@@ -7,6 +7,7 @@ import { createSky } from './world/sky.js';
 import { createMountains, createGround } from './world/terrain.js';
 import { createForest } from './world/forest.js';
 import { createBaseCamp } from './world/camp.js';
+import { createMist } from './world/mist.js';
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? You can also add ?fps to the address, or press F to toggle it.
@@ -46,6 +47,7 @@ createMountains(scene, sky);
 createGround(scene);
 const forest = createForest(scene);
 const baseCamp = createBaseCamp(scene);
+const mist = createMist(scene, sky);
 
 // ---------- Resize: keep the picture sharp and undistorted when the window changes ----------
 function onResize() {
@@ -87,6 +89,7 @@ function tick(timestamp) {
   sky.update(time, camera, renderer.getPixelRatio());
   forest.update(time);
   baseCamp.update(time);
+  mist.update(time);
   renderer.render(scene, camera);
   countFps(performance.now());
 }
@@ -103,7 +106,8 @@ window.__ascent = {
       0: [3.5, 1.7, 9.5, -1.5, 1.6, -4],
       0.2: [1, 1.5, 4, -4, 0.6, -2],
       0.5: [4, 14, -50, -4, 22, -130],
-      1: [-3, 29, -132, 2, 22, -300],
+      0.8: [-3, 29, -132, 2, 22, -300],
+      1: [1, 29.5, -150, 4, 12, -330],
     };
     const v = views[p] || views[0];
     camera.position.set(v[0], v[1], v[2]);

@@ -63,3 +63,12 @@ the ground and nearby trees; because the ground near camp is coloured like trodd
 orange pool against the cool blue night. The soft glow around each light is a **sprite** (a flat picture that always
 faces the camera) with a radial gradient, added on top of the scene; it's a cheap stand-in for a "bloom" effect.
 The lantern flickers very slightly using a few overlapping sine waves, so it feels alive but calm.
+
+## Step 8: Mist
+All mist uses one small shader. It mixes two noise patterns that slide sideways at different speeds, so the mist slowly
+changes shape as it drifts. A fairly tight threshold (`smoothstep`) turns the noise into soft-edged shapes that look like
+brush strokes rather than smoke. Every sheet fades out at its edges and also when the camera comes close, so you never
+see a hard line or "bump into" a flat plane. There are three layers: low strips that hug the ground between the trees
+(their bottom edge follows `groundHeight`), a flat sheet filling the valley beyond the ridge, and a curved band resting
+between the far mountain ranges. The mist colour is the sky's horizon colour lifted slightly, so it shifts at dawn too,
+and the feet of the mountain layers now fade into that same pale mist instead of into darkness.

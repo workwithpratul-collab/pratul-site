@@ -177,9 +177,12 @@ function buildMountainLayer(layer, index, sky) {
 
         // Atmospheric haze: the whole layer leans towards the sky colour,
         // and the lower slopes melt into mist (the "valley fog" look).
-        float valleyMist = smoothstep(vCrest * 0.15 + 30.0, -40.0, vY);
-        float haze = clamp(uHazeAmount + valleyMist * (1.0 - uHazeAmount) * 0.85, 0.0, 1.0);
-        col = mix(col, uHaze, haze);
+        col = mix(col, uHaze, uHazeAmount);
+        // Valleys fade into pale, moonlit mist (the same colour as the mist layers).
+        vec3 mistCol = mix(uHaze, vec3(0.87, 0.9, 1.0), 0.22);
+        float valleyMist = smoothstep(vCrest * 0.2 + 20.0, -60.0, vY);
+        valleyMist *= 0.75 + 0.25 * fbm(vec2(p.x * 4.0, vY * 0.02));  // uneven, like brushwork
+        col = mix(col, mistCol, clamp(valleyMist, 0.0, 1.0) * 0.92);
 
         gl_FragColor = vec4(col + dither(gl_FragCoord.xy), 1.0);
         #include <colorspace_fragment>
