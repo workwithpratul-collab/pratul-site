@@ -101,7 +101,10 @@ const summit = createSummitZone(scene, { sunDir: sky.sunDir });
 
 // Build every shader now, while the curtain is still down. Otherwise three.js compiles each
 // one the first time its object comes into view, which causes a small stutter mid-scroll.
+// (The sea of clouds and the far peaks start hidden, so show them for this one moment.)
+summit.update(0, 1);
 renderer.compile(scene, camera);
+summit.update(0, 0);
 
 // ---------- 6. Scrolling → progress (0 at the top, 1 at the bottom) ----------
 // The page is as tall as the film: FILM_SCREENS screen-heights of scrolling (journey.js).
@@ -260,7 +263,9 @@ function tick(timestamp) {
   camps.forEach((camp, i) => {
     const { arrive, leave } = stops.find((s) => s.stop.camp === CAMPS[i]).stop;
     const near = smoothstep(arrive - 0.08, arrive, p) * (1 - smoothstep(leave, leave + 0.06, p));
-    const wanted = p > arrive - 0.12 && p < leave + 0.1;
+    // The first camp's video loads during the opening instead: the browser's very first video
+    // start costs one long frame, and it's better spent while the curtain is still down.
+    const wanted = p > (i === 0 ? -1 : arrive - 0.12) && p < leave + 0.1;
     camp.update(dt, camera, near, wanted, time);
   });
   campLights.update(camps, camera);
@@ -268,6 +273,9 @@ function tick(timestamp) {
   summit.update(time, mood.climb);
 
   sky.update(time, camera, renderer.getPixelRatio());
+  // Only draw what the camera can see: once we're up on the meadow, base camp's forest is far
+  // behind us and sinking under the clouds, so its ~8,000 trees are skipped entirely.
+  forest.setVisible(p < 0.66);
   forest.update(time);
   baseCamp.update(time);
   mist.update(time);

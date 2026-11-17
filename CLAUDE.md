@@ -37,6 +37,8 @@ Benchmark: my King's Garden site. This must be clearly better: sharper, smoother
   - `index.html`, `css/style.css`
   - `js/main.js` (starts everything), and one file per part of the world in `js/world/`
     (sky.js, terrain.js, forest.js, mist.js, camp.js, trekker.js, cameraPath.js)
+  - also in `js/world/`: journey.js (the film's script: places, stops, light), ridge.js, grass.js,
+    meadow.js and summit.js (one per zone), palette.js (colours), glsl.js (shader helpers)
 - Desktop first. The mobile version comes later (Phase 7), so don't over-optimise for phones yet.
 
 ## Folders

@@ -166,6 +166,10 @@ export function createForest(scene, { routeDistance, legacyRouteDistance, sky } 
     update(time) {
       shared.uWind.value = time;
     },
+    // Show or hide the whole forest (main.js hides it once it's far behind the camera).
+    setVisible(visible) {
+      pineMesh.visible = oakMesh.visible = cardMesh.visible = visible;
+    },
   };
 }
 
