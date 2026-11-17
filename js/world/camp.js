@@ -11,6 +11,11 @@ export const BASE_CAMP = {
   lantern: { x: -1.75, z: 0.35 },
 };
 
+// Where the first project camp (DERMAÉ) stands, on the ridge crest at the end of the trail.
+export const RIDGE_CAMP = { x: 6.2, z: -147.2 };
+// Where the camera stands when we arrive there (cameraPath.js uses this for the arrival shot).
+export const RIDGE_VIEWPOINT = { x: -4.8, z: -135.5 };
+
 const WARM = new THREE.Color('#ffae5c');
 
 // ---------- A soft round glow texture, drawn once on a canvas ----------
@@ -113,6 +118,138 @@ export function createBaseCamp(scene) {
   }
 
   return { group, update, tentLight, lanternLight, lanternPosition: lanternLight.position.clone() };
+}
+
+// =====================================================================
+// PROJECT CAMPS: a cabin tent whose front wall is a video screen
+// =====================================================================
+// options: { x, z, facing, video, label } where label is the HTML element to float near the tent.
+export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label }) {
+  const group = new THREE.Group();
+  group.name = 'project-camp';
+  const y = groundHeight(x, z);
+  group.position.set(x, y - 0.05, z);
+  group.rotation.y = facing;          // the screen (front wall) faces this way
+
+  // ---------- Tent body: walls + a pitched roof ----------
+  const W = 4.8, D = 3.0, wallH = 2.25, roofH = 0.9;
+  const fabric = new THREE.MeshLambertMaterial({ color: '#d8c5a2', emissive: '#2a1a0c' });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(W, wallH, D), fabric);
+  body.position.y = wallH / 2;
+  group.add(body);
+
+  // The roof: a triangle shape pushed out along the tent's length (a "prism").
+  const tri = new THREE.Shape();
+  tri.moveTo(-D / 2 - 0.15, 0);
+  tri.lineTo(D / 2 + 0.15, 0);
+  tri.lineTo(0, roofH);
+  tri.closePath();
+  const roofGeo = new THREE.ExtrudeGeometry(tri, { depth: W + 0.3, bevelEnabled: false });
+  roofGeo.translate(0, 0, -(W + 0.3) / 2);
+  roofGeo.rotateY(Math.PI / 2);
+  const roof = new THREE.Mesh(roofGeo, new THREE.MeshLambertMaterial({ color: '#b96d3c' }));
+  roof.position.y = wallH;
+  group.add(roof);
+
+  // Poles at the corners and guy ropes down to the ground, for a real campsite feel.
+  const poleMat = new THREE.MeshLambertMaterial({ color: '#3d3530' });
+  const ropeMat = new THREE.LineBasicMaterial({ color: '#8a8478', transparent: true, opacity: 0.6 });
+  for (const sx of [-1, 1]) {
+    for (const sz of [-1, 1]) {
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, wallH + 0.15, 6), poleMat);
+      pole.position.set((sx * W) / 2, (wallH + 0.15) / 2, (sz * D) / 2);
+      group.add(pole);
+      const rope = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3((sx * W) / 2, wallH, (sz * D) / 2),
+        new THREE.Vector3((sx * (W / 2 + 1.1)), 0.02, sz * (D / 2 + 0.9)),
+      ]);
+      group.add(new THREE.Line(rope, ropeMat));
+    }
+  }
+
+  // ---------- The screen: the front wall plays the project video ----------
+  // 4.2 x 2.02 m matches the video's shape (1888 x 908), so nothing is stretched.
+  const screenW = 4.2, screenH = 4.2 * (908 / 1888);
+  const screenMat = new THREE.MeshBasicMaterial({ color: '#2a2630', toneMapped: false, fog: false });
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(screenW, screenH), screenMat);
+  screen.position.set(0, 0.12 + screenH / 2, D / 2 + 0.012);
+  group.add(screen);
+
+  // Soft light spilling from the screen onto the ground in front of it.
+  const screenLight = new THREE.PointLight('#f5ddd4', 0, 11, 2);
+  screenLight.position.set(0, 1.2, D / 2 + 1.4);
+  group.add(screenLight);
+
+  // A small lantern by the tent, so the camp feels lived-in (and echoes base camp).
+  const lantern = buildLantern();
+  lantern.position.set(-W / 2 - 0.6, 0, D / 2 + 0.5);
+  group.add(lantern);
+  const lanternLight = new THREE.PointLight('#ffa552', 6, 7, 2);
+  lanternLight.position.set(-W / 2 - 0.6, 0.35, D / 2 + 0.5);
+  group.add(lanternLight);
+  const lanternHalo = makeHalo('#ff9642', 1.3, 0.45);
+  lanternHalo.position.copy(lanternLight.position);
+  group.add(lanternHalo);
+
+  scene.add(group);
+
+  // ---------- The video: created only when needed (it's a large file) ----------
+  let video = null;
+  let videoReady = false;
+  function loadVideo() {
+    if (video) return;
+    video = document.createElement('video');
+    video.src = videoSrc;
+    video.muted = true;          // muted videos are allowed to autoplay
+    video.loop = true;
+    video.playsInline = true;
+    video.preload = 'auto';
+    video.addEventListener('loadeddata', () => {
+      const texture = new THREE.VideoTexture(video);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      screenMat.map = texture;
+      screenMat.needsUpdate = true;
+      videoReady = true;
+    }, { once: true });
+  }
+
+  // Where the label floats: just above the top-left corner of the screen.
+  const labelAnchor = new THREE.Vector3(-screenW / 2, wallH + 0.55, D / 2);
+  const projected = new THREE.Vector3();
+  let screenOn = 0;   // 0..1, fades the screen in once the video is ready
+
+  // ---------- update: called every frame with the film's progress ----------
+  // near: 0 when far away, 1 when we've arrived at this camp.
+  function update(dt, camera, near) {
+    if (near > 0.01) loadVideo();
+    if (video) {
+      // Only play when close: decoding video costs power.
+      if (near > 0.25 && video.paused) video.play().catch(() => {});
+      if (near < 0.15 && !video.paused) video.pause();
+    }
+    // Fade the screen up from a dim fabric colour to the full video picture.
+    const target = videoReady && near > 0.25 ? 1 : 0;
+    screenOn += (target - screenOn) * (1 - Math.exp(-dt * 2));
+    const level = 0.16 + screenOn * 0.72;   // never full white: it's night, keep it gentle
+    screenMat.color.setRGB(level, level, level);
+    if (!videoReady) screenMat.color.set('#2a2630');
+    screenLight.intensity = screenOn * 7;
+
+    // Float the HTML label: turn the 3D anchor into a screen position.
+    if (label) {
+      projected.copy(labelAnchor);
+      group.localToWorld(projected);
+      projected.project(camera);    // now x,y are -1..1 across the screen
+      const inFront = projected.z < 1;
+      const px = (projected.x * 0.5 + 0.5) * window.innerWidth;
+      const py = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+      label.style.transform = `translate3d(${px.toFixed(1)}px, ${py.toFixed(1)}px, 0) translate(0, -100%)`;
+      const show = inFront ? THREE.MathUtils.clamp((near - 0.55) / 0.35, 0, 1) : 0;
+      label.style.opacity = show.toFixed(3);
+    }
+  }
+
+  return { group, update, screen, get videoElement() { return video; } };
 }
 
 // ---------- The dome tent ----------

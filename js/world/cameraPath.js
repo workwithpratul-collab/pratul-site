@@ -9,6 +9,7 @@
 
 import * as THREE from 'three';
 import { groundHeight, smoothstep } from './terrain.js';
+import { RIDGE_CAMP, RIDGE_VIEWPOINT } from './camp.js';
 
 // ---------- The story beats, as parts of the scroll (0 = top of page, 1 = bottom) ----------
 export const BEATS = {
@@ -18,7 +19,12 @@ export const BEATS = {
 
 // Hand-placed shots. pos = where the camera is, look = what it looks at.
 const OPENING = { pos: new THREE.Vector3(3.2, 1.7, 9.2), look: new THREE.Vector3(-1.4, 1.25, -2.2) };
-const ARRIVAL = { pos: new THREE.Vector3(-5.2, 28.0, -131.5), look: new THREE.Vector3(1.6, 26.6, -150) };
+// Arrival: standing behind the trekker, looking at the project tent's screen, with the
+// snowy range rising beyond it. Heights are measured from the ground, so they always fit.
+const ARRIVAL = {
+  pos: new THREE.Vector3(RIDGE_VIEWPOINT.x, 0, RIDGE_VIEWPOINT.z),
+  look: new THREE.Vector3(RIDGE_CAMP.x - 2.2, 0, RIDGE_CAMP.z + 1),
+};
 
 // How the follow camera sits relative to the trekker.
 const FOLLOW = {
@@ -29,10 +35,13 @@ const FOLLOW = {
   lookHeight: 1.2, // ...at about chest height
 };
 
-const TREKKER_END_U = 0.985; // where on the trail (0..1) the trekker stops, next to the ridge camp
+const TREKKER_END_U = 0.998; // where on the trail (0..1) the trekker stops, next to the ridge camp
 
 export function createCameraPath(trailCurve) {
   const trailLength = trailCurve.getLength();
+  ARRIVAL.pos.y = groundHeight(ARRIVAL.pos.x, ARRIVAL.pos.z) + 2.1;
+  ARRIVAL.look.y = groundHeight(ARRIVAL.look.x, ARRIVAL.look.z) + 1.9;
+  OPENING.pos.y = groundHeight(OPENING.pos.x, OPENING.pos.z) + 1.7;
 
   // Point on the trail at a distance (metres) from the start; extends straight past the ends.
   const pointAtDistance = (d, target = new THREE.Vector3()) => {

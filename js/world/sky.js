@@ -82,7 +82,8 @@ export function createSky(scene) {
         col = mix(col, uTop, smoothstep(0.22, 0.95, h));
 
         // 2. Thin painted cloud streaks low in the sky (like brush strokes).
-        vec2 sp = vec2(atan(dir.x, dir.z) * 3.0, h * 26.0);
+        // (atan's seam, where the angle jumps, is placed behind the viewer, never in view.)
+        vec2 sp = vec2(atan(dir.x, -dir.z) * 3.0, h * 26.0);
         float streak = fbm(sp * vec2(1.0, 1.0) + vec2(uTime * 0.004, 0.0));
         streak = smoothstep(0.52, 0.8, streak) * smoothstep(0.02, 0.1, h) * (1.0 - smoothstep(0.18, 0.34, h));
         col = mix(col, mix(uHorizon, uGlow, 0.35) * 1.08, streak * 0.22);

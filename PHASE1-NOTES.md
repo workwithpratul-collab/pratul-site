@@ -95,3 +95,14 @@ At the start and end the camera blends into hand-placed "opening" and "arrival" 
 small fraction of the way towards its target (`lerp` / `slerp`). That easing is what makes the motion slow and calm.
 The trekker's walk animation speed comes from how fast they actually moved, so feet keep pace and they settle back
 into idle when you stop scrolling. Trees are kept 5.5 m away from the camera's route so nothing ever crosses the lens.
+
+## Step 11: Light and the first project camp
+One number, `dawn` (0 = night, 1 = pre-dawn), is worked out from the scroll progress each frame and handed to
+`sky.setDawn()`. Because the fog, lights, mist and mountain haze all *share* the sky's colour objects, they all change
+together, and the trekker's colours brighten a touch too. (Phase 1 stops at 80% of the way, so the shift stays slight.)
+The DERMAÉ camp is a cabin-style tent whose front wall holds a plane sized exactly like the video (1888×908), so nothing
+is stretched. The `<video>` element is only created when you're about a third of the way up, and it only plays while the
+camp is near, to save bandwidth and power; a `VideoTexture` copies each video frame onto the screen. The floating label is
+real HTML: each frame we take a 3D point above the tent, `project()` it into screen coordinates and move the label there.
+At the very end the trekker turns towards the screen, and the arrival shot frames them on the left with the screen on
+the right and the peaks behind.

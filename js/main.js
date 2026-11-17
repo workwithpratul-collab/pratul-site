@@ -10,10 +10,11 @@ import Lenis from 'lenis';
 import { createSky } from './world/sky.js';
 import { createMountains, createGround, trailCurve } from './world/terrain.js';
 import { createForest } from './world/forest.js';
-import { createBaseCamp } from './world/camp.js';
+import { createBaseCamp, createProjectCamp, RIDGE_CAMP, RIDGE_VIEWPOINT } from './world/camp.js';
 import { createMist } from './world/mist.js';
 import { createTrekker } from './world/trekker.js';
-import { createCameraPath } from './world/cameraPath.js';
+import { createCameraPath, BEATS } from './world/cameraPath.js';
+import { smoothstep } from './world/terrain.js';
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? You can also add ?fps to the address, or press F to toggle it.
@@ -55,6 +56,15 @@ const forest = createForest(scene, { avoid: cameraPath.avoid });
 const baseCamp = createBaseCamp(scene);
 const mist = createMist(scene, sky);
 const trekker = createTrekker(scene);
+
+// The first project camp: DERMAÉ, on the ridge. Its screen faces the arrival viewpoint.
+const dermaeCamp = createProjectCamp(scene, {
+  x: RIDGE_CAMP.x,
+  z: RIDGE_CAMP.z,
+  facing: Math.atan2(RIDGE_VIEWPOINT.x - RIDGE_CAMP.x, RIDGE_VIEWPOINT.z - RIDGE_CAMP.z),
+  video: 'recordings/dermae.mp4',
+  label: document.getElementById('label-dermae'),
+});
 
 // ---------- 6. Scrolling → progress (0 at the top, 1 at the bottom) ----------
 // Lenis smooths the wheel/trackpad so scrolling glides instead of jumping in steps.
@@ -110,7 +120,15 @@ let heading = null;
 function placeTrekker(u, dt) {
   trailCurve.getPointAt(u, trekPos);
   trailCurve.getTangentAt(u, trekDir);
-  const target = Math.atan2(trekDir.x, trekDir.z);
+  let target = Math.atan2(trekDir.x, trekDir.z);
+  // On arrival, turn to face the project tent's screen.
+  const arrive = smoothstep(0.96, 0.995, u);
+  if (arrive > 0) {
+    const toTent = Math.atan2(RIDGE_CAMP.x - trekPos.x, RIDGE_CAMP.z - trekPos.z);
+    let d = toTent - target;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    target += d * arrive * 0.85;
+  }
   // Turn smoothly towards the trail direction (taking the short way round the circle).
   if (heading === null) heading = target;
   let diff = target - heading;
@@ -118,6 +136,11 @@ function placeTrekker(u, dt) {
   heading += diff * (1 - Math.exp(-dt * 5));
   trekker.place(trekPos.x, trekPos.z, heading);
 }
+
+// Ambient tints for the character: cool moonlight at night, a little warmer before dawn.
+const NIGHT_TINT = new THREE.Color('#c4cdf2');
+const DAWN_TINT = new THREE.Color('#ddd2ea');
+const nightTint = new THREE.Color();
 
 // ---------- The loop: update, then draw, every frame ----------
 // Timer measures how much time passed since the last frame ("delta time").
@@ -136,6 +159,16 @@ function tick(timestamp) {
   const u = cameraPath.update(camera, scroll.progress, dt, snapNextFrame);
   placeTrekker(u, dt);
   snapNextFrame = false;
+
+  // Light: night (0) → pre-dawn (1) as we climb. Sky, fog, lights, mist, mountains and
+  // the trekker's colours all read from this one number, so they change together.
+  // Phase 1 only climbs to the first camp, so the light shifts *slightly* (80% of the way).
+  const dawn = smoothstep(0.08, 0.98, scroll.progress) * 0.8;
+  sky.setDawn(dawn);
+  trekker.setLightLevel(THREE.MathUtils.lerp(0.42, 0.52, dawn), nightTint.copy(NIGHT_TINT).lerp(DAWN_TINT, dawn));
+
+  // The project camp "wakes up" as we approach the ridge.
+  dermaeCamp.update(dt, camera, smoothstep(0.55, BEATS.walkEnd + 0.04, scroll.progress));
 
   sky.update(time, camera, renderer.getPixelRatio());
   forest.update(time);
