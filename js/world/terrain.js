@@ -299,6 +299,8 @@ function baseHeight(x, z) {
 //  - crest height: how high the land is along the spine (metres)
 //  - spread: how gently the land falls away on each side (bigger = gentler slope)
 //  - flat: how many metres stay level either side of the spine before it starts to fall
+//  - steep (optional 8th value): a straight slope added on top (metres down per metre out).
+//    The summit uses it: its flanks fall in straight lines like a real peak, not a round dome.
 // "Left" and "right" are as seen walking up the trail. On the ridge, left is the valley side.
 const LAND = [
   [4, -162, 21, 14, 12, 2, 3],
@@ -317,12 +319,12 @@ const LAND = [
   [159, -232, 58, 30, 44, 22, 55],
   [161, -246, 58.5, 30, 44, 24, 60],   // the gear check
   [163, -260, 59, 30, 40, 22, 50],
-  [171, -274, 62, 26, 30, 10, 20],
-  [185, -284, 70, 16, 16, 3, 3],       // the snowy summit cone: steep on every side
-  [199, -296, 82, 14, 14, 2, 2],
-  [205, -312, 96, 13, 13, 2, 2],
-  [201, -328, 110, 12, 12, 2, 2],
-  [193, -340, 122, 11, 11, 3, 3],      // the summit
+  [171, -274, 62, 26, 30, 10, 20, 0],
+  [185, -284, 70, 30, 30, 2.5, 2.5, 0.55],   // the summit ridge: a narrow arête, steep both sides
+  [199, -296, 82, 34, 34, 2, 2, 0.8],
+  [205, -312, 96, 36, 36, 2, 2, 0.95],
+  [201, -328, 110, 40, 40, 2, 2, 1.05],
+  [193, -340, 122, 40, 40, 3, 3, 1.1],       // the summit
 ];
 export const SUMMIT_HEIGHT = 122;
 
@@ -352,7 +354,8 @@ function landHeight(x, z) {
     const spread = spreadR + (spreadL - spreadR) * left;
     const flat = flatR + (flatL - flatR) * left;
     const out = Math.max(d - flat, 0);
-    const h = e - (out * out) / (2 * spread);
+    const steep = (a[7] ?? 0) + ((b[7] ?? 0) - (a[7] ?? 0)) * t;
+    const h = e - (out * out) / (2 * spread) - out * steep;
     best = best === -Infinity ? h : smax(best, h, 3);
   }
   // Near DERMAÉ the Phase 1 land already forms the ridge, so the new landform fades away
@@ -384,7 +387,10 @@ function shapeHeight(x, z) {
   y += (noise2(x * 0.022, z * 0.022, 57) - 0.5) * 9 * meadowAmount(x, z) * onLand * smoothstep(6, 26, landDistance);
   // Rocky ribs on the summit's steep sides (calm near the spine, where we walk).
   const high = smoothstep(64, 90, land);
-  const rib = (1 - Math.abs(noise2(x * 0.09, z * 0.09, 93) * 2 - 1)) * 4 + (noise2(x * 0.05, z * 0.05, 91) - 0.5) * 6;
+  // (Ridged noise: folding smooth noise in half makes sharp-topped ribs, like rock buttresses.)
+  const rib = (1 - Math.abs(noise2(x * 0.09, z * 0.09, 93) * 2 - 1)) * 6
+    + (1 - Math.abs(noise2(x * 0.21, z * 0.21, 95) * 2 - 1)) * 1.8
+    + (noise2(x * 0.05, z * 0.05, 91) - 0.5) * 6;
   y += rib * high * onLand * smoothstep(5, 18, landDistance);
   return y;
 }
@@ -589,12 +595,16 @@ function groundColour(x, z, y, ny, c, tmp) {
   }
 
   // High up: snow, dusted over the rock. Rock shows through on the steepest faces.
-  const snowLine = 76 + (noise2(x * 0.06, z * 0.06, 97) - 0.5) * 14;
+  const snowLine = 70 + (noise2(x * 0.06, z * 0.06, 97) - 0.5) * 12;
   const snow = smoothstep(snowLine - 6, snowLine + 6, y);
   if (snow > 0) {
     const drift = noise2(x * 0.08, z * 0.08, 97);
     tmp.copy(SNOW.snow).lerp(SNOW.shade, smoothstep(0.4, 0.8, drift) * 0.35);
-    tmp.lerp(SNOW.rock, smoothstep(0.32, 0.55, 1 - ny + (drift - 0.5) * 0.2) * 0.85);
+    // Rock shows through where the slope is too steep for snow to stay, in streaks that run
+    // down the fall line (stretched noise), like the gullies and buttresses of a real peak.
+    const streak = noise2(x * 0.16 + z * 0.05, z * 0.16 - x * 0.05, 99);
+    const bare = smoothstep(0.26, 0.42, 1 - ny + (drift - 0.5) * 0.2 + (streak - 0.5) * 0.5);
+    tmp.lerp(SNOW.rock, bare * 0.62);
     c.lerp(tmp, snow);
   }
   // A whisper of variation so large areas never look flat.

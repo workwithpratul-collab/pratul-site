@@ -129,11 +129,17 @@ export function createTrekker(scene, renderer, camera) {
         walk.setEffectiveWeight(state.walkAmount);
         walk.setEffectiveTimeScale(THREE.MathUtils.clamp(state.speed / MIXAMO_WALK_SPEED, 0.6, 1.8));
       }
-      if (idle) idle.setEffectiveWeight(1 - state.walkAmount);
+      // While waving, the wave takes over from the idle pose (both at once would halve the wave).
+      // It fades in and out over its first and last 20%, so it starts and ends softly.
+      let waveW = 0;
       if (wave && wave.isRunning()) {
-        const w = Math.sin(Math.min(wave.time / wave.getClip().duration, 1) * Math.PI);
-        wave.setEffectiveWeight(w);
+        const t = Math.min(wave.time / wave.getClip().duration, 1);
+        waveW = smoothstepJS(0, 0.2, t) * (1 - smoothstepJS(0.8, 1, t));
+        wave.setEffectiveWeight(waveW);
+      } else if (wave) {
+        wave.setEffectiveWeight(0);
       }
+      if (idle) idle.setEffectiveWeight((1 - state.walkAmount) * (1 - waveW));
       state.mixer.update(dt);
     } else {
       applyStandInPose(vrm, time, state.walkAmount, state.phase);
@@ -156,6 +162,11 @@ export function createTrekker(scene, renderer, camera) {
     action.reset().play();
   }
 
+  // Allow the wave to play again (after scrolling back down from the summit).
+  function resetWave() {
+    state.waved = false;
+  }
+
   // After a jump (e.g. "Skip film"), forget the old position so we don't think we sprinted there.
   function teleport() {
     hasLast = false;
@@ -170,6 +181,7 @@ export function createTrekker(scene, renderer, camera) {
     teleport,
     update,
     wave,
+    resetWave,
     setLightLevel,
     get walking() { return state.walkAmount; },
     get hasMixamo() { return !!state.actions; },
@@ -263,6 +275,11 @@ function applyStandInPose(vrm, time, walk, phase) {
     hips.position.y = hips.userData.restY - walk * (0.02 + 0.025 * Math.abs(c));
     hips.rotation.y = -0.06 * walk * s;
   }
+}
+
+function smoothstepJS(e0, e1, x) {
+  const t = Math.min(Math.max((x - e0) / (e1 - e0), 0), 1);
+  return t * t * (3 - 2 * t);
 }
 
 function setRot(node, x, y, z) {

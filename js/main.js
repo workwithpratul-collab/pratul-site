@@ -13,10 +13,11 @@ import { createForest } from './world/forest.js';
 import { createBaseCamp, createProjectCamp, createCampLights } from './world/camp.js';
 import { createRidge } from './world/ridge.js';
 import { createMeadowZone } from './world/meadow.js';
+import { createSummitZone } from './world/summit.js';
 import { createMist } from './world/mist.js';
 import { createTrekker } from './world/trekker.js';
 import { createCameraPath } from './world/cameraPath.js';
-import { ZONES, LIGHT, ALTITUDE, FILM_SCREENS, CAMPS } from './world/journey.js';
+import { ZONES, LIGHT, ALTITUDE, FILM_SCREENS, CAMPS, MEADOW } from './world/journey.js';
 import { mood, setClimb } from './world/palette.js';
 import { createAltitudeMeter } from './ui/altitude.js';
 import { createCursor } from './ui/cursor.js';
@@ -95,6 +96,8 @@ const campLights = createCampLights(scene);
 campLights.update(camps, camera);
 // Scene 3: the meadow (grass, wildflowers, trees, stones, mist and the gear-check mat).
 createMeadowZone(scene);
+// Scene 4: the summit (the rising sea of clouds, snow peaks, rocks and the flag).
+const summit = createSummitZone(scene, { sunDir: sky.sunDir });
 
 // Build every shader now, while the curtain is still down. Otherwise three.js compiles each
 // one the first time its object comes into view, which causes a small stutter mid-scroll.
@@ -193,13 +196,18 @@ function placeTrekker(s, dt, stops) {
   trailPointAt(s, trekPos);
   trailDirectionAt(s, trekDir);
   let target = Math.atan2(trekDir.x, trekDir.z);
-  // At a camp, turn to face its screen.
+  // At a camp, turn to face its screen. At the gear check, turn a little towards the mat.
+  // At the summit, turn right round to face the camera (to wave goodbye).
   for (const { stop, here } of stops) {
-    if (here <= 0 || !stop.camp) continue;
-    const [sx, sz] = stop.camp.sheet;
-    let d = Math.atan2(sx - trekPos.x, sz - trekPos.z) - target;
+    if (here <= 0) continue;
+    let look = null, amount = 0.85;
+    if (stop.camp) look = stop.camp.sheet;
+    else if (stop.at === 'meadow') { look = MEADOW.mat; amount = 0.5; }
+    else if (stop.at === 'summit') { look = [camera.position.x, camera.position.z]; amount = smoothstep(0.6, 1, here); }
+    if (!look) continue;
+    let d = Math.atan2(look[0] - trekPos.x, look[1] - trekPos.z) - target;
     d = Math.atan2(Math.sin(d), Math.cos(d));
-    target += d * here * 0.85;
+    target += d * here * amount;
   }
   // Turn smoothly towards the target (taking the short way round the circle).
   if (heading === null) heading = target;
@@ -229,6 +237,12 @@ function tick(timestamp) {
   placeTrekker(s, dt, stops);
   snapNextFrame = false;
 
+  // At the top: once the trekker has stopped and turned round, wave once (then back to idle).
+  // Scrolling back down below the summit lets the wave happen again on the next arrival.
+  const atTop = stops[stops.length - 1];
+  if (atTop.here > 0.98 && atTop.shot > 0.9 && trekker.walking < 0.08) trekker.wave();
+  if (atTop.here < 0.5) trekker.resetWave();
+
   // Light: one "climb" number (0 = night at base camp ... 1 = sunrise at the summit) sets the
   // palette's mood. Sky, fog, lights, mist, trees, mountains and the trekker all read from it,
   // so they change together.
@@ -250,6 +264,8 @@ function tick(timestamp) {
     camp.update(dt, camera, near, wanted, time);
   });
   campLights.update(camps, camera);
+  // The sea of clouds rises with the light; the flag ripples.
+  summit.update(time, mood.climb);
 
   sky.update(time, camera, renderer.getPixelRatio());
   forest.update(time);

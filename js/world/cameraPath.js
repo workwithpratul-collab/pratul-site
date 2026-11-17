@@ -26,7 +26,7 @@ const FOLLOW_KEYS = [
   { s: 90, back: 7.5, height: 2.6, side: 1.6, lookAhead: 6, lookHeight: 1.2 },    // the forest climb
   { s: 175, back: 9.5, height: 4.8, side: 2.6, lookAhead: 9, lookHeight: 0.8 },   // the open ridge: look down over the trekker
   { s: 330, back: 10, height: 3.8, side: 2.2, lookAhead: 9, lookHeight: 1.2 },    // the meadow
-  { s: 400, back: 8, height: 3.2, side: 1.6, lookAhead: 7, lookHeight: 1.6 },     // the summit climb
+  { s: 425, back: 10, height: 5, side: 2, lookAhead: 5, lookHeight: 1.5 },        // the summit climb: just over the trekker's head
 ];
 function followAt(s) {
   let i = 0;
@@ -72,7 +72,7 @@ export function createCameraPath() {
       stop.shot = {
         pos: atGround(MEADOW.view[0], MEADOW.view[1], 4.6),
         look: mat,
-        look2: mat.clone().lerp(summitLook, 0.3),
+        look2: mat.clone().lerp(summitLook, 0.2),
         // A short blend-in: the camera spot is on the trail behind the stop, so the shot only
         // takes over once the trekker has walked past it.
         blendIn: 0.03, blendOut: 0.05,
@@ -85,15 +85,20 @@ export function createCameraPath() {
   });
   const endS = stops[stops.length - 1].s;
 
-  // The last shot: from just below the top, looking past the trekker towards the sunrise,
-  // with open sky on the left for the final words.
+  // The last shot: from just below the top, looking past the trekker towards the sunrise.
+  // The summit, the trekker and the flag sit right of centre with the sun beyond them, so the
+  // left half of the frame (open sky over the sea of clouds) is free for the final words.
   function summitShot() {
     const [tx, tz] = SUMMIT.top;
     const sun = new THREE.Vector3(0.62, 0, -0.78).normalize();   // where the sun rises (sky.js)
     const right = new THREE.Vector3(-sun.z, 0, sun.x);           // to the right of facing the sun
-    const pos = atGround(tx - sun.x * 9 + right.x * 4.5, tz - sun.z * 9 + right.z * 4.5, 0);
-    pos.y = groundHeight(tx, tz) + 2.6;
-    const look = new THREE.Vector3(tx + sun.x * 40 - right.x * 11, groundHeight(tx, tz) - 2, tz + sun.z * 40 - right.z * 11);
+    // Stand 9 m back from the top, 2.5 m to the right of the line to the sun...
+    const pos = new THREE.Vector3(tx - sun.x * 9 + right.x * 2.5, groundHeight(tx, tz) + 2.4, tz - sun.z * 9 + right.z * 2.5);
+    // ...and look about 24° left of the sun: it sits on the right, the trekker just right of centre.
+    const turn = THREE.MathUtils.degToRad(24);
+    const dir = sun.clone().applyAxisAngle(up, turn);
+    const look = pos.clone().addScaledVector(dir, 40);
+    look.y = groundHeight(tx, tz) - 1.5;
     return { pos, look, blendIn: 0.06, blendOut: 0 };
   }
 

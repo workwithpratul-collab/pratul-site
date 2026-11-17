@@ -305,7 +305,7 @@ export function createMeadowZone(scene) {
   createGrass(scene, {
     from: start, to: snow, width: 42, perMetre: 300, flowers: 70, colors: MEADOW_GRASS, seed: 33,
     // Nothing grows on the mat, under the camera, or up in the snow.
-    skip: (x, z) => nearMat(x, z) || groundHeight(x, z) > 70,
+    skip: (x, z) => nearMat(x, z) || groundHeight(x, z) > 62,
   });
 
   // ---------- A few soft trees: a group on the knoll to the right, a lone pine on the left ----------
