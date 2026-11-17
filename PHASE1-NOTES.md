@@ -84,3 +84,14 @@ faint blue rim light keeps the silhouette readable. The Mixamo code follows the 
 each Mixamo bone to its VRM bone and corrects the rotation using both skeletons' rest poses. If the FBX files aren't
 there, it prints one calm message and the stand-in is used. (The browser still lists those missing files as grey
 "404" network lines; that is harmless.)
+
+## Step 10: The camera rail
+**Lenis** smooths the mouse wheel so scrolling glides, and **ScrollTrigger** turns "how far down the page are we" into
+one number, `progress`, from 0 to 1. That number drives the whole film: `trekkerU(progress)` says where on the trail
+the trekker is (with ease-in/ease-out so they start and stop gently), and the camera rides a `CatmullRomCurve3` (a
+smooth curve through points) that was built from the trail itself: about 6.5 m behind, 2.2 m up and a little to the
+side, then smoothed so every bend becomes a soft, wide curve. A second smoothed curve says where the camera looks.
+At the start and end the camera blends into hand-placed "opening" and "arrival" shots, and every frame it only moves a
+small fraction of the way towards its target (`lerp` / `slerp`). That easing is what makes the motion slow and calm.
+The trekker's walk animation speed comes from how fast they actually moved, so feet keep pace and they settle back
+into idle when you stop scrolling. Trees are kept 5.5 m away from the camera's route so nothing ever crosses the lens.

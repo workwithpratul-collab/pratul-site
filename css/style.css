@@ -51,7 +51,7 @@ html.lenis, html.lenis body { height: auto; }
 /* ---------- The scroll track: only gives the page its height ---------- */
 #scroll-track {
   position: relative;
-  height: 900vh;   /* longer = slower, calmer film */
+  height: 1000vh;  /* longer = slower, calmer film */
   z-index: 1;
 }
 #end { position: absolute; bottom: 0; height: 1px; width: 1px; }

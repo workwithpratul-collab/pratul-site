@@ -1,14 +1,19 @@
 // main.js: starts everything.
-// It creates the 3D basics (scene, camera, renderer, light), then runs one loop
-// that redraws the world about 60 times per second.
+// It creates the 3D basics (scene, camera, renderer), builds the world, connects scrolling
+// to the camera, then runs one loop that redraws the world about 60 times per second.
 
 import * as THREE from 'three';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
+
 import { createSky } from './world/sky.js';
 import { createMountains, createGround, trailCurve } from './world/terrain.js';
 import { createForest } from './world/forest.js';
 import { createBaseCamp } from './world/camp.js';
 import { createMist } from './world/mist.js';
 import { createTrekker } from './world/trekker.js';
+import { createCameraPath } from './world/cameraPath.js';
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? You can also add ?fps to the address, or press F to toggle it.
@@ -36,25 +41,37 @@ const scene = new THREE.Scene();
 // ---------- 3. The camera: our eye in the world ----------
 // 40° is a calm, slightly "telephoto" view; wide angles feel dizzying when moving.
 const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 6000);
-camera.position.set(0, 1.6, 8);
-camera.lookAt(0, 6, -40);
 
 // ---------- 4. Light and sky ----------
 // sky.js owns the sky dome, stars, moonlight, fill light and fog, so they can change together.
 const sky = createSky(scene);
 
 // ---------- 5. The world ----------
+// The camera path is worked out first, so the forest can keep trees off the camera's route.
+const cameraPath = createCameraPath(trailCurve);
 createMountains(scene, sky);
 createGround(scene);
-const forest = createForest(scene);
+const forest = createForest(scene, { avoid: cameraPath.avoid });
 const baseCamp = createBaseCamp(scene);
 const mist = createMist(scene, sky);
 const trekker = createTrekker(scene);
 
-// Stand the trekker at the start of the trail, facing up it (seen from behind).
-const start = trailCurve.getPointAt(0.004);
-const startDir = trailCurve.getTangentAt(0.004);
-trekker.place(start.x, start.z, Math.atan2(startDir.x, startDir.z));
+// ---------- 6. Scrolling → progress (0 at the top, 1 at the bottom) ----------
+// Lenis smooths the wheel/trackpad so scrolling glides instead of jumping in steps.
+const lenis = new Lenis({ lerp: 0.07, wheelMultiplier: 0.8, smoothWheel: true });
+gsap.registerPlugin(ScrollTrigger);
+// Let GSAP's clock drive Lenis, and tell ScrollTrigger whenever Lenis scrolls.
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add((time) => lenis.raf(time * 1000));
+gsap.ticker.lagSmoothing(0);
+
+const scroll = { target: 0, progress: 0 };
+ScrollTrigger.create({
+  trigger: '#scroll-track',
+  start: 'top top',
+  end: 'bottom bottom',
+  onUpdate: (self) => { scroll.target = self.progress; },
+});
 
 // ---------- Resize: keep the picture sharp and undistorted when the window changes ----------
 function onResize() {
@@ -86,18 +103,46 @@ function countFps(now) {
   }
 }
 
+// ---------- Moving the trekker along the trail ----------
+const trekPos = new THREE.Vector3();
+const trekDir = new THREE.Vector3();
+let heading = null;
+function placeTrekker(u, dt) {
+  trailCurve.getPointAt(u, trekPos);
+  trailCurve.getTangentAt(u, trekDir);
+  const target = Math.atan2(trekDir.x, trekDir.z);
+  // Turn smoothly towards the trail direction (taking the short way round the circle).
+  if (heading === null) heading = target;
+  let diff = target - heading;
+  diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+  heading += diff * (1 - Math.exp(-dt * 5));
+  trekker.place(trekPos.x, trekPos.z, heading);
+}
+
 // ---------- The loop: update, then draw, every frame ----------
 // Timer measures how much time passed since the last frame ("delta time").
 const timer = new THREE.Timer();
+let snapNextFrame = true;   // the first frame puts the camera exactly in place
+
 function tick(timestamp) {
   timer.update(timestamp);
   const dt = Math.min(timer.getDelta(), 0.1); // cap, so a hiccup never causes a big jump
   const time = timer.getElapsed();
+
+  // A second, gentle smoothing on top of Lenis, so the film never lurches.
+  if (snapNextFrame) scroll.progress = scroll.target;
+  scroll.progress += (scroll.target - scroll.progress) * (1 - Math.exp(-dt * 4));
+
+  const u = cameraPath.update(camera, scroll.progress, dt, snapNextFrame);
+  placeTrekker(u, dt);
+  snapNextFrame = false;
+
   sky.update(time, camera, renderer.getPixelRatio());
   forest.update(time);
   baseCamp.update(time);
   mist.update(time);
   trekker.update(dt, time);
+
   renderer.render(scene, camera);
   countFps(performance.now());
 }
@@ -107,23 +152,19 @@ renderer.setAnimationLoop(tick);
 window.__ascent = {
   ready: false,
   get fps() { return fps; },
+  get progress() { return scroll.progress; },
   info: () => ({ trees: forest.count, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
-  // TEMP test views until the camera rail exists (step 10 replaces this).
+  // Jump straight to a point in the film (0..1), for testing.
   jump(p) {
-    const views = {
-      0: [3.5, 1.7, 9.5, -1.5, 1.6, -4],
-      0.2: [1, 1.5, 4, -4, 0.6, -2],
-      0.1: [1.8, 1.5, 6.2, 0.4, 1.0, 1.4],
-      0.15: [-1.2, 1.3, -2.2, 0.6, 1.0, 2.4],
-      0.5: [4, 14, -50, -4, 22, -130],
-      0.8: [-3, 29, -132, 2, 22, -300],
-      1: [1, 29.5, -150, 4, 12, -330],
-    };
-    const v = views[p] || views[0];
-    camera.position.set(v[0], v[1], v[2]);
-    camera.lookAt(v[3], v[4], v[5]);
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    lenis.scrollTo(p * max, { immediate: true, force: true });
+    scroll.target = p;
+    snapNextFrame = true;
   },
+  lenis,
 };
 
 // Tell tests the world is ready once the character has loaded (or failed to).
-trekker.ready.catch((e) => console.error('[trekker] failed to load', e)).finally(() => { window.__ascent.ready = true; });
+trekker.ready
+  .catch((e) => console.error('[trekker] failed to load', e))
+  .finally(() => { window.__ascent.ready = true; });
