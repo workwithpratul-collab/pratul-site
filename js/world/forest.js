@@ -16,23 +16,12 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { groundHeight, nearestTrail, noise2, smoothstep, seededRandom } from './terrain.js';
+import { mood } from './palette.js';
 
-// ---------- Painted colours (these are final screen colours, not surface colours) ----------
-// Night and pre-dawn versions; setDawn() blends between them.
-const PALETTE = {
-  night: {
-    nearBottom: '#172a3d', nearTop: '#2f4b62',   // near trees: deep slate blue low, lighter high
-    cardBottom: '#172b3f', cardTop: '#223d52',   // card trees: flatter; the fog adds the depth
-    rim: '#a3adc8',                              // faint cool silver on the moon side
-    trunk: '#26242e',
-  },
-  dawn: {
-    nearBottom: '#252f4a', nearTop: '#4a5878',
-    cardBottom: '#232c46', cardTop: '#343f5e',
-    rim: '#c9c0d8',
-    trunk: '#332d3a',
-  },
-};
+// ---------- Painted colours ----------
+// Tree, stone and wood colours live in palette.js (mood.trees, mood.stones, mood.wood).
+// They are final screen colours, not surface colours: the painted shader below shows them
+// almost exactly, with only a soft hint of light and shade.
 
 // Places that must stay clear of trees: base camp and the ridge camp.
 const CLEARINGS = [
@@ -56,18 +45,20 @@ const CARD_DISTANCE = 26;
 const NEAR_MIN_DISTANCE = 6.5;   // no tree closer than this to the camera's route
 
 // Values shared by every tree shader, so one update moves/colours them all.
+// The colours here are the palette's live colour objects, so they follow the time of day.
 const shared = {
   uWind: { value: 0 },
-  uMoonDir: { value: new THREE.Vector3(-0.5, 0.36, -0.79).normalize() },
-  uRim: { value: new THREE.Color(PALETTE.night.rim) },
+  uMoonDir: { value: new THREE.Vector3(-0.5, 0.36, -0.79).normalize() },  // replaced by the sky's key light direction
+  uRim: { value: mood.trees.rim },
   uWarmPos: { value: new THREE.Vector3(-3.8, 0.8, -2.2) },     // base camp tent
   uWarmPos2: { value: new THREE.Vector3(0, -1000, 0) },        // ridge camp tent (set by camp.js)
-  uWarmColor: { value: new THREE.Color('#ffa257') },
-  uMistColor: { value: new THREE.Color() },
+  uWarmColor: { value: mood.warm },
+  uMistColor: { value: mood.mist.treeFeet },
 };
 
 export function createForest(scene, { routeDistance, sky } = {}) {
-  if (sky) shared.uMoonDir.value.copy(sky.moonDir);
+  // Share the sky's live key light direction (moon at night, sun later), so trees shade with it.
+  if (sky) shared.uMoonDir.value = sky.keyDir;
 
   // ---------- 1. Decide where every tree goes ----------
   const rand = seededRandom(2024);
@@ -117,44 +108,21 @@ export function createForest(scene, { routeDistance, sky } = {}) {
   }
 
   // ---------- 2. Build the meshes ----------
-  const nearMat = makePaintedMaterial({
-    night: { bottom: PALETTE.night.nearBottom, top: PALETTE.night.nearTop, trunk: PALETTE.night.trunk },
-    dawn: { bottom: PALETTE.dawn.nearBottom, top: PALETTE.dawn.nearTop, trunk: PALETTE.dawn.trunk },
-  });
+  const nearMat = makePaintedMaterial({ colors: mood.trees });
   const pineMesh = makeNearInstanced(buildSoftPine(), near.pine, nearMat, 'near-pines');
   const oakMesh = makeNearInstanced(buildSoftOak(), near.oak, nearMat, 'near-oaks');
   const cardMesh = makeCards(cards);
   scene.add(pineMesh, oakMesh, cardMesh);
 
-  // ---------- 3. Colours that change from night to pre-dawn ----------
-  const night = mapColors(PALETTE.night);
-  const dawn = mapColors(PALETTE.dawn);
-  function setDawn(t) {
-    setPaintedDawn(t);   // near trees and rocks
-    cardMesh.material.uniforms.uBottom.value.lerpColors(night.cardBottom, dawn.cardBottom, t);
-    cardMesh.material.uniforms.uTop.value.lerpColors(night.cardTop, dawn.cardTop, t);
-    shared.uRim.value.lerpColors(night.rim, dawn.rim, t);
-  }
-  setDawn(0);
+  // Colours need no per-frame work: every tree material holds the palette's live colours.
 
   return {
     count: near.pine.length + near.oak.length + cards.length,
     counts: { nearPines: near.pine.length, nearOaks: near.oak.length, cards: cards.length },
-    setDawn,
     update(time) {
       shared.uWind.value = time;
-      // Mist at the trees' feet takes the sky's horizon colour (so it follows the dawn).
-      if (sky) shared.uMistColor.value.copy(sky.colors.horizon).lerp(WHITE, 0.18);
     },
   };
-}
-
-const WHITE = new THREE.Color('#dfe6ff');
-
-function mapColors(p) {
-  const out = {};
-  for (const k in p) out[k] = new THREE.Color(p[k]);
-  return out;
 }
 
 // =====================================================================
@@ -162,18 +130,16 @@ function mapColors(p) {
 // =====================================================================
 // Colours are a painted gradient (darker low, lighter high), plus a soft hint of
 // form from the moon, a faint silver rim on the moon side, and warm light from the
-// camp tents on surfaces that face them. Every painted material is remembered, so
-// setPaintedDawn() can shift them all from night to pre-dawn together.
-const paintedMaterials = [];
+// camp tents on surfaces that face them.
+// colors: a group of live palette colours with bottom, top and (optionally) trunk,
+// e.g. mood.trees, mood.stones or mood.wood. Because these are the palette's own colour
+// objects, the material follows the time of day with no extra code.
 
-export function makePaintedMaterial({ night, dawn, wind = true, roundness = 0.55, rim = 1 }) {
+export function makePaintedMaterial({ colors, wind = true, roundness = 0.55, rim = 1 }) {
   const material = new THREE.ShaderMaterial({
     fog: true,
     defines: wind ? { USE_WIND: '' } : {},
     uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {
-      uBottom: { value: new THREE.Color(night.bottom) },
-      uTop: { value: new THREE.Color(night.top) },
-      uTrunk: { value: new THREE.Color(night.trunk || night.bottom) },
       uRoundness: { value: roundness },
       uRimAmount: { value: rim },
     }]),
@@ -257,26 +223,18 @@ export function makePaintedMaterial({ night, dawn, wind = true, roundness = 0.55
       }
     `,
   });
+  // Link the palette's live colours (after merge(), which would have copied them).
+  Object.assign(material.uniforms, {
+    uBottom: { value: colors.bottom },
+    uTop: { value: colors.top },
+    uTrunk: { value: colors.trunk || colors.bottom },
+  });
   // Link the values every painted material shares (wind, moon, rim colour, tent lights).
   Object.assign(material.uniforms, {
     uWind: shared.uWind, uMoonDir: shared.uMoonDir, uRim: shared.uRim,
     uWarmPos: shared.uWarmPos, uWarmPos2: shared.uWarmPos2, uWarmColor: shared.uWarmColor,
   });
-  paintedMaterials.push({
-    material,
-    night: { bottom: new THREE.Color(night.bottom), top: new THREE.Color(night.top), trunk: new THREE.Color(night.trunk || night.bottom) },
-    dawn: { bottom: new THREE.Color(dawn.bottom), top: new THREE.Color(dawn.top), trunk: new THREE.Color(dawn.trunk || dawn.bottom) },
-  });
   return material;
-}
-
-// Shift every painted material (trees and rocks) between night (0) and pre-dawn (1).
-function setPaintedDawn(t) {
-  for (const p of paintedMaterials) {
-    p.material.uniforms.uBottom.value.lerpColors(p.night.bottom, p.dawn.bottom, t);
-    p.material.uniforms.uTop.value.lerpColors(p.night.top, p.dawn.top, t);
-    p.material.uniforms.uTrunk.value.lerpColors(p.night.trunk, p.dawn.trunk, t);
-  }
 }
 
 // Tell the painted materials where the second (ridge camp) tent glows from.
@@ -383,11 +341,6 @@ function buildSoftOak() {
 // =====================================================================
 // ROCKS: soft, rounded painted stones in the same style as the trees
 // =====================================================================
-const STONE = {
-  night: { bottom: '#1b2230', top: '#465066' },
-  dawn: { bottom: '#262a3e', top: '#5b5f7c' },
-};
-
 // One smooth pebble shape (a sphere gently pushed in and out by noise), 1 unit tall.
 function buildStoneGeometry() {
   const geo = new THREE.SphereGeometry(0.5, 32, 20);
@@ -408,7 +361,7 @@ function buildStoneGeometry() {
 
 // stones: [{ x, z, s }] in world space. Returns one instanced mesh.
 export function createStones(scene, stones, rand = Math.random) {
-  const material = makePaintedMaterial({ ...STONE, wind: false, roundness: 0.35, rim: 0.7 });
+  const material = makePaintedMaterial({ colors: mood.stones, wind: false, roundness: 0.35, rim: 0.7 });
   const mesh = new THREE.InstancedMesh(buildStoneGeometry(), material, stones.length);
   mesh.name = 'stones';
   const m = new THREE.Matrix4();
@@ -449,8 +402,6 @@ function makeCards(cards) {
     side: THREE.DoubleSide,
     uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {
       uAtlas: { value: null },
-      uBottom: { value: new THREE.Color() },
-      uTop: { value: new THREE.Color() },
     }]),
     vertexShader: /* glsl */ `
       #include <common>
@@ -511,6 +462,9 @@ function makeCards(cards) {
     `,
   });
   material.uniforms.uAtlas.value = atlas;
+  // The card colours are the palette's live colours (follow the time of day by themselves).
+  material.uniforms.uBottom = { value: mood.trees.cardBottom };
+  material.uniforms.uTop = { value: mood.trees.cardTop };
   Object.assign(material.uniforms, { uWind: shared.uWind, uRim: shared.uRim, uMistColor: shared.uMistColor });
 
   const mesh = new THREE.InstancedMesh(geo, material, Math.max(cards.length, 1));

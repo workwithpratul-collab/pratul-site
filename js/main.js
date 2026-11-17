@@ -15,6 +15,7 @@ import { createMist } from './world/mist.js';
 import { createTrekker } from './world/trekker.js';
 import { createCameraPath, BEATS } from './world/cameraPath.js';
 import { smoothstep } from './world/terrain.js';
+import { mood, setClimb, CLIMB } from './world/palette.js';
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? You can also add ?fps to the address, or press F to toggle it.
@@ -50,11 +51,11 @@ const sky = createSky(scene);
 // ---------- 5. The world ----------
 // The camera path is worked out first, so the forest can keep trees off the camera's route.
 const cameraPath = createCameraPath(trailCurve);
-createMountains(scene, sky);
+const mountains = createMountains(scene);
 createGround(scene);
 const forest = createForest(scene, { routeDistance: cameraPath.routeDistance, sky });
 const baseCamp = createBaseCamp(scene);
-const mist = createMist(scene, sky);
+const mist = createMist(scene);
 const trekker = createTrekker(scene, renderer, camera);
 
 // The first project camp: DERMAÉ, on the ridge. Its screen faces the arrival viewpoint.
@@ -142,11 +143,6 @@ function placeTrekker(u, dt) {
   trekker.place(trekPos.x, trekPos.z, heading);
 }
 
-// Ambient tints for the character: cool moonlight at night, a little warmer before dawn.
-const NIGHT_TINT = new THREE.Color('#c4cdf2');
-const DAWN_TINT = new THREE.Color('#ddd2ea');
-const nightTint = new THREE.Color();
-
 // ---------- The loop: update, then draw, every frame ----------
 // Timer measures how much time passed since the last frame ("delta time").
 const timer = new THREE.Timer();
@@ -165,13 +161,14 @@ function tick(timestamp) {
   placeTrekker(u, dt);
   snapNextFrame = false;
 
-  // Light: night (0) → pre-dawn (1) as we climb. Sky, fog, lights, mist, mountains and
-  // the trekker's colours all read from this one number, so they change together.
-  // Phase 1 only climbs to the first camp, so the light shifts *slightly* (80% of the way).
-  const dawn = smoothstep(0.08, 0.98, scroll.progress) * 0.8;
-  sky.setDawn(dawn);
-  forest.setDawn(dawn);
-  trekker.setLightLevel(THREE.MathUtils.lerp(0.42, 0.52, dawn), nightTint.copy(NIGHT_TINT).lerp(DAWN_TINT, dawn));
+  // Light: one "climb" number (0 = night at base camp ... 1 = sunrise at the summit) sets the
+  // palette's mood. Sky, fog, lights, mist, trees, mountains and the trekker all read from it,
+  // so they change together. Phase 1 only climbs to the first camp, so the light goes
+  // 80% of the way from night towards pre-dawn.
+  setClimb(smoothstep(0.08, 0.98, scroll.progress) * 0.8 * CLIMB.predawn);
+  sky.applyMood();
+  mountains.userData.applyMood();
+  trekker.setLightLevel(mood.character.level, mood.character.tint);
 
   // The project camp "wakes up" as we approach the ridge.
   dermaeCamp.update(dt, camera, smoothstep(0.55, BEATS.walkEnd + 0.04, scroll.progress), scroll.progress > 0.35, time);

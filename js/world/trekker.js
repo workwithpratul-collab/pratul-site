@@ -14,6 +14,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 import { groundHeight } from './terrain.js';
+import { PRESETS, MATERIALS } from './palette.js';
 
 const MODEL_URL = 'assets/pratul-trekker.vrm';
 const ANIMATION_URLS = {
@@ -23,8 +24,9 @@ const ANIMATION_URLS = {
 };
 const STRIDE = 0.72;           // metres per step, used to keep feet and ground in sync
 const MIXAMO_WALK_SPEED = 1.3; // metres per second the Mixamo "Walking" clip naturally covers
-const NIGHT_LEVEL = 0.42;            // how bright the character's colours are at night
-const NIGHT_TINT = new THREE.Color('#c4cdf2'); // cool moonlight tint
+// How bright the character's colours are at night, and the cool moonlight tint (palette.js).
+const NIGHT_LEVEL = PRESETS.night.character.level;
+const NIGHT_TINT = new THREE.Color(PRESETS.night.character.tint);
 
 export function createTrekker(scene, renderer, camera) {
   // `root` is what we move around the world; the VRM sits inside it.
@@ -184,7 +186,7 @@ export function createTrekker(scene, renderer, camera) {
 // material's original colours and scale them with a "light level" (see setLightLevel).
 const toonMaterials = [];
 function tuneMaterialsForNight(vrm) {
-  const moonRim = new THREE.Color('#5a6ec8');
+  const moonRim = new THREE.Color(MATERIALS.characterRim);
   vrm.scene.traverse((obj) => {
     if (!obj.isMesh) return;
     const materials = Array.isArray(obj.material) ? obj.material : [obj.material];

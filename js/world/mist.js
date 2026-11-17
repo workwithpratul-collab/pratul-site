@@ -7,11 +7,12 @@
 import * as THREE from 'three';
 import { NOISE_GLSL } from './glsl.js';
 import { groundHeight } from './terrain.js';
+import { mood } from './palette.js';
 
 // Shared values every mist layer reads, so one update moves them all.
 const shared = {
   uTime: { value: 0 },
-  uColor: { value: new THREE.Color() },
+  uColor: { value: mood.mist.air },   // the palette's live mist colour: follows the time of day
 };
 
 function makeMistMaterial({ opacity, scale, speed, softness = [0.42, 0.68], nearFade = [6, 22], seed = 0 }) {
@@ -67,7 +68,7 @@ function makeMistMaterial({ opacity, scale, speed, softness = [0.42, 0.68], near
   });
 }
 
-export function createMist(scene, sky) {
+export function createMist(scene) {
   const group = new THREE.Group();
   group.name = 'mist';
 
@@ -111,11 +112,9 @@ export function createMist(scene, sky) {
 
   scene.add(group);
 
-  // The mist colour is the sky's horizon colour, lifted a little (moonlit vapour).
-  const white = new THREE.Color('#dfe6ff');
+  // The mist colour comes from the palette (mood.mist.air), so only time needs updating.
   function update(time) {
     shared.uTime.value = time;
-    shared.uColor.value.copy(sky.colors.horizon).lerp(white, 0.22);
   }
   update(0);
 

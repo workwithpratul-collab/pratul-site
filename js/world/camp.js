@@ -6,6 +6,10 @@ import * as THREE from 'three';
 import { groundHeight, seededRandom } from './terrain.js';
 import { makePaintedMaterial, createStones, setSecondWarmLight } from './forest.js';
 import { NOISE_GLSL } from './glsl.js';
+import { mood, MATERIALS } from './palette.js';
+
+const L = MATERIALS.lights;   // light-source colours (the only strong warm colours in the world)
+const GEAR = MATERIALS.camp;
 
 // Where base camp sits (the clearing in terrain.js is centred near here).
 export const BASE_CAMP = {
@@ -18,7 +22,7 @@ export const RIDGE_CAMP = { x: 6.2, z: -147.2 };
 // Where the camera stands when we arrive there (cameraPath.js uses this for the arrival shot).
 export const RIDGE_VIEWPOINT = { x: -4.8, z: -135.5 };
 
-const WARM = new THREE.Color('#ffae5c');
+const WARM = new THREE.Color(L.tentLight);
 
 // ---------- A soft round glow texture, drawn once on a canvas ----------
 // Used for halos around lights: bright middle, fading to nothing at the edge.
@@ -76,7 +80,7 @@ export function createBaseCamp(scene) {
   tentLight.position.set(tx, tent.position.y + 0.7, tz);
   group.add(tentLight);
   // A big soft glow around the tent, like light scattering in the night air.
-  const tentHalo = makeHalo('#ff7a2a', 7, 0.26);
+  const tentHalo = makeHalo(L.tentHalo, 7, 0.26);
   tentHalo.position.set(tx, tent.position.y + 0.7, tz);
   group.add(tentHalo);
 
@@ -86,10 +90,10 @@ export function createBaseCamp(scene) {
   lantern.position.set(lx, groundHeight(lx, lz), lz);
   group.add(lantern);
 
-  const lanternLight = new THREE.PointLight('#ffa552', 12, 10, 2);
+  const lanternLight = new THREE.PointLight(L.lanternLight, 12, 10, 2);
   lanternLight.position.set(lx, lantern.position.y + 0.32, lz);
   group.add(lanternLight);
-  const lanternHalo = makeHalo('#ff9642', 1.5, 0.5);
+  const lanternHalo = makeHalo(L.lanternHalo, 1.5, 0.5);
   lanternHalo.position.copy(lanternLight.position);
   group.add(lanternHalo);
 
@@ -149,11 +153,7 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
   const poleH = sheetBottom + sheetH + 0.3;
 
   // ---------- The two wooden trekking poles ----------
-  const poleMat = makePaintedMaterial({
-    night: { bottom: '#2a2421', top: '#5b4a3d' },
-    dawn: { bottom: '#352c2a', top: '#6e5a4b' },
-    wind: false, roundness: 0, rim: 0.6,
-  });
+  const poleMat = makePaintedMaterial({ colors: mood.wood, wind: false, roundness: 0, rim: 0.6 });
   const poleGeo = new THREE.CylinderGeometry(0.028, 0.038, 1, 8);
   poleGeo.translate(0, 0.5, 0);
   poleGeo.setAttribute('aTrunk', new THREE.Float32BufferAttribute(new Array(poleGeo.attributes.position.count).fill(0), 1));
@@ -170,7 +170,7 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
   group.add(poles);
 
   // ---------- Guy ropes: thin lines from the pole tops and sheet corners down to stakes ----------
-  const ropeMat = new THREE.LineBasicMaterial({ color: '#9a9484', transparent: true, opacity: 0.5 });
+  const ropeMat = new THREE.LineBasicMaterial({ color: GEAR.rope, transparent: true, opacity: 0.5 });
   const ropes = [];
   for (const side of [-1, 1]) {
     const top = new THREE.Vector3(side * (poleX + side * 0.08), poleH - 0.15, 0);
@@ -193,7 +193,7 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
     uVideo: { value: placeholder },
     uOn: { value: 0 },                                     // 0 = projector off, 1 = on
     uTime: { value: 0 },
-    uCanvas: { value: new THREE.Color('#5f6173') },        // pale canvas in moonlight
+    uCanvas: { value: new THREE.Color(GEAR.canvas) },        // pale canvas in moonlight
     uSize: { value: new THREE.Vector2(sheetW, sheetH) },
     uVid: { value: new THREE.Vector2(vidW, vidH) },
   };
@@ -291,12 +291,12 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
   group.add(sheet);
 
   // ---------- Light from the projection, spilling onto the grass in front ----------
-  const spillLight = new THREE.PointLight('#ffd6bd', 0, 10, 2);
+  const spillLight = new THREE.PointLight(L.projector, 0, 10, 2);
   spillLight.position.set(0, 1.0, 1.6);
   group.add(spillLight);
   // A soft painted glow on the grass (cheaper and softer than a real light alone).
   const glowMat = new THREE.MeshBasicMaterial({
-    map: getGlowTexture(), color: '#ffc9a0', transparent: true, opacity: 0,
+    map: getGlowTexture(), color: L.projectorGlow, transparent: true, opacity: 0,
     depthWrite: false, blending: THREE.AdditiveBlending,
     polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4,
   });
@@ -315,7 +315,7 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
   const tentLight = new THREE.PointLight(WARM, 14, 10, 2);
   tentLight.position.set(tentX, tent.position.y + 0.6, tentZ);
   group.add(tentLight);
-  const tentHalo = makeHalo('#ff7a2a', 5, 0.22);
+  const tentHalo = makeHalo(L.tentHalo, 5, 0.22);
   tentHalo.position.copy(tentLight.position);
   group.add(tentHalo);
 
@@ -323,10 +323,10 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
   const lantern = buildLantern();
   lantern.position.set(lanternX, localGround(lanternX, lanternZ), lanternZ);
   group.add(lantern);
-  const lanternLight = new THREE.PointLight('#ffa552', 6, 7, 2);
+  const lanternLight = new THREE.PointLight(L.lanternLight, 6, 7, 2);
   lanternLight.position.set(lanternX, lantern.position.y + 0.33, lanternZ);
   group.add(lanternLight);
-  const lanternHalo = makeHalo('#ff9642', 1.3, 0.45);
+  const lanternHalo = makeHalo(L.lanternHalo, 1.3, 0.45);
   lanternHalo.position.copy(lanternLight.position);
   group.add(lanternHalo);
 
@@ -432,8 +432,8 @@ function buildDomeTent() {
   domeGeo.scale(width / 2, height, depth / 2);
 
   const fabric = new THREE.MeshLambertMaterial({
-    color: '#c9772f',
-    emissive: '#ff8a2e',
+    color: L.tentFabric,
+    emissive: L.tentGlow,
     emissiveIntensity: 1,
   });
   // A small shader addition: the fabric glows as if lit from inside.
@@ -473,7 +473,7 @@ function buildDomeTent() {
   // A flat dark groundsheet just under the tent, so it doesn't look like it floats.
   const sheet = new THREE.Mesh(
     new THREE.CircleGeometry(1, 32),
-    new THREE.MeshLambertMaterial({ color: '#3b3330' })
+    new THREE.MeshLambertMaterial({ color: GEAR.groundsheet })
   );
   sheet.rotation.x = -Math.PI / 2;
   sheet.scale.set(width / 2 + 0.15, depth / 2 + 0.15, 1);
@@ -486,8 +486,8 @@ function buildDomeTent() {
 // ---------- The lantern: a small metal base, glowing glass, a cap and a handle ----------
 function buildLantern() {
   const group = new THREE.Group();
-  const metal = new THREE.MeshLambertMaterial({ color: '#3a3a40' });
-  const glass = new THREE.MeshBasicMaterial({ color: '#ffd59a' }); // "Basic" ignores lights: it IS the light
+  const metal = new THREE.MeshLambertMaterial({ color: GEAR.metal });
+  const glass = new THREE.MeshBasicMaterial({ color: L.lanternGlass }); // "Basic" ignores lights: it IS the light
 
   const base = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.1, 0.06, 12), metal);
   base.position.y = 0.03;

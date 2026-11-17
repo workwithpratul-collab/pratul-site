@@ -4,6 +4,7 @@
 
 import * as THREE from 'three';
 import { NOISE_GLSL } from './glsl.js';
+import { mood, MATERIALS } from './palette.js';
 
 // ---------- A tiny seeded random generator ----------
 // Math.random() gives different mountains every reload. A "seeded" random gives the
@@ -38,25 +39,32 @@ function makeNoise1D(seed, count = 512) {
 // peaks: how many big mountains fit around the full circle. rough: how jagged the crests are.
 // trees: height of the little tree "fuzz" on the skyline (only near, forested ranges).
 // haze: how much the layer melts into the sky colour (far = more).
+// Each layer's rock colour comes from the palette (mood.mountains.layers), nearest first.
 const MOUNTAIN_LAYERS = [
-  { radius: 420,  base: 14,  amp: 60,  peaks: 14, rough: 0.10, trees: 7, color: '#0a1130', haze: 0.14, snow: 0,    seed: 11, columns: 3200 },
-  { radius: 800,  base: 30,  amp: 140, peaks: 16, rough: 0.16, trees: 9, color: '#111a46', haze: 0.32, snow: 0,    seed: 23, columns: 2400 },
-  { radius: 1450, base: 60,  amp: 330, peaks: 20, rough: 0.28, trees: 0, color: '#1a2660', haze: 0.50, snow: 0, seed: 37, columns: 1400 },
-  { radius: 2500, base: 120, amp: 820, peaks: 22, rough: 0.34, trees: 0, color: '#283676', haze: 0.52, snow: 1.0,  seed: 51, columns: 1400 },
+  { radius: 420,  base: 14,  amp: 60,  peaks: 14, rough: 0.10, trees: 7, haze: 0.14, snow: 0,    seed: 11, columns: 3200 },
+  { radius: 800,  base: 30,  amp: 140, peaks: 16, rough: 0.16, trees: 9, haze: 0.32, snow: 0,    seed: 23, columns: 2400 },
+  { radius: 1450, base: 60,  amp: 330, peaks: 20, rough: 0.28, trees: 0, haze: 0.50, snow: 0, seed: 37, columns: 1400 },
+  { radius: 2500, base: 120, amp: 820, peaks: 22, rough: 0.34, trees: 0, haze: 0.52, snow: 1.0,  seed: 51, columns: 1400 },
 ];
 
 // The centre the mountain rings are drawn around (about the middle of the walk).
 const RING_CENTRE = new THREE.Vector3(0, 0, -80);
 
-export function createMountains(scene, sky) {
+export function createMountains(scene) {
   const group = new THREE.Group();
   group.name = 'mountains';
-  MOUNTAIN_LAYERS.forEach((layer, index) => group.add(buildMountainLayer(layer, index, sky)));
+  const layers = MOUNTAIN_LAYERS.map((layer, index) => buildMountainLayer(layer, index));
+  layers.forEach((mesh) => group.add(mesh));
   scene.add(group);
+  // Colours follow the palette by themselves (shared colour objects); only the snow's
+  // warmth is a plain number, so it is copied across here every frame.
+  group.userData.applyMood = () => {
+    for (const mesh of layers) mesh.userData.material.uniforms.uGlowStrength.value = mood.mountains.snowWarmth;
+  };
   return group;
 }
 
-function buildMountainLayer(layer, index, sky) {
+function buildMountainLayer(layer, index) {
   const columns = layer.columns; // how many vertical slices make up the outline
   const bottom = -260;           // the foot of the layer, far below the horizon
   // Each noise "table" has exactly as many cells as we walk through around the circle,
@@ -120,14 +128,16 @@ function buildMountainLayer(layer, index, sky) {
   const mat = new THREE.ShaderMaterial({
     side: THREE.DoubleSide,
     uniforms: {
-      uColor: { value: new THREE.Color(layer.color) },
-      uHaze: { value: sky.colors.horizon },         // shared with the sky, so it shifts at dawn too
-      uGlow: { value: sky.colors.glow },
-      uGlowStrength: { value: 0 },
+      // These colour objects are the palette's live mood, so the mountains follow the time of day.
+      uColor: { value: mood.mountains.layers[index] },
+      uHaze: { value: mood.sky.horizon },
+      uGlow: { value: mood.sky.glow },
+      uValleyMist: { value: mood.mist.valley },
+      uGlowStrength: { value: mood.mountains.snowWarmth },
       uHazeAmount: { value: layer.haze },
       uSnow: { value: layer.snow },
-      uSnowLit: { value: new THREE.Color('#9eaee4') },
-      uSnowShade: { value: new THREE.Color('#4a5898') },
+      uSnowLit: { value: mood.mountains.snowLit },
+      uSnowShade: { value: mood.mountains.snowShade },
       uSnowLine: { value: layer.base + layer.amp * 0.2 },
       uLayer: { value: index },
     },
@@ -145,7 +155,7 @@ function buildMountainLayer(layer, index, sky) {
       }
     `,
     fragmentShader: /* glsl */ `
-      uniform vec3 uColor, uHaze, uGlow, uSnowLit, uSnowShade;
+      uniform vec3 uColor, uHaze, uGlow, uSnowLit, uSnowShade, uValleyMist;
       uniform float uHazeAmount, uSnow, uSnowLine, uLayer, uGlowStrength;
       varying float vY, vCrest, vSlope;
       varying vec2 vXZ;
@@ -178,8 +188,8 @@ function buildMountainLayer(layer, index, sky) {
         // Atmospheric haze: the whole layer leans towards the sky colour,
         // and the lower slopes melt into mist (the "valley fog" look).
         col = mix(col, uHaze, uHazeAmount);
-        // Valleys fade into pale, moonlit mist (the same colour as the mist layers).
-        vec3 mistCol = mix(uHaze, vec3(0.87, 0.9, 1.0), 0.22);
+        // Valleys fade into pale mist (the palette's valley mist colour).
+        vec3 mistCol = uValleyMist;
         float valleyMist = smoothstep(vCrest * 0.2 + 20.0, -60.0, vY);
         valleyMist *= 0.75 + 0.25 * fbm(vec2(p.x * 4.0, vY * 0.02));  // uneven, like brushwork
         col = mix(col, mistCol, clamp(valleyMist, 0.0, 1.0) * 0.92);
@@ -286,16 +296,11 @@ export const trailCurve = new THREE.CatmullRomCurve3(
   false, 'centripetal'
 );
 
-// Painted ground colours. These are the surface colours in neutral light: the cool
-// moonlight turns them blue at night, the lantern turns them warm near camp.
-const GROUND = {
-  forest: new THREE.Color('#4f6e6a'),   // blue-green forest floor
-  moss: new THREE.Color('#5f8172'),     // slightly lighter mossy patches
-  grass: new THREE.Color('#71927c'),    // open grassy slopes higher up
-  grassLit: new THREE.Color('#87a88a'), // lighter grass patches
-  valley: new THREE.Color('#3e5464'),   // the deep valley beyond the ridge
-  earth: new THREE.Color('#857865'),    // trodden earth at the camps (turns orange in lamplight)
-};
+// Painted ground colours (from palette.js). These are the surface colours in neutral light:
+// the cool moonlight turns them blue at night, the lantern turns them warm near camp.
+const GROUND = Object.fromEntries(
+  ['forest', 'moss', 'grass', 'grassLit', 'valley', 'earth'].map((k) => [k, new THREE.Color(MATERIALS.ground[k])])
+);
 
 // The ground grid: 520 m wide, 560 m deep, one vertex roughly every 1.3 m.
 const GRID = { width: 520, depth: 560, segX: 400, segZ: 430, minX: -260, minZ: -490 };
@@ -358,6 +363,9 @@ export function createGround(scene) {
   geo.computeVertexNormals();
 
   const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  // The palette's ground tint multiplies every painted colour (white at night = no change).
+  // It's the same colour object as the mood's, so it follows the time of day by itself.
+  mat.color = mood.ground;
   const ground = new THREE.Mesh(geo, mat);
   ground.name = 'ground';
   scene.add(ground);
@@ -373,8 +381,8 @@ function createTrailStrip() {
   const alpha = [0, 0.85, 1, 0.85, 0];      // edges fade out, so the path looks painted on
   const halfWidth = 0.85;
   const positions = [], colors = [], indices = [];
-  const pathCol = new THREE.Color('#9b9a9f'); // pale dusty earth, catches the moonlight
-  const pathLit = new THREE.Color('#b3ad9f');
+  const pathCol = new THREE.Color(MATERIALS.ground.path); // pale dusty earth, catches the moonlight
+  const pathLit = new THREE.Color(MATERIALS.ground.pathLit);
   const col = new THREE.Color();
   const p = new THREE.Vector3();
   const tangent = new THREE.Vector3();

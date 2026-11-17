@@ -1,57 +1,39 @@
-// sky.js: the sky dome, the moon, the stars, and the "mood" of the light.
-// Everything that should change colour together as night turns to dawn lives here:
-// sky gradient, fog colour, moonlight and the soft fill light.
+// sky.js: the sky dome, the moon, the sun, the stars, and the "mood" of the light.
+// Everything that should change colour together as the climb goes from night to sunrise
+// is applied here: sky gradient, fog, the key light (moon or sun) and the soft fill light.
 
 import * as THREE from 'three';
 import { NOISE_GLSL } from './glsl.js';
+import { mood } from './palette.js';
 
-// ---------- Two moods. We blend between them as you climb. ----------
-// Colours are written as normal hex (sRGB); three.js converts them for lighting maths.
-const NIGHT = {
-  top: '#03061a',       // almost black navy straight up
-  mid: '#0e1747',       // deep indigo
-  horizon: '#25336a',   // lighter blue at the horizon (also the fog colour)
-  glow: '#1c2a62',      // no sunrise glow yet, just a faint lift
-  glowStrength: 0.0,
-  stars: 1.0,
-  // Lights: surfaces use mid-tone colours, and these cool lights tint them blue.
-  moonLight: '#9ab0f5',
-  moonIntensity: 1.9,
-  hemiSky: '#5166b8',
-  hemiGround: '#141a36',
-  hemiIntensity: 2.2,
-};
-const PREDAWN = {
-  top: '#0a1440',
-  mid: '#2a3a86',
-  horizon: '#6b6fa8',
-  glow: '#f2a17c',      // warm peach on the eastern horizon
-  glowStrength: 0.9,
-  stars: 0.25,
-  moonLight: '#b4bdf0',
-  moonIntensity: 1.7,
-  hemiSky: '#7f89cc',
-  hemiGround: '#221d38',
-  hemiIntensity: 2.6,
-};
+// The colours of every time of day live in palette.js. This file reads the live,
+// blended "mood" from there (see setClimb in palette.js) and applies it to the sky and lights.
 
 // Where things sit in the sky (directions from the viewer).
 const MOON_DIR = new THREE.Vector3(-0.5, 0.36, -0.79).normalize();
 const DAWN_DIR = new THREE.Vector3(0.62, 0.0, -0.78).normalize(); // forward-right, where the sun will rise
+const SUN_DIR = new THREE.Vector3(0.62, 0.03, -0.78).normalize();  // the sun itself, just above that horizon
 
 const SKY_RADIUS = 4500;
 const STAR_RADIUS = 3600;
 
-export function createSky(scene) {
+// options (all optional): directions for the moon, the dawn glow and the sun. The main film
+// uses the defaults; the style frames point the sun wherever their camera looks.
+export function createSky(scene, { moonDir = MOON_DIR, glowDir = DAWN_DIR, sunDir = SUN_DIR } = {}) {
   // ---------- The sky dome: a huge sphere seen from inside, coloured by a shader ----------
+  // The colour uniforms *are* the palette's live colours (same objects), so they follow
+  // the mood automatically; applyMood() only copies the plain numbers.
   const skyUniforms = {
-    uTop: { value: new THREE.Color(NIGHT.top) },
-    uMid: { value: new THREE.Color(NIGHT.mid) },
-    uHorizon: { value: new THREE.Color(NIGHT.horizon) },
-    uGlow: { value: new THREE.Color(NIGHT.glow) },
-    uGlowStrength: { value: NIGHT.glowStrength },
-    uGlowDir: { value: DAWN_DIR },
-    uMoonDir: { value: MOON_DIR },
+    uTop: { value: mood.sky.top },
+    uMid: { value: mood.sky.mid },
+    uHorizon: { value: mood.sky.horizon },
+    uGlow: { value: mood.sky.glow },
+    uGlowStrength: { value: 0 },
+    uGlowDir: { value: glowDir.clone().normalize() },
+    uMoonDir: { value: moonDir.clone().normalize() },
+    uSunDir: { value: sunDir.clone().normalize() },
+    uMoon: { value: 1 },
+    uSun: { value: 0 },
     uStars: { value: 1 },
     uTime: { value: 0 },
   };
@@ -68,8 +50,8 @@ export function createSky(scene) {
       }
     `,
     fragmentShader: /* glsl */ `
-      uniform vec3 uTop, uMid, uHorizon, uGlow, uGlowDir, uMoonDir;
-      uniform float uGlowStrength, uStars, uTime;
+      uniform vec3 uTop, uMid, uHorizon, uGlow, uGlowDir, uMoonDir, uSunDir;
+      uniform float uGlowStrength, uStars, uTime, uMoon, uSun;
       varying vec3 vDir;
       ${NOISE_GLSL}
 
@@ -104,7 +86,15 @@ export function createSky(scene) {
         float disc = smoothstep(0.99972, 0.99984, m);
         float halo = pow(m, 900.0) * 0.3 + pow(m, 40.0) * 0.06;
         vec3 moonCol = vec3(0.92, 0.94, 1.0);
-        col += moonCol * (disc * 0.9 + halo);
+        col += moonCol * (disc * 0.9 + halo) * uMoon;
+
+        // 5b. The sun: a soft, warm disc with a wide painted bloom around it (no lens flares).
+        float s = max(dot(dir, uSunDir), 0.0);
+        float sunDisc = smoothstep(0.99935, 0.99962, s);
+        float sunBloom = pow(s, 400.0) * 0.55 + pow(s, 24.0) * 0.22 + pow(s, 4.0) * 0.08;
+        vec3 sunCol = mix(uGlow, vec3(1.0, 0.97, 0.88), 0.7);
+        col = mix(col, sunCol, clamp(sunDisc * uSun, 0.0, 1.0));
+        col += uGlow * sunBloom * uSun;
 
         // 6. Below the horizon, just use the horizon colour (fog hides it anyway).
         col = mix(uHorizon, col, smoothstep(-0.04, 0.0, h));
@@ -194,41 +184,43 @@ export function createSky(scene) {
   scene.add(stars);
 
   // ---------- Lights ----------
-  // Moonlight: a cool directional light coming from the moon's direction.
-  const moonLight = new THREE.DirectionalLight(NIGHT.moonLight, NIGHT.moonIntensity);
-  moonLight.position.copy(MOON_DIR).multiplyScalar(100);
-  scene.add(moonLight);
-  // Hemisphere light: soft blue from above, very dark from below. Fills the shadows gently.
-  const hemi = new THREE.HemisphereLight(NIGHT.hemiSky, NIGHT.hemiGround, NIGHT.hemiIntensity);
+  // The key light: the main light of the scene. Cool moonlight at night; as the climb
+  // goes on it swings round to come from the sun (see key.fromSun in palette.js).
+  const keyDir = moonDir.clone().normalize();          // live direction, shared with the painted materials
+  const keyLight = new THREE.DirectionalLight(mood.key.color, mood.key.intensity);
+  keyLight.position.copy(keyDir).multiplyScalar(100);
+  scene.add(keyLight);
+  // Hemisphere light: soft colour from above, darker from below. Fills the shadows gently.
+  const hemi = new THREE.HemisphereLight(mood.ambient.sky, mood.ambient.ground, mood.ambient.intensity);
   scene.add(hemi);
 
-  // ---------- Fog: same colour as the horizon, so far objects melt into the sky ----------
+  // ---------- Fog: the horizon colour, so far objects melt into the sky ----------
   // "Exp2" fog thickens smoothly with distance, so each row of trees is a little paler
   // than the one in front, the layered look of a painting.
-  scene.fog = new THREE.FogExp2(NIGHT.horizon, 0.0095);
+  scene.fog = new THREE.FogExp2(mood.fog.color, mood.fog.density);
 
-  // Colour objects we reuse every frame (making new ones each frame wastes memory).
-  const night = toColors(NIGHT);
-  const dawn = toColors(PREDAWN);
-
-  // ---------- setDawn: blend everything from night (0) to pre-dawn (1) ----------
-  function setDawn(t) {
-    skyUniforms.uTop.value.lerpColors(night.top, dawn.top, t);
-    skyUniforms.uMid.value.lerpColors(night.mid, dawn.mid, t);
-    skyUniforms.uHorizon.value.lerpColors(night.horizon, dawn.horizon, t);
-    skyUniforms.uGlow.value.lerpColors(night.glow, dawn.glow, t);
-    skyUniforms.uGlowStrength.value = lerp(NIGHT.glowStrength, PREDAWN.glowStrength, t);
-    const starAmount = lerp(NIGHT.stars, PREDAWN.stars, t);
-    skyUniforms.uStars.value = starAmount;
-    starUniforms.uOpacity.value = starAmount;
-    scene.fog.color.copy(skyUniforms.uHorizon.value);
-    moonLight.color.lerpColors(night.moonLight, dawn.moonLight, t);
-    moonLight.intensity = lerp(NIGHT.moonIntensity, PREDAWN.moonIntensity, t);
-    hemi.color.lerpColors(night.hemiSky, dawn.hemiSky, t);
-    hemi.groundColor.lerpColors(night.hemiGround, dawn.hemiGround, t);
-    hemi.intensity = lerp(NIGHT.hemiIntensity, PREDAWN.hemiIntensity, t);
+  // ---------- applyMood: copy the palette's current mood onto the sky and lights ----------
+  // Call it after palette.setClimb(), once per frame (it's cheap: a few copies).
+  const moonDirN = moonDir.clone().normalize();
+  const sunDirN = sunDir.clone().normalize();
+  function applyMood() {
+    skyUniforms.uGlowStrength.value = mood.sky.glowStrength;
+    skyUniforms.uStars.value = mood.sky.stars;
+    starUniforms.uOpacity.value = mood.sky.stars;
+    skyUniforms.uMoon.value = mood.sky.moon;
+    skyUniforms.uSun.value = mood.sky.sun;
+    stars.visible = mood.sky.stars > 0.001;
+    scene.fog.color.copy(mood.fog.color);
+    scene.fog.density = mood.fog.density;
+    keyLight.color.copy(mood.key.color);
+    keyLight.intensity = mood.key.intensity;
+    keyDir.copy(moonDirN).lerp(sunDirN, mood.key.fromSun).normalize();
+    keyLight.position.copy(keyDir).multiplyScalar(100);
+    hemi.color.copy(mood.ambient.sky);
+    hemi.groundColor.copy(mood.ambient.ground);
+    hemi.intensity = mood.ambient.intensity;
   }
-  setDawn(0);
+  applyMood();
 
   // ---------- update: called every frame ----------
   function update(time, camera, pixelRatio) {
@@ -242,22 +234,12 @@ export function createSky(scene) {
 
   return {
     update,
-    setDawn,
-    moonLight,
+    applyMood,
+    keyLight,
     hemi,
-    // Shared colours other parts of the world (mountains, mist) read to stay in harmony.
-    colors: { horizon: skyUniforms.uHorizon.value, glow: skyUniforms.uGlow.value, mid: skyUniforms.uMid.value },
-    glowStrength: () => skyUniforms.uGlowStrength.value,
-    dawnDir: DAWN_DIR,
-    moonDir: MOON_DIR,
+    keyDir,                 // where the main light comes from right now (updated by applyMood)
+    dawnDir: glowDir,
+    moonDir: moonDirN,
+    sunDir: sunDirN,
   };
-}
-
-function lerp(a, b, t) { return a + (b - a) * t; }
-function toColors(mood) {
-  const out = {};
-  for (const key of Object.keys(mood)) {
-    if (typeof mood[key] === 'string') out[key] = new THREE.Color(mood[key]);
-  }
-  return out;
 }
