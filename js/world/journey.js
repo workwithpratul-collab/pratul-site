@@ -37,6 +37,7 @@ export const CAMPS = [
     tent: -1,
     tentTurn: 0.5,
     lanternSide: 1,
+    blendIn: 0.022,   // the trail passes right by this camera spot: take over only at the very end
     video: 'recordings/web/kings-garden.mp4',
     label: 'label-kings-garden',
   },
@@ -71,8 +72,14 @@ export const SUMMIT = {
 // =====================================================================
 // 2. THE TIMELINE
 // =====================================================================
-// How many screen-heights of scrolling the whole film lasts (the page is this + 1 screens tall).
-export const FILM_SCREENS = 10;
+// How many screen-heights of scrolling the whole film lasts (the film part of the page is this
+// + 1 screens tall).
+export const FILM_SCREENS = 13;
+
+// The trekker's top speed, in metres per second: a brisk hike that the walk animation can
+// still match step for step. If you scroll faster than this, the film glides on behind your
+// scroll and catches up, rather than sliding his feet. Higher = more responsive, lower = calmer.
+export const MAX_WALK_SPEED = 3.8;
 
 // Each zone's share of the scroll (they add up to 1): base camp 15%, ridge 40%, meadow 25%, summit 20%.
 export const ZONES = [

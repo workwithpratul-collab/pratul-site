@@ -24,7 +24,11 @@ const OPENING = { pos: new THREE.Vector3(3.4, 1.7, 9.6), look: new THREE.Vector3
 const FOLLOW_KEYS = [
   { s: 0, back: 6.5, height: 2.2, side: 1.5, lookAhead: 5, lookHeight: 1.2 },     // base camp (Phase 1)
   { s: 90, back: 7.5, height: 2.6, side: 1.6, lookAhead: 6, lookHeight: 1.2 },    // the forest climb
-  { s: 175, back: 9.5, height: 4.8, side: 2.6, lookAhead: 9, lookHeight: 0.8 },   // the open ridge: look down over the trekker
+  // Leaving DERMAÉ the trail runs round behind its screen, so the camera swaps to the trekker's
+  // left (away from the screen) and rises, then moves back to the uphill side on the open ridge.
+  { s: 150, back: 8.5, height: 3.6, side: -2.6, lookAhead: 7, lookHeight: 1.1 },
+  { s: 176, back: 9.5, height: 4.4, side: -1.6, lookAhead: 6, lookHeight: 1.3 },
+  { s: 205, back: 9.5, height: 4.6, side: 2.6, lookAhead: 6.5, lookHeight: 1.3 },   // the open ridge: look down over the trekker
   { s: 330, back: 10, height: 3.8, side: 2.2, lookAhead: 9, lookHeight: 1.2 },    // the meadow
   { s: 425, back: 10, height: 5, side: 2, lookAhead: 5, lookHeight: 1.5 },        // the summit climb: just over the trekker's head
 ];
@@ -61,7 +65,7 @@ export function createCameraPath() {
       stop.shot = {
         pos: atGround(camp.view[0], camp.view[1], 2.1),
         look: atGround(camp.look[0], camp.look[1], 1.9),
-        blendIn: 0.045, blendOut: 0.04,
+        blendIn: camp.blendIn ?? 0.045, blendOut: 0.04,
       };
     } else if (st.at === 'meadow') {
       stop.s = trailDistanceAt(MEADOW.stop[0], MEADOW.stop[1]);
