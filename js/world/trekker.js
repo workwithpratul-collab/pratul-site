@@ -297,8 +297,10 @@ async function loadMixamoClips(vrm) {
     Object.entries(ANIMATION_URLS).map(async ([name, url]) => {
       try {
         return [name, await loadMixamoAnimation(url, vrm)];
-      } catch {
-        return [name, null];   // file missing or unreadable: just skip it
+      } catch (err) {
+        // A missing file is normal (stay quiet). A file that exists but can't be read is worth a warning.
+        if (!/404/.test(String(err?.message ?? err))) console.warn(`[trekker] Could not use ${url}:`, err);
+        return [name, null];
       }
     })
   );

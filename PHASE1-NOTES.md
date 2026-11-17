@@ -142,3 +142,22 @@ Then change `video: 'recordings/dermae.mp4'` to `'recordings/dermae-web.mp4'` in
 6. Search **Breathing Idle**. Download with the same settings → `assets/animations/Idle.fbx`.
 7. Search **Waving**. Download with the same settings → `assets/animations/Waving.fbx`.
 8. Reload the page. The console should say `[trekker] Mixamo animations loaded: walk, idle, wave`.
+
+---
+
+## Polish 1: Painted trees
+The old pines were stacks of hard cones with near-black undersides. Now there are two kinds of tree, chosen by how close
+the camera ever gets to them (`routeDistance()` in `cameraPath.js`):
+- **Cards (further than 26 m from the camera's route):** flat silhouettes drawn in code on a canvas (6 pines with drooping
+  branch tips, 2 round broadleaf trees) and stored side by side in one texture (an "atlas"). Each card turns to face the
+  camera around its vertical axis, so trees stay upright. The shader paints a dark-to-light gradient, thins into mist at
+  the feet, and the scene fog makes each row paler than the one in front, the cut-paper layers of style-3/style-4.
+  Edges use **alpha-to-coverage**: the anti-aliasing samples smooth the outline, so ~9,000 cards need no slow
+  transparency sorting.
+- **Near trees:** smooth "turned" pines (soft rounded scallops, no steps) and round-clump oaks with a custom shader.
+  The colour is a *painted* gradient between two chosen colours (never near-black), plus a soft hint of form from the
+  moon, a cool moonlit rim on the moon side, and the warm camp glow on trees close to the tent. Normals are leaned
+  outwards from the trunk, so each tree shades as one soft form instead of many facets.
+- **Sizing rule:** no tree within 6.5 m of the camera's route, fewer trees near it, and a near tree may be at most about
+  half as tall as its distance from the route. That keeps the trail and the sky between the trees open.
+Colours have night and pre-dawn versions; `forest.setDawn()` blends them along with the sky.

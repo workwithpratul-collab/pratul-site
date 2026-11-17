@@ -260,7 +260,9 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
       const py = (-projected.y * 0.5 + 0.5) * window.innerHeight;
       label.style.transform = `translate3d(${px.toFixed(1)}px, ${py.toFixed(1)}px, 0) translate(0, -100%)`;
       const show = inFront ? THREE.MathUtils.clamp((near - 0.55) / 0.35, 0, 1) : 0;
-      label.style.opacity = show.toFixed(3);
+      // Never fully 0: keeping the label "barely there" means the browser has already drawn it,
+      // so it fades in without a stutter.
+      label.style.opacity = Math.max(show, 0.001).toFixed(3);
     }
   }
 

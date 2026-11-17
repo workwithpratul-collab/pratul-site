@@ -86,10 +86,16 @@ export function createCameraPath(trailCurve) {
   // so the forest can keep trees out of the way.
   const routePoints = camRail.getSpacedPoints(300).concat([OPENING.pos, ARRIVAL.pos]);
   function avoid(x, z) {
+    return routeDistance(x, z) < 5.5;
+  }
+  // How far (metres, measured on the map) a point is from anywhere the camera will go.
+  function routeDistance(x, z) {
+    let best = Infinity;
     for (const p of routePoints) {
-      if ((p.x - x) * (p.x - x) + (p.z - z) * (p.z - z) < 5.5 * 5.5) return true;
+      const d = (p.x - x) * (p.x - x) + (p.z - z) * (p.z - z);
+      if (d < best) best = d;
     }
-    return false;
+    return Math.sqrt(best);
   }
 
   // ---------- Progress → trekker position on the trail (0..1) ----------
@@ -145,7 +151,7 @@ export function createCameraPath(trailCurve) {
     return u;
   }
 
-  return { update, avoid, trekkerU, camRail, lookRail };
+  return { update, avoid, routeDistance, trekkerU, camRail, lookRail };
 }
 
 // Average each point with its neighbours a few times: sharp corners become soft curves.

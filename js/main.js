@@ -52,7 +52,7 @@ const sky = createSky(scene);
 const cameraPath = createCameraPath(trailCurve);
 createMountains(scene, sky);
 createGround(scene);
-const forest = createForest(scene, { avoid: cameraPath.avoid });
+const forest = createForest(scene, { routeDistance: cameraPath.routeDistance, sky });
 const baseCamp = createBaseCamp(scene);
 const mist = createMist(scene, sky);
 const trekker = createTrekker(scene, renderer, camera);
@@ -170,6 +170,7 @@ function tick(timestamp) {
   // Phase 1 only climbs to the first camp, so the light shifts *slightly* (80% of the way).
   const dawn = smoothstep(0.08, 0.98, scroll.progress) * 0.8;
   sky.setDawn(dawn);
+  forest.setDawn(dawn);
   trekker.setLightLevel(THREE.MathUtils.lerp(0.42, 0.52, dawn), nightTint.copy(NIGHT_TINT).lerp(DAWN_TINT, dawn));
 
   // The project camp "wakes up" as we approach the ridge.
@@ -191,7 +192,7 @@ window.__ascent = {
   ready: false,
   get fps() { return fps; },
   get progress() { return scroll.progress; },
-  info: () => ({ trees: forest.count, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
+  info: () => ({ trees: forest.counts, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
   // Jump straight to a point in the film (0..1), for testing.
   jump(p) {
     const max = document.documentElement.scrollHeight - window.innerHeight;
