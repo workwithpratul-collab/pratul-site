@@ -14,11 +14,12 @@ const NIGHT = {
   glow: '#1c2a62',      // no sunrise glow yet, just a faint lift
   glowStrength: 0.0,
   stars: 1.0,
-  moonLight: '#8ea6f0',
-  moonIntensity: 1.05,
-  hemiSky: '#4a5fb0',
-  hemiGround: '#0b0f22',
-  hemiIntensity: 1.1,
+  // Lights: surfaces use mid-tone colours, and these cool lights tint them blue.
+  moonLight: '#9ab0f5',
+  moonIntensity: 1.9,
+  hemiSky: '#5166b8',
+  hemiGround: '#141a36',
+  hemiIntensity: 2.2,
 };
 const PREDAWN = {
   top: '#0a1440',
@@ -27,11 +28,11 @@ const PREDAWN = {
   glow: '#f2a17c',      // warm peach on the eastern horizon
   glowStrength: 0.9,
   stars: 0.25,
-  moonLight: '#a9b6f2',
-  moonIntensity: 1.0,
-  hemiSky: '#7b86c8',
-  hemiGround: '#1a1830',
-  hemiIntensity: 1.35,
+  moonLight: '#b4bdf0',
+  moonIntensity: 1.7,
+  hemiSky: '#7f89cc',
+  hemiGround: '#221d38',
+  hemiIntensity: 2.6,
 };
 
 // Where things sit in the sky (directions from the viewer).

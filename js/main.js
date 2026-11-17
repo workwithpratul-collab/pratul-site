@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 import { createSky } from './world/sky.js';
-import { createMountains } from './world/terrain.js';
+import { createMountains, createGround } from './world/terrain.js';
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? You can also add ?fps to the address, or press F to toggle it.
@@ -41,6 +41,7 @@ const sky = createSky(scene);
 
 // ---------- 5. The world ----------
 createMountains(scene, sky);
+createGround(scene);
 
 // ---------- Resize: keep the picture sharp and undistorted when the window changes ----------
 function onResize() {
@@ -88,9 +89,15 @@ renderer.setAnimationLoop(tick);
 window.__ascent = {
   ready: true,
   get fps() { return fps; },
-  // TEMP test views until the camera rail exists: 0 = base camp, 1 = up at the ridge.
+  // TEMP test views until the camera rail exists (step 10 replaces this).
   jump(p) {
-    if (p < 0.5) { camera.position.set(0, 1.6, 8); camera.lookAt(0, 6, -40); }
-    else { camera.position.set(-6, 30, -150); camera.lookAt(0, 20, -400); }
+    const views = {
+      0: [2.5, 1.8, 9, -1, 2.5, -30],
+      0.5: [4, 14, -50, -4, 22, -130],
+      1: [-3, 29, -132, 2, 22, -300],
+    };
+    const v = views[p] || views[0];
+    camera.position.set(v[0], v[1], v[2]);
+    camera.lookAt(v[3], v[4], v[5]);
   },
 };

@@ -35,3 +35,13 @@ paints each layer: farther layers lean more towards the sky's horizon colour (th
 slopes melt into mist, and the farthest range gets snow with a moonlit side and a shadow side. The haze colour is
 *shared* with the sky, so when the sky changes at dawn the mountains change with it automatically. Scene **fog**
 (set in `sky.js`) uses the same horizon colour, so the ground and trees we add next also fade into the sky.
+
+## Step 5: The ground and the trail
+The ground is one big flat grid (about 170,000 points) that we bend into hills: for every point we ask `getHeight(x, z)`,
+which adds a gentle climb to the ridge, a drop into the valley beyond, slopes on both sides and soft noise bumps.
+The trail is a smooth curve drawn on the map; near it the ground is flattened sideways so the path sits on a natural shelf.
+The visible path is a separate thin strip with see-through edges, so it looks painted on. **Lighting lesson:** in three.js,
+light colour is *multiplied* by surface colour, so a blue light on a dark-blue surface goes black. We give surfaces
+mid-tone colours and let the cool moonlight make them blue, which also means the lantern can warm them later.
+`groundHeight()` reads the height of the triangles actually drawn, so the path (and later tents and feet) sit exactly on
+the visible surface instead of flickering in and out of it.
