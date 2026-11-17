@@ -124,7 +124,7 @@ export function createBaseCamp(scene) {
 // PROJECT CAMPS: a cabin tent whose front wall is a video screen
 // =====================================================================
 // options: { x, z, facing, video, label } where label is the HTML element to float near the tent.
-export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label }) {
+export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label, renderer }) {
   const group = new THREE.Group();
   group.name = 'project-camp';
   const y = groundHeight(x, z);
@@ -170,7 +170,11 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label 
   // ---------- The screen: the front wall plays the project video ----------
   // 4.2 x 2.02 m matches the video's shape (1888 x 908), so nothing is stretched.
   const screenW = 4.2, screenH = 4.2 * (908 / 1888);
-  const screenMat = new THREE.MeshBasicMaterial({ color: '#2a2630', toneMapped: false, fog: false });
+  // Start with a tiny 1x1 placeholder picture. When the video arrives we only swap the picture,
+  // so three.js never has to build a new shader mid-scroll (that would cause a small stutter).
+  const placeholder = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
+  placeholder.needsUpdate = true;
+  const screenMat = new THREE.MeshBasicMaterial({ map: placeholder, color: '#2a2630', toneMapped: false, fog: false });
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(screenW, screenH), screenMat);
   screen.position.set(0, 0.12 + screenH / 2, D / 2 + 0.012);
   group.add(screen);
@@ -193,24 +197,36 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label 
 
   scene.add(group);
 
-  // ---------- The video: created only when needed (it's a large file) ----------
-  let video = null;
+  // ---------- The video ----------
+  // At load we only fetch the first frame ("metadata"), and send it to the graphics card
+  // straight away, while the curtain is still down. The full file (it's large) is only
+  // downloaded later, once we're part-way up the trail (see loadVideo).
   let videoReady = false;
+  const video = document.createElement('video');
+  video.muted = true;          // muted videos are allowed to autoplay
+  video.loop = true;
+  video.playsInline = true;
+  video.preload = 'metadata';
+  video.addEventListener('loadeddata', () => {
+    const texture = new THREE.VideoTexture(video);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    renderer?.initTexture(texture); // upload now, not in the middle of the film
+    screenMat.map = texture;        // same kind of material, just a new picture: no shader rebuild
+    videoReady = true;
+    // Warm up the video decoder: play for a moment, then pause. Starting a decoder takes
+    // a little time, so we do it now instead of when the camp comes into view.
+    video.play().then(() => {
+      video.pause();
+      video.currentTime = 0;
+    }).catch(() => {});
+  }, { once: true });
+  video.src = videoSrc;
+
+  let fullLoadStarted = false;
   function loadVideo() {
-    if (video) return;
-    video = document.createElement('video');
-    video.src = videoSrc;
-    video.muted = true;          // muted videos are allowed to autoplay
-    video.loop = true;
-    video.playsInline = true;
-    video.preload = 'auto';
-    video.addEventListener('loadeddata', () => {
-      const texture = new THREE.VideoTexture(video);
-      texture.colorSpace = THREE.SRGBColorSpace;
-      screenMat.map = texture;
-      screenMat.needsUpdate = true;
-      videoReady = true;
-    }, { once: true });
+    if (fullLoadStarted) return;
+    fullLoadStarted = true;
+    video.preload = 'auto';         // now download the rest of the file in the background
   }
 
   // Where the label floats: just above the top-left corner of the screen.
@@ -220,13 +236,12 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label 
 
   // ---------- update: called every frame with the film's progress ----------
   // near: 0 when far away, 1 when we've arrived at this camp.
-  function update(dt, camera, near) {
-    if (near > 0.01) loadVideo();
-    if (video) {
-      // Only play when close: decoding video costs power.
-      if (near > 0.25 && video.paused) video.play().catch(() => {});
-      if (near < 0.15 && !video.paused) video.pause();
-    }
+  // preload: true once we're far enough up the trail to start fetching the video quietly.
+  function update(dt, camera, near, preload) {
+    if (preload || near > 0.01) loadVideo();
+    // Only play when close: decoding video costs power.
+    if (near > 0.25 && video.paused) video.play().catch(() => {});
+    if (near < 0.15 && !video.paused) video.pause();
     // Fade the screen up from a dim fabric colour to the full video picture.
     const target = videoReady && near > 0.25 ? 1 : 0;
     screenOn += (target - screenOn) * (1 - Math.exp(-dt * 2));

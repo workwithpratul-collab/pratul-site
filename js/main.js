@@ -55,7 +55,7 @@ createGround(scene);
 const forest = createForest(scene, { avoid: cameraPath.avoid });
 const baseCamp = createBaseCamp(scene);
 const mist = createMist(scene, sky);
-const trekker = createTrekker(scene);
+const trekker = createTrekker(scene, renderer, camera);
 
 // The first project camp: DERMAÉ, on the ridge. Its screen faces the arrival viewpoint.
 const dermaeCamp = createProjectCamp(scene, {
@@ -64,7 +64,12 @@ const dermaeCamp = createProjectCamp(scene, {
   facing: Math.atan2(RIDGE_VIEWPOINT.x - RIDGE_CAMP.x, RIDGE_VIEWPOINT.z - RIDGE_CAMP.z),
   video: 'recordings/dermae.mp4',
   label: document.getElementById('label-dermae'),
+  renderer,
 });
+
+// Build every shader now, while the curtain is still down. Otherwise three.js compiles each
+// one the first time its object comes into view, which causes a small stutter mid-scroll.
+renderer.compile(scene, camera);
 
 // ---------- 6. Scrolling → progress (0 at the top, 1 at the bottom) ----------
 // Lenis smooths the wheel/trackpad so scrolling glides instead of jumping in steps.
@@ -168,7 +173,7 @@ function tick(timestamp) {
   trekker.setLightLevel(THREE.MathUtils.lerp(0.42, 0.52, dawn), nightTint.copy(NIGHT_TINT).lerp(DAWN_TINT, dawn));
 
   // The project camp "wakes up" as we approach the ridge.
-  dermaeCamp.update(dt, camera, smoothstep(0.55, BEATS.walkEnd + 0.04, scroll.progress));
+  dermaeCamp.update(dt, camera, smoothstep(0.55, BEATS.walkEnd + 0.04, scroll.progress), scroll.progress > 0.35);
 
   sky.update(time, camera, renderer.getPixelRatio());
   forest.update(time);
@@ -193,11 +198,83 @@ window.__ascent = {
     lenis.scrollTo(p * max, { immediate: true, force: true });
     scroll.target = p;
     snapNextFrame = true;
+    heading = null;
+    trekker.teleport();
   },
   lenis,
 };
 
+// ---------- 7. The opening text and the page "chrome" ----------
+const curtain = document.getElementById('curtain');
+const intro = document.getElementById('intro');
+const hint = document.getElementById('scroll-hint');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Split the headline into words, so each word can appear on its own.
+const headline = intro.querySelector('.intro__headline');
+headline.innerHTML = headline.textContent
+  .trim()
+  .split(/\s+/)   // split on spaces
+  .map((word) => `<span class="word">${word}</span>`)
+  .join(' ');
+
+// Soft reveal: "Hi, I'm Pratul." first, then the headline word by word, then the scroll hint.
+function revealIntro() {
+  if (reduceMotion) {
+    gsap.set(['.intro__hello', '.intro__headline .word', hint], { opacity: 1 });
+    return;
+  }
+  const tl = gsap.timeline({ delay: 0.6 });
+  tl.fromTo('.intro__hello', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 1.4, ease: 'power2.out' })
+    .fromTo('.intro__headline .word',
+      { opacity: 0, y: 18, filter: 'blur(8px)' },
+      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.4, ease: 'power3.out', stagger: 0.07 },
+      '-=0.6')
+    .to(hint, { opacity: 1, duration: 1.2, ease: 'power1.out' }, '+=0.2');
+}
+
+// As the climb begins (the first half-screen of scrolling), the text drifts up and fades away.
+gsap.to(intro, {
+  opacity: 0,
+  y: -40,
+  ease: 'none',
+  scrollTrigger: { trigger: '#scroll-track', start: 'top top', end: () => `+=${window.innerHeight * 0.5}`, scrub: true },
+});
+ScrollTrigger.create({
+  trigger: '#scroll-track',
+  start: 'top top',
+  end: () => `+=${window.innerHeight * 0.25}`,
+  onUpdate: (self) => { if (self.progress > 0.05) gsap.to(hint, { opacity: 0, duration: 0.6, overwrite: true }); },
+});
+
+// Lift the curtain when the character is ready, or after 6 seconds at the most.
+let lifted = false;
+function liftCurtain() {
+  if (lifted) return;
+  lifted = true;
+  curtain.classList.add('is-lifted');
+  revealIntro();
+}
+setTimeout(liftCurtain, 6000);
+
+// "Skip film": dip to black, jump to the end, fade back in (no fast-forward rush up the trail).
+document.getElementById('skip').addEventListener('click', (e) => {
+  e.preventDefault();
+  curtain.classList.add('is-dipping');
+  curtain.classList.remove('is-lifted');
+  setTimeout(() => {
+    window.__ascent.jump(1);
+    setTimeout(() => {
+      curtain.classList.add('is-lifted');
+      setTimeout(() => curtain.classList.remove('is-dipping'), 700);
+    }, 120);
+  }, 650);
+});
+
 // Tell tests the world is ready once the character has loaded (or failed to).
 trekker.ready
   .catch((e) => console.error('[trekker] failed to load', e))
-  .finally(() => { window.__ascent.ready = true; });
+  .finally(() => {
+    window.__ascent.ready = true;
+    liftCurtain();
+  });

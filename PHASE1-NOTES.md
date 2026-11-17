@@ -106,3 +106,39 @@ camp is near, to save bandwidth and power; a `VideoTexture` copies each video fr
 real HTML: each frame we take a 3D point above the tent, `project()` it into screen coordinates and move the label there.
 At the very end the trekker turns towards the screen, and the arrival shot frames them on the left with the screen on
 the right and the peaks behind.
+
+## Step 12: Opening text and polish
+The headline sits top-left over the dark tree canopy (best contrast) so the glowing camp below stays clear. JavaScript
+wraps each word in a `<span>`, and a **GSAP timeline** reveals "Hi, I'm Pratul." and then the words one by one, each
+rising slightly out of a soft blur. A **scrubbed** ScrollTrigger tween ties the text's fade-out to the first half-screen
+of scrolling, so it drifts away just as the trekker sets off. "Skip film" dips to black, jumps to the end and fades back
+in (no fast-forward sprint up the trail). Polish for smoothness: all shaders are compiled while the black curtain is
+down, the video's first frame is uploaded and its decoder warmed up during loading, and the label no longer uses
+`backdrop-filter` (blurring a live 3D canvas every frame caused a visible stutter). A faint paper grain and a soft
+vignette (pure CSS, zero cost per frame) give the finished, painted feel.
+
+---
+
+# How to view it
+1. Open the `Pratul-site` folder in VS Code.
+2. Right-click `index.html` → **Open with Live Server**.
+3. Add `?fps` to the address (e.g. `http://127.0.0.1:5500/index.html?fps`) to see the FPS counter, or press **F**.
+
+# Making the video lighter (recommended before going live)
+`recordings/dermae.mp4` is 24.8 MB (1888×908, 60 fps). A 1280-wide, 30 fps, no-audio version is about **2 MB** and looks
+the same on the tent screen. With ffmpeg:
+
+    ffmpeg -i recordings/dermae.mp4 -vf "scale=1280:-2,fps=30" -c:v libx264 -preset slow -crf 26 -pix_fmt yuv420p -an -movflags +faststart recordings/dermae-web.mp4
+
+Then change `video: 'recordings/dermae.mp4'` to `'recordings/dermae-web.mp4'` in `js/main.js`.
+
+# Mixamo animations (needs your Adobe account)
+1. Go to mixamo.com and sign in.
+2. Click **Upload Character** and upload any humanoid (Mixamo's default "Y Bot" also works: animations are retargeted
+   onto your VRM in code, so the character you preview on doesn't matter).
+3. Search **Walking**. Pick a calm, natural walk. Tick **In Place**.
+4. Click **Download** → Format **FBX Binary (.fbx)**, Skin **Without Skin**, Frames per Second **30**, Keyframe Reduction **none**.
+5. Save it as `assets/animations/Walking.fbx` (exact name, capital W).
+6. Search **Breathing Idle**. Download with the same settings → `assets/animations/Idle.fbx`.
+7. Search **Waving**. Download with the same settings → `assets/animations/Waving.fbx`.
+8. Reload the page. The console should say `[trekker] Mixamo animations loaded: walk, idle, wave`.

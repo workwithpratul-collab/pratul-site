@@ -26,7 +26,7 @@ const MIXAMO_WALK_SPEED = 1.3; // metres per second the Mixamo "Walking" clip na
 const NIGHT_LEVEL = 0.42;            // how bright the character's colours are at night
 const NIGHT_TINT = new THREE.Color('#c4cdf2'); // cool moonlight tint
 
-export function createTrekker(scene) {
+export function createTrekker(scene, renderer, camera) {
   // `root` is what we move around the world; the VRM sits inside it.
   const root = new THREE.Group();
   root.name = 'trekker';
@@ -69,6 +69,8 @@ export function createTrekker(scene) {
     applyStandInPose(vrm, 0, 0, 0);
     vrm.update(0);
     root.visible = true;
+    // Build the character's shaders right away (while the curtain is down), not mid-scroll.
+    if (renderer && camera) renderer.compile(scene, camera);
 
     // Try to load Mixamo animations in the background. Missing files are fine.
     loadMixamoClips(vrm).then((clips) => {
@@ -152,10 +154,18 @@ export function createTrekker(scene) {
     action.reset().play();
   }
 
+  // After a jump (e.g. "Skip film"), forget the old position so we don't think we sprinted there.
+  function teleport() {
+    hasLast = false;
+    state.speed = 0;
+    state.walkAmount = 0;
+  }
+
   return {
     root,
     ready,
     place,
+    teleport,
     update,
     wave,
     setLightLevel,
@@ -344,13 +354,9 @@ async function loadMixamoAnimation(url, vrm) {
         values.map((val, i) => (isVrm0 && i % 2 === 0 ? -val : val))
       ));
     } else if (track instanceof THREE.VectorKeyframeTrack && vrmBoneName === 'hips') {
-      // Keep the hips' up/down bob, but drop forward/sideways drift: the trail moves us, not the clip.
-      const isVrm0 = vrm.meta?.metaVersion === '0';
-      const values = track.values.map((val, i) => {
-        const axis = i % 3;
-        if (axis !== 1) return 0;
-        return (isVrm0 && axis !== 1 ? -val : val) * hipsPositionScale;
-      });
+      // Keep the hips' up/down bob (y), but drop forward/sideways drift (x, z):
+      // the trail moves the trekker, not the clip. Tick "In Place" on Mixamo too.
+      const values = track.values.map((val, i) => (i % 3 === 1 ? val * hipsPositionScale : 0));
       tracks.push(new THREE.VectorKeyframeTrack(`${vrmNodeName}.${propertyName}`, track.times, values));
     }
   }

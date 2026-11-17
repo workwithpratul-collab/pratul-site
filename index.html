@@ -38,7 +38,11 @@
   <!-- The 3D world is drawn here. It stays fixed behind everything. -->
   <canvas id="scene" aria-hidden="true"></canvas>
 
-  <!-- A soft black cover that fades away once the first frame is ready. -->
+  <!-- Painterly finishing layers: a faint paper grain and a soft dark edge (vignette). -->
+  <div id="vignette" aria-hidden="true"></div>
+  <div id="grain" aria-hidden="true"></div>
+
+  <!-- A soft black cover that fades away once the world is ready. -->
   <div id="curtain" aria-hidden="true"></div>
 
   <!-- All real text lives in this HTML layer, on top of the canvas. -->

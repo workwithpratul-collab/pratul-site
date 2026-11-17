@@ -38,7 +38,6 @@ html.lenis, html.lenis body { height: auto; }
 
 /* Black cover that fades out once the world has drawn its first frame. */
 #curtain {
-  opacity: 0; /* TEMP until step 12 */
   position: fixed;
   inset: 0;
   background: var(--night);
@@ -47,6 +46,28 @@ html.lenis, html.lenis body { height: auto; }
   transition: opacity 1.8s ease;
 }
 #curtain.is-lifted { opacity: 0; }
+/* Used by "Skip film": a quick dip to black. */
+#curtain.is-dipping { transition: opacity 0.6s ease; }
+
+/* Darker edges pull the eye to the middle, like a film frame. */
+#vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 55%, transparent 55%, rgba(4, 6, 20, 0.42) 100%);
+}
+
+/* A very faint, still grain, like paper under paint. Drawn once by the browser (SVG noise). */
+#grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 
 /* ---------- The scroll track: only gives the page its height ---------- */
 #scroll-track {
@@ -64,12 +85,14 @@ html.lenis, html.lenis body { height: auto; }
   pointer-events: none;   /* clicks pass through to the page, except on links */
 }
 
+/* The headline sits top-left, over the dark tree canopy, so the glowing camp below stays clear. */
 .intro {
   position: absolute;
   left: clamp(24px, 7vw, 120px);
-  bottom: clamp(96px, 20vh, 220px);
-  max-width: min(760px, 86vw);
-  text-shadow: 0 2px 30px rgba(3, 6, 18, 0.55);
+  top: clamp(88px, 15vh, 170px);
+  max-width: min(720px, 86vw);
+  text-shadow: 0 2px 30px rgba(3, 6, 18, 0.6);
+  will-change: opacity, transform;
 }
 .intro__hello {
   font-family: var(--mono);
@@ -135,8 +158,9 @@ html.lenis, html.lenis body { height: auto; }
   padding: 7px 11px;
   border: 1px solid rgba(238, 240, 247, 0.28);
   border-radius: 2px;
-  background: rgba(8, 12, 30, 0.42);
-  backdrop-filter: blur(6px);
+  /* A plain see-through background. (A backdrop blur here would re-blur the live 3D canvas
+     every frame and caused a visible stutter when the label appeared.) */
+  background: rgba(8, 12, 30, 0.55);
   opacity: 0;
   will-change: transform, opacity;
 }

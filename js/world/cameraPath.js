@@ -18,7 +18,7 @@ export const BEATS = {
 };
 
 // Hand-placed shots. pos = where the camera is, look = what it looks at.
-const OPENING = { pos: new THREE.Vector3(3.2, 1.7, 9.2), look: new THREE.Vector3(-1.4, 1.25, -2.2) };
+const OPENING = { pos: new THREE.Vector3(3.4, 1.7, 9.6), look: new THREE.Vector3(-2.0, 1.55, -2.4) };
 // Arrival: standing behind the trekker, looking at the project tent's screen, with the
 // snowy range rising beyond it. Heights are measured from the ground, so they always fit.
 const ARRIVAL = {
