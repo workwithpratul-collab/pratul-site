@@ -24,7 +24,7 @@ const OPENING = { pos: new THREE.Vector3(3.4, 1.7, 9.6), look: new THREE.Vector3
 const FOLLOW_KEYS = [
   { s: 0, back: 6.5, height: 2.2, side: 1.5, lookAhead: 5, lookHeight: 1.2 },     // base camp (Phase 1)
   { s: 90, back: 7.5, height: 2.6, side: 1.6, lookAhead: 6, lookHeight: 1.2 },    // the forest climb
-  { s: 175, back: 9.5, height: 3.4, side: 2.2, lookAhead: 8, lookHeight: 1.3 },   // the open ridge
+  { s: 175, back: 9.5, height: 4.8, side: 2.6, lookAhead: 9, lookHeight: 0.8 },   // the open ridge: look down over the trekker
   { s: 330, back: 10, height: 3.8, side: 2.2, lookAhead: 9, lookHeight: 1.2 },    // the meadow
   { s: 400, back: 8, height: 3.2, side: 1.6, lookAhead: 7, lookHeight: 1.6 },     // the summit climb
 ];

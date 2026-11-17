@@ -301,12 +301,12 @@ function baseHeight(x, z) {
 //  - flat: how many metres stay level either side of the spine before it starts to fall
 // "Left" and "right" are as seen walking up the trail. On the ridge, left is the valley side.
 const LAND = [
-  [4, -162, 24, 14, 12, 2, 3],
-  [13, -169, 25, 14, 12, 2, 3],
-  [26, -173, 26, 16, 14, 3, 7],
-  [40, -175, 27.5, 18, 16, 6, 8],      // King's Garden camp
-  [55, -176, 30, 18, 22, 3, 5],
-  [70, -174, 34, 18, 30, 3, 5],
+  [4, -162, 21, 14, 12, 2, 3],
+  [13, -169, 21, 14, 12, 2, 3],
+  [26, -173, 21.5, 16, 14, 3, 7],
+  [40, -175, 23, 18, 16, 6, 8],        // King's Garden camp
+  [55, -176, 26.5, 18, 22, 3, 5],
+  [70, -174, 32, 18, 30, 3, 5],
   [86, -169, 39, 20, 30, 3, 6],
   [100, -165, 43, 20, 30, 4, 8],       // Trinetra camp
   [114, -167, 46, 20, 30, 3, 5],

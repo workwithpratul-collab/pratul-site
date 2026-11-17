@@ -35,6 +35,8 @@ export const CAMPS = [
     view: [29, -168.2],
     look: [42.1, -184.2],
     tent: -1,
+    tentTurn: 0.5,
+    lanternSide: 1,
     video: 'recordings/web/kings-garden.mp4',
     label: 'label-kings-garden',
   },
@@ -46,6 +48,7 @@ export const CAMPS = [
     view: [91, -172],
     look: [105, -157.4],
     tent: 1,
+    tentTurn: -0.35,
     video: 'recordings/web/trinetra.mp4',
     label: 'label-trinetra',
   },
@@ -56,7 +59,7 @@ export const MEADOW = {
   centre: [158, -238],      // the middle of the rolling grassland
   stop: [161, -246],        // where the trekker stops
   mat: [164.6, -249.2],     // the placeholder mat on the grass
-  view: [155.6, -238.5],    // camera: above and behind, so it can tilt down onto the mat
+  view: [153.4, -237.6],    // camera: above and behind, so it can tilt down onto the mat
 };
 
 // The summit: the end of the trail, with the flag ("Book a call") beside it.

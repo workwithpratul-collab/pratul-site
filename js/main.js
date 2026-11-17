@@ -10,7 +10,8 @@ import Lenis from 'lenis';
 import { createSky } from './world/sky.js';
 import { createMountains, createGround, trailPointAt, trailDirectionAt, smoothstep, SUMMIT_HEIGHT, TRAIL_LENGTH } from './world/terrain.js';
 import { createForest } from './world/forest.js';
-import { createBaseCamp, createProjectCamp } from './world/camp.js';
+import { createBaseCamp, createProjectCamp, createCampLights } from './world/camp.js';
+import { createRidge } from './world/ridge.js';
 import { createMist } from './world/mist.js';
 import { createTrekker } from './world/trekker.js';
 import { createCameraPath } from './world/cameraPath.js';
@@ -74,15 +75,23 @@ const baseCamp = createBaseCamp(scene);
 const mist = createMist(scene);
 const trekker = createTrekker(scene, renderer, camera);
 
-// The project camps: outdoor camp cinemas along the ridge, one per project (journey.js).
-const camps = CAMPS.map((c) => createProjectCamp(scene, {
+// Scene 2: the ridge (grass, stones, trees, valley mist) and the project camps: outdoor camp
+// cinemas along the trail, one per project (journey.js). Each screen faces its camera spot.
+createRidge(scene);
+const camps = CAMPS.map((c, i) => createProjectCamp(scene, {
   x: c.sheet[0],
   z: c.sheet[1],
   facing: Math.atan2(c.view[0] - c.sheet[0], c.view[1] - c.sheet[1]),
   video: c.video,
   label: document.getElementById(c.label),
   renderer,
+  tent: c.tent,
+  tentTurn: c.tentTurn ?? 0,
+  lanternSide: c.lanternSide ?? c.tent,
+  variety: i > 0,          // DERMAÉ keeps its Phase 1 pebbles; the new camps get mixed stones
 }));
+const campLights = createCampLights(scene);
+campLights.update(camps, camera);
 
 // Build every shader now, while the curtain is still down. Otherwise three.js compiles each
 // one the first time its object comes into view, which causes a small stutter mid-scroll.
@@ -229,12 +238,15 @@ function tick(timestamp) {
   altitude.update(p, metresAt(s / TRAIL_LENGTH), zoneName(p));
 
   // Each project camp "wakes up" (projector on, video playing) as we arrive, and goes quiet
-  // once we've walked on.
+  // once we've walked on. Its video is only loaded while we're within reach of it in the
+  // scroll ("wanted"), and let go again once we're well past it or back down the trail.
   camps.forEach((camp, i) => {
-    const st = stops.find((s) => s.stop.camp === CAMPS[i]);
-    const near = smoothstep(st.stop.arrive - 0.08, st.stop.arrive, p) * (1 - smoothstep(st.stop.leave, st.stop.leave + 0.06, p));
-    camp.update(dt, camera, near, p > st.stop.arrive - 0.14, time);
+    const { arrive, leave } = stops.find((s) => s.stop.camp === CAMPS[i]).stop;
+    const near = smoothstep(arrive - 0.08, arrive, p) * (1 - smoothstep(leave, leave + 0.06, p));
+    const wanted = p > arrive - 0.12 && p < leave + 0.1;
+    camp.update(dt, camera, near, wanted, time);
   });
+  campLights.update(camps, camera);
 
   sky.update(time, camera, renderer.getPixelRatio());
   forest.update(time);
@@ -266,6 +278,8 @@ window.__ascent = {
   scene,   // handy in the console: e.g. __ascent.scene.getObjectByName("stones")
   camera,
   cameraPath,
+  // Which project videos are loaded right now (for testing the lazy loading).
+  videos: () => camps.map((c, i) => `${CAMPS[i].id}:${c.videoElement ? (c.videoElement.paused ? 'loaded' : 'playing') : '-'}`).join(' '),
 };
 
 // ---------- 7. The opening text and the page "chrome" ----------

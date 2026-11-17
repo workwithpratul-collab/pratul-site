@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 import { groundHeight, seededRandom } from './terrain.js';
-import { makePaintedMaterial, createStones, setSecondWarmLight } from './forest.js';
+import { makePaintedMaterial, createStones, createStoneVariety, setSecondWarmLight } from './forest.js';
 import { NOISE_GLSL } from './glsl.js';
 import { mood, MATERIALS } from './palette.js';
 
@@ -127,8 +127,20 @@ export function createBaseCamp(scene) {
 // slightly soft, with its light spilling onto the grass. A small orange tent and a lantern
 // sit beside it, so it feels like part of a trek camp.
 //
-// options: { x, z, facing, video, label, renderer } where label is the HTML caption element.
-export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label, renderer }) {
+// options: { x, z, facing, video, label, renderer, tent, tentTurn, lanternSide, variety }
+//   label:       the HTML caption element
+//   tent:        which side of the sheet the tent sits on (1 = right, -1 = left, seen from the front)
+//   tentTurn:    extra turn of the tent (radians), so no two camps are pitched alike
+//   lanternSide: which side the lantern stands on (defaults to the tent's side)
+//   variety:     true = use the four mixed stone shapes (the new camps); false = Phase 1's pebbles
+//
+// Lights: the three camps share ONE set of point lights (see createCampLights below), moved
+// to whichever camp is nearest. Every light costs time on every pixel of the screen, so
+// sharing keeps the film fast however many camps there are.
+export function createProjectCamp(scene, {
+  x, z, facing, video: videoSrc, label, renderer,
+  tent: tentSide = 1, tentTurn = 0, lanternSide = tentSide, variety = false,
+}) {
   const group = new THREE.Group();
   group.name = 'project-camp';
   group.position.set(x, groundHeight(x, z), z);
@@ -253,6 +265,10 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
         // Soft edges, like a projector that's slightly out of focus at the borders.
         float edge = smoothstep(0.0, 0.025, vuv.x) * smoothstep(1.0, 0.975, vuv.x)
                    * smoothstep(0.0, 0.04, vuv.y) * smoothstep(1.0, 0.96, vuv.y);
+        // The projector shines on the front; from behind you only see a faint glow through
+        // the cloth (and never a mirror-image picture).
+        float on = gl_FrontFacing ? uOn : 0.0;
+        float through = gl_FrontFacing ? 0.0 : uOn;
 
         // A gentle 5-tap blur: a projected image is never razor sharp.
         vec2 px = vec2(1.3 / 1888.0, 1.3 / 908.0);
@@ -275,8 +291,9 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
         col *= mix(0.78, 1.0, smoothstep(0.03, 0.06, hem));
         // A little projector light also spills past the picture onto the canvas margin.
         float spill = (1.0 - edge) * exp(-6.0 * length(max(abs(vuv - 0.5) - 0.5, 0.0))) * 0.35;
-        col += vec3(1.0, 0.86, 0.7) * spill * uOn * 0.35;
-        col = mix(col, pic * weave, edge * uOn);
+        col += vec3(1.0, 0.86, 0.7) * spill * on * 0.35;
+        col = mix(col, pic * weave, edge * on);
+        col += vec3(1.0, 0.86, 0.7) * edge * through * 0.12;
         col *= vShade;
 
         gl_FragColor = vec4(col, 1.0);
@@ -291,9 +308,8 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
   group.add(sheet);
 
   // ---------- Light from the projection, spilling onto the grass in front ----------
-  const spillLight = new THREE.PointLight(L.projector, 0, 10, 2);
-  spillLight.position.set(0, 1.0, 1.6);
-  group.add(spillLight);
+  // (The real point lights are shared between camps; these are where they sit for this one.)
+  const spillAnchor = new THREE.Vector3(0, 1.0, 1.6);
   // A soft painted glow on the grass (cheaper and softer than a real light alone).
   const glowMat = new THREE.MeshBasicMaterial({
     map: getGlowTexture(), color: L.projectorGlow, transparent: true, opacity: 0,
@@ -306,102 +322,112 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
   group.add(groundGlow);
 
   // ---------- A small orange tent and the lantern beside the sheet ----------
-  const tentX = sheetW / 2 + 2.3, tentZ = -0.5;
+  const tentX = tentSide * (sheetW / 2 + 2.3), tentZ = -0.5;
   const tent = buildDomeTent();
   tent.scale.setScalar(0.9);
   tent.position.set(tentX, localGround(tentX, tentZ) - 0.05, tentZ);
-  tent.rotation.y = -0.45;               // door turned towards the viewer
+  tent.rotation.y = -0.45 * tentSide + tentTurn;    // door turned towards the viewer
   group.add(tent);
-  const tentLight = new THREE.PointLight(WARM, 14, 10, 2);
-  tentLight.position.set(tentX, tent.position.y + 0.6, tentZ);
-  group.add(tentLight);
+  const tentAnchor = new THREE.Vector3(tentX, tent.position.y + 0.6, tentZ);
   const tentHalo = makeHalo(L.tentHalo, 5, 0.22);
-  tentHalo.position.copy(tentLight.position);
+  tentHalo.position.copy(tentAnchor);
   group.add(tentHalo);
 
-  const lanternX = sheetW / 2 + 0.95, lanternZ = 0.9;
+  const lanternX = lanternSide * (sheetW / 2 + 0.95), lanternZ = 0.9;
   const lantern = buildLantern();
   lantern.position.set(lanternX, localGround(lanternX, lanternZ), lanternZ);
   group.add(lantern);
-  const lanternLight = new THREE.PointLight(L.lanternLight, 6, 7, 2);
-  lanternLight.position.set(lanternX, lantern.position.y + 0.33, lanternZ);
-  group.add(lanternLight);
+  const lanternAnchor = new THREE.Vector3(lanternX, lantern.position.y + 0.33, lanternZ);
   const lanternHalo = makeHalo(L.lanternHalo, 1.3, 0.45);
-  lanternHalo.position.copy(lanternLight.position);
+  lanternHalo.position.copy(lanternAnchor);
   group.add(lanternHalo);
 
   scene.add(group);
   group.updateMatrixWorld(true);
-
-  // Let the painted trees and stones nearby catch this tent's warm glow too.
-  setSecondWarmLight(group.localToWorld(tentLight.position.clone()));
+  // The light positions in the world, for the shared lights.
+  const anchors = {
+    spill: group.localToWorld(spillAnchor.clone()),
+    tent: group.localToWorld(tentAnchor.clone()),
+    lantern: group.localToWorld(lanternAnchor.clone()),
+  };
 
   // A few soft stones around the camp (given in camp coordinates, placed in the world).
-  const rand = seededRandom(303);
-  const stones = [[-3.1, 0.9, 0.5], [-3.6, 0.3, 0.3], [tentX + 1.4, 0.6, 0.55], [tentX - 0.9, 1.5, 0.3], [1.2, 2.6, 0.35], [-1.6, 2.2, 0.25]]
+  // Two stones on the far side from the tent, two by the tent, two out in front.
+  // (DERMAÉ keeps exactly its Phase 1 stones: same places, same random seed.)
+  const rand = seededRandom(variety ? 303 + Math.round(x * 7) : 303);
+  const away = -tentSide;
+  const stones = [[3.1 * away, 0.9, 0.5], [3.6 * away, 0.3, 0.3], [tentX + 1.4 * tentSide, 0.6, 0.55], [tentX - 0.9 * tentSide, 1.5, 0.3], [1.2, 2.6, 0.35], [-1.6, 2.2, 0.25]]
     .map(([lx, lz, s]) => {
       const w = group.localToWorld(new THREE.Vector3(lx, 0, lz));
       return { x: w.x, z: w.z, s };
     });
-  createStones(scene, stones, rand);
+  if (variety) createStoneVariety(scene, stones, rand);
+  else createStones(scene, stones, rand);
 
   // ---------- The video ----------
-  // At load we only fetch the first frame ("metadata"), and send it to the graphics card
-  // straight away, while the curtain is still down. The full file (it's large) is only
-  // downloaded later, once we're part-way up the trail (see loadVideo).
+  // Nothing is downloaded until we approach this camp (see update: `wanted`). Then the file
+  // streams in, its first frame goes to the graphics card, and it plays while we're here.
+  // Once we've walked well past, the video is let go, so the memory is freed again.
+  let video = null;
+  let texture = null;
   let videoReady = false;
-  const video = document.createElement('video');
-  video.muted = true;          // muted videos are allowed to autoplay
-  video.loop = true;
-  video.playsInline = true;
-  video.preload = 'metadata';
-  video.addEventListener('loadeddata', () => {
-    const texture = new THREE.VideoTexture(video);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    renderer?.initTexture(texture); // upload now, not in the middle of the film
-    sheetUniforms.uVideo.value = texture;
-    videoReady = true;
-    // Warm up the video decoder: play for a moment, then pause. Starting a decoder takes
-    // a little time, so we do it now instead of when the camp comes into view.
-    video.play().then(() => {
-      video.pause();
-      video.currentTime = 0;
-    }).catch(() => {});
-  }, { once: true });
-  video.src = videoSrc;
-
-  let fullLoadStarted = false;
   function loadVideo() {
-    if (fullLoadStarted) return;
-    fullLoadStarted = true;
-    video.preload = 'auto';         // now download the rest of the file in the background
+    if (video) return;
+    video = document.createElement('video');
+    video.muted = true;          // muted videos are allowed to autoplay
+    video.loop = true;
+    video.playsInline = true;
+    video.preload = 'auto';
+    video.addEventListener('loadeddata', () => {
+      texture = new THREE.VideoTexture(video);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      renderer?.initTexture(texture); // upload the first frame now, not in the middle of a shot
+      sheetUniforms.uVideo.value = texture;
+      videoReady = true;
+    }, { once: true });
+    video.src = videoSrc;
+  }
+  function unloadVideo() {
+    if (!video) return;
+    video.pause();
+    video.removeAttribute('src');
+    video.load();                // tells the browser to drop the file and its decoder
+    video = null;
+    texture?.dispose();
+    texture = null;
+    videoReady = false;
+    sheetUniforms.uVideo.value = placeholder;
   }
 
   // The caption sits centred just under the sheet.
   const labelAnchor = new THREE.Vector3(0, sheetBottom - 0.12, 0.2);
   const projected = new THREE.Vector3();
   let on = 0;   // 0..1, fades the projection in once the video is ready
+  const levels = { spill: 0, tent: 14, lantern: 6 };   // what the shared lights should be here
 
   // ---------- update: called every frame ----------
   // near: 0 when far away, 1 when we've arrived at this camp.
-  // preload: true once we're far enough up the trail to start fetching the video quietly.
-  function update(dt, camera, near, preload, time) {
-    if (preload || near > 0.01) loadVideo();
+  // wanted: true while we're close enough (in the scroll) that the video should be loaded.
+  function update(dt, camera, near, wanted, time) {
+    if (wanted) loadVideo();
+    else if (on < 0.01) unloadVideo();
     // Only play when close: decoding video costs power.
-    if (near > 0.25 && video.paused) video.play().catch(() => {});
-    if (near < 0.15 && !video.paused) video.pause();
+    if (video) {
+      if (near > 0.25 && video.paused) video.play().catch(() => {});
+      if (near < 0.15 && !video.paused) video.pause();
+    }
 
     // Fade the projection up gently, and the light it spills with it.
     const target = videoReady && near > 0.25 ? 1 : 0;
     on += (target - on) * (1 - Math.exp(-dt * 1.6));
     sheetUniforms.uOn.value = on * 0.92;
     sheetUniforms.uTime.value = time;
-    spillLight.intensity = on * 5;
     glowMat.opacity = on * 0.16;
 
-    const flicker = 1 + Math.sin(time * 7.7) * 0.03 + Math.sin(time * 12.3 + 0.4) * 0.02;
-    lanternLight.intensity = 6 * flicker;
+    const flicker = 1 + Math.sin(time * 7.7 + x) * 0.03 + Math.sin(time * 12.3 + 0.4) * 0.02;
     lanternHalo.material.opacity = 0.45 * flicker;
+    levels.spill = on * 5;
+    levels.lantern = 6 * flicker;
 
     // Place the HTML caption: turn the 3D anchor into a screen position.
     if (label) {
@@ -411,15 +437,47 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
       const inFront = projected.z < 1;
       const px = (projected.x * 0.5 + 0.5) * window.innerWidth;
       const py = (-projected.y * 0.5 + 0.5) * window.innerHeight;
-      label.style.transform = `translate3d(${px.toFixed(1)}px, ${py.toFixed(1)}px, 0) translate(-50%, 0)`;
       const show = inFront ? THREE.MathUtils.clamp((near - 0.6) / 0.3, 0, 1) : 0;
+      if (show > 0) label.style.transform = `translate3d(${px.toFixed(1)}px, ${py.toFixed(1)}px, 0) translate(-50%, 0)`;
       // Never fully 0: keeping the caption "barely there" means the browser has already drawn it,
       // so it fades in without a stutter.
       label.style.opacity = Math.max(show, 0.001).toFixed(3);
     }
   }
 
-  return { group, update, sheet, get videoElement() { return video; } };
+  return { group, update, sheet, anchors, levels, get videoElement() { return video; } };
+}
+
+// ---------- The shared camp lights ----------
+// One projector spill, one tent glow and one lantern light, moved to whichever project camp
+// is nearest the camera. The camps are 60 m or more apart and these lights reach under 10 m,
+// so the move always happens out of sight. The painted trees and stones get the same tent
+// glow position (setSecondWarmLight), so they light up at whichever camp we're at.
+export function createCampLights(scene) {
+  const spill = new THREE.PointLight(L.projector, 0, 10, 2);
+  const tent = new THREE.PointLight(WARM, 14, 10, 2);
+  const lantern = new THREE.PointLight(L.lanternLight, 6, 7, 2);
+  scene.add(spill, tent, lantern);
+  let current = null;
+  // camps: the camp objects; camera: to find the nearest one.
+  function update(camps, camera) {
+    let best = null, bestD = Infinity;
+    for (const c of camps) {
+      const d = c.anchors.tent.distanceToSquared(camera.position);
+      if (d < bestD) { bestD = d; best = c; }
+    }
+    if (best !== current) {
+      current = best;
+      spill.position.copy(best.anchors.spill);
+      tent.position.copy(best.anchors.tent);
+      lantern.position.copy(best.anchors.lantern);
+      setSecondWarmLight(best.anchors.tent);
+    }
+    spill.intensity = current.levels.spill;
+    tent.intensity = current.levels.tent;
+    lantern.intensity = current.levels.lantern;
+  }
+  return { update };
 }
 
 // ---------- The dome tent ----------
