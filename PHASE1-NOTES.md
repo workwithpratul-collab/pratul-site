@@ -72,3 +72,15 @@ see a hard line or "bump into" a flat plane. There are three layers: low strips 
 (their bottom edge follows `groundHeight`), a flat sheet filling the valley beyond the ridge, and a curved band resting
 between the far mountain ranges. The mist colour is the sky's horizon colour lifted slightly, so it shifts at dawn too,
 and the feet of the mountain layers now fade into that same pale mist instead of into darkness.
+
+## Step 9: My trekker
+`GLTFLoader` reads the `.vrm` file (VRM is glTF with extra avatar info) and the `VRMLoaderPlugin` turns it into a VRM
+object with **normalized bones**: every VRM gets the same named bones (`hips`, `leftUpperArm`, …) that start in a
+T-pose. A pose is just "rotate these bones by these angles", so the stand-in pose lowers the arms, bends the elbows a
+little and adds slow breathing; a simple procedural walk (legs and arms swinging on a sine wave, knees bending, a
+small hip bob) is ready for step 10. VRoid's toon material (MToon) reacts to light more strongly than our painted world,
+so `setLightLevel()` dims and cools the character's own colours at night (and can brighten them towards dawn), and a
+faint blue rim light keeps the silhouette readable. The Mixamo code follows the official three-vrm method: it maps
+each Mixamo bone to its VRM bone and corrects the rotation using both skeletons' rest poses. If the FBX files aren't
+there, it prints one calm message and the stand-in is used. (The browser still lists those missing files as grey
+"404" network lines; that is harmless.)

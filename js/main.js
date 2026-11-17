@@ -4,10 +4,11 @@
 
 import * as THREE from 'three';
 import { createSky } from './world/sky.js';
-import { createMountains, createGround } from './world/terrain.js';
+import { createMountains, createGround, trailCurve } from './world/terrain.js';
 import { createForest } from './world/forest.js';
 import { createBaseCamp } from './world/camp.js';
 import { createMist } from './world/mist.js';
+import { createTrekker } from './world/trekker.js';
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? You can also add ?fps to the address, or press F to toggle it.
@@ -48,6 +49,12 @@ createGround(scene);
 const forest = createForest(scene);
 const baseCamp = createBaseCamp(scene);
 const mist = createMist(scene, sky);
+const trekker = createTrekker(scene);
+
+// Stand the trekker at the start of the trail, facing up it (seen from behind).
+const start = trailCurve.getPointAt(0.004);
+const startDir = trailCurve.getTangentAt(0.004);
+trekker.place(start.x, start.z, Math.atan2(startDir.x, startDir.z));
 
 // ---------- Resize: keep the picture sharp and undistorted when the window changes ----------
 function onResize() {
@@ -90,6 +97,7 @@ function tick(timestamp) {
   forest.update(time);
   baseCamp.update(time);
   mist.update(time);
+  trekker.update(dt, time);
   renderer.render(scene, camera);
   countFps(performance.now());
 }
@@ -97,7 +105,7 @@ renderer.setAnimationLoop(tick);
 
 // A small hook so tests (and you, in the console) can peek at the state.
 window.__ascent = {
-  ready: true,
+  ready: false,
   get fps() { return fps; },
   info: () => ({ trees: forest.count, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
   // TEMP test views until the camera rail exists (step 10 replaces this).
@@ -105,6 +113,8 @@ window.__ascent = {
     const views = {
       0: [3.5, 1.7, 9.5, -1.5, 1.6, -4],
       0.2: [1, 1.5, 4, -4, 0.6, -2],
+      0.1: [1.8, 1.5, 6.2, 0.4, 1.0, 1.4],
+      0.15: [-1.2, 1.3, -2.2, 0.6, 1.0, 2.4],
       0.5: [4, 14, -50, -4, 22, -130],
       0.8: [-3, 29, -132, 2, 22, -300],
       1: [1, 29.5, -150, 4, 12, -330],
@@ -114,3 +124,6 @@ window.__ascent = {
     camera.lookAt(v[3], v[4], v[5]);
   },
 };
+
+// Tell tests the world is ready once the character has loaded (or failed to).
+trekker.ready.catch((e) => console.error('[trekker] failed to load', e)).finally(() => { window.__ascent.ready = true; });
