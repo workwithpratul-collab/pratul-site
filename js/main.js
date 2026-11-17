@@ -3,6 +3,7 @@
 // that redraws the world about 60 times per second.
 
 import * as THREE from 'three';
+import { createSky } from './world/sky.js';
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? You can also add ?fps to the address, or press F to toggle it.
@@ -26,25 +27,16 @@ renderer.toneMapping = THREE.NoToneMapping;
 
 // ---------- 2. The scene: the container that holds every 3D object ----------
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#0b1230');
 
 // ---------- 3. The camera: our eye in the world ----------
 // 40° is a calm, slightly "telephoto" view; wide angles feel dizzying when moving.
 const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 6000);
 camera.position.set(0, 1.6, 8);
-camera.lookAt(0, 1.2, 0);
+camera.lookAt(0, 6, -40);
 
-// ---------- 4. A basic light, so solid objects are visible ----------
-const hemi = new THREE.HemisphereLight('#6d7fc4', '#141a2e', 1.2);
-scene.add(hemi);
-
-// A test cube, just to prove all four basics work. (Removed in the next step.)
-const cube = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshLambertMaterial({ color: '#ff9a4d' })
-);
-cube.position.y = 1.2;
-scene.add(cube);
+// ---------- 4. Light and sky ----------
+// sky.js owns the sky dome, stars, moonlight, fill light and fog, so they can change together.
+const sky = createSky(scene);
 
 // ---------- Resize: keep the picture sharp and undistorted when the window changes ----------
 function onResize() {
@@ -82,7 +74,7 @@ const timer = new THREE.Timer();
 function tick(timestamp) {
   timer.update(timestamp);
   const dt = Math.min(timer.getDelta(), 0.1); // cap, so a hiccup never causes a big jump
-  cube.rotation.y += dt * 0.5;
+  sky.update(timer.getElapsed(), camera, renderer.getPixelRatio());
   renderer.render(scene, camera);
   countFps(performance.now());
 }
