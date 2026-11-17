@@ -237,6 +237,23 @@ export function makePaintedMaterial({ colors, wind = true, roundness = 0.55, rim
   return material;
 }
 
+// Soft painted trees for other scenes (the style frames, and later the meadow).
+// trees: { pine: [{ x, y, z, scale, rot, tint }], oak: [...] }, with y = the ground height there.
+export function createNearTrees(scene, trees) {
+  const material = makePaintedMaterial({ colors: mood.trees });
+  const pines = makeNearInstanced(buildSoftPine(), trees.pine || [], material, 'soft-pines');
+  const oaks = makeNearInstanced(buildSoftOak(), trees.oak || [], material, 'soft-oaks');
+  scene.add(pines, oaks);
+  return { pines, oaks };
+}
+
+// Move the tents' warm glow (scenes without tents send it far away, so nothing is tinted).
+const FAR_AWAY = new THREE.Vector3(0, -10000, 0);
+export function setWarmLights(first = FAR_AWAY, second = FAR_AWAY) {
+  shared.uWarmPos.value.copy(first);
+  shared.uWarmPos2.value.copy(second);
+}
+
 // Tell the painted materials where the second (ridge camp) tent glows from.
 export function setSecondWarmLight(position) {
   shared.uWarmPos2.value.copy(position);
@@ -371,7 +388,8 @@ export function createStones(scene, stones, rand = Math.random) {
   const up = new THREE.Vector3(0, 1, 0);
   const color = new THREE.Color();
   stones.forEach((st, i) => {
-    p.set(st.x, groundHeight(st.x, st.z) - st.s * 0.12, st.z);
+    // st.y is optional: other scenes (the style frames) pass their own ground height.
+    p.set(st.x, (st.y ?? groundHeight(st.x, st.z)) - st.s * 0.12, st.z);
     q.setFromAxisAngle(up, rand() * Math.PI * 2);
     sc.set(st.s * (1.2 + rand() * 0.4), st.s * (0.55 + rand() * 0.25), st.s * (0.95 + rand() * 0.3));
     m.compose(p, q, sc);

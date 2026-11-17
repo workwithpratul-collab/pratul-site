@@ -15,7 +15,7 @@ const shared = {
   uColor: { value: mood.mist.air },   // the palette's live mist colour: follows the time of day
 };
 
-function makeMistMaterial({ opacity, scale, speed, softness = [0.42, 0.68], nearFade = [6, 22], seed = 0 }) {
+export function makeMistMaterial({ opacity, scale, speed, softness = [0.42, 0.68], nearFade = [6, 22], seed = 0 }) {
   return new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,          // mist never hides things behind it from the depth test

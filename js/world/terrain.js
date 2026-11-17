@@ -61,6 +61,10 @@ export function createMountains(scene) {
   group.userData.applyMood = () => {
     for (const mesh of layers) mesh.userData.material.uniforms.uGlowStrength.value = mood.mountains.snowWarmth;
   };
+  // Which side of each peak catches the light: 1 = left (the moon in the film), -1 = right.
+  group.userData.setLitSide = (side) => {
+    for (const mesh of layers) mesh.userData.material.uniforms.uLitSide.value = side;
+  };
   return group;
 }
 
@@ -140,6 +144,7 @@ function buildMountainLayer(layer, index) {
       uSnowShade: { value: mood.mountains.snowShade },
       uSnowLine: { value: layer.base + layer.amp * 0.2 },
       uLayer: { value: index },
+      uLitSide: { value: 1 },     // 1 = light from the left (the moon); -1 = from the right
     },
     vertexShader: /* glsl */ `
       attribute float aCrest;
@@ -156,7 +161,7 @@ function buildMountainLayer(layer, index) {
     `,
     fragmentShader: /* glsl */ `
       uniform vec3 uColor, uHaze, uGlow, uSnowLit, uSnowShade, uValleyMist;
-      uniform float uHazeAmount, uSnow, uSnowLine, uLayer, uGlowStrength;
+      uniform float uHazeAmount, uSnow, uSnowLine, uLayer, uGlowStrength, uLitSide;
       varying float vY, vCrest, vSlope;
       varying vec2 vXZ;
       ${NOISE_GLSL}
@@ -168,7 +173,7 @@ function buildMountainLayer(layer, index) {
         // Lit or shadow side of each peak: the moon is on the left, so slopes rising
         // to the right catch light. Noise wobbles the line so it looks hand-painted.
         float wobble = (fbm(vec2(p.x * 6.0 + vY * 0.004, vY * 0.006)) - 0.5) * 1.4;
-        float lit = smoothstep(-0.55, 0.55, vSlope + wobble);
+        float lit = smoothstep(-0.55, 0.55, vSlope * uLitSide + wobble);
 
         // Base rock colour, slightly lighter on the lit side.
         vec3 col = uColor * mix(0.85, 1.18, lit);

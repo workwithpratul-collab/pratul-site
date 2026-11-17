@@ -97,8 +97,8 @@ export function createTrekker(scene, renderer, camera) {
   // ---------- Place the trekker: position on the ground and the direction to face ----------
   const lastPos = new THREE.Vector3();
   let hasLast = false;
-  function place(x, z, heading) {
-    const y = groundHeight(x, z);
+  // y is optional: other scenes (the style frames) pass their own ground height.
+  function place(x, z, heading, y = groundHeight(x, z)) {
     root.position.set(x, y, z);
     root.rotation.y = heading;            // VRM models face +Z; heading turns them
     shadow.position.set(x, y + 0.02, z);

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Style frame</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    /* One full-window 3D frame with the film's grain and vignette on top. Open it in a
+       1920 x 1080 window for a screenshot-ready still. */
+    html, body { margin: 0; height: 100%; overflow: hidden; background: var(--page); }
+    #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+    #curtain {
+      position: fixed; inset: 0; z-index: 5; pointer-events: none;
+      background: var(--page);
+      transition: opacity 1.2s var(--ease-out);
+    }
+    #curtain.is-lifted { opacity: 0; }
+  </style>
+  <!-- Same pinned libraries as the film (see index.html). -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/",
+      "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div id="vignette" aria-hidden="true"></div>
+  <div id="grain" aria-hidden="true"></div>
+  <div id="curtain" aria-hidden="true"></div>
+  <script type="module" src="js/style-frame.js"></script>
+</body>
+</html>

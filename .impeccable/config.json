@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "css/components.css"
+        ],
+        "createdAt": "2026-11-17T13:34:28.000Z",
+        "reason": "Claude design decision: the warm halo on the primary 'Book a call' hover is the lantern/flag light-source metaphor of the film; it is the only glow in the UI"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "style-frames.html"
+        ],
+        "createdAt": "2026-11-17T13:42:57.445Z",
+        "reason": "Claude design decision: inherited from css/components.css, the intentional lantern-glow hover on the primary 'Book a call' button"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "style-frame.html"
+        ],
+        "createdAt": "2026-11-17T13:42:57.579Z",
+        "reason": "Claude design decision: inherited from css/components.css, the intentional lantern-glow hover on the primary 'Book a call' button"
+      }
+    ]
+  }
+}

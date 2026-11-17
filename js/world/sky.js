@@ -19,7 +19,10 @@ const STAR_RADIUS = 3600;
 
 // options (all optional): directions for the moon, the dawn glow and the sun. The main film
 // uses the defaults; the style frames point the sun wherever their camera looks.
-export function createSky(scene, { moonDir = MOON_DIR, glowDir = DAWN_DIR, sunDir = SUN_DIR } = {}) {
+// sunLightDir: where the sun's LIGHT comes from, if different from the visible disc. A painter's
+// cheat: a sun sitting on the horizon would only graze the ground, so a scene can light it from
+// a little higher to get warm light on the grass.
+export function createSky(scene, { moonDir = MOON_DIR, glowDir = DAWN_DIR, sunDir = SUN_DIR, sunLightDir = sunDir } = {}) {
   // ---------- The sky dome: a huge sphere seen from inside, coloured by a shader ----------
   // The colour uniforms *are* the palette's live colours (same objects), so they follow
   // the mood automatically; applyMood() only copies the plain numbers.
@@ -203,6 +206,7 @@ export function createSky(scene, { moonDir = MOON_DIR, glowDir = DAWN_DIR, sunDi
   // Call it after palette.setClimb(), once per frame (it's cheap: a few copies).
   const moonDirN = moonDir.clone().normalize();
   const sunDirN = sunDir.clone().normalize();
+  const sunLightN = sunLightDir.clone().normalize();
   function applyMood() {
     skyUniforms.uGlowStrength.value = mood.sky.glowStrength;
     skyUniforms.uStars.value = mood.sky.stars;
@@ -214,7 +218,7 @@ export function createSky(scene, { moonDir = MOON_DIR, glowDir = DAWN_DIR, sunDi
     scene.fog.density = mood.fog.density;
     keyLight.color.copy(mood.key.color);
     keyLight.intensity = mood.key.intensity;
-    keyDir.copy(moonDirN).lerp(sunDirN, mood.key.fromSun).normalize();
+    keyDir.copy(moonDirN).lerp(sunLightN, mood.key.fromSun).normalize();
     keyLight.position.copy(keyDir).multiplyScalar(100);
     hemi.color.copy(mood.ambient.sky);
     hemi.groundColor.copy(mood.ambient.ground);

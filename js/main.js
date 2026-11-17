@@ -24,6 +24,12 @@ import { createCursor } from './ui/cursor.js';
 const SHOW_FPS = new URLSearchParams(location.search).has('fps');
 // Never render at more than 2x pixels: above that the eye can't tell, but the GPU pays.
 const MAX_PIXEL_RATIO = 2;
+// Still mode, for the style frames: ?still=0 shows base camp, ?still=1 the ridge camp, as a clean
+// picture with no text. Add &pause to stop drawing once it has settled (saves the GPU when
+// several frames sit on one page).
+const params = new URLSearchParams(location.search);
+const STILL = params.has('still') ? Math.min(Math.max(Number(params.get('still')) || 0, 0), 1) : null;
+if (STILL !== null) document.documentElement.classList.add('is-still');
 
 // ---------- 1. The renderer: turns the 3D scene into pixels on the canvas ----------
 const canvas = document.getElementById('scene');
@@ -94,8 +100,8 @@ ScrollTrigger.create({
 // ---------- The interface on top of the film ----------
 // The altitude meter: Phase 1's film ends at the ridge camp, so a full rail = the ridge.
 const altitude = createAltitudeMeter(document.getElementById('altitude'), { filmEnd: CLIMB.predawn });
-// A subtle custom cursor (only with a mouse or trackpad).
-createCursor();
+// A subtle custom cursor (only with a mouse or trackpad; not in the style-frame stills).
+if (STILL === null) createCursor();
 
 // ---------- Resize: keep the picture sharp and undistorted when the window changes ----------
 function onResize() {
@@ -285,5 +291,17 @@ trekker.ready
   .catch((e) => console.error('[trekker] failed to load', e))
   .finally(() => {
     window.__ascent.ready = true;
+    if (STILL !== null) showStill();
     liftCurtain();
   });
+
+// Still mode: jump to the chosen moment, and (with &pause) stop drawing a few seconds later.
+function showStill() {
+  window.__ascent.jump(STILL);
+  if (!params.has('pause')) return;
+  setTimeout(() => {
+    renderer.setAnimationLoop(null);
+    // If the frame is resized while paused, draw it once more at the new size.
+    window.addEventListener('resize', () => renderer.render(scene, camera));
+  }, 4000);
+}

@@ -93,7 +93,7 @@ export const PRESETS = {
     label: 'First light',
     place: 'The meadow',
     sky: { top: '#5a6aa8', mid: '#a59ccc', horizon: '#efc6b4', glow: '#ffd2a0', glowStrength: 0.85, stars: 0, moon: 0.12, sun: 0.75 },
-    fog: { color: '#e4c3bc', density: 0.0052 },
+    fog: { color: '#cfc0d4', density: 0.0042 },   // lilac haze: distant hills turn soft violet, not beige
     ambient: { sky: '#c4bce6', ground: '#5c5a4a', intensity: 2.5 },
     key: { color: '#ffe0ae', intensity: 2.6, fromSun: 1 },
     mist: { air: '#f2dcd6', treeFeet: '#e9d2d0', valley: '#f0d8d2' },
@@ -106,10 +106,10 @@ export const PRESETS = {
       rim: '#ffdcae',
       trunk: '#3f3536',
     },
-    stones: { bottom: '#4a4856', top: '#a59a9e' },
+    stones: { bottom: '#4a4856', top: '#8e868e' },
     wood: { bottom: '#4a3a30', top: '#8a6f58' },
     mountains: {
-      layers: ['#46597a', '#66729c', '#8a8cb6', '#a8a6cc'],
+      layers: ['#647c84', '#7c87a6', '#8f8fb8', '#a8a6cc'],
       snowLit: '#fff0dd', snowShade: '#a7aad2', snowWarmth: 0.55,
     },
     character: { level: 0.82, tint: '#fbe9e2' },
@@ -121,10 +121,10 @@ export const PRESETS = {
     place: 'The summit',
     sky: { top: '#36508f', mid: '#c995ad', horizon: '#ffcf96', glow: '#ffb46e', glowStrength: 1, stars: 0, moon: 0, sun: 1 },
     fog: { color: '#f6c6a8', density: 0.0032 },
-    ambient: { sky: '#e6c8d0', ground: '#6e5258', intensity: 2.6 },
+    ambient: { sky: '#c2bce2', ground: '#6e5258', intensity: 2.6 },   // lilac: shaded snow goes cool, the sun side gold
     key: { color: '#ffd09a', intensity: 3.1, fromSun: 1 },
     mist: { air: '#ffe4cc', treeFeet: '#f6d8c6', valley: '#ffdcc2' },
-    clouds: { lit: '#ffe6c8', shade: '#c99cb2' },
+    clouds: { lit: '#ffe6c8', shade: '#b7a6c8' },
     ground: '#ffe8d2',
     warm: '#ffb46a',
     trees: {
@@ -191,7 +191,7 @@ export const MATERIALS = {
     grass: '#6f8a5c',
     grassLit: '#a3ad6c',
     grassDeep: '#4e6a52',
-    flowers: ['#f2d27a', '#e9a6be', '#b7a6e4', '#f6efe6'],  // gold, rose, lilac, white: pastel, never neon
+    flowers: ['#f0d488', '#ecb4c6', '#c4b6e6', '#f6efe6'],  // gold, rose, lilac, white: pastel, never neon
   },
   // The summit (scene 4): snow and rock.
   summit: {
