@@ -16,6 +16,8 @@ import { createTrekker } from './world/trekker.js';
 import { createCameraPath, BEATS } from './world/cameraPath.js';
 import { smoothstep } from './world/terrain.js';
 import { mood, setClimb, CLIMB } from './world/palette.js';
+import { createAltitudeMeter } from './ui/altitude.js';
+import { createCursor } from './ui/cursor.js';
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? You can also add ?fps to the address, or press F to toggle it.
@@ -88,6 +90,12 @@ ScrollTrigger.create({
   end: 'bottom bottom',
   onUpdate: (self) => { scroll.target = self.progress; },
 });
+
+// ---------- The interface on top of the film ----------
+// The altitude meter: Phase 1's film ends at the ridge camp, so a full rail = the ridge.
+const altitude = createAltitudeMeter(document.getElementById('altitude'), { filmEnd: CLIMB.predawn });
+// A subtle custom cursor (only with a mouse or trackpad).
+createCursor();
 
 // ---------- Resize: keep the picture sharp and undistorted when the window changes ----------
 function onResize() {
@@ -169,6 +177,7 @@ function tick(timestamp) {
   sky.applyMood();
   mountains.userData.applyMood();
   trekker.setLightLevel(mood.character.level, mood.character.tint);
+  altitude.update(scroll.progress);
 
   // The project camp "wakes up" as we approach the ridge.
   dermaeCamp.update(dt, camera, smoothstep(0.55, BEATS.walkEnd + 0.04, scroll.progress), scroll.progress > 0.35, time);
@@ -220,7 +229,7 @@ headline.innerHTML = headline.textContent
 // Soft reveal: "Hi, I'm Pratul." first, then the headline word by word, then the scroll hint.
 function revealIntro() {
   if (reduceMotion) {
-    gsap.set(['.intro__hello', '.intro__headline .word', hint], { opacity: 1 });
+    gsap.set(['.intro__hello', '.intro__headline .word', hint, '#altitude'], { opacity: 1 });
     return;
   }
   const tl = gsap.timeline({ delay: 0.6 });
@@ -229,7 +238,8 @@ function revealIntro() {
       { opacity: 0, y: 18, filter: 'blur(8px)' },
       { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.4, ease: 'power3.out', stagger: 0.07 },
       '-=0.6')
-    .to(hint, { opacity: 1, duration: 1.2, ease: 'power1.out' }, '+=0.2');
+    .to(hint, { opacity: 1, duration: 1.2, ease: 'power1.out' }, '+=0.2')
+    .to('#altitude', { opacity: 1, duration: 1.6, ease: 'power1.out' }, '<');
 }
 
 // As the climb begins (the first half-screen of scrolling), the text drifts up and fades away.

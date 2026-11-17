@@ -6,14 +6,17 @@
   <title>Pratul · The Ascent</title>
   <meta name="description" content="Pratul builds websites that stand out, for businesses that refuse to blend in.">
 
-  <!-- Fonts: a soft serif for headlines, a mono for small labels. -->
+  <!-- Fonts (see css/tokens.css): a soft serif for headlines, a warm sans for body text,
+       a mono for small labels. To be self-hosted later. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <!-- An empty icon, so the browser stops asking for favicon.ico. -->
   <link rel="icon" href="data:,">
 
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/style.css">
 
   <!--
@@ -55,9 +58,19 @@
     <p class="scroll-hint" id="scroll-hint">Scroll to begin the climb</p>
 
     <!-- Small label that floats next to the project tent (positioned by JavaScript). -->
-    <p class="camp-label" id="label-dermae">DERMAÉ · Derma clinic · concept</p>
+    <p class="camp-label project-label" id="label-dermae">
+      <span class="project-label__name">DERMAÉ</span>
+      <span class="project-label__type">Derma clinic</span>
+      <span class="project-label__tag">Concept</span>
+    </p>
 
-    <a class="skip" id="skip" href="#end">Skip film</a>
+    <a class="skip skip-link" id="skip" href="#end">
+      Skip film
+      <svg class="skip-link__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 1.5v8M2.5 6.5 6 10l3.5-3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+
+    <!-- How high we are: rises with the scroll and doubles as the progress bar (js/ui/altitude.js). -->
+    <div class="altitude" id="altitude" aria-hidden="true"></div>
 
     <div class="fps" id="fps" hidden>-- fps</div>
   </div>

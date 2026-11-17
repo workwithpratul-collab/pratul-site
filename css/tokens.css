@@ -1,0 +1,98 @@
+/* tokens.css: the design "settings" of the whole site, as CSS variables.
+   Every page (the film, the pages below it, the style guide) reads these, so a font,
+   colour or size is changed in ONE place. See style-guide.html to see them all in use.
+
+   The film's colours (sky, mist, light) live in js/world/palette.js. These are the
+   interface colours that sit ON TOP of the film, chosen to read on all four times of day. */
+
+:root {
+  /* ---------- Fonts ----------
+     Display: Instrument Serif, a soft, high-contrast serif for headlines (the "film title" voice).
+     Body:    Manrope, a clean, open sans with friendly rounded shapes (warm, never cold or techy).
+     Mono:    IBM Plex Mono, for small labels, numbers and captions (the "field notes" voice). */
+  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+
+  /* ---------- Type scale (px steps, the same ladder everywhere) ---------- */
+  --text-xs: 12px;     /* labels, captions, the altitude meter */
+  --text-sm: 14px;     /* small body text, buttons in tight spots */
+  --text-base: 16px;   /* body text, buttons */
+  --text-lg: 18px;     /* lead paragraphs */
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;    /* small section titles */
+  --text-4xl: 36px;
+  --text-5xl: 48px;    /* section headings below the film */
+  --text-6xl: 60px;
+  /* The film's big headline scales with the window, between 38px and 76px. */
+  --text-display: clamp(38px, 5.2vw, 76px);
+  --text-heading: clamp(36px, 4.2vw, 60px);
+
+  /* ---------- Weights ---------- */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;   /* the heaviest we use: nothing bold or black */
+
+  /* ---------- Line heights ---------- */
+  --leading-display: 1.04;  /* big serif lines sit close together, like a film title */
+  --leading-heading: 1.1;
+  --leading-body: 1.6;      /* relaxed reading */
+  --leading-label: 1.35;
+
+  /* ---------- Letter spacing ---------- */
+  --tracking-display: -0.01em;   /* large serif: pulled in very slightly */
+  --tracking-body: 0;
+  --tracking-label: 0.18em;      /* small uppercase mono: spaced out so it breathes */
+  --tracking-caption: 0.08em;    /* mono captions in normal case */
+
+  /* ---------- Interface colours ----------
+     Text is a soft, moonlit ivory (never pure white, which glares on the night scenes and
+     disappears on the sunrise ones). A gentle indigo shadow behind it keeps it readable
+     over the bright peach and gold skies of the last two scenes. */
+  --ink: #f5f0e8;                          /* main text */
+  --ink-muted: rgba(245, 240, 232, 0.68);  /* secondary text */
+  --ink-faint: rgba(245, 240, 232, 0.38);  /* hairlines, disabled, tick marks */
+  --accent: #ffb877;                       /* lantern amber: the only warm UI colour */
+  --accent-hover: #ffd3a3;                 /* the lantern turned up */
+  --accent-ink: #24150a;                   /* text on an amber button */
+  --accent-glow: rgba(255, 170, 96, 0.45); /* the warm halo around a hovered primary button */
+
+  /* Surfaces: deep night-indigo "glass" that lets the film show through, blurred. */
+  --surface: rgba(12, 15, 36, 0.42);
+  --surface-strong: rgba(12, 15, 36, 0.72);
+  --surface-line: rgba(245, 240, 232, 0.28);
+  --surface-line-hover: rgba(245, 240, 232, 0.7);
+  --surface-blur: 14px;
+
+  /* The solid page colour below the film (and behind the canvas before it loads). */
+  --page: #070b1a;
+  --page-raised: #0e1330;
+
+  /* The soft shadow that keeps text readable over any sky. */
+  --text-scrim: 0 1px 2px rgba(10, 10, 30, 0.35), 0 2px 28px rgba(12, 12, 40, 0.45);
+
+  /* ---------- Spacing (only these steps) ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --gutter: clamp(24px, 7vw, 120px);   /* distance from the screen edge to the text */
+
+  /* ---------- Shapes ---------- */
+  --radius-sm: 4px;
+  --radius-pill: 999px;
+  --hairline: 1px;
+
+  /* ---------- Motion: everything eases out slowly and settles, like the camera ---------- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 300ms;   /* colour and opacity on hover */
+  --duration: 500ms;        /* small movements */
+  --duration-slow: 900ms;   /* reveals */
+}
