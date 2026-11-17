@@ -127,7 +127,8 @@ export function createTrekker(scene, renderer, camera) {
       const { walk, idle, wave } = state.actions;
       if (walk) {
         walk.setEffectiveWeight(state.walkAmount);
-        walk.setEffectiveTimeScale(THREE.MathUtils.clamp(state.speed / MIXAMO_WALK_SPEED, 0.6, 1.8));
+        // Match the stride to the real speed (a brisk walk at most, so it never looks like running).
+        walk.setEffectiveTimeScale(THREE.MathUtils.clamp(state.speed / MIXAMO_WALK_SPEED, 0.6, 2.2));
       }
       // While waving, the wave takes over from the idle pose (both at once would halve the wave).
       // It fades in and out over its first and last 20%, so it starts and ends softly.
