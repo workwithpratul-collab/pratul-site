@@ -291,6 +291,7 @@ const GROUND = {
   grass: new THREE.Color('#71927c'),    // open grassy slopes higher up
   grassLit: new THREE.Color('#87a88a'), // lighter grass patches
   valley: new THREE.Color('#3e5464'),   // the deep valley beyond the ridge
+  earth: new THREE.Color('#857865'),    // trodden earth at the camps (turns orange in lamplight)
 };
 
 // The ground grid: 520 m wide, 560 m deep, one vertex roughly every 1.3 m.
@@ -343,6 +344,9 @@ export function createGround(scene) {
     grass.copy(GROUND.grass).lerp(GROUND.grassLit, smoothstep(0.5, 0.85, patch * 0.7 + fine * 0.3));
     c.lerp(grass, altitude);
     c.lerp(GROUND.valley, smoothstep(5, -40, y) * smoothstep(-150, -190, z));
+    // Trodden earth around base camp, broken up by noise so the edge looks natural.
+    const camp = 1 - smoothstep(3.5, 8, Math.hypot(x + 2.5, z + 0.5) + (patch - 0.5) * 4);
+    c.lerp(GROUND.earth, camp * 0.85);
     // A whisper of variation so large areas never look flat.
     c.multiplyScalar(0.94 + fine * 0.12);
     colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;

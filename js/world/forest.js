@@ -13,7 +13,7 @@ const BARK = new THREE.Color('#5c4c46');
 
 // Places that must stay clear of trees: base camp and the ridge camp.
 const CLEARINGS = [
-  { x: -1.5, z: -1, r: 10 },
+  { x: -1, z: 1.5, r: 12.5 },
   { x: 0, z: -146, r: 15 },
 ];
 

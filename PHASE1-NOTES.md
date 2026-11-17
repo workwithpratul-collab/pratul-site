@@ -54,3 +54,12 @@ Where trees grow is decided by rules: noise makes natural groves and clearings, 
 and they thin out as the land climbs to the open ridge. Each tree has a colour gradient painted on (dark under each layer
 of branches, lighter on top), a tiny shader tweak makes the tree tops sway gently, and the new **exponential fog** makes
 every row of trees a little paler than the one in front, the layered look of a painting.
+
+## Step 7: Base camp
+The tent is the top half of a sphere, stretched into a dome. Its material glows (`emissive`), and a small shader
+addition (`onBeforeCompile`) decides *how much* each spot glows: brighter low down, a rounded door that glows pale
+gold, darker lines where the poles cross. Two warm **point lights** (one inside the tent, one in the lantern) light up
+the ground and nearby trees; because the ground near camp is coloured like trodden earth, that light reads as a warm
+orange pool against the cool blue night. The soft glow around each light is a **sprite** (a flat picture that always
+faces the camera) with a radial gradient, added on top of the scene; it's a cheap stand-in for a "bloom" effect.
+The lantern flickers very slightly using a few overlapping sine waves, so it feels alive but calm.

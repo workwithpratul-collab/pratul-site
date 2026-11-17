@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { createSky } from './world/sky.js';
 import { createMountains, createGround } from './world/terrain.js';
 import { createForest } from './world/forest.js';
+import { createBaseCamp } from './world/camp.js';
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? You can also add ?fps to the address, or press F to toggle it.
@@ -44,6 +45,7 @@ const sky = createSky(scene);
 createMountains(scene, sky);
 createGround(scene);
 const forest = createForest(scene);
+const baseCamp = createBaseCamp(scene);
 
 // ---------- Resize: keep the picture sharp and undistorted when the window changes ----------
 function onResize() {
@@ -84,6 +86,7 @@ function tick(timestamp) {
   const time = timer.getElapsed();
   sky.update(time, camera, renderer.getPixelRatio());
   forest.update(time);
+  baseCamp.update(time);
   renderer.render(scene, camera);
   countFps(performance.now());
 }
@@ -97,7 +100,8 @@ window.__ascent = {
   // TEMP test views until the camera rail exists (step 10 replaces this).
   jump(p) {
     const views = {
-      0: [2.5, 1.8, 9, -1, 2.5, -30],
+      0: [3.5, 1.7, 9.5, -1.5, 1.6, -4],
+      0.2: [1, 1.5, 4, -4, 0.6, -2],
       0.5: [4, 14, -50, -4, 22, -130],
       1: [-3, 29, -132, 2, 22, -300],
     };
