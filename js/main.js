@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { createSky } from './world/sky.js';
 import { createMountains, createGround } from './world/terrain.js';
+import { createForest } from './world/forest.js';
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? You can also add ?fps to the address, or press F to toggle it.
@@ -42,6 +43,7 @@ const sky = createSky(scene);
 // ---------- 5. The world ----------
 createMountains(scene, sky);
 createGround(scene);
+const forest = createForest(scene);
 
 // ---------- Resize: keep the picture sharp and undistorted when the window changes ----------
 function onResize() {
@@ -79,7 +81,9 @@ const timer = new THREE.Timer();
 function tick(timestamp) {
   timer.update(timestamp);
   const dt = Math.min(timer.getDelta(), 0.1); // cap, so a hiccup never causes a big jump
-  sky.update(timer.getElapsed(), camera, renderer.getPixelRatio());
+  const time = timer.getElapsed();
+  sky.update(time, camera, renderer.getPixelRatio());
+  forest.update(time);
   renderer.render(scene, camera);
   countFps(performance.now());
 }
@@ -89,6 +93,7 @@ renderer.setAnimationLoop(tick);
 window.__ascent = {
   ready: true,
   get fps() { return fps; },
+  info: () => ({ trees: forest.count, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
   // TEMP test views until the camera rail exists (step 10 replaces this).
   jump(p) {
     const views = {

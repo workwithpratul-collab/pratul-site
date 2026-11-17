@@ -202,7 +202,9 @@ export function createSky(scene) {
   scene.add(hemi);
 
   // ---------- Fog: same colour as the horizon, so far objects melt into the sky ----------
-  scene.fog = new THREE.Fog(NIGHT.horizon, 30, 420);
+  // "Exp2" fog thickens smoothly with distance, so each row of trees is a little paler
+  // than the one in front, the layered look of a painting.
+  scene.fog = new THREE.FogExp2(NIGHT.horizon, 0.0095);
 
   // Colour objects we reuse every frame (making new ones each frame wastes memory).
   const night = toColors(NIGHT);

@@ -45,3 +45,12 @@ light colour is *multiplied* by surface colour, so a blue light on a dark-blue s
 mid-tone colours and let the cool moonlight make them blue, which also means the lantern can warm them later.
 `groundHeight()` reads the height of the triangles actually drawn, so the path (and later tents and feet) sit exactly on
 the visible surface instead of flickering in and out of it.
+
+## Step 6: The forest
+Each tree type is built **once** from simple shapes: a pine is five stacked cones on a short trunk, an oak is a cluster
+of soft round blobs. Then an `InstancedMesh` draws thousands of copies in a single call to the graphics card, each copy
+with its own position, size, rotation and colour tint. That is why ~6,000 trees cost only 2 draw calls.
+Where trees grow is decided by rules: noise makes natural groves and clearings, trees avoid the trail and the two camps,
+and they thin out as the land climbs to the open ridge. Each tree has a colour gradient painted on (dark under each layer
+of branches, lighter on top), a tiny shader tweak makes the tree tops sway gently, and the new **exponential fog** makes
+every row of trees a little paler than the one in front, the layered look of a painting.

@@ -385,7 +385,9 @@ function createTrailStrip() {
       const z = p.z + side.z * a * w;
       positions.push(x, groundHeight(x, z) + 0.03, z);
       col.copy(pathCol).lerp(pathLit, noise2(x * 0.6, z * 0.6, 4));
-      colors.push(col.r, col.g, col.b, alpha[k] * 0.9);
+      // Fade the path in at the start and out at the end, so it has no hard edges.
+      const ends = smoothstep(0, 0.02, u) * (1 - smoothstep(0.97, 1, u));
+      colors.push(col.r, col.g, col.b, alpha[k] * 0.9 * ends);
     });
     if (i < steps) {
       const a = i * across.length, b = (i + 1) * across.length;
