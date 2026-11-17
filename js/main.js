@@ -4,6 +4,7 @@
 
 import * as THREE from 'three';
 import { createSky } from './world/sky.js';
+import { createMountains } from './world/terrain.js';
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? You can also add ?fps to the address, or press F to toggle it.
@@ -37,6 +38,9 @@ camera.lookAt(0, 6, -40);
 // ---------- 4. Light and sky ----------
 // sky.js owns the sky dome, stars, moonlight, fill light and fog, so they can change together.
 const sky = createSky(scene);
+
+// ---------- 5. The world ----------
+createMountains(scene, sky);
 
 // ---------- Resize: keep the picture sharp and undistorted when the window changes ----------
 function onResize() {
@@ -81,4 +85,12 @@ function tick(timestamp) {
 renderer.setAnimationLoop(tick);
 
 // A small hook so tests (and you, in the console) can peek at the state.
-window.__ascent = { ready: true, get fps() { return fps; } };
+window.__ascent = {
+  ready: true,
+  get fps() { return fps; },
+  // TEMP test views until the camera rail exists: 0 = base camp, 1 = up at the ridge.
+  jump(p) {
+    if (p < 0.5) { camera.position.set(0, 1.6, 8); camera.lookAt(0, 6, -40); }
+    else { camera.position.set(-6, 30, -150); camera.lookAt(0, 20, -400); }
+  },
+};

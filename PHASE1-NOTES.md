@@ -26,3 +26,12 @@ Stars are 2,200 **points**; each one is drawn as a soft round glow instead of a 
 slowly rises and falls on its own rhythm (the twinkle). `sky.js` also owns the moonlight, the soft fill light and the fog,
 because all of these must change colour together when night turns towards dawn (`setDawn(0 → 1)`). `glsl.js` holds the
 "noise" helpers: smooth random patterns that make shapes feel hand-painted rather than perfect.
+
+## Step 4: Distant mountains
+The mountains are four giant curved "paper cut-outs" (ribbons) standing in rings around the world, like stage scenery.
+For each one, JavaScript walks around the circle and decides the outline height using three sizes of **noise**: big
+massifs, sharp ridged crests and small jagged bits (plus tiny tree tips on the near, forested ranges). The shader then
+paints each layer: farther layers lean more towards the sky's horizon colour (that is the "distance haze"), the lower
+slopes melt into mist, and the farthest range gets snow with a moonlit side and a shadow side. The haze colour is
+*shared* with the sky, so when the sky changes at dawn the mountains change with it automatically. Scene **fog**
+(set in `sky.js`) uses the same horizon colour, so the ground and trees we add next also fade into the sky.
