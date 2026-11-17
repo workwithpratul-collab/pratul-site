@@ -65,6 +65,22 @@ export function createMountains(scene) {
   group.userData.setLitSide = (side) => {
     for (const mesh of layers) mesh.userData.material.uniforms.uLitSide.value = side;
   };
+  // As we climb above them (0 = from the valley, 1 = from the summit), the nearer ranges
+  // sink below the sea of clouds and the farthest one becomes a low line on the horizon,
+  // like in the summit style frame. Nothing pops: they slide down slowly with the climb.
+  const SINK = [130, 210, 330, 0];
+  group.userData.setRise = (t) => {
+    layers.forEach((mesh, i) => {
+      mesh.position.y = -SINK[i] * t;
+      mesh.visible = !(i < 3 && t > 0.999);   // fully sunk: don't draw them at all
+    });
+    const far = layers[3];
+    const s = 1 + 0.6 * t;
+    far.scale.set(s, 1 - 0.58 * t, s);
+    // Scale around the ring centre, not the world's origin.
+    far.position.x = RING_CENTRE.x * (1 - s);
+    far.position.z = RING_CENTRE.z * (1 - s);
+  };
   return group;
 }
 
@@ -216,13 +232,23 @@ function buildMountainLayer(layer, index) {
 // 2. THE GROUND AND THE TRAIL
 // =====================================================================
 
-// The trail, drawn as a map from above: [x, z] points in metres.
-// It starts at base camp (0, 0) and winds up to the first ridge camp (around z = -150).
+// The trail, drawn as a map from above: [x, z] points in metres. One continuous path from
+// base camp (0, 0) to the summit.
 const TRAIL_MAP = [
+  // Scene 1: base camp, up through the forest to the first ridge camp (Phase 1, unchanged).
   [0.6, 2.5], [1.2, -6], [-0.5, -16], [-4.5, -27], [-5.5, -39], [-2, -51],
   [3.5, -62], [5.5, -74], [2.5, -87], [-3, -99], [-6.5, -111], [-5, -123],
   [-2, -134], [-0.5, -144],
+  // Scene 2: round behind DERMAÉ to the valley rim, then east along the ridge past two more camps.
+  [-2, -152], [-1, -160], [6, -167], [17, -172], [28, -174.5], [40, -175], [55, -176], [70, -174],
+  [86, -169], [100, -165], [114, -167], [128, -174], [140, -186], [149, -200],
+  // Scene 3: up a broad spur onto the high meadow.
+  [155, -216], [159, -232], [161, -246], [163, -260], [171, -274],
+  // Scene 4: the final climb, curling up onto the summit.
+  [185, -284], [199, -296], [205, -312], [201, -328], [193, -340],
 ];
+// The first 14 points are the Phase 1 trail; base camp's forest is still planted along it.
+const LEGACY_POINTS = 14;
 
 // Smooth 2D noise in JavaScript (same idea as the shader noise).
 function hash2(ix, iz, seed) {
@@ -242,8 +268,14 @@ export function smoothstep(e0, e1, x) {
   const t = Math.min(Math.max((x - e0) / (e1 - e0), 0), 1);
   return t * t * (3 - 2 * t);
 }
+// A "soft maximum": like Math.max, but the two shapes melt into each other over `k` metres
+// instead of meeting in a sharp crease (where a ridge rises out of a slope, for example).
+function smax(a, b, k) {
+  const h = Math.max(k - Math.abs(a - b), 0) / k;
+  return Math.max(a, b) + h * h * k * 0.25;
+}
 
-// The basic shape of the land, before the trail is carved in.
+// ---------- The Phase 1 land: the climb from base camp to the ridge, and the valley beyond ----------
 function baseHeight(x, z) {
   // The long climb from base camp (y = 0) up to the ridge crest (y ≈ 26).
   let y = 26 * smoothstep(-4, -146, z);
@@ -261,54 +293,245 @@ function baseHeight(x, z) {
   return y;
 }
 
-// Sample the trail densely once, so we can quickly find "how far is this point from the trail?".
+// ---------- The new land: the ridge, the meadow shelf and the summit ----------
+// One long landform that follows the trail from DERMAÉ to the summit, like a spine.
+// Each point: [x, z, crest height, left spread, right spread, left flat, right flat].
+//  - crest height: how high the land is along the spine (metres)
+//  - spread: how gently the land falls away on each side (bigger = gentler slope)
+//  - flat: how many metres stay level either side of the spine before it starts to fall
+// "Left" and "right" are as seen walking up the trail. On the ridge, left is the valley side.
+const LAND = [
+  [4, -162, 24, 14, 12, 2, 3],
+  [13, -169, 25, 14, 12, 2, 3],
+  [26, -173, 26, 16, 14, 3, 7],
+  [40, -175, 27.5, 18, 16, 6, 8],      // King's Garden camp
+  [55, -176, 30, 18, 22, 3, 5],
+  [70, -174, 34, 18, 30, 3, 5],
+  [86, -169, 39, 20, 30, 3, 6],
+  [100, -165, 43, 20, 30, 4, 8],       // Trinetra camp
+  [114, -167, 46, 20, 30, 3, 5],
+  [128, -174, 49, 22, 30, 3, 5],
+  [140, -186, 52, 24, 30, 4, 6],
+  [149, -200, 55, 26, 34, 6, 10],
+  [155, -216, 57, 28, 40, 16, 40],     // the meadow begins: broad and nearly level
+  [159, -232, 58, 30, 44, 22, 55],
+  [161, -246, 58.5, 30, 44, 24, 60],   // the gear check
+  [163, -260, 59, 30, 40, 22, 50],
+  [171, -274, 62, 26, 30, 10, 20],
+  [185, -284, 70, 16, 16, 3, 3],       // the snowy summit cone: steep on every side
+  [199, -296, 82, 14, 14, 2, 2],
+  [205, -312, 96, 13, 13, 2, 2],
+  [201, -328, 110, 12, 12, 2, 2],
+  [193, -340, 122, 11, 11, 3, 3],      // the summit
+];
+export const SUMMIT_HEIGHT = 122;
+
+// Height of the new landform at (x, z), or -Infinity far away from it.
+// It also remembers how far the point was from the spine (landDistance), for the rocky ribs.
+let landDistance = Infinity;
+function landHeight(x, z) {
+  let best = -Infinity;
+  landDistance = Infinity;
+  for (let i = 0; i < LAND.length - 1; i++) {
+    const a = LAND[i], b = LAND[i + 1];
+    const dx = b[0] - a[0], dz = b[1] - a[1];
+    const len2 = dx * dx + dz * dz;
+    // The closest point on this piece of spine, and how far along it is (0..1).
+    const t = Math.min(Math.max(((x - a[0]) * dx + (z - a[1]) * dz) / len2, 0), 1);
+    const px = x - (a[0] + dx * t), pz = z - (a[1] + dz * t);
+    const d = Math.hypot(px, pz);
+    if (d > 160) continue;
+    if (d < landDistance) landDistance = d;
+    // Left of the walking direction is (dz, -dx).
+    const left = px * dz - pz * dx > 0;
+    const e = a[2] + (b[2] - a[2]) * t;
+    const spread = left ? a[3] + (b[3] - a[3]) * t : a[4] + (b[4] - a[4]) * t;
+    const flat = left ? a[5] + (b[5] - a[5]) * t : a[6] + (b[6] - a[6]) * t;
+    const out = Math.max(d - flat, 0);
+    const h = e - (out * out) / (2 * spread);
+    best = best === -Infinity ? h : smax(best, h, 3);
+  }
+  // Near DERMAÉ the Phase 1 land already forms the ridge, so the new landform fades away
+  // there (sinks far below it) and leaves the first camp's ground exactly as it was.
+  return best - 40 * (1 - smoothstep(6, 22, x));
+}
+
+// Small level "pads" where things stand: the camps, the gear-check mat, the summit.
+// [x, z, radius, lift] (lift raises a pad into a little knoll).
+const PADS = [
+  [41.5, -184.5, 7, 0],        // King's Garden screen
+  [36, -174.6, 4, 0],          // where the trekker watches it
+  [106, -158.5, 9, 1.4],       // Trinetra's knoll
+  [164.6, -249.2, 7, 0],       // the gear-check mat
+  [193, -340, 4.5, 0],         // the summit top
+];
+
+// The shape of the land before the trail is trodden into it.
+function shapeHeight(x, z) {
+  const base = baseHeight(x, z);
+  const land = landHeight(x, z);
+  if (land < base - 6) return base;                 // far from the new land: Phase 1 exactly
+  let y = smax(base, land, 6);
+  // How much this point belongs to the new landform (0..1).
+  const onLand = smoothstep(-6, 3, land - base);
+  // Gentle rolls on the grass, larger swells on the meadow, wind-carved ripples up high.
+  y += ((noise2(x * 0.045, z * 0.045, 61) - 0.5) * 2.4 + (noise2(x * 0.16, z * 0.16, 63) - 0.5) * 0.5) * onLand;
+  // Rocky ribs on the summit's steep sides (calm near the spine, where we walk).
+  const high = smoothstep(64, 90, land);
+  const rib = (1 - Math.abs(noise2(x * 0.09, z * 0.09, 93) * 2 - 1)) * 4 + (noise2(x * 0.05, z * 0.05, 91) - 0.5) * 6;
+  y += rib * high * onLand * smoothstep(5, 18, landDistance);
+  return y;
+}
+
+// Pads: worked out once, from the land around them.
+const PAD_LEVELS = PADS.map(([x, z, r, lift]) => ({ x, z, r, y: shapeHeight(x, z) + lift }));
+function padded(x, z, y) {
+  for (const p of PAD_LEVELS) {
+    const d = Math.hypot(x - p.x, z - p.z);
+    if (d < p.r) y += (p.y - y) * (1 - smoothstep(p.r * 0.45, p.r, d));
+  }
+  return y;
+}
+function landShape(x, z) {
+  return padded(x, z, shapeHeight(x, z));
+}
+
+// ---------- The trail, sampled densely, with a quick "nearest point" lookup ----------
 const trailSpline2D = new THREE.CatmullRomCurve3(
   TRAIL_MAP.map(([x, z]) => new THREE.Vector3(x, 0, z)), false, 'centripetal'
 );
-const TRAIL_SAMPLES = trailSpline2D.getSpacedPoints(700).map((p) => ({ x: p.x, z: p.z, y: baseHeight(p.x, p.z) }));
-const TRAIL_BOUNDS = TRAIL_SAMPLES.reduce(
+// Measure the curve finely (every ~13 cm), so "metres along the trail" is exact and the
+// trekker walks at an even pace.
+trailSpline2D.arcLengthDivisions = 4000;
+export const TRAIL_LENGTH = trailSpline2D.getLength();
+
+// A point on the trail, `s` metres from the start (measured on the map), standing on the ground.
+// Everything that moves along the trail (the trekker, the camera rail) uses these two.
+export function trailPointAt(s, target = new THREE.Vector3()) {
+  trailSpline2D.getPointAt(Math.min(Math.max(s / TRAIL_LENGTH, 0), 1), target);
+  target.y = groundHeight(target.x, target.z);
+  return target;
+}
+// The direction the trail runs at `s` metres (flat, along the ground).
+export function trailDirectionAt(s, target = new THREE.Vector3()) {
+  return trailSpline2D.getTangentAt(Math.min(Math.max(s / TRAIL_LENGTH, 0), 1), target);
+}
+const SAMPLE_COUNT = Math.round(TRAIL_LENGTH * 4);   // one sample every 25 cm
+const TRAIL_SAMPLES = trailSpline2D.getSpacedPoints(SAMPLE_COUNT).map((p, i) => ({
+  x: p.x, z: p.z, y: landShape(p.x, p.z), s: (i / SAMPLE_COUNT) * TRAIL_LENGTH,
+}));
+
+// The samples are sorted into a grid of 10 m squares, so a lookup only checks nearby ones.
+const BUCKET = 10;
+const buckets = new Map();
+const bucketKey = (ix, iz) => ix * 100003 + iz;
+for (const p of TRAIL_SAMPLES) {
+  const key = bucketKey(Math.floor(p.x / BUCKET), Math.floor(p.z / BUCKET));
+  if (!buckets.has(key)) buckets.set(key, []);
+  buckets.get(key).push(p);
+}
+
+// Distance from (x, z) to the trail (exact up to 10 m; further away it says Infinity),
+// plus the trail's height there and how far along the trail (metres) that nearest point is.
+const FAR = { distance: Infinity, y: 0, s: 0 };
+export function nearestTrail(x, z) {
+  const bx = Math.floor(x / BUCKET), bz = Math.floor(z / BUCKET);
+  let best = Infinity, hit = null;
+  for (let i = -1; i <= 1; i++) {
+    for (let j = -1; j <= 1; j++) {
+      const list = buckets.get(bucketKey(bx + i, bz + j));
+      if (!list) continue;
+      for (const p of list) {
+        const d = (p.x - x) * (p.x - x) + (p.z - z) * (p.z - z);
+        if (d < best) { best = d; hit = p; }
+      }
+    }
+  }
+  if (!hit || best > BUCKET * BUCKET) return FAR;
+  return { distance: Math.sqrt(best), y: hit.y, s: hit.s };
+}
+
+// THE height function everyone uses: ground, trail, trees, tents and the trekker's feet.
+export function getHeight(x, z) {
+  const shape = landShape(x, z);
+  const t = nearestTrail(x, z);
+  if (t.distance === Infinity) return shape;
+  // Near the trail, flatten the ground sideways so the path is a walkable shelf.
+  const flatten = 1 - smoothstep(1.4, 6, t.distance);
+  return shape + (t.y - shape) * flatten;
+}
+
+// How far along the trail (metres) the point nearest to (x, z) is. For placing things.
+export function trailDistanceAt(x, z) {
+  let best = Infinity, s = 0;
+  for (const p of TRAIL_SAMPLES) {
+    const d = (p.x - x) * (p.x - x) + (p.z - z) * (p.z - z);
+    if (d < best) { best = d; s = p.s; }
+  }
+  return s;
+}
+
+
+// ---------- The Phase 1 world, kept for planting base camp's forest exactly as it was ----------
+// The forest is scattered with a seeded random sequence along the Phase 1 trail. Replaying it
+// with the Phase 1 trail and land keeps every tree of base camp and DERMAÉ where it was.
+const legacySpline = new THREE.CatmullRomCurve3(
+  TRAIL_MAP.slice(0, LEGACY_POINTS).map(([x, z]) => new THREE.Vector3(x, 0, z)), false, 'centripetal'
+);
+const LEGACY_SAMPLES = legacySpline.getSpacedPoints(700).map((p) => ({ x: p.x, z: p.z, y: baseHeight(p.x, p.z) }));
+const LEGACY_BOUNDS = LEGACY_SAMPLES.reduce(
   (b, p) => ({ minX: Math.min(b.minX, p.x), maxX: Math.max(b.maxX, p.x), minZ: Math.min(b.minZ, p.z), maxZ: Math.max(b.maxZ, p.z) }),
   { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity }
 );
-
-// Distance from (x, z) to the trail, plus the trail's height at the nearest point.
-export function nearestTrail(x, z) {
+function legacyNearestTrail(x, z) {
   const pad = 14;
-  if (x < TRAIL_BOUNDS.minX - pad || x > TRAIL_BOUNDS.maxX + pad || z < TRAIL_BOUNDS.minZ - pad || z > TRAIL_BOUNDS.maxZ + pad) {
-    return { distance: Infinity, y: 0 };
-  }
+  const b = LEGACY_BOUNDS;
+  if (x < b.minX - pad || x > b.maxX + pad || z < b.minZ - pad || z > b.maxZ + pad) return { distance: Infinity, y: 0 };
   let best = Infinity, bestY = 0;
-  for (const p of TRAIL_SAMPLES) {
+  for (const p of LEGACY_SAMPLES) {
     const d = (p.x - x) * (p.x - x) + (p.z - z) * (p.z - z);
     if (d < best) { best = d; bestY = p.y; }
   }
   return { distance: Math.sqrt(best), y: bestY };
 }
-
-// THE height function everyone uses: ground, trail, trees, tents and the trekker's feet.
-export function getHeight(x, z) {
+function legacyHeight(x, z) {
   const base = baseHeight(x, z);
-  const t = nearestTrail(x, z);
+  const t = legacyNearestTrail(x, z);
   if (t.distance === Infinity) return base;
-  // Near the trail, flatten the ground sideways so the path is a walkable shelf.
-  const flatten = 1 - smoothstep(1.4, 6, t.distance);
-  return base + (t.y - base) * flatten;
+  return base + (t.y - base) * (1 - smoothstep(1.4, 6, t.distance));
 }
+export const legacy = {
+  nearestTrail: legacyNearestTrail,
+  height: legacyHeight,
+  trailCurve: new THREE.CatmullRomCurve3(
+    legacySpline.getSpacedPoints(160).map((p) => new THREE.Vector3(p.x, legacyHeight(p.x, p.z), p.z)), false, 'centripetal'
+  ),
+};
 
-// The trail as a 3D curve on the ground: the trekker walks along this.
-export const trailCurve = new THREE.CatmullRomCurve3(
-  trailSpline2D.getSpacedPoints(160).map((p) => new THREE.Vector3(p.x, getHeight(p.x, p.z), p.z)),
-  false, 'centripetal'
-);
-
+// =====================================================================
+// The ground mesh
+// =====================================================================
 // Painted ground colours (from palette.js). These are the surface colours in neutral light:
-// the cool moonlight turns them blue at night, the lantern turns them warm near camp.
+// the cool moonlight turns them blue at night, the low sun gold at the top.
 const GROUND = Object.fromEntries(
   ['forest', 'moss', 'grass', 'grassLit', 'valley', 'earth'].map((k) => [k, new THREE.Color(MATERIALS.ground[k])])
 );
+const MEADOW_COL = {
+  grass: new THREE.Color(MATERIALS.meadow.grass),
+  lit: new THREE.Color(MATERIALS.meadow.grassLit),
+  deep: new THREE.Color(MATERIALS.meadow.grassDeep),
+};
+const SNOW = {
+  snow: new THREE.Color(MATERIALS.summit.snow),
+  shade: new THREE.Color(MATERIALS.summit.snowShade),
+  rock: new THREE.Color(MATERIALS.summit.rock),
+};
 
-// The ground grid: 520 m wide, 560 m deep, one vertex roughly every 1.3 m.
-const GRID = { width: 520, depth: 560, segX: 400, segZ: 430, minX: -260, minZ: -490 };
+// The ground is one big grid of points, about one every 1.3 m (the same grid as Phase 1, made
+// wider to reach the summit). It is cut into square chunks, so three.js can skip drawing the
+// chunks that are outside the camera's view.
+const GRID = { minX: -260, minZ: -490, cellX: 1.3, cellZ: 560 / 430, segX: 446, segZ: 430 };
+const CHUNK = 64;   // cells per chunk side
 let gridHeights = null; // filled in by createGround()
 
 // Height of the ground *as it is actually drawn*. The ground is made of flat triangles,
@@ -316,8 +539,7 @@ let gridHeights = null; // filled in by createGround()
 // sit exactly on the visible surface (path, tents, feet) uses this.
 export function groundHeight(x, z) {
   if (!gridHeights) return getHeight(x, z);
-  const cellX = GRID.width / GRID.segX, cellZ = GRID.depth / GRID.segZ;
-  const gx = (x - GRID.minX) / cellX, gz = (z - GRID.minZ) / cellZ;
+  const gx = (x - GRID.minX) / GRID.cellX, gz = (z - GRID.minZ) / GRID.cellZ;
   const ix = Math.min(Math.max(Math.floor(gx), 0), GRID.segX - 1);
   const iz = Math.min(Math.max(Math.floor(gz), 0), GRID.segZ - 1);
   const fx = gx - ix, fz = gz - iz;
@@ -326,68 +548,142 @@ export function groundHeight(x, z) {
   const hD = gridHeights[iz * row + ix + 1];       // one step in x
   const hB = gridHeights[(iz + 1) * row + ix];     // one step in z
   const hC = gridHeights[(iz + 1) * row + ix + 1]; // diagonal corner
-  // Each grid square is two triangles split along the B-D diagonal (same as three.js does).
+  // Each grid square is two triangles split along the B-D diagonal.
   if (fx + fz <= 1) return hA + (hD - hA) * fx + (hB - hA) * fz;
   return hC + (hB - hC) * (1 - fx) + (hD - hC) * (1 - fz);
 }
 
-export function createGround(scene) {
-  // A big grid of points. Each vertex gets its height from getHeight().
-  const geo = new THREE.PlaneGeometry(GRID.width, GRID.depth, GRID.segX, GRID.segZ);
-  geo.rotateX(-Math.PI / 2);                      // lay the plane flat
-  geo.translate(0, 0, GRID.minZ + GRID.depth / 2); // from z = -490 (valley) to z = +70 (behind camp)
+// How much a point belongs to the meadow (0..1): the broad shelf around the gear check.
+export function meadowAmount(x, z) {
+  return 1 - smoothstep(38, 95, Math.hypot((x - 160) * 0.9, (z - 240) * 0.7) + (noise2(x * 0.03, z * 0.03, 71) - 0.5) * 30);
+}
 
-  const pos = geo.attributes.position;
-  // After rotating, rows run from far (-z) to near (+z), matching groundHeight() above.
-  gridHeights = new Float32Array(pos.count);
-  const colors = new Float32Array(pos.count * 3);
-  const c = new THREE.Color();
-  const grass = new THREE.Color();
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i), z = pos.getZ(i);
-    const y = getHeight(x, z);
-    pos.setY(i, y);
-    gridHeights[i] = y;
+// The painted colour of the ground at a point (y = height, ny = how flat it is: 1 = level).
+function groundColour(x, z, y, ny, c, tmp) {
+  // Phase 1 colours: forest floor low down, grass higher up, painted patches from noise.
+  const patch = noise2(x * 0.07, z * 0.07, 11);
+  const fine = noise2(x * 0.35, z * 0.35, 5);
+  const altitude = smoothstep(4, 20, y);
+  c.copy(GROUND.forest).lerp(GROUND.moss, smoothstep(0.45, 0.75, patch));
+  tmp.copy(GROUND.grass).lerp(GROUND.grassLit, smoothstep(0.5, 0.85, patch * 0.7 + fine * 0.3));
+  c.lerp(tmp, altitude);
+  c.lerp(GROUND.valley, smoothstep(5, -40, y) * smoothstep(-150, -190, z));
+  // Trodden earth around base camp, broken up by noise so the edge looks natural.
+  const camp = 1 - smoothstep(3.5, 8, Math.hypot(x + 2.5, z + 0.5) + (patch - 0.5) * 4);
+  c.lerp(GROUND.earth, camp * 0.85);
 
-    // Colour: forest floor low down, grass higher up, painted patches from noise.
-    const patch = noise2(x * 0.07, z * 0.07, 11);
-    const fine = noise2(x * 0.35, z * 0.35, 5);
-    const altitude = smoothstep(4, 20, y);
-    c.copy(GROUND.forest).lerp(GROUND.moss, smoothstep(0.45, 0.75, patch));
-    grass.copy(GROUND.grass).lerp(GROUND.grassLit, smoothstep(0.5, 0.85, patch * 0.7 + fine * 0.3));
-    c.lerp(grass, altitude);
-    c.lerp(GROUND.valley, smoothstep(5, -40, y) * smoothstep(-150, -190, z));
-    // Trodden earth around base camp, broken up by noise so the edge looks natural.
-    const camp = 1 - smoothstep(3.5, 8, Math.hypot(x + 2.5, z + 0.5) + (patch - 0.5) * 4);
-    c.lerp(GROUND.earth, camp * 0.85);
-    // A whisper of variation so large areas never look flat.
-    c.multiplyScalar(0.94 + fine * 0.12);
-    colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+  // The meadow: brush-stroke patches of sunlit alpine grass (like the meadow style frame).
+  const meadow = meadowAmount(x, z) * smoothstep(30, 45, y);
+  if (meadow > 0) {
+    const stroke = noise2(x * 0.018, z * 0.055, 61);
+    const mfine = noise2(x * 0.09, z * 0.2, 67);
+    tmp.copy(MEADOW_COL.grass).lerp(MEADOW_COL.deep, smoothstep(0.55, 0.8, stroke));
+    tmp.lerp(MEADOW_COL.lit, smoothstep(0.5, 0.85, (1 - stroke) * 0.6 + mfine * 0.4) * 0.8);
+    c.lerp(tmp, meadow);
   }
-  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  geo.computeVertexNormals();
 
+  // High up: snow, dusted over the rock. Rock shows through on the steepest faces.
+  const snowLine = 76 + (noise2(x * 0.06, z * 0.06, 97) - 0.5) * 14;
+  const snow = smoothstep(snowLine - 6, snowLine + 6, y);
+  if (snow > 0) {
+    const drift = noise2(x * 0.08, z * 0.08, 97);
+    tmp.copy(SNOW.snow).lerp(SNOW.shade, smoothstep(0.4, 0.8, drift) * 0.35);
+    tmp.lerp(SNOW.rock, smoothstep(0.32, 0.55, 1 - ny + (drift - 0.5) * 0.2) * 0.85);
+    c.lerp(tmp, snow);
+  }
+  // A whisper of variation so large areas never look flat.
+  c.multiplyScalar(0.94 + fine * 0.12);
+  return c;
+}
+
+export function createGround(scene) {
+  const cols = GRID.segX + 1, rows = GRID.segZ + 1;
+  // 1. Heights of every grid point.
+  gridHeights = new Float32Array(cols * rows);
+  for (let iz = 0; iz < rows; iz++) {
+    for (let ix = 0; ix < cols; ix++) {
+      gridHeights[iz * cols + ix] = getHeight(GRID.minX + ix * GRID.cellX, GRID.minZ + iz * GRID.cellZ);
+    }
+  }
+  // 2. Normals (which way each point faces), worked out from the whole grid at once, so
+  //    neighbouring chunks shade exactly alike and their seams are invisible.
+  const normals = new Float32Array(cols * rows * 3);
+  const n = new THREE.Vector3();
+  for (let iz = 0; iz < rows; iz++) {
+    for (let ix = 0; ix < cols; ix++) {
+      const hL = gridHeights[iz * cols + Math.max(ix - 1, 0)], hR = gridHeights[iz * cols + Math.min(ix + 1, cols - 1)];
+      const hF = gridHeights[Math.max(iz - 1, 0) * cols + ix], hN = gridHeights[Math.min(iz + 1, rows - 1) * cols + ix];
+      n.set((hL - hR) / (2 * GRID.cellX), 1, (hF - hN) / (2 * GRID.cellZ)).normalize();
+      normals.set([n.x, n.y, n.z], (iz * cols + ix) * 3);
+    }
+  }
+  // 3. Colours.
+  const colors = new Float32Array(cols * rows * 3);
+  const c = new THREE.Color(), tmp = new THREE.Color();
+  for (let iz = 0; iz < rows; iz++) {
+    for (let ix = 0; ix < cols; ix++) {
+      const i = iz * cols + ix;
+      groundColour(GRID.minX + ix * GRID.cellX, GRID.minZ + iz * GRID.cellZ, gridHeights[i], normals[i * 3 + 1], c, tmp);
+      colors.set([c.r, c.g, c.b], i * 3);
+    }
+  }
+
+  // 4. The chunks: one mesh per square of the grid, all sharing one material.
   const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
   // The palette's ground tint multiplies every painted colour (white at night = no change).
   // It's the same colour object as the mood's, so it follows the time of day by itself.
   mat.color = mood.ground;
-  const ground = new THREE.Mesh(geo, mat);
-  ground.name = 'ground';
-  scene.add(ground);
-
+  const group = new THREE.Group();
+  group.name = 'ground';
+  for (let cz = 0; cz < GRID.segZ; cz += CHUNK) {
+    for (let cx = 0; cx < GRID.segX; cx += CHUNK) {
+      const nx = Math.min(CHUNK, GRID.segX - cx), nz = Math.min(CHUNK, GRID.segZ - cz);
+      const count = (nx + 1) * (nz + 1);
+      const pos = new Float32Array(count * 3), nor = new Float32Array(count * 3), col = new Float32Array(count * 3);
+      let k = 0;
+      for (let iz = cz; iz <= cz + nz; iz++) {
+        for (let ix = cx; ix <= cx + nx; ix++, k++) {
+          const i = iz * cols + ix;
+          pos.set([GRID.minX + ix * GRID.cellX, gridHeights[i], GRID.minZ + iz * GRID.cellZ], k * 3);
+          nor.set(normals.subarray(i * 3, i * 3 + 3), k * 3);
+          col.set(colors.subarray(i * 3, i * 3 + 3), k * 3);
+        }
+      }
+      // Two triangles per square, split along the same diagonal groundHeight() assumes.
+      const index = [];
+      const w = nx + 1;
+      for (let iz = 0; iz < nz; iz++) {
+        for (let ix = 0; ix < nx; ix++) {
+          const a = iz * w + ix, b = (iz + 1) * w + ix, cc = (iz + 1) * w + ix + 1, d = iz * w + ix + 1;
+          index.push(a, b, d, b, cc, d);
+        }
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+      geo.setIndex(index);
+      geo.computeBoundingSphere();
+      const chunk = new THREE.Mesh(geo, mat);
+      chunk.name = 'ground-chunk';
+      group.add(chunk);
+    }
+  }
+  scene.add(group);
   scene.add(createTrailStrip());
-  return ground;
+  return group;
 }
 
 // The visible path: a thin strip that follows the trail, with soft see-through edges.
 function createTrailStrip() {
-  const steps = 900;
+  const steps = Math.round(TRAIL_LENGTH * 6);
   const across = [-1, -0.55, 0, 0.55, 1];   // 5 vertices from left edge to right edge
   const alpha = [0, 0.85, 1, 0.85, 0];      // edges fade out, so the path looks painted on
   const halfWidth = 0.85;
   const positions = [], colors = [], indices = [];
   const pathCol = new THREE.Color(MATERIALS.ground.path); // pale dusty earth, catches the moonlight
   const pathLit = new THREE.Color(MATERIALS.ground.pathLit);
+  const snowPath = new THREE.Color(MATERIALS.summit.snowShade);   // trodden snow: a cool hollow
   const col = new THREE.Color();
   const p = new THREE.Vector3();
   const tangent = new THREE.Vector3();
@@ -398,15 +694,20 @@ function createTrailStrip() {
     trailSpline2D.getPointAt(u, p);
     trailSpline2D.getTangentAt(u, tangent);
     side.set(-tangent.z, 0, tangent.x).normalize();
-    // The path wobbles slightly in width, like a real trodden trail.
-    const w = halfWidth * (0.8 + noise2(u * 40, 0.5, 9) * 0.45);
+    const metres = u * TRAIL_LENGTH;
+    // The path wobbles slightly in width, like a real trodden trail; it narrows to a faint
+    // track on the meadow and the summit snow.
+    const narrow = 1 - 0.35 * smoothstep(380, 420, metres);
+    const w = halfWidth * narrow * (0.8 + noise2(metres * 0.27, 0.5, 9) * 0.45);
     across.forEach((a, k) => {
       const x = p.x + side.x * a * w;
       const z = p.z + side.z * a * w;
-      positions.push(x, groundHeight(x, z) + 0.03, z);
+      const y = groundHeight(x, z);
+      positions.push(x, y + 0.03, z);
       col.copy(pathCol).lerp(pathLit, noise2(x * 0.6, z * 0.6, 4));
-      // Fade the path in at the start and out at the end, so it has no hard edges.
-      const ends = smoothstep(0, 0.02, u) * (1 - smoothstep(0.97, 1, u));
+      col.lerp(snowPath, smoothstep(72, 84, y) * 0.8);
+      // Fade the path in at the start and out at the very top, so it has no hard ends.
+      const ends = smoothstep(0, 3, metres) * (1 - smoothstep(TRAIL_LENGTH - 6, TRAIL_LENGTH - 1, metres));
       colors.push(col.r, col.g, col.b, alpha[k] * 0.9 * ends);
     });
     if (i < steps) {
@@ -431,6 +732,7 @@ function createTrailStrip() {
     polygonOffsetFactor: -4,
     polygonOffsetUnits: -4,
   });
+  mat.color = mood.ground;
   const strip = new THREE.Mesh(geo, mat);
   strip.name = 'trail';
   strip.renderOrder = 1;

@@ -15,8 +15,9 @@
 
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { groundHeight, nearestTrail, noise2, smoothstep, seededRandom } from './terrain.js';
+import { groundHeight, nearestTrail, noise2, smoothstep, seededRandom, legacy } from './terrain.js';
 import { mood } from './palette.js';
+import { CAMPS } from './journey.js';
 
 // ---------- Painted colours ----------
 // Tree, stone and wood colours live in palette.js (mood.trees, mood.stones, mood.wood).
@@ -56,14 +57,18 @@ const shared = {
   uMistColor: { value: mood.mist.treeFeet },
 };
 
-export function createForest(scene, { routeDistance, sky } = {}) {
+export function createForest(scene, { routeDistance, legacyRouteDistance, sky } = {}) {
   // Share the sky's live key light direction (moon at night, sun later), so trees shade with it.
   if (sky) shared.uMoonDir.value = sky.keyDir;
 
   // ---------- 1. Decide where every tree goes ----------
+  // The forest is planted exactly as in Phase 1 (same seeded random sequence, along the
+  // Phase 1 trail, camera route and land), so base camp and DERMAÉ keep every tree.
+  // Then the trees in the way of the new trail are cleared (step 1b).
   const rand = seededRandom(2024);
   const near = { pine: [], oak: [] };
   const cards = [];
+  const legacyRoute = legacyRouteDistance || routeDistance;
 
   for (const t of HERO_TREES) {
     near[t.type].push({ x: t.x, z: t.z, scale: t.scale, rot: rand() * 6.28, tint: 0.95 });
@@ -74,13 +79,13 @@ export function createForest(scene, { routeDistance, sky } = {}) {
     const x = (rand() - 0.5) * 320;
     const z = 60 - rand() * 340;
     // Keep the trail and the clearings free.
-    const trail = nearestTrail(x, z).distance;
+    const trail = legacy.nearestTrail(x, z).distance;
     if (trail < 6 + rand() * 3) continue;
     if (CLEARINGS.some((c) => Math.hypot(x - c.x, z - c.z) < c.r + rand() * 4)) continue;
-    const route = routeDistance ? routeDistance(x, z) : 100;
+    const route = legacyRoute ? legacyRoute(x, z) : 100;
     if (route < NEAR_MIN_DISTANCE + rand() * 2) continue;
 
-    const y = groundHeight(x, z);
+    const y = legacy.height(x, z);
     // Trees grow in groves (noise), and thin out as the land climbs to the open ridge.
     const grove = noise2(x * 0.045, z * 0.045, 21);
     const altitude = 1 - smoothstep(10, 22, y + (z < -120 ? 6 : 0));
@@ -104,6 +109,45 @@ export function createForest(scene, { routeDistance, sky } = {}) {
       const maxScale = 1.5 + route * 0.48;
       const scale = Math.min(isOak ? 4.5 + rand() * 2.5 : 5.5 + rand() * 4.5, maxScale);
       near[isOak ? 'oak' : 'pine'].push({ x, z, y, scale, rot: rand() * 6.28, tint });
+    }
+  }
+
+  // ---------- 1b. Clear the way for the new trail (scene 2 onwards) ----------
+  // Every tree is checked against the full trail and the full camera route:
+  //  - too close to the new trail or the camera's path: removed,
+  //  - standing on the new ridge land (the ground rose there): mostly removed, so the ridge
+  //    is open grass with only a few scattered trees,
+  //  - a flat card tree that the camera now passes close to: turned into a soft 3D tree.
+  const legacyEnd = legacy.trailCurve.getLength() - 1;   // metres of trail that are Phase 1's
+  const keep = (t) => {
+    const y = groundHeight(t.x, t.z);
+    const trail = nearestTrail(t.x, t.z);
+    if (trail.distance < 6.5 && trail.s > legacyEnd) return false;
+    const route = routeDistance ? routeDistance(t.x, t.z) : 100;
+    // Only where the new camera route passes closer than the old one did.
+    if (route < NEAR_MIN_DISTANCE && route < legacyRoute(t.x, t.z) - 0.5) return false;
+    // Keep the new camps' screens and the view of them clear (DERMAÉ keeps its Phase 1 setting).
+    for (const c of CAMPS.slice(1)) {
+      if (distanceToSegment(t.x, t.z, c.view, c.sheet) < 7 || Math.hypot(t.x - c.sheet[0], t.z - c.sheet[1]) < 12) return false;
+    }
+    const rose = y - (t.y ?? y);
+    // Trees on the new ridge land, or on the open ridge well east of DERMAÉ (beyond the pines
+    // that frame its arrival shot): keep about one in six.
+    const onRidge = rose > 1.5 || (t.z < -166 && t.x > 30) || (t.z < -150 && t.x > 55);
+    if (onRidge && noise2(t.x * 0.9, t.z * 0.9, 404) > 0.24) return false;
+    t.y = y;
+    t.route = route;
+    return true;
+  };
+  for (const kind of ['pine', 'oak']) near[kind] = near[kind].filter((t) => t.y === undefined || keep(t));
+  for (let i = cards.length - 1; i >= 0; i--) {
+    const c = cards[i];
+    if (!keep(c)) { cards.splice(i, 1); continue; }
+    // (Cards look fine down to about 15 m; only closer ones need to become real 3D trees.)
+    if (c.route < 15 && c.route < legacyRoute(c.x, c.z) - 0.5) {
+      cards.splice(i, 1);
+      const scale = Math.min(c.height * 0.8, 1.5 + c.route * 0.48);
+      near[c.variant >= 6 ? 'oak' : 'pine'].push({ x: c.x, z: c.z, y: c.y, scale, rot: c.x * 1.7, tint: c.tint });
     }
   }
 
@@ -245,6 +289,13 @@ export function createNearTrees(scene, trees) {
   const oaks = makeNearInstanced(buildSoftOak(), trees.oak || [], material, 'soft-oaks');
   scene.add(pines, oaks);
   return { pines, oaks };
+}
+
+// How far (x, z) is from the straight line between points a and b (on the map).
+function distanceToSegment(x, z, a, b) {
+  const dx = b[0] - a[0], dz = b[1] - a[1];
+  const t = Math.min(Math.max(((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz), 0), 1);
+  return Math.hypot(x - (a[0] + dx * t), z - (a[1] + dz * t));
 }
 
 // Move the tents' warm glow (scenes without tents send it far away, so nothing is tinted).
@@ -401,6 +452,99 @@ export function createStones(scene, stones, rand = Math.random) {
   mesh.computeBoundingSphere();
   scene.add(mesh);
   return mesh;
+}
+
+// ---------- Four stone shapes, for the new parts of the trail ----------
+// Base camp keeps its smooth pebbles. Further up, the stones vary, so no two clusters look
+// copy-pasted. Each is still soft (low-frequency noise only, no sharp facets), 1 unit tall.
+//   0 boulder: a big round lump     1 slab: low, wide and flat-topped, like a split rock
+//   2 standing stone: tall, leaning, tapering   3 twin: two lumps grown together
+function buildStoneShapes() {
+  const shape = (seed, fn, detail = [32, 20]) => {
+    const geo = new THREE.SphereGeometry(0.5, detail[0], detail[1]);
+    const pos = geo.attributes.position;
+    const v = new THREE.Vector3();
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i);
+      fn(v, seed);
+      pos.setXYZ(i, v.x, v.y, v.z);
+    }
+    // Sit the shape on y = 0 and make it 1 unit tall.
+    geo.computeBoundingBox();
+    const b = geo.boundingBox;
+    geo.translate(0, -b.min.y, 0);
+    geo.scale(1, 1 / (b.max.y - b.min.y), 1);
+    geo.computeVertexNormals();
+    return flag(geo, 0);
+  };
+  const lumpy = (v, seed, amount) => 1 - amount / 2 + amount * noise2(v.x * 2.2 + v.y * 1.3 + seed, v.z * 2.2 - v.y * 0.7, 31 + seed);
+  return [
+    shape(1, (v, s) => {
+      v.multiplyScalar(lumpy(v, s, 0.35));
+      if (v.y < -0.28) v.y = -0.28 + (v.y + 0.28) * 0.3;
+    }),
+    shape(2, (v, s) => {
+      // A slab: squashed, with a flatter, slightly tilted top.
+      v.multiplyScalar(lumpy(v, s, 0.25));
+      v.y *= 0.55;
+      if (v.y > 0.12) v.y = 0.12 + (v.y - 0.12) * 0.25 + v.x * 0.06;
+      v.x *= 1.5;
+      if (v.y < -0.18) v.y = -0.18 + (v.y + 0.18) * 0.3;
+    }),
+    shape(3, (v, s) => {
+      // A standing stone: taller than wide, narrowing and leaning towards the top.
+      v.multiplyScalar(lumpy(v, s, 0.3));
+      const up = v.y + 0.5;                        // 0 at the bottom, 1 at the top
+      v.x *= 0.62 * (1.1 - up * 0.35);
+      v.z *= 0.5 * (1.1 - up * 0.35);
+      v.y *= 1.7;
+      v.x += up * up * 0.12;
+      if (v.y < -0.7) v.y = -0.7 + (v.y + 0.7) * 0.3;
+    }),
+    shape(4, (v, s) => {
+      // Twin: a lump with a softer, lower shoulder grown onto one side.
+      v.multiplyScalar(lumpy(v, s, 0.3));
+      const shoulder = Math.max(v.x, 0);
+      v.x *= 1.45;
+      v.y *= 1 - shoulder * 0.7;
+      v.y -= shoulder * shoulder * 0.25;
+      if (v.y < -0.3) v.y = -0.3 + (v.y + 0.3) * 0.3;
+    }),
+  ];
+}
+
+// stones: [{ x, z, s, y?, shape? }] (shape 0..3, chosen at random if missing).
+// One instanced mesh per shape: four draw calls for any number of stones.
+let stoneShapes = null;
+export function createStoneVariety(scene, stones, rand = Math.random, colors = mood.stones) {
+  stoneShapes ??= buildStoneShapes();
+  const material = makePaintedMaterial({ colors, wind: false, roundness: 0.3, rim: 0.7 });
+  const groups = [[], [], [], []];
+  for (const st of stones) groups[st.shape ?? Math.floor(rand() * 4)].push(st);
+  const meshes = [];
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3();
+  const up = new THREE.Vector3(0, 1, 0), color = new THREE.Color();
+  groups.forEach((list, shape) => {
+    if (!list.length) return;
+    const mesh = new THREE.InstancedMesh(stoneShapes[shape], material, list.length);
+    mesh.name = `stones-${shape}`;
+    list.forEach((st, i) => {
+      // Sunk a little into the ground, so no stone looks like it was set down on top.
+      p.set(st.x, (st.y ?? groundHeight(st.x, st.z)) - st.s * 0.15, st.z);
+      q.setFromAxisAngle(up, rand() * Math.PI * 2);
+      const tall = shape === 2 ? 1.3 : shape === 1 ? 0.5 : 0.75;
+      sc.set(st.s * (1.0 + rand() * 0.4), st.s * tall * (0.85 + rand() * 0.3), st.s * (0.85 + rand() * 0.3));
+      m.compose(p, q, sc);
+      mesh.setMatrixAt(i, m);
+      color.setScalar(0.88 + rand() * 0.22);
+      mesh.setColorAt(i, color);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.computeBoundingSphere();
+    scene.add(mesh);
+    meshes.push(mesh);
+  });
+  return meshes;
 }
 
 // =====================================================================

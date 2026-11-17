@@ -47,7 +47,7 @@ html.lenis, html.lenis body { height: auto; }
 /* ---------- The scroll track: only gives the page its height ---------- */
 #scroll-track {
   position: relative;
-  height: 1000vh;  /* longer = slower, calmer film */
+  height: 1100vh;  /* FILM_SCREENS + 1 screens (journey.js sets the exact value) */
   z-index: 1;
 }
 #end { position: absolute; bottom: 0; height: 1px; width: 1px; }

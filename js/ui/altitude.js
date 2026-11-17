@@ -1,36 +1,14 @@
 // altitude.js: the small altitude meter in the bottom-left corner.
-// It shows how high the trekker is ("ALT 3,620 m") and a thin rail that fills as you climb,
-// so it doubles as the film's progress bar. Each of the four camps has a tick on the rail.
+// It shows how high the trekker is ("ALT 3,620 m") and a thin rail that fills as you scroll,
+// so it doubles as the film's progress bar. Each of the four places has a tick on the rail.
 
-import { CLIMB, PRESETS } from '../world/palette.js';
-
-// The imagined altitude of each camp, in metres (a believable Himalayan trek).
-export const STATIONS = [
-  { key: 'night', climb: CLIMB.night, metres: 3450 },
-  { key: 'predawn', climb: CLIMB.predawn, metres: 3980 },
-  { key: 'firstLight', climb: CLIMB.firstLight, metres: 4410 },
-  { key: 'sunrise', climb: CLIMB.sunrise, metres: 5120 },
-];
-
-// Altitude for a point of the climb (0..1): straight lines between the camps.
-export function altitudeAt(climb) {
-  for (let i = 0; i < STATIONS.length - 1; i++) {
-    const a = STATIONS[i], b = STATIONS[i + 1];
-    if (climb <= b.climb) {
-      const t = (climb - a.climb) / (b.climb - a.climb);
-      return a.metres + (b.metres - a.metres) * Math.max(t, 0);
-    }
-  }
-  return STATIONS[STATIONS.length - 1].metres;
-}
-
-// el: the .altitude element. filmEnd: how far up the climb the current film goes
-// (Phase 1 ends at the ridge), so the rail is full when the page ends.
-export function createAltitudeMeter(el, { filmEnd = 1 } = {}) {
+// el: the .altitude element.
+// stations: [{ progress, name }], the four places and where they are in the scroll (0..1).
+export function createAltitudeMeter(el, { stations }) {
   el.innerHTML = `
     <div class="altitude__rail">
       <div class="altitude__fill"></div>
-      ${STATIONS.map((s) => `<span class="altitude__tick" style="bottom:${(Math.min(s.climb / filmEnd, 1) * 100).toFixed(1)}%" ${s.climb > filmEnd ? 'hidden' : ''}></span>`).join('')}
+      ${stations.map((s) => `<span class="altitude__tick" style="bottom:${(s.progress * 100).toFixed(1)}%"></span>`).join('')}
     </div>
     <div class="altitude__readout">
       <span class="altitude__place"></span>
@@ -43,26 +21,30 @@ export function createAltitudeMeter(el, { filmEnd = 1 } = {}) {
   let shownMetres = -1;
   let shownPlace = '';
 
-  // progress: 0..1 down the page. Only touches the page when something visibly changes,
-  // so it costs almost nothing per frame.
-  function update(progress) {
-    const climb = progress * filmEnd;
+  // progress: 0..1 down the page. metres: the trekker's altitude. name: the zone we're in.
+  // Only touches the page when something visibly changes, so it costs almost nothing per frame.
+  function update(progress, metres, name) {
     el.style.setProperty('--progress', progress.toFixed(4));
     // Round to 10 m: the number ticks over calmly instead of flickering.
-    const metres = Math.round(altitudeAt(climb) / 10) * 10;
-    if (metres !== shownMetres) {
-      shownMetres = metres;
-      value.textContent = `${format.format(metres)} m`;
+    const rounded = Math.round(metres / 10) * 10;
+    if (rounded !== shownMetres) {
+      shownMetres = rounded;
+      value.textContent = `${format.format(rounded)} m`;
     }
-    // Name the camp we're nearest to.
-    const nearest = STATIONS.reduce((best, s) => (Math.abs(s.climb - climb) < Math.abs(best.climb - climb) ? s : best));
-    const name = PRESETS[nearest.key].place;
     if (name !== shownPlace) {
       shownPlace = name;
       place.textContent = name;
     }
-    STATIONS.forEach((s, i) => ticks[i].classList.toggle('is-passed', climb >= s.climb - 1e-4));
+    stations.forEach((s, i) => ticks[i].classList.toggle('is-passed', progress >= s.progress - 1e-4));
   }
-  update(0);
   return { update };
 }
+
+// The four places with their (rounded) altitudes, for the style guide. The film itself works
+// out the live altitude from the trekker's height on the trail (see main.js).
+export const STATIONS = [
+  { key: 'night', progress: 0, metres: 2850, name: 'Base camp' },
+  { key: 'predawn', progress: 0.215, metres: 3180, name: 'The ridge' },
+  { key: 'firstLight', progress: 0.635, metres: 3600, name: 'The meadow' },
+  { key: 'sunrise', progress: 0.95, metres: 4410, name: 'The summit' },
+];

@@ -8,14 +8,14 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 
 import { createSky } from './world/sky.js';
-import { createMountains, createGround, trailCurve } from './world/terrain.js';
+import { createMountains, createGround, trailPointAt, trailDirectionAt, smoothstep, SUMMIT_HEIGHT, TRAIL_LENGTH } from './world/terrain.js';
 import { createForest } from './world/forest.js';
-import { createBaseCamp, createProjectCamp, RIDGE_CAMP, RIDGE_VIEWPOINT } from './world/camp.js';
+import { createBaseCamp, createProjectCamp } from './world/camp.js';
 import { createMist } from './world/mist.js';
 import { createTrekker } from './world/trekker.js';
-import { createCameraPath, BEATS } from './world/cameraPath.js';
-import { smoothstep } from './world/terrain.js';
-import { mood, setClimb, CLIMB } from './world/palette.js';
+import { createCameraPath } from './world/cameraPath.js';
+import { ZONES, LIGHT, ALTITUDE, FILM_SCREENS, CAMPS } from './world/journey.js';
+import { mood, setClimb } from './world/palette.js';
 import { createAltitudeMeter } from './ui/altitude.js';
 import { createCursor } from './ui/cursor.js';
 
@@ -24,11 +24,13 @@ import { createCursor } from './ui/cursor.js';
 const SHOW_FPS = new URLSearchParams(location.search).has('fps');
 // Never render at more than 2x pixels: above that the eye can't tell, but the GPU pays.
 const MAX_PIXEL_RATIO = 2;
-// Still mode, for the style frames: ?still=0 shows base camp, ?still=1 the ridge camp, as a clean
-// picture with no text. Add &pause to stop drawing once it has settled (saves the GPU when
-// several frames sit on one page).
+// Still mode, for the style frames: ?still=0 shows base camp, ?still=0.215 the first ridge camp
+// (any point of the film, 0..1), as a clean picture with no text. Add &pause to stop drawing
+// once it has settled (saves the GPU when several frames sit on one page).
 const params = new URLSearchParams(location.search);
-const STILL = params.has('still') ? Math.min(Math.max(Number(params.get('still')) || 0, 0), 1) : null;
+const STILL_POINTS = { 0: 0, 1: 0.215 };   // the old ?still=1 meant "the ridge camp"
+const stillParam = params.has('still') ? Number(params.get('still')) || 0 : null;
+const STILL = stillParam === null ? null : (STILL_POINTS[stillParam] ?? Math.min(Math.max(stillParam, 0), 1));
 if (STILL !== null) document.documentElement.classList.add('is-still');
 
 // ---------- 1. The renderer: turns the 3D scene into pixels on the canvas ----------
@@ -54,33 +56,41 @@ const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerH
 
 // ---------- 4. Light and sky ----------
 // sky.js owns the sky dome, stars, moonlight, fill light and fog, so they can change together.
-const sky = createSky(scene);
+// The sun's light comes from a little higher than the sun itself (a painter's cheat), so the
+// low morning light still lays warm gold on the meadow and the snow instead of only grazing them.
+const sky = createSky(scene, { sunLightDir: new THREE.Vector3(0.62, 0.32, -0.78) });
 
 // ---------- 5. The world ----------
 // The camera path is worked out first, so the forest can keep trees off the camera's route.
-const cameraPath = createCameraPath(trailCurve);
+const cameraPath = createCameraPath();
 const mountains = createMountains(scene);
 createGround(scene);
-const forest = createForest(scene, { routeDistance: cameraPath.routeDistance, sky });
+const forest = createForest(scene, {
+  routeDistance: cameraPath.routeDistance,
+  legacyRouteDistance: cameraPath.legacyRouteDistance,
+  sky,
+});
 const baseCamp = createBaseCamp(scene);
 const mist = createMist(scene);
 const trekker = createTrekker(scene, renderer, camera);
 
-// The first project camp: DERMAÉ, on the ridge. Its screen faces the arrival viewpoint.
-const dermaeCamp = createProjectCamp(scene, {
-  x: RIDGE_CAMP.x,
-  z: RIDGE_CAMP.z,
-  facing: Math.atan2(RIDGE_VIEWPOINT.x - RIDGE_CAMP.x, RIDGE_VIEWPOINT.z - RIDGE_CAMP.z),
-  video: 'recordings/dermae.mp4',
-  label: document.getElementById('label-dermae'),
+// The project camps: outdoor camp cinemas along the ridge, one per project (journey.js).
+const camps = CAMPS.map((c) => createProjectCamp(scene, {
+  x: c.sheet[0],
+  z: c.sheet[1],
+  facing: Math.atan2(c.view[0] - c.sheet[0], c.view[1] - c.sheet[1]),
+  video: c.video,
+  label: document.getElementById(c.label),
   renderer,
-});
+}));
 
 // Build every shader now, while the curtain is still down. Otherwise three.js compiles each
 // one the first time its object comes into view, which causes a small stutter mid-scroll.
 renderer.compile(scene, camera);
 
 // ---------- 6. Scrolling → progress (0 at the top, 1 at the bottom) ----------
+// The page is as tall as the film: FILM_SCREENS screen-heights of scrolling (journey.js).
+document.getElementById('scroll-track').style.height = `${(FILM_SCREENS + 1) * 100}vh`;
 // Lenis smooths the wheel/trackpad so scrolling glides instead of jumping in steps.
 const lenis = new Lenis({ lerp: 0.07, wheelMultiplier: 0.8, smoothWheel: true });
 gsap.registerPlugin(ScrollTrigger);
@@ -97,9 +107,39 @@ ScrollTrigger.create({
   onUpdate: (self) => { scroll.target = self.progress; },
 });
 
+// ---------- The light: how far through the dawn we are at a point of the scroll ----------
+// journey.js lists a few points (LIGHT); in between, the light eases from one to the next.
+function lightAt(p) {
+  for (let i = 0; i < LIGHT.length - 1; i++) {
+    const [p0, c0] = LIGHT[i], [p1, c1] = LIGHT[i + 1];
+    if (p <= p1) return c0 + (c1 - c0) * smoothstep(p0, p1, p);
+  }
+  return LIGHT[LIGHT.length - 1][1];
+}
+
 // ---------- The interface on top of the film ----------
-// The altitude meter: Phase 1's film ends at the ridge camp, so a full rail = the ridge.
-const altitude = createAltitudeMeter(document.getElementById('altitude'), { filmEnd: CLIMB.predawn });
+// The altitude meter: a tick at each place (the first stop of each zone), and the live altitude
+// worked out from how high the trekker is on the trail.
+const stopOf = (id) => cameraPath.stops.find((st) => st.at === id);
+const altitude = createAltitudeMeter(document.getElementById('altitude'), {
+  stations: ['start', 'dermae', 'meadow', 'summit'].map((id) => ({ progress: id === 'start' ? 0 : stopOf(id).arrive })),
+});
+// The trail's height, measured every metre or so and smoothed so it only ever rises:
+// the meter never counts down on a small dip in the path.
+const ALT_STEPS = 500;
+const altTable = new Float32Array(ALT_STEPS + 1);
+for (let i = 0, top = 0; i <= ALT_STEPS; i++) {
+  top = Math.max(top, trailPointAt((i / ALT_STEPS) * TRAIL_LENGTH).y);
+  altTable[i] = top;
+}
+function metresAt(u) {
+  const f = Math.min(Math.max(u, 0), 1) * ALT_STEPS;
+  const i = Math.min(Math.floor(f), ALT_STEPS - 1);
+  const y = altTable[i] + (altTable[i + 1] - altTable[i]) * (f - i);
+  return ALTITUDE.base + (ALTITUDE.summit - ALTITUDE.base) * Math.min(y / SUMMIT_HEIGHT, 1);
+}
+const zoneName = (p) => (ZONES.find((z) => p < z.to) || ZONES[ZONES.length - 1]).name;
+
 // A subtle custom cursor (only with a mouse or trackpad; not in the style-frame stills).
 if (STILL === null) createCursor();
 
@@ -137,19 +177,19 @@ function countFps(now) {
 const trekPos = new THREE.Vector3();
 const trekDir = new THREE.Vector3();
 let heading = null;
-function placeTrekker(u, dt) {
-  trailCurve.getPointAt(u, trekPos);
-  trailCurve.getTangentAt(u, trekDir);
+function placeTrekker(s, dt, stops) {
+  trailPointAt(s, trekPos);
+  trailDirectionAt(s, trekDir);
   let target = Math.atan2(trekDir.x, trekDir.z);
-  // On arrival, turn to face the project tent's screen.
-  const arrive = smoothstep(0.96, 0.995, u);
-  if (arrive > 0) {
-    const toTent = Math.atan2(RIDGE_CAMP.x - trekPos.x, RIDGE_CAMP.z - trekPos.z);
-    let d = toTent - target;
+  // At a camp, turn to face its screen.
+  for (const { stop, here } of stops) {
+    if (here <= 0 || !stop.camp) continue;
+    const [sx, sz] = stop.camp.sheet;
+    let d = Math.atan2(sx - trekPos.x, sz - trekPos.z) - target;
     d = Math.atan2(Math.sin(d), Math.cos(d));
-    target += d * arrive * 0.85;
+    target += d * here * 0.85;
   }
-  // Turn smoothly towards the trail direction (taking the short way round the circle).
+  // Turn smoothly towards the target (taking the short way round the circle).
   if (heading === null) heading = target;
   let diff = target - heading;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
@@ -170,23 +210,31 @@ function tick(timestamp) {
   // A second, gentle smoothing on top of Lenis, so the film never lurches.
   if (snapNextFrame) scroll.progress = scroll.target;
   scroll.progress += (scroll.target - scroll.progress) * (1 - Math.exp(-dt * 4));
+  const p = scroll.progress;
 
-  const u = cameraPath.update(camera, scroll.progress, dt, snapNextFrame);
-  placeTrekker(u, dt);
+  const s = cameraPath.update(camera, p, dt, snapNextFrame);   // metres along the trail
+  const stops = cameraPath.stopInfo(p);
+  placeTrekker(s, dt, stops);
   snapNextFrame = false;
 
   // Light: one "climb" number (0 = night at base camp ... 1 = sunrise at the summit) sets the
   // palette's mood. Sky, fog, lights, mist, trees, mountains and the trekker all read from it,
-  // so they change together. Phase 1 only climbs to the first camp, so the light goes
-  // 80% of the way from night towards pre-dawn.
-  setClimb(smoothstep(0.08, 0.98, scroll.progress) * 0.8 * CLIMB.predawn);
+  // so they change together.
+  setClimb(lightAt(p));
   sky.applyMood();
   mountains.userData.applyMood();
+  // As the camera climbs the summit, the nearer ranges sink below the sea of clouds.
+  mountains.userData.setRise(smoothstep(62, 118, camera.position.y));
   trekker.setLightLevel(mood.character.level, mood.character.tint);
-  altitude.update(scroll.progress);
+  altitude.update(p, metresAt(s / TRAIL_LENGTH), zoneName(p));
 
-  // The project camp "wakes up" as we approach the ridge.
-  dermaeCamp.update(dt, camera, smoothstep(0.55, BEATS.walkEnd + 0.04, scroll.progress), scroll.progress > 0.35, time);
+  // Each project camp "wakes up" (projector on, video playing) as we arrive, and goes quiet
+  // once we've walked on.
+  camps.forEach((camp, i) => {
+    const st = stops.find((s) => s.stop.camp === CAMPS[i]);
+    const near = smoothstep(st.stop.arrive - 0.08, st.stop.arrive, p) * (1 - smoothstep(st.stop.leave, st.stop.leave + 0.06, p));
+    camp.update(dt, camera, near, p > st.stop.arrive - 0.14, time);
+  });
 
   sky.update(time, camera, renderer.getPixelRatio());
   forest.update(time);
@@ -216,6 +264,8 @@ window.__ascent = {
   },
   lenis,
   scene,   // handy in the console: e.g. __ascent.scene.getObjectByName("stones")
+  camera,
+  cameraPath,
 };
 
 // ---------- 7. The opening text and the page "chrome" ----------

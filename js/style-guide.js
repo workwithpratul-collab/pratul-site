@@ -77,8 +77,9 @@ document.querySelectorAll('[data-sky]').forEach((el) => {
 
 // Altitude meters, one per camp (the film's meter, frozen at each station).
 document.querySelectorAll('[data-altitude]').forEach((el) => {
-  const meter = createAltitudeMeter(el, { filmEnd: 1 });
-  meter.update(Number(el.dataset.altitude));
+  const meter = createAltitudeMeter(el, { stations: STATIONS });
+  const i = Math.round(Number(el.dataset.altitude) * 3);
+  meter.update(STATIONS[i].progress, STATIONS[i].metres, STATIONS[i].name);
 });
 
 // The real custom cursor runs on this page too: move over the buttons to feel it.
