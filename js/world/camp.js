@@ -1,9 +1,11 @@
 // camp.js: the camps along the trail.
 //  - Base camp: a glowing orange dome tent, a lantern with a warm pool of light, rocks.
-//  - Project camps (step 11): tents whose side works like a screen.
+//  - Project camps: an outdoor camp cinema (a canvas sheet between trekking poles).
 
 import * as THREE from 'three';
 import { groundHeight, seededRandom } from './terrain.js';
+import { makePaintedMaterial, createStones, setSecondWarmLight } from './forest.js';
+import { NOISE_GLSL } from './glsl.js';
 
 // Where base camp sits (the clearing in terrain.js is centred near here).
 export const BASE_CAMP = {
@@ -97,15 +99,8 @@ export function createBaseCamp(scene) {
     { x: 2.2, z: -3.5, s: 0.7 }, { x: 2.9, z: -2.8, s: 0.36 }, { x: -2.4, z: -5.8, s: 0.45 },
     { x: 3.4, z: 4.5, s: 0.5 }, { x: -4.4, z: 3.6, s: 0.4 },
   ];
-  const rand = seededRandom(77);
-  const rockMat = new THREE.MeshLambertMaterial({ color: '#8e958b', flatShading: true });
-  for (const r of rocks) {
-    const rock = new THREE.Mesh(buildRockGeometry(rand), rockMat);
-    rock.position.set(r.x, groundHeight(r.x, r.z) - r.s * 0.25, r.z);
-    rock.scale.set(r.s * 1.3, r.s * 0.8, r.s);
-    rock.rotation.y = rand() * Math.PI;
-    group.add(rock);
-  }
+  // Soft, rounded painted stones (same painted style as the trees; see forest.js).
+  createStones(scene, rocks.map((r) => ({ x: r.x, z: r.z, s: r.s * 1.35 })), seededRandom(77));
 
   scene.add(group);
 
@@ -121,81 +116,234 @@ export function createBaseCamp(scene) {
 }
 
 // =====================================================================
-// PROJECT CAMPS: a cabin tent whose front wall is a video screen
+// PROJECT CAMPS: an outdoor camp cinema
 // =====================================================================
-// options: { x, z, facing, video, label } where label is the HTML element to float near the tent.
+// A pale canvas sheet stretched between two wooden trekking poles and tied down with guy
+// ropes. It billows gently in the wind. The project video is "projected" onto it: warm,
+// slightly soft, with its light spilling onto the grass. A small orange tent and a lantern
+// sit beside it, so it feels like part of a trek camp.
+//
+// options: { x, z, facing, video, label, renderer } where label is the HTML caption element.
 export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label, renderer }) {
   const group = new THREE.Group();
   group.name = 'project-camp';
-  const y = groundHeight(x, z);
-  group.position.set(x, y - 0.05, z);
-  group.rotation.y = facing;          // the screen (front wall) faces this way
+  group.position.set(x, groundHeight(x, z), z);
+  group.rotation.y = facing;          // the front of the sheet faces this way
+  group.updateMatrixWorld(true);
 
-  // ---------- Tent body: walls + a pitched roof ----------
-  const W = 4.8, D = 3.0, wallH = 2.25, roofH = 0.9;
-  const fabric = new THREE.MeshLambertMaterial({ color: '#d8c5a2', emissive: '#2a1a0c' });
-  const body = new THREE.Mesh(new THREE.BoxGeometry(W, wallH, D), fabric);
-  body.position.y = wallH / 2;
-  group.add(body);
-
-  // The roof: a triangle shape pushed out along the tent's length (a "prism").
-  const tri = new THREE.Shape();
-  tri.moveTo(-D / 2 - 0.15, 0);
-  tri.lineTo(D / 2 + 0.15, 0);
-  tri.lineTo(0, roofH);
-  tri.closePath();
-  const roofGeo = new THREE.ExtrudeGeometry(tri, { depth: W + 0.3, bevelEnabled: false });
-  roofGeo.translate(0, 0, -(W + 0.3) / 2);
-  roofGeo.rotateY(Math.PI / 2);
-  const roof = new THREE.Mesh(roofGeo, new THREE.MeshLambertMaterial({ color: '#b96d3c' }));
-  roof.position.y = wallH;
-  group.add(roof);
-
-  // Poles at the corners and guy ropes down to the ground, for a real campsite feel.
-  const poleMat = new THREE.MeshLambertMaterial({ color: '#3d3530' });
-  const ropeMat = new THREE.LineBasicMaterial({ color: '#8a8478', transparent: true, opacity: 0.6 });
-  for (const sx of [-1, 1]) {
-    for (const sz of [-1, 1]) {
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, wallH + 0.15, 6), poleMat);
-      pole.position.set((sx * W) / 2, (wallH + 0.15) / 2, (sz * D) / 2);
-      group.add(pole);
-      const rope = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3((sx * W) / 2, wallH, (sz * D) / 2),
-        new THREE.Vector3((sx * (W / 2 + 1.1)), 0.02, sz * (D / 2 + 0.9)),
-      ]);
-      group.add(new THREE.Line(rope, ropeMat));
-    }
+  // Height of the ground at a point given in this camp's own (local) coordinates.
+  const tmp = new THREE.Vector3();
+  function localGround(lx, lz) {
+    tmp.set(lx, 0, lz);
+    group.localToWorld(tmp);
+    return groundHeight(tmp.x, tmp.z) - group.position.y;
   }
 
-  // ---------- The screen: the front wall plays the project video ----------
-  // 4.2 x 2.02 m matches the video's shape (1888 x 908), so nothing is stretched.
-  const screenW = 4.2, screenH = 4.2 * (908 / 1888);
+  // ---------- Sizes ----------
+  // The picture area matches the video's shape (1888 x 908), with a canvas margin around it.
+  const vidW = 4.0, vidH = vidW * (908 / 1888);
+  const sheetW = vidW + 0.5, sheetH = vidH + 0.55;
+  const sheetBottom = 0.5;                     // the sheet hangs this far above the grass
+  const sheetCentreY = sheetBottom + sheetH / 2;
+  const poleX = sheetW / 2 + 0.07;
+  const poleH = sheetBottom + sheetH + 0.3;
+
+  // ---------- The two wooden trekking poles ----------
+  const poleMat = makePaintedMaterial({
+    night: { bottom: '#2a2421', top: '#5b4a3d' },
+    dawn: { bottom: '#352c2a', top: '#6e5a4b' },
+    wind: false, roundness: 0, rim: 0.6,
+  });
+  const poleGeo = new THREE.CylinderGeometry(0.028, 0.038, 1, 8);
+  poleGeo.translate(0, 0.5, 0);
+  poleGeo.setAttribute('aTrunk', new THREE.Float32BufferAttribute(new Array(poleGeo.attributes.position.count).fill(0), 1));
+  const poles = new THREE.InstancedMesh(poleGeo, poleMat, 2);
+  const m = new THREE.Matrix4();
+  const q = new THREE.Quaternion();
+  [-1, 1].forEach((side, i) => {
+    // Each pole leans out very slightly, pulled by its guy ropes.
+    q.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -side * 0.035);
+    m.compose(new THREE.Vector3(side * poleX, localGround(side * poleX, 0) - 0.15, 0), q, new THREE.Vector3(1, poleH, 1));
+    poles.setMatrixAt(i, m);
+  });
+  poles.instanceMatrix.needsUpdate = true;
+  group.add(poles);
+
+  // ---------- Guy ropes: thin lines from the pole tops and sheet corners down to stakes ----------
+  const ropeMat = new THREE.LineBasicMaterial({ color: '#9a9484', transparent: true, opacity: 0.5 });
+  const ropes = [];
+  for (const side of [-1, 1]) {
+    const top = new THREE.Vector3(side * (poleX + side * 0.08), poleH - 0.15, 0);
+    for (const [ox, oz] of [[1.5, -1.3], [1.2, 1.0]]) {
+      const sx = side * (poleX + ox), sz = oz;
+      ropes.push(top, new THREE.Vector3(sx, localGround(sx, sz), sz));
+    }
+    // The sheet's bottom corners are tied down to small stakes just in front.
+    const bx = side * (sheetW / 2 - 0.05);
+    ropes.push(new THREE.Vector3(bx, sheetBottom, 0.02), new THREE.Vector3(side * (sheetW / 2 + 0.4), localGround(side * (sheetW / 2 + 0.4), 0.55), 0.55));
+  }
+  group.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(ropes), ropeMat));
+
+  // ---------- The canvas sheet, with the video projected onto it ----------
   // Start with a tiny 1x1 placeholder picture. When the video arrives we only swap the picture,
   // so three.js never has to build a new shader mid-scroll (that would cause a small stutter).
-  const placeholder = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
+  const placeholder = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
   placeholder.needsUpdate = true;
-  const screenMat = new THREE.MeshBasicMaterial({ map: placeholder, color: '#2a2630', toneMapped: false, fog: false });
-  const screen = new THREE.Mesh(new THREE.PlaneGeometry(screenW, screenH), screenMat);
-  screen.position.set(0, 0.12 + screenH / 2, D / 2 + 0.012);
-  group.add(screen);
+  const sheetUniforms = {
+    uVideo: { value: placeholder },
+    uOn: { value: 0 },                                     // 0 = projector off, 1 = on
+    uTime: { value: 0 },
+    uCanvas: { value: new THREE.Color('#5f6173') },        // pale canvas in moonlight
+    uSize: { value: new THREE.Vector2(sheetW, sheetH) },
+    uVid: { value: new THREE.Vector2(vidW, vidH) },
+  };
+  const sheetMat = new THREE.ShaderMaterial({
+    fog: true,
+    side: THREE.DoubleSide,
+    uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {}]),
+    vertexShader: /* glsl */ `
+      #include <common>
+      #include <fog_pars_vertex>
+      uniform float uTime;
+      uniform vec2 uSize;
+      varying vec2 vUv;
+      varying float vShade;
 
-  // Soft light spilling from the screen onto the ground in front of it.
-  const screenLight = new THREE.PointLight('#f5ddd4', 0, 11, 2);
-  screenLight.position.set(0, 1.2, D / 2 + 1.4);
-  group.add(screenLight);
+      // How far the sheet bulges forward at a point: pinned at the poles (left/right edges),
+      // held a little at the top and bottom by the ropes, freest in the middle.
+      float billow(vec2 p) {
+        vec2 h = uSize * 0.5;
+        float pinX = 1.0 - pow(p.x / h.x, 2.0);
+        float pinY = 0.55 + 0.45 * (1.0 - pow(p.y / h.y, 2.0));
+        float wind = 0.17 + 0.06 * sin(uTime * 0.55 + p.x * 0.8) + 0.03 * sin(uTime * 1.1 + p.y * 2.0 + p.x);
+        return pinX * pinY * wind;
+      }
 
-  // A small lantern by the tent, so the camp feels lived-in (and echoes base camp).
+      void main() {
+        vUv = uv;
+        vec3 p = position;
+        // The cloth sags between the poles: the top edge dips in the middle, the bottom edge
+        // is pulled up a little by its ropes. So the outline is curved, not a perfect rectangle.
+        float across = 1.0 - pow(p.x / (uSize.x * 0.5), 2.0);
+        float yN = p.y / (uSize.y * 0.5);
+        p.y += across * (-0.09 * smoothstep(0.0, 1.0, yN) + 0.05 * smoothstep(0.0, 1.0, -yN));
+        p.z += billow(position.xy);
+        // Shade the folds: compare with the bulge a little to the side, like light on cloth.
+        float slope = (billow(p.xy + vec2(0.15, 0.0)) - billow(p.xy - vec2(0.15, 0.0))) / 0.3;
+        vShade = clamp(1.0 + slope * 2.2, 0.74, 1.15);
+        vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+        gl_Position = projectionMatrix * mvPosition;
+        #include <fog_vertex>
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      #include <common>
+      #include <fog_pars_fragment>
+      uniform sampler2D uVideo;
+      uniform float uOn;
+      uniform vec3 uCanvas;
+      uniform vec2 uSize, uVid;
+      varying vec2 vUv;
+      varying float vShade;
+      ${NOISE_GLSL}
+
+      void main() {
+        // Where on the video this point of the sheet is (the video sits in the middle).
+        vec2 vuv = (vUv - 0.5) * (uSize / uVid) + 0.5;
+        // Soft edges, like a projector that's slightly out of focus at the borders.
+        float edge = smoothstep(0.0, 0.025, vuv.x) * smoothstep(1.0, 0.975, vuv.x)
+                   * smoothstep(0.0, 0.04, vuv.y) * smoothstep(1.0, 0.96, vuv.y);
+
+        // A gentle 5-tap blur: a projected image is never razor sharp.
+        vec2 px = vec2(1.3 / 1888.0, 1.3 / 908.0);
+        vec2 cuv = clamp(vuv, 0.0, 1.0);
+        vec3 pic = texture2D(uVideo, cuv).rgb * 0.4
+                 + texture2D(uVideo, cuv + vec2(px.x, 0.0)).rgb * 0.15
+                 + texture2D(uVideo, cuv - vec2(px.x, 0.0)).rgb * 0.15
+                 + texture2D(uVideo, cuv + vec2(0.0, px.y)).rgb * 0.15
+                 + texture2D(uVideo, cuv - vec2(0.0, px.y)).rgb * 0.15;
+        // Warm it, soften the contrast and lift the blacks: it's light on canvas, not a screen.
+        float lum = dot(pic, vec3(0.299, 0.587, 0.114));
+        pic = mix(pic, vec3(lum), 0.06) * vec3(1.0, 0.94, 0.84);
+        pic = pic * 0.9 + 0.03;
+
+        // The canvas itself, with a faint woven texture and the folds of the fabric.
+        float weave = 0.96 + 0.06 * vnoise(vUv * vec2(260.0, 150.0));
+        vec3 col = uCanvas * weave;
+        // A stitched hem along the edges of the cloth, a little darker.
+        float hem = min(min(vUv.x, 1.0 - vUv.x) * uSize.x, min(vUv.y, 1.0 - vUv.y) * uSize.y);
+        col *= mix(0.78, 1.0, smoothstep(0.03, 0.06, hem));
+        // A little projector light also spills past the picture onto the canvas margin.
+        float spill = (1.0 - edge) * exp(-6.0 * length(max(abs(vuv - 0.5) - 0.5, 0.0))) * 0.35;
+        col += vec3(1.0, 0.86, 0.7) * spill * uOn * 0.35;
+        col = mix(col, pic * weave, edge * uOn);
+        col *= vShade;
+
+        gl_FragColor = vec4(col, 1.0);
+        #include <colorspace_fragment>
+        #include <fog_fragment>
+      }
+    `,
+  });
+  Object.assign(sheetMat.uniforms, sheetUniforms);
+  const sheet = new THREE.Mesh(new THREE.PlaneGeometry(sheetW, sheetH, 48, 24), sheetMat);
+  sheet.position.set(0, sheetCentreY, 0);
+  group.add(sheet);
+
+  // ---------- Light from the projection, spilling onto the grass in front ----------
+  const spillLight = new THREE.PointLight('#ffd6bd', 0, 10, 2);
+  spillLight.position.set(0, 1.0, 1.6);
+  group.add(spillLight);
+  // A soft painted glow on the grass (cheaper and softer than a real light alone).
+  const glowMat = new THREE.MeshBasicMaterial({
+    map: getGlowTexture(), color: '#ffc9a0', transparent: true, opacity: 0,
+    depthWrite: false, blending: THREE.AdditiveBlending,
+    polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4,
+  });
+  const groundGlow = new THREE.Mesh(new THREE.PlaneGeometry(6.5, 4), glowMat);
+  groundGlow.rotation.x = -Math.PI / 2;
+  groundGlow.position.set(0, localGround(0, 1.6) + 0.04, 1.6);
+  group.add(groundGlow);
+
+  // ---------- A small orange tent and the lantern beside the sheet ----------
+  const tentX = sheetW / 2 + 2.3, tentZ = -0.5;
+  const tent = buildDomeTent();
+  tent.scale.setScalar(0.9);
+  tent.position.set(tentX, localGround(tentX, tentZ) - 0.05, tentZ);
+  tent.rotation.y = -0.45;               // door turned towards the viewer
+  group.add(tent);
+  const tentLight = new THREE.PointLight(WARM, 14, 10, 2);
+  tentLight.position.set(tentX, tent.position.y + 0.6, tentZ);
+  group.add(tentLight);
+  const tentHalo = makeHalo('#ff7a2a', 5, 0.22);
+  tentHalo.position.copy(tentLight.position);
+  group.add(tentHalo);
+
+  const lanternX = sheetW / 2 + 0.95, lanternZ = 0.9;
   const lantern = buildLantern();
-  lantern.position.set(-W / 2 - 0.6, 0, D / 2 + 0.5);
+  lantern.position.set(lanternX, localGround(lanternX, lanternZ), lanternZ);
   group.add(lantern);
   const lanternLight = new THREE.PointLight('#ffa552', 6, 7, 2);
-  lanternLight.position.set(-W / 2 - 0.6, 0.35, D / 2 + 0.5);
+  lanternLight.position.set(lanternX, lantern.position.y + 0.33, lanternZ);
   group.add(lanternLight);
   const lanternHalo = makeHalo('#ff9642', 1.3, 0.45);
   lanternHalo.position.copy(lanternLight.position);
   group.add(lanternHalo);
 
   scene.add(group);
+  group.updateMatrixWorld(true);
+
+  // Let the painted trees and stones nearby catch this tent's warm glow too.
+  setSecondWarmLight(group.localToWorld(tentLight.position.clone()));
+
+  // A few soft stones around the camp (given in camp coordinates, placed in the world).
+  const rand = seededRandom(303);
+  const stones = [[-3.1, 0.9, 0.5], [-3.6, 0.3, 0.3], [tentX + 1.4, 0.6, 0.55], [tentX - 0.9, 1.5, 0.3], [1.2, 2.6, 0.35], [-1.6, 2.2, 0.25]]
+    .map(([lx, lz, s]) => {
+      const w = group.localToWorld(new THREE.Vector3(lx, 0, lz));
+      return { x: w.x, z: w.z, s };
+    });
+  createStones(scene, stones, rand);
 
   // ---------- The video ----------
   // At load we only fetch the first frame ("metadata"), and send it to the graphics card
@@ -211,7 +359,7 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
     const texture = new THREE.VideoTexture(video);
     texture.colorSpace = THREE.SRGBColorSpace;
     renderer?.initTexture(texture); // upload now, not in the middle of the film
-    screenMat.map = texture;        // same kind of material, just a new picture: no shader rebuild
+    sheetUniforms.uVideo.value = texture;
     videoReady = true;
     // Warm up the video decoder: play for a moment, then pause. Starting a decoder takes
     // a little time, so we do it now instead of when the camp comes into view.
@@ -229,28 +377,33 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
     video.preload = 'auto';         // now download the rest of the file in the background
   }
 
-  // Where the label floats: just above the top-left corner of the screen.
-  const labelAnchor = new THREE.Vector3(-screenW / 2, wallH + 0.55, D / 2);
+  // The caption sits centred just under the sheet.
+  const labelAnchor = new THREE.Vector3(0, sheetBottom - 0.12, 0.2);
   const projected = new THREE.Vector3();
-  let screenOn = 0;   // 0..1, fades the screen in once the video is ready
+  let on = 0;   // 0..1, fades the projection in once the video is ready
 
-  // ---------- update: called every frame with the film's progress ----------
+  // ---------- update: called every frame ----------
   // near: 0 when far away, 1 when we've arrived at this camp.
   // preload: true once we're far enough up the trail to start fetching the video quietly.
-  function update(dt, camera, near, preload) {
+  function update(dt, camera, near, preload, time) {
     if (preload || near > 0.01) loadVideo();
     // Only play when close: decoding video costs power.
     if (near > 0.25 && video.paused) video.play().catch(() => {});
     if (near < 0.15 && !video.paused) video.pause();
-    // Fade the screen up from a dim fabric colour to the full video picture.
-    const target = videoReady && near > 0.25 ? 1 : 0;
-    screenOn += (target - screenOn) * (1 - Math.exp(-dt * 2));
-    const level = 0.16 + screenOn * 0.72;   // never full white: it's night, keep it gentle
-    screenMat.color.setRGB(level, level, level);
-    if (!videoReady) screenMat.color.set('#2a2630');
-    screenLight.intensity = screenOn * 7;
 
-    // Float the HTML label: turn the 3D anchor into a screen position.
+    // Fade the projection up gently, and the light it spills with it.
+    const target = videoReady && near > 0.25 ? 1 : 0;
+    on += (target - on) * (1 - Math.exp(-dt * 1.6));
+    sheetUniforms.uOn.value = on * 0.92;
+    sheetUniforms.uTime.value = time;
+    spillLight.intensity = on * 5;
+    glowMat.opacity = on * 0.16;
+
+    const flicker = 1 + Math.sin(time * 7.7) * 0.03 + Math.sin(time * 12.3 + 0.4) * 0.02;
+    lanternLight.intensity = 6 * flicker;
+    lanternHalo.material.opacity = 0.45 * flicker;
+
+    // Place the HTML caption: turn the 3D anchor into a screen position.
     if (label) {
       projected.copy(labelAnchor);
       group.localToWorld(projected);
@@ -258,15 +411,15 @@ export function createProjectCamp(scene, { x, z, facing, video: videoSrc, label,
       const inFront = projected.z < 1;
       const px = (projected.x * 0.5 + 0.5) * window.innerWidth;
       const py = (-projected.y * 0.5 + 0.5) * window.innerHeight;
-      label.style.transform = `translate3d(${px.toFixed(1)}px, ${py.toFixed(1)}px, 0) translate(0, -100%)`;
-      const show = inFront ? THREE.MathUtils.clamp((near - 0.55) / 0.35, 0, 1) : 0;
-      // Never fully 0: keeping the label "barely there" means the browser has already drawn it,
+      label.style.transform = `translate3d(${px.toFixed(1)}px, ${py.toFixed(1)}px, 0) translate(-50%, 0)`;
+      const show = inFront ? THREE.MathUtils.clamp((near - 0.6) / 0.3, 0, 1) : 0;
+      // Never fully 0: keeping the caption "barely there" means the browser has already drawn it,
       // so it fades in without a stutter.
       label.style.opacity = Math.max(show, 0.001).toFixed(3);
     }
   }
 
-  return { group, update, screen, get videoElement() { return video; } };
+  return { group, update, sheet, get videoElement() { return video; } };
 }
 
 // ---------- The dome tent ----------
@@ -346,20 +499,4 @@ function buildLantern() {
   handle.position.y = 0.33;
   group.add(base, glow, cap, handle);
   return group;
-}
-
-// ---------- A lumpy rock: a 12-sided shape with its corners pushed in and out ----------
-function buildRockGeometry(rand) {
-  const geo = new THREE.DodecahedronGeometry(1, 0);
-  const pos = geo.attributes.position;
-  // Corners are duplicated per face; move identical corners the same way so there are no gaps.
-  const offsets = new Map();
-  for (let i = 0; i < pos.count; i++) {
-    const key = `${pos.getX(i).toFixed(3)},${pos.getY(i).toFixed(3)},${pos.getZ(i).toFixed(3)}`;
-    if (!offsets.has(key)) offsets.set(key, 0.75 + rand() * 0.45);
-    const k = offsets.get(key);
-    pos.setXYZ(i, pos.getX(i) * k, pos.getY(i) * k, pos.getZ(i) * k);
-  }
-  geo.computeVertexNormals();
-  return geo;
 }

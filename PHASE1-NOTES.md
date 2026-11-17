@@ -161,3 +161,19 @@ the camera ever gets to them (`routeDistance()` in `cameraPath.js`):
 - **Sizing rule:** no tree within 6.5 m of the camera's route, fewer trees near it, and a near tree may be at most about
   half as tall as its distance from the route. That keeps the trail and the sky between the trees open.
 Colours have night and pre-dawn versions; `forest.setDawn()` blends them along with the sky.
+
+## Polish 2: Camp cinema, finished trees, painted stones
+- **Camp cinema** (`createProjectCamp` in `camp.js`): the hut is gone. A canvas sheet hangs between two wooden trekking
+  poles with guy ropes. Its shader does three jobs: the *vertex* part bends the flat sheet (it sags between the poles and
+  billows most in the middle, pinned at the edges, swaying slowly with time); the *fragment* part paints the canvas
+  (faint weave, darker hem, shaded folds) and "projects" the video onto the middle: a gentle 5-tap blur, warmer colours,
+  softer contrast and lifted blacks, with soft edges, so it reads as light on cloth rather than a TV. A point light
+  plus a soft glow decal spill the projection's light onto the grass. A small orange tent (the same `buildDomeTent`)
+  and the lantern sit beside it. The caption is plain HTML text centred just under the sheet.
+- **One painted style** (`makePaintedMaterial` in `forest.js`): near trees, the poles and the new stones all use the
+  same shader. The moon rim is now a faint silver edge only on the moon side. The warm camp light is applied only to
+  surfaces *facing* a tent and fades quickly, so it reads as a glow instead of a brown tint (and the ridge tent glows too).
+- **Pines** have ragged outlines: each ring of the lathe pushes branch tips in and out with noise, drooping slightly.
+  **Leafy trees** have short trunks and fuller canopies that sit lower.
+- **Stones** are smooth spheres gently pushed in and out by low-frequency noise (soft lumps, no facets), with a flatter
+  base so they sit on the ground, drawn with instancing in the painted style.

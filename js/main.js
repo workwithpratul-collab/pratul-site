@@ -174,7 +174,7 @@ function tick(timestamp) {
   trekker.setLightLevel(THREE.MathUtils.lerp(0.42, 0.52, dawn), nightTint.copy(NIGHT_TINT).lerp(DAWN_TINT, dawn));
 
   // The project camp "wakes up" as we approach the ridge.
-  dermaeCamp.update(dt, camera, smoothstep(0.55, BEATS.walkEnd + 0.04, scroll.progress), scroll.progress > 0.35);
+  dermaeCamp.update(dt, camera, smoothstep(0.55, BEATS.walkEnd + 0.04, scroll.progress), scroll.progress > 0.35, time);
 
   sky.update(time, camera, renderer.getPixelRatio());
   forest.update(time);
@@ -203,6 +203,7 @@ window.__ascent = {
     trekker.teleport();
   },
   lenis,
+  scene,   // handy in the console: e.g. __ascent.scene.getObjectByName("stones")
 };
 
 // ---------- 7. The opening text and the page "chrome" ----------

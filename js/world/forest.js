@@ -23,13 +23,13 @@ const PALETTE = {
   night: {
     nearBottom: '#172a3d', nearTop: '#2f4b62',   // near trees: deep slate blue low, lighter high
     cardBottom: '#172b3f', cardTop: '#223d52',   // card trees: flatter; the fog adds the depth
-    rim: '#7e95d6',                              // cool moonlight on the edges
+    rim: '#a3adc8',                              // faint cool silver on the moon side
     trunk: '#26242e',
   },
   dawn: {
     nearBottom: '#252f4a', nearTop: '#4a5878',
     cardBottom: '#232c46', cardTop: '#343f5e',
-    rim: '#c2b4d8',
+    rim: '#c9c0d8',
     trunk: '#332d3a',
   },
 };
@@ -60,8 +60,9 @@ const shared = {
   uWind: { value: 0 },
   uMoonDir: { value: new THREE.Vector3(-0.5, 0.36, -0.79).normalize() },
   uRim: { value: new THREE.Color(PALETTE.night.rim) },
-  uWarmPos: { value: new THREE.Vector3(-3.8, 0.8, -2.2) },  // base camp tent
-  uWarmColor: { value: new THREE.Color('#ff9a4a') },
+  uWarmPos: { value: new THREE.Vector3(-3.8, 0.8, -2.2) },     // base camp tent
+  uWarmPos2: { value: new THREE.Vector3(0, -1000, 0) },        // ridge camp tent (set by camp.js)
+  uWarmColor: { value: new THREE.Color('#ffa257') },
   uMistColor: { value: new THREE.Color() },
 };
 
@@ -116,7 +117,10 @@ export function createForest(scene, { routeDistance, sky } = {}) {
   }
 
   // ---------- 2. Build the meshes ----------
-  const nearMat = makeNearMaterial();
+  const nearMat = makePaintedMaterial({
+    night: { bottom: PALETTE.night.nearBottom, top: PALETTE.night.nearTop, trunk: PALETTE.night.trunk },
+    dawn: { bottom: PALETTE.dawn.nearBottom, top: PALETTE.dawn.nearTop, trunk: PALETTE.dawn.trunk },
+  });
   const pineMesh = makeNearInstanced(buildSoftPine(), near.pine, nearMat, 'near-pines');
   const oakMesh = makeNearInstanced(buildSoftOak(), near.oak, nearMat, 'near-oaks');
   const cardMesh = makeCards(cards);
@@ -126,9 +130,7 @@ export function createForest(scene, { routeDistance, sky } = {}) {
   const night = mapColors(PALETTE.night);
   const dawn = mapColors(PALETTE.dawn);
   function setDawn(t) {
-    nearMat.uniforms.uBottom.value.lerpColors(night.nearBottom, dawn.nearBottom, t);
-    nearMat.uniforms.uTop.value.lerpColors(night.nearTop, dawn.nearTop, t);
-    nearMat.uniforms.uTrunk.value.lerpColors(night.trunk, dawn.trunk, t);
+    setPaintedDawn(t);   // near trees and rocks
     cardMesh.material.uniforms.uBottom.value.lerpColors(night.cardBottom, dawn.cardBottom, t);
     cardMesh.material.uniforms.uTop.value.lerpColors(night.cardTop, dawn.cardTop, t);
     shared.uRim.value.lerpColors(night.rim, dawn.rim, t);
@@ -156,38 +158,48 @@ function mapColors(p) {
 }
 
 // =====================================================================
-// NEAR TREES: smooth 3D shapes with a painted gradient shader
+// PAINTED MATERIAL: used by near trees AND rocks, so they share one style
 // =====================================================================
-function makeNearMaterial() {
-  return new THREE.ShaderMaterial({
+// Colours are a painted gradient (darker low, lighter high), plus a soft hint of
+// form from the moon, a faint silver rim on the moon side, and warm light from the
+// camp tents on surfaces that face them. Every painted material is remembered, so
+// setPaintedDawn() can shift them all from night to pre-dawn together.
+const paintedMaterials = [];
+
+export function makePaintedMaterial({ night, dawn, wind = true, roundness = 0.55, rim = 1 }) {
+  const material = new THREE.ShaderMaterial({
     fog: true,
+    defines: wind ? { USE_WIND: '' } : {},
     uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {
-      uBottom: { value: new THREE.Color() },
-      uTop: { value: new THREE.Color() },
-      uTrunk: { value: new THREE.Color() },
+      uBottom: { value: new THREE.Color(night.bottom) },
+      uTop: { value: new THREE.Color(night.top) },
+      uTrunk: { value: new THREE.Color(night.trunk || night.bottom) },
+      uRoundness: { value: roundness },
+      uRimAmount: { value: rim },
     }]),
     vertexShader: /* glsl */ `
       #include <common>
       #include <fog_pars_vertex>
-      attribute float aTrunk;      // 1 on trunk vertices, 0 on foliage
-      uniform float uWind;
+      attribute float aTrunk;      // 1 on trunk vertices, 0 on foliage / stone
+      uniform float uWind, uRoundness;
       varying float vH, vTrunk;
       varying vec3 vNormalW, vWorld, vTint;
       void main() {
         vec3 p = position;
-        // Gentle sway: tops move, roots stay still, each tree on its own rhythm.
-        float phase = instanceMatrix[3].x * 0.37 + instanceMatrix[3].z * 0.21;
-        float bend = p.y * p.y;
-        p.x += sin(uWind * 0.9 + phase) * 0.012 * bend;
-        p.z += cos(uWind * 0.7 + phase) * 0.008 * bend;
-
+        #ifdef USE_WIND
+          // Gentle sway: tops move, roots stay still, each tree on its own rhythm.
+          float phase = instanceMatrix[3].x * 0.37 + instanceMatrix[3].z * 0.21;
+          float bend = p.y * p.y;
+          p.x += sin(uWind * 0.9 + phase) * 0.012 * bend;
+          p.z += cos(uWind * 0.7 + phase) * 0.008 * bend;
+        #endif
         mat4 m = modelMatrix * instanceMatrix;
         vec4 world = m * vec4(p, 1.0);
         vWorld = world.xyz;
-        // Lean the normals towards "pointing out from the trunk", so the shape shades
+        // Lean the normals towards "pointing out from the middle", so each shape shades
         // like one soft rounded form instead of many small facets.
         vec3 radial = normalize(vec3(position.x, 0.3, position.z) + vec3(1e-5));
-        vNormalW = normalize(mat3(m) * normalize(mix(normal, radial, 0.55)));
+        vNormalW = normalize(mat3(m) * normalize(mix(normal, radial, uRoundness)));
         vH = position.y;
         vTrunk = aTrunk;
         #ifdef USE_INSTANCING_COLOR
@@ -203,9 +215,20 @@ function makeNearMaterial() {
     fragmentShader: /* glsl */ `
       #include <common>
       #include <fog_pars_fragment>
-      uniform vec3 uBottom, uTop, uTrunk, uRim, uMoonDir, uWarmPos, uWarmColor;
+      uniform vec3 uBottom, uTop, uTrunk, uRim, uMoonDir, uWarmPos, uWarmPos2, uWarmColor;
+      uniform float uRimAmount;
       varying float vH, vTrunk;
       varying vec3 vNormalW, vWorld, vTint;
+
+      // How much warm light a point gets from a tent: only on surfaces that face it,
+      // strong close by and fading quickly, so it reads as a glow, not a brown tint.
+      float warmFrom(vec3 lightPos, vec3 n) {
+        vec3 L = lightPos - vWorld;
+        float d2 = dot(L, L);
+        float facing = max(dot(n, normalize(L)), 0.0);
+        return facing * facing / (1.0 + d2 * 0.16);
+      }
+
       void main() {
         vec3 n = normalize(vNormalW);
         vec3 v = normalize(cameraPosition - vWorld);
@@ -216,19 +239,17 @@ function makeNearMaterial() {
 
         // 2. A very soft hint of form from the moon (wrapped, so there is no hard shadow side).
         float wrap = dot(n, uMoonDir) * 0.5 + 0.5;
-        col *= mix(0.88, 1.1, wrap);
+        col *= mix(0.9, 1.08, wrap);
 
-        // 3. Cool moonlit rim on the edges that face the moon's side.
-        float fres = pow(1.0 - max(dot(n, v), 0.0), 2.5);
+        // 3. A faint, cool silver edge, only on the side facing the moon.
+        float fres = pow(1.0 - max(dot(n, v), 0.0), 3.5);
         vec2 nSide = normalize(n.xz + vec2(1e-5));
-        float side = smoothstep(-0.2, 0.8, dot(nSide, normalize(uMoonDir.xz)));
-        col += uRim * fres * side * 0.42 * (1.0 - vTrunk);
+        float side = smoothstep(0.35, 0.95, dot(nSide, normalize(uMoonDir.xz)));
+        col += uRim * fres * side * 0.13 * uRimAmount * (1.0 - vTrunk);
 
-        // 4. Warm glow from the base camp tent on nearby trees.
-        vec3 toWarm = uWarmPos - vWorld;
-        float d2 = dot(toWarm, toWarm);
-        float facing = 0.35 + 0.65 * max(dot(n, normalize(toWarm)), 0.0);
-        col += uWarmColor * (0.9 / (1.0 + d2 * 0.14)) * facing * 0.5;   // strong close by, fades fast
+        // 4. Warm glow from the camp tents.
+        float warm = warmFrom(uWarmPos, n) + 0.7 * warmFrom(uWarmPos2, n);
+        col += uWarmColor * warm * 0.85;
 
         gl_FragColor = vec4(col, 1.0);
         #include <colorspace_fragment>
@@ -236,14 +257,34 @@ function makeNearMaterial() {
       }
     `,
   });
+  // Link the values every painted material shares (wind, moon, rim colour, tent lights).
+  Object.assign(material.uniforms, {
+    uWind: shared.uWind, uMoonDir: shared.uMoonDir, uRim: shared.uRim,
+    uWarmPos: shared.uWarmPos, uWarmPos2: shared.uWarmPos2, uWarmColor: shared.uWarmColor,
+  });
+  paintedMaterials.push({
+    material,
+    night: { bottom: new THREE.Color(night.bottom), top: new THREE.Color(night.top), trunk: new THREE.Color(night.trunk || night.bottom) },
+    dawn: { bottom: new THREE.Color(dawn.bottom), top: new THREE.Color(dawn.top), trunk: new THREE.Color(dawn.trunk || dawn.bottom) },
+  });
+  return material;
+}
+
+// Shift every painted material (trees and rocks) between night (0) and pre-dawn (1).
+function setPaintedDawn(t) {
+  for (const p of paintedMaterials) {
+    p.material.uniforms.uBottom.value.lerpColors(p.night.bottom, p.dawn.bottom, t);
+    p.material.uniforms.uTop.value.lerpColors(p.night.top, p.dawn.top, t);
+    p.material.uniforms.uTrunk.value.lerpColors(p.night.trunk, p.dawn.trunk, t);
+  }
+}
+
+// Tell the painted materials where the second (ridge camp) tent glows from.
+export function setSecondWarmLight(position) {
+  shared.uWarmPos2.value.copy(position);
 }
 
 function makeNearInstanced(geometry, trees, material, name) {
-  // Each mesh needs the shared uniforms (wind, rim, warm light) linked into its material.
-  Object.assign(material.uniforms, {
-    uWind: shared.uWind, uMoonDir: shared.uMoonDir, uRim: shared.uRim,
-    uWarmPos: shared.uWarmPos, uWarmColor: shared.uWarmColor,
-  });
   const mesh = new THREE.InstancedMesh(geometry, material, Math.max(trees.length, 1));
   mesh.count = trees.length;
   mesh.name = name;
@@ -269,26 +310,33 @@ function makeNearInstanced(geometry, trees, material, name) {
   return mesh;
 }
 
-// A pine "turned" on a lathe: a smooth outline with gentle scallops (soft layers of
-// branches) that taper to a point. Each tree outline is slightly lopsided, so it feels drawn.
+// A flag attribute that marks every vertex of a part as trunk (1) or not (0).
+function flag(geo, value) {
+  geo.setAttribute('aTrunk', new THREE.Float32BufferAttribute(new Array(geo.attributes.position.count).fill(value), 1));
+  if (geo.attributes.uv) geo.deleteAttribute('uv');   // no textures; all parts must match
+  return geo.index ? geo.toNonIndexed() : geo;
+}
+
+// A pine "turned" on a lathe: soft layers of branches that taper to a point. The outline
+// is ragged: branch tips poke out unevenly around each layer, so it reads as a pine.
 function buildSoftPine() {
-  const rand = seededRandom(7);
-  const radial = 16, rows = 34;
-  const positions = [], trunkFlag = [], indices = [];
+  const radial = 26, rows = 40;
+  const positions = [], indices = [];
   const tiers = 5;
-  const lobes = Array.from({ length: radial }, () => 0.9 + rand() * 0.2); // lopsidedness per direction
   for (let r = 0; r <= rows; r++) {
     const t = r / rows;                         // 0 at the bottom of the foliage, 1 at the tip
-    const y = 0.08 + t * 0.92;
-    // Overall taper, plus soft scallops (rounded, never stepped).
-    const scallop = 0.5 + 0.5 * Math.cos(t * tiers * Math.PI * 2);
-    // Soft scallops: each "layer" of branches bulges out and tucks in, smoothly.
-    const radius = 0.26 * Math.pow(1 - t, 0.95) * (0.76 + 0.24 * Math.pow(scallop, 1.6));
+    // Each layer of branches bulges out and tucks in, smoothly (no steps, no dark bands).
+    const scallop = Math.pow(0.5 + 0.5 * Math.cos(t * tiers * Math.PI * 2), 1.6);
+    const radius = 0.26 * Math.pow(1 - t, 0.95) * (0.76 + 0.24 * scallop);
     for (let a = 0; a < radial; a++) {
       const ang = (a / radial) * Math.PI * 2;
-      const k = lobes[a] * radius;
+      // Ragged edge: uneven branch tips (noise) that stick out most at the bulge of each layer.
+      const tip = (a % 2 === 0 ? 1 : -1) * 0.07 * scallop;
+      const ragged = 0.84 + 0.32 * noise2(a * 0.83 + 3.1, r * 0.47, 13) + tip;
+      const k = radius * ragged;
+      // Branch tips droop slightly where they stick out.
+      const y = 0.08 + t * 0.92 - Math.max(ragged - 1, 0) * 0.05;
       positions.push(Math.cos(ang) * k, y, Math.sin(ang) * k);
-      trunkFlag.push(0);
     }
   }
   for (let r = 0; r < rows; r++) {
@@ -301,41 +349,87 @@ function buildSoftPine() {
   // Close the bottom of the foliage with a gently domed underside (so no hole, no dark rim).
   const centre = positions.length / 3;
   positions.push(0, 0.05, 0);
-  trunkFlag.push(0);
   for (let a = 0; a < radial; a++) indices.push(centre, a, (a + 1) % radial);
 
   const foliage = new THREE.BufferGeometry();
   foliage.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  foliage.setAttribute('aTrunk', new THREE.Float32BufferAttribute(trunkFlag, 1));
   foliage.setIndex(indices);
   foliage.computeVertexNormals();
 
   const trunk = new THREE.CylinderGeometry(0.014, 0.024, 0.12, 8);
   trunk.translate(0, 0.06, 0);
-  trunk.setAttribute('aTrunk', new THREE.Float32BufferAttribute(new Array(trunk.attributes.position.count).fill(1), 1));
-  trunk.deleteAttribute('uv');   // trees use no textures; all parts must share the same attributes
-  return mergeGeometries([foliage.toNonIndexed(), trunk.toNonIndexed()]);
+  return mergeGeometries([flag(foliage, 0), flag(trunk, 1)]);
 }
 
-// An oak: a cluster of smooth round clumps on a short trunk.
+// A leafy tree: a short trunk under a full, low canopy of soft round clumps
+// (not broccoli on a stick).
 function buildSoftOak() {
-  const parts = [];
-  const trunk = new THREE.CylinderGeometry(0.03, 0.05, 0.45, 8);
-  trunk.translate(0, 0.22, 0);
-  trunk.setAttribute('aTrunk', new THREE.Float32BufferAttribute(new Array(trunk.attributes.position.count).fill(1), 1));
-  parts.push(trunk.toNonIndexed());
+  const trunk = new THREE.CylinderGeometry(0.035, 0.06, 0.26, 8);
+  trunk.translate(0, 0.13, 0);
+  const parts = [flag(trunk, 1)];
   const clumps = [
-    [0, 0.66, 0, 0.27], [0.17, 0.57, 0.05, 0.2], [-0.16, 0.58, -0.04, 0.21],
-    [0.04, 0.58, 0.17, 0.19], [-0.05, 0.57, -0.16, 0.19], [0.02, 0.84, 0.02, 0.18],
+    [0, 0.5, 0, 0.3], [0.21, 0.42, 0.06, 0.24], [-0.2, 0.43, -0.05, 0.25],
+    [0.05, 0.41, 0.21, 0.23], [-0.06, 0.41, -0.21, 0.23], [0.1, 0.66, -0.04, 0.22],
+    [-0.1, 0.64, 0.08, 0.21], [0, 0.33, 0, 0.25],
   ];
   for (const [x, y, z, r] of clumps) {
-    const s = new THREE.SphereGeometry(r, 18, 12);
+    const s = new THREE.SphereGeometry(r, 20, 14);
     s.translate(x, y, z);
-    s.setAttribute('aTrunk', new THREE.Float32BufferAttribute(new Array(s.attributes.position.count).fill(0), 1));
-    parts.push(s.toNonIndexed());
+    parts.push(flag(s, 0));
   }
-  parts.forEach((g) => g.deleteAttribute('uv'));   // no textures on trees
   return mergeGeometries(parts);
+}
+
+// =====================================================================
+// ROCKS: soft, rounded painted stones in the same style as the trees
+// =====================================================================
+const STONE = {
+  night: { bottom: '#1b2230', top: '#465066' },
+  dawn: { bottom: '#262a3e', top: '#5b5f7c' },
+};
+
+// One smooth pebble shape (a sphere gently pushed in and out by noise), 1 unit tall.
+function buildStoneGeometry() {
+  const geo = new THREE.SphereGeometry(0.5, 32, 20);
+  const pos = geo.attributes.position;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i);
+    // Low-frequency noise only: soft lumps, never sharp corners.
+    const bump = 0.8 + 0.3 * noise2(v.x * 2.2 + v.y * 1.3, v.z * 2.2 - v.y * 0.7, 31)
+      + 0.1 * noise2(v.x * 5.1 - v.y * 2.0, v.z * 5.1 + v.y * 1.7, 37);
+    v.multiplyScalar(bump);
+    if (v.y < -0.3) v.y = -0.3 + (v.y + 0.3) * 0.3;   // a flatter base, so stones sit on the ground
+    pos.setXYZ(i, v.x, v.y + 0.5, v.z);
+  }
+  geo.computeVertexNormals();
+  return flag(geo, 0);
+}
+
+// stones: [{ x, z, s }] in world space. Returns one instanced mesh.
+export function createStones(scene, stones, rand = Math.random) {
+  const material = makePaintedMaterial({ ...STONE, wind: false, roundness: 0.35, rim: 0.7 });
+  const mesh = new THREE.InstancedMesh(buildStoneGeometry(), material, stones.length);
+  mesh.name = 'stones';
+  const m = new THREE.Matrix4();
+  const q = new THREE.Quaternion();
+  const sc = new THREE.Vector3();
+  const p = new THREE.Vector3();
+  const up = new THREE.Vector3(0, 1, 0);
+  const color = new THREE.Color();
+  stones.forEach((st, i) => {
+    p.set(st.x, groundHeight(st.x, st.z) - st.s * 0.12, st.z);
+    q.setFromAxisAngle(up, rand() * Math.PI * 2);
+    sc.set(st.s * (1.2 + rand() * 0.4), st.s * (0.55 + rand() * 0.25), st.s * (0.95 + rand() * 0.3));
+    m.compose(p, q, sc);
+    mesh.setMatrixAt(i, m);
+    color.setScalar(0.9 + rand() * 0.2);
+    mesh.setColorAt(i, color);
+  });
+  mesh.instanceMatrix.needsUpdate = true;
+  mesh.computeBoundingSphere();
+  scene.add(mesh);
+  return mesh;
 }
 
 // =====================================================================
@@ -406,7 +500,7 @@ function makeCards(cards) {
         // Painted gradient + a little brush variation + a moonlit left edge.
         vec3 col = mix(uBottom, uTop, smoothstep(0.0, 1.0, vUv.y)) * vTint;
         col *= 0.93 + 0.14 * t.r;
-        col += uRim * t.g * 0.06;     // only a whisper of moonlight on far trees
+        col += uRim * t.g * 0.035;    // only a whisper of moonlight on far trees
         // Mist gathers at the feet of each tree (the style-4 look).
         col = mix(col, uMistColor, (1.0 - smoothstep(0.0, 0.35, vUv.y)) * 0.3);
 
