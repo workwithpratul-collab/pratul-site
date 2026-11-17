@@ -49,3 +49,24 @@ Benchmark: my King's Garden site. This must be clearly better: sharper, smoother
 Build in small steps. After each step, stop, tell me what to look at in the browser,
 and explain what the new code does in 3–5 simple sentences. Commit to Git after each
 working step with a clear message.
+
+## Rules of the look
+Locked in Phase 2. Every future step must follow these. See `style-guide.html` for the palette,
+type, components and style frames; colours live in `js/world/palette.js` (world) and
+`css/tokens.css` (interface).
+1. **Paint, don't render.** Surfaces are soft gradients of chosen colours. No photo textures, no visible
+   facets, no shiny highlights, no hard edges between light and shade.
+2. **No black, no hard shadows.** The darkest value in a scene is that scene's deep colour (navy at night,
+   lilac at sunrise). Shade is a cooler colour, never a darker grey.
+3. **Warm means light.** Saturated amber, orange and gold come only from light sources: tents, lanterns,
+   the sun, and the summit flag ("Book a call"). Everything else stays soft and cool.
+4. **Distance is paler.** Every layer further away leans towards the horizon colour, so the world reads as
+   stacked painted layers, with mist gathering low between them.
+5. **One palette, one place.** World colours only from `palette.js`, interface colours only from `tokens.css`.
+   Never type a colour straight into a scene file.
+6. **The light moves as one.** Sky, fog, mist, key light, trees and the trekker change together through
+   `setClimb()` in `palette.js`. Never animate one of them on its own.
+7. **Calm motion only.** Slow, eased camera and interface moves (ease out, 300 ms or more). Nothing bounces,
+   flashes, shakes or swooshes.
+8. **Small figure, big world.** The trekker is a small warm note in a large, quiet landscape. Leave open sky,
+   and keep text as real HTML in the calm parts of the frame.

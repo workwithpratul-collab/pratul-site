@@ -120,7 +120,7 @@
   font-size: var(--text-xs);
   line-height: var(--leading-label);
   letter-spacing: var(--tracking-caption);
-  color: var(--ink-muted);
+  color: rgba(245, 240, 232, 0.82);   /* a little stronger than muted: it often sits over bright grass or sky */
   white-space: nowrap;
   text-shadow: var(--text-scrim);
 }
@@ -145,6 +145,7 @@
   border: var(--hairline) solid rgba(255, 184, 119, 0.45);
   border-radius: var(--radius-pill);
   color: var(--accent);
+  background: rgba(12, 15, 36, 0.4);   /* a faint dark backing, so the amber reads on bright skies too */
   font-size: 10px;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
