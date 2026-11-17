@@ -342,11 +342,15 @@ function landHeight(x, z) {
     const d = Math.hypot(px, pz);
     if (d > 160) continue;
     if (d < landDistance) landDistance = d;
-    // Left of the walking direction is (dz, -dx).
-    const left = px * dz - pz * dx > 0;
+    // How far to the left of the walking direction (dz, -dx) the point is. The left and
+    // right slopes blend over a few metres, so there is never a crease where they meet.
+    const sideways = (px * dz - pz * dx) / Math.sqrt(len2);
+    const left = smoothstep(-5, 5, sideways);
     const e = a[2] + (b[2] - a[2]) * t;
-    const spread = left ? a[3] + (b[3] - a[3]) * t : a[4] + (b[4] - a[4]) * t;
-    const flat = left ? a[5] + (b[5] - a[5]) * t : a[6] + (b[6] - a[6]) * t;
+    const spreadL = a[3] + (b[3] - a[3]) * t, spreadR = a[4] + (b[4] - a[4]) * t;
+    const flatL = a[5] + (b[5] - a[5]) * t, flatR = a[6] + (b[6] - a[6]) * t;
+    const spread = spreadR + (spreadL - spreadR) * left;
+    const flat = flatR + (flatL - flatR) * left;
     const out = Math.max(d - flat, 0);
     const h = e - (out * out) / (2 * spread);
     best = best === -Infinity ? h : smax(best, h, 3);
@@ -362,7 +366,7 @@ const PADS = [
   [41.5, -184.5, 7, 0],        // King's Garden screen
   [36, -174.6, 4, 0],          // where the trekker watches it
   [106, -158.5, 9, 1.4],       // Trinetra's knoll
-  [164.6, -249.2, 7, 0],       // the gear-check mat
+  [164.2, -247.1, 7, 0],       // the gear-check mat
   [193, -340, 4.5, 0],         // the summit top
 ];
 
@@ -376,6 +380,8 @@ function shapeHeight(x, z) {
   const onLand = smoothstep(-6, 3, land - base);
   // Gentle rolls on the grass, larger swells on the meadow, wind-carved ripples up high.
   y += ((noise2(x * 0.045, z * 0.045, 61) - 0.5) * 2.4 + (noise2(x * 0.16, z * 0.16, 63) - 0.5) * 0.5) * onLand;
+  // The meadow rolls in long, slow swells (calmer close to the path, so it stays walkable).
+  y += (noise2(x * 0.022, z * 0.022, 57) - 0.5) * 9 * meadowAmount(x, z) * onLand * smoothstep(6, 26, landDistance);
   // Rocky ribs on the summit's steep sides (calm near the spine, where we walk).
   const high = smoothstep(64, 90, land);
   const rib = (1 - Math.abs(noise2(x * 0.09, z * 0.09, 93) * 2 - 1)) * 4 + (noise2(x * 0.05, z * 0.05, 91) - 0.5) * 6;

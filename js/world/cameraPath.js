@@ -65,13 +65,17 @@ export function createCameraPath() {
       };
     } else if (st.at === 'meadow') {
       stop.s = trailDistanceAt(MEADOW.stop[0], MEADOW.stop[1]);
-      // Arrive looking down at the mat on the grass, then lift the gaze towards the summit.
-      const summitLook = atGround(SUMMIT.top[0], SUMMIT.top[1], -30);
+      // Arrive looking down past the trekker at the mat on the grass, then slowly lift the
+      // gaze up the slope towards the summit before walking on.
+      const summitLook = atGround(SUMMIT.top[0], SUMMIT.top[1], -38);
+      const mat = atGround(MEADOW.mat[0], MEADOW.mat[1], 0.15);
       stop.shot = {
-        pos: atGround(MEADOW.view[0], MEADOW.view[1], 3.3),
-        look: atGround(MEADOW.mat[0], MEADOW.mat[1], 0.3),
-        look2: atGround(MEADOW.mat[0], MEADOW.mat[1], 0.3).lerp(summitLook, 0.22),
-        blendIn: 0.05, blendOut: 0.05,
+        pos: atGround(MEADOW.view[0], MEADOW.view[1], 4.6),
+        look: mat,
+        look2: mat.clone().lerp(summitLook, 0.3),
+        // A short blend-in: the camera spot is on the trail behind the stop, so the shot only
+        // takes over once the trekker has walked past it.
+        blendIn: 0.03, blendOut: 0.05,
       };
     } else if (st.at === 'summit') {
       stop.s = trailLength - 0.4;

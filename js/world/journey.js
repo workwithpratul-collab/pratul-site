@@ -58,8 +58,8 @@ export const CAMPS = [
 export const MEADOW = {
   centre: [158, -238],      // the middle of the rolling grassland
   stop: [161, -246],        // where the trekker stops
-  mat: [164.6, -249.2],     // the placeholder mat on the grass
-  view: [153.4, -237.6],    // camera: above and behind, so it can tilt down onto the mat
+  mat: [164.2, -247.1],     // the placeholder mat on the grass, just ahead and to the right
+  view: [161.7, -236.8],    // camera: high behind the trekker, so it looks down past them onto the mat
 };
 
 // The summit: the end of the trail, with the flag ("Book a call") beside it.

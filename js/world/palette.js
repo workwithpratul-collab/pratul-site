@@ -174,6 +174,8 @@ export const MATERIALS = {
     rope: '#9a9484',
     groundsheet: '#3b3330',
     metal: '#3a3a40',
+    mat: '#5f678f',            // the gear-check mat: faded indigo wool (soft and cool, never warm)
+    matStripe: '#cfc6b6',      // its woven pale stripes
   },
   // Painted ground colours. These are "surface" colours: the light tints them.
   ground: {

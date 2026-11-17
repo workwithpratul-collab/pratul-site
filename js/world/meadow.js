@@ -10,8 +10,10 @@
 
 import * as THREE from 'three';
 import { createSky } from './sky.js';
-import { createMountains, noise2, smoothstep, seededRandom } from './terrain.js';
-import { createNearTrees, createStones, setWarmLights } from './forest.js';
+import { createMountains, noise2, smoothstep, seededRandom, groundHeight, nearestTrail, trailDistanceAt, trailDirectionAt } from './terrain.js';
+import { createNearTrees, createStones, createStoneVariety, setWarmLights } from './forest.js';
+import { createGrass, MEADOW_GRASS } from './grass.js';
+import { MEADOW } from './journey.js';
 import { makeMistMaterial } from './mist.js';
 import { createTrekker } from './trekker.js';
 import { mood, MATERIALS } from './palette.js';
@@ -282,5 +284,106 @@ function buildFlowers(rand) {
   }
   mesh.count = n;
   mesh.name = 'wildflowers';
+  return mesh;
+}
+
+// =====================================================================
+// THE MEADOW IN THE FILM (scene 3)
+// =====================================================================
+// The style frame above builds its own little world. In the film, the meadow is part of the
+// one continuous landscape (terrain.js shapes the broad, rolling shelf), and this adds what
+// grows and lies on it: alpine grass and drifts of wildflowers, a few soft trees, stones in
+// four shapes, mist in the valley below, and the gear-check mat (a placeholder until Phase 4).
+export function createMeadowZone(scene) {
+  const rand = seededRandom(4242);
+  const [mx, mz] = MEADOW.mat;
+  const nearMat = (x, z) => Math.hypot(x - mx, z - mz) < 2.6 || Math.hypot(x - MEADOW.view[0], z - MEADOW.view[1]) < 5;
+
+  // ---------- Grass and wildflowers, from the end of the ridge to the snow line ----------
+  const start = trailDistanceAt(149, -200);
+  const snow = trailDistanceAt(185, -284);
+  createGrass(scene, {
+    from: start, to: snow, width: 42, perMetre: 300, flowers: 70, colors: MEADOW_GRASS, seed: 33,
+    // Nothing grows on the mat, under the camera, or up in the snow.
+    skip: (x, z) => nearMat(x, z) || groundHeight(x, z) > 70,
+  });
+
+  // ---------- A few soft trees: a group on the knoll to the right, a lone pine on the left ----------
+  const tree = (x, z, scale) => ({ x, z, y: groundHeight(x, z), scale, rot: rand() * 6.28, tint: 0.92 + rand() * 0.14 });
+  createNearTrees(scene, {
+    pine: [tree(186, -246, 9), tree(191, -239, 7), tree(184, -233, 10.5), tree(193, -252, 6.5), tree(136, -254, 8.5), tree(141, -262, 6)],
+    oak: [tree(178, -229, 5.5), tree(181, -258, 4.8), tree(134, -230, 5)],
+  });
+
+  // ---------- Stones: clusters in the grass, each a mix of shapes ----------
+  const stones = [];
+  for (const [cx, cz] of [[171, -238], [150, -226], [175, -264], [146, -248], [168, -216], [156, -270], [190, -262]]) {
+    const n = 2 + Math.floor(rand() * 3);
+    for (let i = 0; i < n; i++) {
+      const x = cx + (rand() - 0.5) * 5, z = cz + (rand() - 0.5) * 5;
+      if (nearMat(x, z) || nearestTrail(x, z).distance < 2.2) continue;
+      stones.push({ x, z, s: (i === 0 ? 0.8 : 0.3) + rand() * 0.5 });
+    }
+  }
+  createStoneVariety(scene, stones, rand);
+
+  // ---------- Mist: soft bands in the valley below the meadow's western edge ----------
+  for (const s of [
+    { from: [118, -196], to: [104, -300], bottom: 8, height: 20, seed: 3.9 },
+    { from: [96, -250], to: [112, -360], bottom: 0, height: 26, seed: 7.7 },
+  ]) {
+    const geo = new THREE.PlaneGeometry(1, 1, 60, 1);
+    const pos = geo.attributes.position;
+    for (let k = 0; k < pos.count; k++) {
+      const t = pos.getX(k) + 0.5, up = (pos.getY(k) + 0.5) * s.height;
+      pos.setXYZ(k, s.from[0] + (s.to[0] - s.from[0]) * t, s.bottom + up, s.from[1] + (s.to[1] - s.from[1]) * t);
+    }
+    const strip = new THREE.Mesh(geo, makeMistMaterial({ opacity: 0.5, scale: [12, 1.3], speed: 0.01, softness: [0.36, 0.64], nearFade: [25, 70], seed: s.seed }));
+    strip.name = 'meadow-mist';
+    scene.add(strip);
+  }
+
+  // ---------- The gear-check mat ----------
+  // A woven wool mat rolled out on the grass, with pale stripes near each end. The trekking
+  // gear will be laid out on it in Phase 4.
+  const mat = buildMat();
+  mat.position.set(mx, groundHeight(mx, mz) + 0.025, mz);
+  // Turned so its long side faces the trail.
+  const t = trailDistanceAt(MEADOW.stop[0], MEADOW.stop[1]);
+  const dir = trailDirectionAt(t);
+  mat.rotation.y = Math.atan2(dir.x, dir.z) + 0.25;
+  scene.add(mat);
+  return { mat };
+}
+
+// A thin rug: a gently rounded slab, coloured by vertices (indigo wool, pale stripes), with a
+// soft roll at one end. Lambert-lit, so it takes the morning light like everything else.
+function buildMat() {
+  const W = 1.9, D = 1.15;
+  const geo = new THREE.PlaneGeometry(W, D, 48, 16).rotateX(-Math.PI / 2);
+  const pos = geo.attributes.position;
+  const colors = new Float32Array(pos.count * 3);
+  const wool = new THREE.Color(MATERIALS.camp.mat), stripe = new THREE.Color(MATERIALS.camp.matStripe), c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), z = pos.getZ(i);
+    const u = x / W + 0.5;    // 0..1 along the mat
+    // Edges sit a touch lower than the middle, so the mat drapes over the grass.
+    const edge = Math.min(u, 1 - u, z / D + 0.5, 0.5 - z / D) * 2;
+    pos.setY(i, Math.min(edge * 0.25, 0.015));
+    // Two pairs of stripes near each end.
+    const stripes = [0.1, 0.14, 0.86, 0.9].some((s) => Math.abs(u - s) < 0.012);
+    c.copy(wool).lerp(stripe, stripes ? 0.85 : 0);
+    c.multiplyScalar(0.95 + 0.08 * noise2(x * 9, z * 9, 12));
+    colors.set([c.r, c.g, c.b], i * 3);
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geo.computeVertexNormals();
+  const material = new THREE.MeshLambertMaterial({ vertexColors: true });
+  const mesh = new THREE.Mesh(geo, material);
+  mesh.name = 'gear-mat';
+  // A soft roll of the same wool at the far end, as if it was just unrolled.
+  const roll = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, D * 0.98, 16).rotateX(Math.PI / 2), new THREE.MeshLambertMaterial({ color: MATERIALS.camp.mat }));
+  roll.position.set(W / 2 + 0.05, 0.06, 0);
+  mesh.add(roll);
   return mesh;
 }

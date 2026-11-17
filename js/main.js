@@ -12,6 +12,7 @@ import { createMountains, createGround, trailPointAt, trailDirectionAt, smoothst
 import { createForest } from './world/forest.js';
 import { createBaseCamp, createProjectCamp, createCampLights } from './world/camp.js';
 import { createRidge } from './world/ridge.js';
+import { createMeadowZone } from './world/meadow.js';
 import { createMist } from './world/mist.js';
 import { createTrekker } from './world/trekker.js';
 import { createCameraPath } from './world/cameraPath.js';
@@ -92,6 +93,8 @@ const camps = CAMPS.map((c, i) => createProjectCamp(scene, {
 }));
 const campLights = createCampLights(scene);
 campLights.update(camps, camera);
+// Scene 3: the meadow (grass, wildflowers, trees, stones, mist and the gear-check mat).
+createMeadowZone(scene);
 
 // Build every shader now, while the curtain is still down. Otherwise three.js compiles each
 // one the first time its object comes into view, which causes a small stutter mid-scroll.
