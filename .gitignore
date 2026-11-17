@@ -1,0 +1,13 @@
+# OS junk files (never useful in the project)
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+*.swp
+*~
+
+# Editor settings that are personal to one machine
+.vscode/*
+!.vscode/settings.json
+
+# Note: assets/ and recordings/ are deliberately NOT ignored.

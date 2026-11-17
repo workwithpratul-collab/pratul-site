@@ -1,0 +1,175 @@
+/* ---------- Colours and fonts used across the page ---------- */
+:root {
+  --night: #070b1a;          /* page background, matches the night sky */
+  --ink: #eef0f7;            /* main text colour, a soft off-white */
+  --ink-dim: rgba(238, 240, 247, 0.62);
+  --ember: #ffb36b;          /* warm accent, like the tent glow */
+  --serif: "Instrument Serif", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --sans: "Inter", system-ui, sans-serif;
+}
+
+/* ---------- Reset: remove browser default spacing ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+p, h1 { margin: 0; }
+
+html { background: var(--night); }
+body {
+  background: var(--night);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Lenis (smooth scroll) recommends these so it can take over scrolling cleanly. */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+/* ---------- The 3D canvas: fixed, full screen, behind everything ---------- */
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  z-index: 0;
+}
+
+/* Black cover that fades out once the world has drawn its first frame. */
+#curtain {
+  position: fixed;
+  inset: 0;
+  background: var(--night);
+  z-index: 5;
+  pointer-events: none;
+  transition: opacity 1.8s ease;
+}
+#curtain.is-lifted { opacity: 0; }
+
+/* ---------- The scroll track: only gives the page its height ---------- */
+#scroll-track {
+  position: relative;
+  height: 900vh;   /* longer = slower, calmer film */
+  z-index: 1;
+}
+#end { position: absolute; bottom: 0; height: 1px; width: 1px; }
+
+/* ---------- Text overlay ---------- */
+#overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;   /* clicks pass through to the page, except on links */
+}
+
+.intro {
+  position: absolute;
+  left: clamp(24px, 7vw, 120px);
+  bottom: clamp(96px, 20vh, 220px);
+  max-width: min(760px, 86vw);
+  text-shadow: 0 2px 30px rgba(3, 6, 18, 0.55);
+}
+.intro__hello {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin-bottom: 18px;
+}
+.intro__headline {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(38px, 5.2vw, 76px);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+/* Words start hidden; JavaScript reveals them softly on load. */
+.intro__hello, .intro__headline .word {
+  opacity: 0;
+}
+.intro__headline .word { display: inline-block; }
+
+.scroll-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: 0;
+}
+/* A thin line under the hint that slowly "breathes" to invite scrolling. */
+.scroll-hint::after {
+  content: "";
+  display: block;
+  width: 1px;
+  height: 34px;
+  margin: 12px auto 0;
+  background: linear-gradient(var(--ink-dim), transparent);
+  animation: breathe 2.8s ease-in-out infinite;
+  transform-origin: top;
+}
+@keyframes breathe {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.4; }
+  50%      { transform: scaleY(1);   opacity: 1; }
+}
+
+/* Floating label next to a project tent. */
+.camp-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  white-space: nowrap;
+  padding: 7px 11px;
+  border: 1px solid rgba(238, 240, 247, 0.28);
+  border-radius: 2px;
+  background: rgba(8, 12, 30, 0.42);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.skip {
+  position: absolute;
+  top: 24px;
+  right: clamp(20px, 3vw, 40px);
+  pointer-events: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-decoration: none;
+  padding: 8px 2px;
+  border-bottom: 1px solid transparent;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+.skip:hover, .skip:focus-visible { color: var(--ink); border-bottom-color: var(--ink-dim); outline: none; }
+
+.fps {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #9fe7a8;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 4px 7px;
+  border-radius: 3px;
+}
+
+/* People who ask their system for less motion get no breathing line. */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hint::after { animation: none; }
+}
