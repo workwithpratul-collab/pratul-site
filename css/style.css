@@ -38,6 +38,7 @@ html.lenis, html.lenis body { height: auto; }
 
 /* Black cover that fades out once the world has drawn its first frame. */
 #curtain {
+  opacity: 0; /* TEMP until step 12 */
   position: fixed;
   inset: 0;
   background: var(--night);
