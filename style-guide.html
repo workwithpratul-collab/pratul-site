@@ -108,7 +108,7 @@
     .stage__top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-2); }
     /* In a narrow card the label may wrap (in the film it always sits on one line). */
     .stage .project-label { flex-wrap: wrap; white-space: normal; row-gap: var(--space-2); }
-    .stage__name { font-family: var(--font-mono); font-size: 10px; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-muted); text-shadow: var(--text-scrim); }
+    .stage__name { font-family: var(--font-mono); font-size: var(--text-2xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--ink-muted); text-shadow: var(--text-scrim); }
     .stage__body { display: grid; gap: var(--space-4); justify-items: start; }
     .stage__headline { margin: 0; font-family: var(--font-display); font-size: var(--text-3xl); line-height: var(--leading-heading); text-shadow: var(--text-scrim); }
 
@@ -187,7 +187,7 @@
     <!-- ===================== 1. COLOUR AND LIGHT ===================== -->
     <section id="colour">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">01 <span>Colour and light</span></p>
+        <p class="section-heading__eyebrow">3,450 m <span>Colour and light</span></p>
         <h2 class="section-heading__title">Four times of day, one palette.</h2>
         <p class="section-heading__lead">Every colour in the world comes from one of these presets. As you climb, the film blends from one to the next, and sky, fog, mist and light always move together.</p>
       </header>
@@ -201,7 +201,7 @@
     <!-- ===================== 2. TYPE ===================== -->
     <section id="type">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">02 <span>Type</span></p>
+        <p class="section-heading__eyebrow">3,700 m <span>Type</span></p>
         <h2 class="section-heading__title">A film title, a warm voice, field notes.</h2>
         <p class="section-heading__lead">Three fonts with three jobs. The serif speaks the big lines, the sans tells the story, the mono labels things.</p>
       </header>
@@ -242,7 +242,7 @@
     <!-- ===================== 3. COMPONENTS ===================== -->
     <section id="components">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">03 <span>Components</span></p>
+        <p class="section-heading__eyebrow">3,980 m <span>Components</span></p>
         <h2 class="section-heading__title">Calm, quiet, and readable on every sky.</h2>
         <p class="section-heading__lead">The interface sits over the film, so every piece is tested on all four skies. Hover over anything on this page: the custom cursor is live.</p>
       </header>
@@ -314,7 +314,8 @@
         </table>
       </div>
 
-      <p class="sub">Altitude meter: one per camp (bottom left of the film; the rail is the progress bar)</p>
+      <p class="sub">Altitude meter</p>
+      <p class="why" style="margin-top:0;margin-bottom:var(--space-4)">One per camp. In the film it sits bottom left, and the rail doubles as the progress bar.</p>
       <div class="meters" data-sky="night">
         <div class="altitude" data-altitude="0" aria-hidden="true"></div>
         <div class="altitude" data-altitude="0.3333" aria-hidden="true"></div>
@@ -322,18 +323,19 @@
         <div class="altitude" data-altitude="1" aria-hidden="true"></div>
       </div>
 
-      <p class="sub">Custom cursor (mouse and trackpad only; touch screens keep their normal behaviour)</p>
+      <p class="sub">Custom cursor</p>
+      <p class="why" style="margin-top:0;margin-bottom:var(--space-4)">Mouse and trackpad only; touch screens keep their normal behaviour.</p>
       <div class="cursor-demo" data-sky="predawn">
         <figure><div class="cd"></div><figcaption>Normal</figcaption></figure>
         <figure><div class="cd cd--link"></div><figcaption>Over a link or button</figcaption></figure>
         <figure><div class="cd cd--down"></div><figcaption>Pressed</figcaption></figure>
       </div>
 
-      <p class="sub">Section heading (the pages below the film)</p>
+      <p class="sub">Section heading, for the pages below the film</p>
       <div class="section-demo">
         <header class="section-heading" style="margin:0">
-          <p class="section-heading__eyebrow">04 <span>How I work</span></p>
-          <h2 class="section-heading__title">The climb is the hard part. The view is <em>what your customers feel.</em></h2>
+          <p class="section-heading__eyebrow">4,410 m <span>How I work</span></p>
+          <h2 class="section-heading__title">The climb is the hard part. The view is what your customers feel.</h2>
           <p class="section-heading__lead">Understand, design the experience, build, then launch and refine. Four steps, shared with you all the way up.</p>
         </header>
       </div>
@@ -342,7 +344,7 @@
     <!-- ===================== 4. STYLE FRAMES ===================== -->
     <section id="frames">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">05 <span>Style frames</span></p>
+        <p class="section-heading__eyebrow">4,700 m <span>Style frames</span></p>
         <h2 class="section-heading__title">The whole climb at once.</h2>
         <p class="section-heading__lead">Live renders from the real engine. Base camp and the ridge are the Phase 1 film; the meadow and the summit are first style frames. <a style="color:var(--accent)" href="style-frames.html">Open the large sheet.</a></p>
       </header>
@@ -357,7 +359,7 @@
     <!-- ===================== 5. RULES OF THE LOOK ===================== -->
     <section id="rules">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">06 <span>Rules of the look</span></p>
+        <p class="section-heading__eyebrow">4,950 m <span>Rules of the look</span></p>
         <h2 class="section-heading__title">Eight rules every future step follows.</h2>
         <p class="section-heading__lead">The same list lives in CLAUDE.md, so every working session starts from it.</p>
       </header>
@@ -376,7 +378,7 @@
     <!-- ===================== 6. DECISIONS ===================== -->
     <section id="decisions">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">07 <span>Decisions</span></p>
+        <p class="section-heading__eyebrow">5,120 m <span>Decisions</span></p>
         <h2 class="section-heading__title">What we chose, and why.</h2>
       </header>
       <div class="decisions">
@@ -402,6 +404,10 @@
         <div class="decision"><h3>Cursor</h3><div>
           <p>Considered a large blend mode blob and a trailing ring. Blobs hide what you point at.</p>
           <p>Chose a <strong>6 px dot that never lags</strong> (aiming always feels exact) plus a <strong>thin ring that follows softly</strong> and opens over links. Off on touch screens, and the ring stops moving with reduced motion.</p>
+        </div></div>
+        <div class="decision"><h3>Section heading</h3><div>
+          <p>Considered numbered eyebrows (01, 02, 03), a common pattern that says nothing about the story.</p>
+          <p>Chose an <strong>altitude marker</strong> (“4,410 m · How I work”): each page below the film becomes another camp on the climb, and it echoes the altitude meter. Headings stay roman (no italic), with the serif at heading size.</p>
         </div></div>
         <div class="decision"><h3>The meadow</h3><div>
           <p>Considered a close, flower filled foreground (like the reference photos) and a wide valley view.</p>

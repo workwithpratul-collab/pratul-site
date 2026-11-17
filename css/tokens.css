@@ -15,6 +15,7 @@
   --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
 
   /* ---------- Type scale (px steps, the same ladder everywhere) ---------- */
+  --text-2xs: 11px;    /* the smallest text allowed: tiny caps labels and tags (never below 11px) */
   --text-xs: 12px;     /* labels, captions, the altitude meter */
   --text-sm: 14px;     /* small body text, buttons in tight spots */
   --text-base: 16px;   /* body text, buttons */
@@ -44,7 +45,7 @@
   --tracking-display: -0.01em;   /* large serif: pulled in very slightly */
   --tracking-body: 0;
   --tracking-label: 0.18em;      /* small uppercase mono: spaced out so it breathes */
-  --tracking-caption: 0.08em;    /* mono captions in normal case */
+  --tracking-caption: 0.04em;    /* mono captions in normal case: only a touch of air */
 
   /* ---------- Interface colours ----------
      Text is a soft, moonlit ivory (never pure white, which glares on the night scenes and

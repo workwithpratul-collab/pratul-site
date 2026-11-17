@@ -38,6 +38,51 @@
         ],
         "createdAt": "2026-11-17T13:46:28.076Z",
         "reason": "Claude design decision: the guide displays the intentional lantern-glow hover state of the primary 'Book a call' button from css/components.css"
+      },
+      {
+        "rule": "overused-font",
+        "value": "instrument serif",
+        "files": [
+          "style-guide.html"
+        ],
+        "createdAt": "2026-11-17T13:52:09.577Z",
+        "reason": "user confirmed: brief says 'keep the current serif for headlines'"
+      },
+      {
+        "rule": "overused-font",
+        "value": "instrument serif",
+        "files": [
+          "style-frames.html"
+        ],
+        "createdAt": "2026-11-17T13:52:09.691Z",
+        "reason": "user confirmed: brief says 'keep the current serif for headlines'"
+      },
+      {
+        "rule": "overused-font",
+        "value": "instrument serif",
+        "files": [
+          "css/components.css"
+        ],
+        "createdAt": "2026-11-17T13:52:09.825Z",
+        "reason": "user confirmed: brief says 'keep the current serif for headlines'"
+      },
+      {
+        "rule": "overused-font",
+        "value": "instrument serif",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-17T13:52:09.964Z",
+        "reason": "user confirmed: brief says 'keep the current serif for headlines'"
+      },
+      {
+        "rule": "tight-leading",
+        "value": "*",
+        "files": [
+          "style-guide.html"
+        ],
+        "createdAt": "2026-11-17T13:52:10.104Z",
+        "reason": "Claude design decision: 1.04 applies only to the display serif film-title headline (38-76px), carried over from Phase 1; body text uses 1.6"
       }
     ]
   }
