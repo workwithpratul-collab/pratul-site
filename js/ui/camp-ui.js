@@ -95,6 +95,7 @@ export function createCampUI({ camps, defs, camera, cameraPath, getProgress, red
       const f = cameraPath.focus;
       f.pos.copy(entry.camp.front);
       f.look.copy(entry.camp.centre);
+      f.arc = 1.6;   // rise up and over the trekker on the way
       gsap.to(f, { w: 1, duration: 1.8, ease: 'power2.inOut' });
       await new Promise((r) => setTimeout(r, 700));
       await veil(true, { duration: 1100 });
@@ -112,7 +113,8 @@ export function createCampUI({ camps, defs, camera, cameraPath, getProgress, red
       f.pos.copy(entry.camp.front);
       f.look.copy(entry.camp.centre);
       f.w = 1;
-      gsap.to(f, { w: 0, duration: 2.6, ease: 'power2.inOut', delay: 0.3 });
+      f.arc = 1.6;
+      gsap.to(f, { w: 0, duration: 2.6, ease: 'power2.inOut', delay: 0.3, onComplete: () => { f.arc = 0; } });
     }
     await veil(false, { duration: reduceMotion ? 700 : 1600 });
   }

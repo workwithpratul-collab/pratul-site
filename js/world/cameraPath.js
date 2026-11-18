@@ -180,7 +180,7 @@ export function createCameraPath() {
 
   // ---------- 4. The camera itself, eased every frame ----------
   // focus: set by transitions. w = 0 (follow the film) ... 1 (look from focus.pos at focus.look).
-  const focus = { pos: new THREE.Vector3(), look: new THREE.Vector3(), w: 0 };
+  const focus = { pos: new THREE.Vector3(), look: new THREE.Vector3(), w: 0, arc: 0 };
   const desiredPos = new THREE.Vector3();
   const desiredLook = new THREE.Vector3();
   const shotLook = new THREE.Vector3();
@@ -215,6 +215,8 @@ export function createCameraPath() {
     if (focus.w > 0) {
       desiredPos.lerp(focus.pos, focus.w);
       desiredLook.lerp(focus.look, focus.w);
+      // A gentle arc up and over (never a straight line past the trekker's head).
+      desiredPos.y += Math.sin(Math.PI * Math.min(focus.w, 1)) * (focus.arc ?? 0);
     }
 
     // Never dip into the ground.

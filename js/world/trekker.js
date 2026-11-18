@@ -23,10 +23,24 @@ const ANIMATION_URLS = {
   wave: 'assets/animations/Waving.fbx',
   // A light jog, for catching up when the visitor scrolls fast (blended in from the walk).
   jog: 'assets/animations/Jogging.fbx',
-  // Optional: a sitting-on-the-ground loop for the gear check. If the file isn't there, the
-  // trekker simply stands beside the mat (see the Phase 4 notes for how to download it).
+  // The moments of the climb (Phase 6): sitting at the gear check, pointing at a landmark,
+  // looking around while watching it, stretching at the summit, and stepping round on the spot.
   sit: 'assets/animations/Sitting.fbx',
+  sitToStand: 'assets/animations/SitToStand.fbx',
+  point: 'assets/animations/Pointing.fbx',
+  look: 'assets/animations/LookAround.fbx',
+  stretch: 'assets/animations/Stretch.fbx',
+  turnLeft: 'assets/animations/TurnLeft.fbx',
+  turnRight: 'assets/animations/TurnRight.fbx',
 };
+// Clips that play once (the rest loop).
+const ONE_SHOTS = ['wave', 'point', 'stretch', 'sitToStand'];
+// For the turning clips we keep only the stepping legs: the film turns him itself, so the clip's
+// own turn of the hips is dropped (otherwise he would turn twice as far).
+const DROP_HIP_TURN = ['turnLeft', 'turnRight'];
+// The bigger wave: which arm waves in the Waving clip, and how much higher it is lifted (radians).
+const WAVE_ARM = 'rightUpperArm';
+const WAVE_LIFT = 1.0;    // (positive for this VRM 0.x model, which faces the other way)
 const STRIDE = 0.72;           // metres per step, used to keep feet and ground in sync
 // The ground speed each Mixamo clip naturally covers (metres per second), measured from how
 // fast a planted foot moves back under the hips. Each clip is played faster or slower so his
@@ -67,9 +81,18 @@ export function createTrekker(scene, renderer, camera) {
     phase: 0,            // where we are in the walk cycle
     blinkTimer: 2,
     waved: false,
-    sit: 0,              // 0 = standing, 1 = sitting (smoothly blended)
-    sitTarget: 0,
     stride: 0,           // walk / jog cycle position, 0..1 (shared by both, so they stay in step)
+    // The "moment" layer on top of walking and idling (see updateMoments):
+    shot: null,          // the one-shot clip playing now ('point', 'stretch', 'wave'), if any
+    loop: null,          // a looping pose to hold while standing ('look'), if any
+    sitPhase: 'stand',   // 'stand' -> 'down' -> 'sit' -> 'up' -> 'stand'
+    sitWanted: false,
+    weights: {},         // the smoothed weight of every moment clip
+    turnRate: 0,         // how fast he's turning on the spot (radians per second, smoothed)
+    lastHeading: null,
+    lookTarget: null,    // a point to turn his head towards (or null)
+    look: { yaw: 0, pitch: 0 },
+    sink: 0,             // how far the hips drop to reach the lower foot on a slope
   };
 
   // ---------- Load the VRM ----------
@@ -103,9 +126,9 @@ export function createTrekker(scene, renderer, camera) {
       state.actions = {};
       for (const [name, clip] of Object.entries(clips)) {
         const action = state.mixer.clipAction(clip);
-        if (name === 'wave') {
+        if (ONE_SHOTS.includes(name)) {
           action.setLoop(THREE.LoopOnce, 1);
-          action.clampWhenFinished = false;
+          action.clampWhenFinished = true;   // hold the last pose; its weight fades it out
         }
         action.play();
         action.setEffectiveWeight(name === 'idle' ? 1 : 0);
@@ -125,6 +148,7 @@ export function createTrekker(scene, renderer, camera) {
     root.rotation.y = heading;            // VRM models face +Z; heading turns them
     shadow.position.set(x, y + 0.02, z);
   }
+  let groundAt = groundHeight;           // style frames pass their own ground (see setGround)
 
   // ---------- update: called every frame ----------
   function update(dt, time) {
@@ -137,6 +161,13 @@ export function createTrekker(scene, renderer, camera) {
     }
     lastPos.copy(root.position);
     hasLast = true;
+    // How fast he's turning on the spot (for the stepping-round clips).
+    if (state.lastHeading !== null && dt > 0) {
+      let d = root.rotation.y - state.lastHeading;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      state.turnRate += (d / dt - state.turnRate) * (1 - Math.exp(-dt * 5));
+    }
+    state.lastHeading = root.rotation.y;
 
     const targetWalk = THREE.MathUtils.clamp(state.speed / 0.6, 0, 1);
     state.walkAmount += (targetWalk - state.walkAmount) * (1 - Math.exp(-dt * 4));
@@ -168,22 +199,9 @@ export function createTrekker(scene, renderer, camera) {
           jog.setEffectiveWeight(state.walkAmount * jogMix);
         }
       }
-      // While waving, the wave takes over from the idle pose (both at once would halve the wave).
-      // It fades in and out over its first and last 20%, so it starts and ends softly.
-      let waveW = 0;
-      if (wave && wave.isRunning()) {
-        const t = Math.min(wave.time / wave.getClip().duration, 1);
-        waveW = smoothstepJS(0, 0.2, t) * (1 - smoothstepJS(0.8, 1, t));
-        wave.setEffectiveWeight(waveW);
-      } else if (wave) {
-        wave.setEffectiveWeight(0);
-      }
-      // Sitting (only if the clip exists, and never while walking): it takes over from idle.
-      const sit = state.actions.sit;
-      state.sit += ((sit ? state.sitTarget : 0) * (1 - state.walkAmount) - state.sit) * (1 - Math.exp(-dt * 1.5));
-      if (sit) sit.setEffectiveWeight(state.sit);
-      if (idle) idle.setEffectiveWeight((1 - state.walkAmount) * (1 - waveW) * (1 - state.sit));
+      updateMoments(dt);
       state.mixer.update(dt);
+      afterClips(dt);
     } else {
       applyStandInPose(vrm, time, state.walkAmount, state.phase);
     }
@@ -197,18 +215,181 @@ export function createTrekker(scene, renderer, camera) {
     vrm.update(dt);  // applies the bones, springy hair/clothes, and expressions
   }
 
-  // Play the Mixamo wave once (only if that file exists).
+  // ---------- The moment layer ----------
+  // Every moment clip has a weight that eases towards its target, so nothing ever snaps:
+  // one-shots fade in over their first 15% and out over their last 15%, loops ease in and out,
+  // and all of them only show while he's standing (they fade as soon as he walks).
+  const MOMENTS = ['wave', 'point', 'stretch', 'look', 'sit', 'sitToStand', 'turnLeft', 'turnRight'];
+  function updateMoments(dt) {
+    const A = state.actions;
+    const standing = 1 - state.walkAmount;
+    const target = {};
+    // A one-shot playing now.
+    if (state.shot) {
+      const act = A[state.shot];
+      const t = act ? act.time / act.getClip().duration : 1;
+      if (!act || t >= 0.999 || !act.isRunning()) state.shot = null;
+      else target[state.shot] = smoothstepJS(0, 0.15, t) * (1 - smoothstepJS(0.85, 1, t));
+    }
+    // Sitting down, sitting, and standing up again (SitToStand played backwards, then forwards).
+    const sts = A.sitToStand, sit = A.sit;
+    if (sts && sit) {
+      const want = state.sitWanted && standing > 0.9;
+      const len = sts.getClip().duration;
+      if (state.sitPhase === 'stand' && want) {
+        state.sitPhase = 'down';
+        sts.reset();
+        sts.setEffectiveTimeScale(-1);
+        sts.time = len;
+        sts.play();
+      } else if (state.sitPhase === 'down' && !want) {
+        // Changed our mind halfway down: stand back up from where we are.
+        const from = sts.time;
+        state.sitPhase = 'up';
+        sts.reset();
+        sts.setEffectiveTimeScale(1);
+        sts.time = from;
+        sts.play();
+      } else if (state.sitPhase === 'down' && sts.time <= 0.02) {
+        state.sitPhase = 'sit';
+      } else if (state.sitPhase === 'sit' && !want) {
+        state.sitPhase = 'up';
+        sts.reset();
+        sts.setEffectiveTimeScale(1);
+        sts.play();
+      } else if (state.sitPhase === 'up' && sts.time >= len - 0.02) {
+        state.sitPhase = 'stand';
+      }
+      if (state.sitPhase === 'down' || state.sitPhase === 'up') target.sitToStand = 1;
+      if (state.sitPhase === 'sit') target.sit = 1;
+    }
+    // A looping pose (looking around), mixed with the idle.
+    if (state.loop && state.sitPhase === 'stand') target[state.loop] = 0.6;
+    // Turning on the spot: the stepping clip for the way he's turning.
+    const turning = Math.min(Math.abs(state.turnRate) / 1.4, 1) * (state.sitPhase === 'stand' ? 1 : 0);
+    if (turning > 0.05) target[state.turnRate > 0 ? 'turnLeft' : 'turnRight'] = turning * 0.85;
+
+    let sum = 0;
+    for (const name of MOMENTS) {
+      if (!A[name]) continue;
+      const before = state.weights[name] ?? 0;
+      // Sitting transitions are quicker to take over (the clip carries the whole body).
+      const rate = name === 'sitToStand' || name === 'sit' ? 9 : 6;
+      const w = before + ((target[name] ?? 0) - before) * (1 - Math.exp(-dt * rate));
+      state.weights[name] = w;
+      const shown = w * standing;
+      A[name].setEffectiveWeight(shown);
+      sum += shown;
+    }
+    // The idle fills whatever the walk and the moments leave.
+    A.idle?.setEffectiveWeight(Math.max(standing - sum, 0));
+  }
+
+  // ---------- Touches on top of the clips (before the VRM takes the pose) ----------
+  const qa = new THREE.Quaternion();
+  const axisX = new THREE.Vector3(1, 0, 0), axisY = new THREE.Vector3(0, 1, 0), axisZ = new THREE.Vector3(0, 0, 1);
+  const v1 = new THREE.Vector3(), v2 = new THREE.Vector3();
+  let legLength = 0;
+  function afterClips(dt) {
+    const vrm = state.vrm;
+    const bone = (n) => vrm.humanoid.getNormalizedBoneNode(n);
+    const k = 1 - Math.exp(-dt * 4);
+
+    // 1. A bigger, more open wave: lift the waving arm well above the head.
+    const waveW = (state.weights.wave ?? 0) * (1 - state.walkAmount);
+    // (premultiply: turn the arm round the shoulder's own forward axis, so it rises straight up
+    // whatever pose the clip has it in)
+    if (waveW > 0.001) bone(WAVE_ARM)?.quaternion.premultiply(qa.setFromAxisAngle(axisZ, WAVE_LIFT * waveW));
+
+    // 2. The head turns towards whatever he's looking at (a hovered gear item, say).
+    let yaw = 0, pitch = 0;
+    if (state.lookTarget) {
+      vrm.humanoid.getRawBoneNode('head').getWorldPosition(v1);
+      v2.copy(state.lookTarget).sub(v1);
+      yaw = Math.atan2(v2.x, v2.z) - root.rotation.y;
+      yaw = THREE.MathUtils.clamp(Math.atan2(Math.sin(yaw), Math.cos(yaw)), -1.1, 1.1);
+      pitch = THREE.MathUtils.clamp(-Math.atan2(v2.y, Math.hypot(v2.x, v2.z)), -0.4, 0.75);
+    }
+    state.look.yaw += (yaw - state.look.yaw) * k;
+    state.look.pitch += (pitch - state.look.pitch) * k;
+    if (Math.abs(state.look.yaw) + Math.abs(state.look.pitch) > 0.002) {
+      bone('neck')?.quaternion.multiply(qa.setFromAxisAngle(axisY, state.look.yaw * 0.4)).multiply(qa.setFromAxisAngle(axisX, state.look.pitch * 0.4));
+      bone('head')?.quaternion.multiply(qa.setFromAxisAngle(axisY, state.look.yaw * 0.6)).multiply(qa.setFromAxisAngle(axisX, state.look.pitch * 0.6));
+    }
+
+    // 3. Feet on the ground on slopes. The hips drop to whichever foot's ground is lower, then
+    //    the other knee bends just enough to put that foot on its (higher) ground.
+    //    (It uses where the feet were last frame: a frame's delay is invisible.)
+    if (!legLength) {
+      const h = vrm.humanoid.getRawBoneNode('leftUpperLeg').getWorldPosition(new THREE.Vector3());
+      const kn = vrm.humanoid.getRawBoneNode('leftLowerLeg').getWorldPosition(new THREE.Vector3());
+      legLength = h.distanceTo(kn);
+    }
+    if (state.sitPhase !== 'stand') {
+      state.sink += (0 - state.sink) * k;
+      vrm.scene.position.y = state.sink;
+      return;
+    }
+    const ground0 = root.position.y;
+    const feet = ['left', 'right'].map((side) => {
+      vrm.humanoid.getRawBoneNode(side + 'Foot').getWorldPosition(v1);
+      return { side, g: groundAt(v1.x, v1.z) - ground0 };
+    });
+    const low = Math.max(Math.min(feet[0].g, feet[1].g, 0), -0.35);
+    state.sink += (low - state.sink) * (1 - Math.exp(-dt * 10));
+    vrm.scene.position.y = state.sink;
+    for (const f of feet) {
+      const lift = THREE.MathUtils.clamp(f.g - state.sink, 0, 0.35);
+      if (lift < 0.005) continue;
+      const thigh = bone(f.side + 'UpperLeg'), shin = bone(f.side + 'LowerLeg');
+      if (!thigh || !shin) continue;
+      // Thigh and shin as two equal sides of a triangle: bending the knee shortens the leg.
+      const bend0 = 2 * Math.acos(Math.min(Math.abs(shin.quaternion.w), 1));
+      const reach = 2 * legLength * Math.cos(bend0 / 2) - lift;
+      const bend1 = 2 * Math.acos(THREE.MathUtils.clamp(reach / (2 * legLength), 0.35, 1));
+      const extra = Math.max(bend1 - bend0, 0);
+      thigh.quaternion.multiply(qa.setFromAxisAngle(axisX, -extra / 2));
+      shin.quaternion.multiply(qa.setFromAxisAngle(axisX, extra));
+    }
+    // ...and each foot tilts to the slope under it (toes up going uphill), so the toes never
+    // dig into the ground and the heel never hangs in the air.
+    const fx = Math.sin(root.rotation.y), fz = Math.cos(root.rotation.y);
+    for (const f of feet) {
+      const foot = bone(f.side + 'Foot');
+      if (!foot) continue;
+      vrm.humanoid.getRawBoneNode(f.side + 'Foot').getWorldPosition(v1);
+      const slope = Math.atan2(groundAt(v1.x + fx * 0.15, v1.z + fz * 0.15) - groundAt(v1.x - fx * 0.1, v1.z - fz * 0.1), 0.25);
+      foot.quaternion.multiply(qa.setFromAxisAngle(axisX, -THREE.MathUtils.clamp(slope, -0.6, 0.6)));
+    }
+  }
+
+  // ---------- What main.js can ask for ----------
+  // Play a one-shot moment ('point', 'stretch', 'wave'). Returns false if the clip is missing.
+  function play(name) {
+    const act = state.actions?.[name];
+    if (!act) return false;
+    act.reset().setEffectiveTimeScale(1).play();
+    state.shot = name;
+    return true;
+  }
+  // Is a one-shot playing right now?
+  const playing = (name) => state.shot === name;
+  // Hold a looping pose while standing ('look'), or null for plain idle.
+  function setLoop(name) { state.loop = name; }
+  // Turn the head towards a point in the world (or null to look ahead again).
+  function lookAt(point) { state.lookTarget = point; }
+
+  // The summit wave (once per arrival).
   function wave() {
-    const action = state.actions?.wave;
-    if (!action || state.waved) return;
+    if (state.waved || !state.actions?.wave) return;
     state.waved = true;
-    action.reset().play();
+    play('wave');
   }
 
   // Allow the wave to play again (after scrolling back down from the summit).
   // Sit down (true) or stand up (false). Does nothing if there's no sitting animation.
   function setSitting(on) {
-    state.sitTarget = on ? 1 : 0;
+    state.sitWanted = !!on;
   }
 
   function resetWave() {
@@ -218,6 +399,8 @@ export function createTrekker(scene, renderer, camera) {
   // After a jump (e.g. "Skip film"), forget the old position so we don't think we sprinted there.
   function teleport() {
     hasLast = false;
+    state.lastHeading = null;
+    state.turnRate = 0;
     state.speed = 0;
     state.walkAmount = 0;
   }
@@ -231,6 +414,13 @@ export function createTrekker(scene, renderer, camera) {
     wave,
     resetWave,
     setSitting,
+    play,
+    playing,
+    setLoop,
+    lookAt,
+    get sitting() { return state.sitPhase; },
+    // Other scenes (the style frames) have their own ground.
+    setGround(fn) { groundAt = fn; },
     get canSit() { return !!state.actions?.sit; },
     // For testing: the measured speed and how much of the jog is showing.
     get debug() { return { speed: state.speed, walk: state.walkAmount, jog: state.actions?.jog ? smoothstepJS(JOG_FROM, JOG_TO, state.speed) : 0, actions: state.actions, vrm: state.vrm }; },
@@ -263,9 +453,11 @@ function tuneMaterialsForNight(vrm) {
       });
       // A gentle cool rim light around the edges (like moonlight catching the outline).
       m.parametricRimColorFactor?.copy(moonRim);
-      if ('parametricRimFresnelPowerFactor' in m) m.parametricRimFresnelPowerFactor = 3.5;
+      if ('parametricRimFresnelPowerFactor' in m) m.parametricRimFresnelPowerFactor = 6;
       if ('parametricRimLiftFactor' in m) m.parametricRimLiftFactor = 0.0;
-      if ('rimLightingMixFactor' in m) m.rimLightingMixFactor = 0.6;
+      if ('rimLightingMixFactor' in m) m.rimLightingMixFactor = 0.15;
+      // No drawn outline round the body either (it read as a sticker edge).
+      if ('outlineWidthFactor' in m) m.outlineWidthFactor = 0;
       // Let the soft sky light fill the shadows a bit, so the toon shade isn't harsh black.
       if ('giEqualizationFactor' in m) m.giEqualizationFactor = 0.6;
       // Make sure nothing on the model glows by itself in the dark.
@@ -367,7 +559,7 @@ async function loadMixamoClips(vrm) {
   const results = await Promise.all(
     Object.entries(ANIMATION_URLS).map(async ([name, url]) => {
       try {
-        return [name, await loadMixamoAnimation(url, vrm)];
+        return [name, await loadMixamoAnimation(url, vrm, { dropHipTurn: DROP_HIP_TURN.includes(name) })];
       } catch (err) {
         // A missing file is normal (stay quiet). A file that exists but can't be read is worth a warning.
         if (!/404/.test(String(err?.message ?? err))) console.warn(`[trekker] Could not use ${url}:`, err);
@@ -386,7 +578,7 @@ async function loadMixamoClips(vrm) {
 // Convert one Mixamo FBX animation into a clip for this VRM.
 // Mixamo bones have different "rest" orientations from VRM bones, so each rotation is
 // corrected: rotate into world space using the Mixamo rest pose, then back into VRM space.
-async function loadMixamoAnimation(url, vrm) {
+async function loadMixamoAnimation(url, vrm, { dropHipTurn = false } = {}) {
   const asset = await new FBXLoader().loadAsync(url);
   const clip = THREE.AnimationClip.findByName(asset.animations, 'mixamo.com') || asset.animations[0];
   if (!clip) throw new Error('no animation in ' + url);
@@ -413,6 +605,7 @@ async function loadMixamoAnimation(url, vrm) {
     mixamoRigNode.getWorldQuaternion(restRotationInverse).invert();
     mixamoRigNode.parent.getWorldQuaternion(parentRestWorldRotation);
 
+    if (dropHipTurn && vrmBoneName === 'hips' && track instanceof THREE.QuaternionKeyframeTrack) continue;
     if (track instanceof THREE.QuaternionKeyframeTrack) {
       const values = track.values.slice();
       for (let i = 0; i < values.length; i += 4) {

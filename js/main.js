@@ -244,6 +244,9 @@ function countFps(now) {
 
 // ---------- Moving the trekker along the trail ----------
 const trekPos = new THREE.Vector3();
+let summitBeat = 'arrive';         // the summit's three beats: arrive, stretch, turn, wave
+let facingCamera = false;          // has he finished turning to where he wants to face?
+const pointed = CAMPS.map(() => false);   // has he pointed at this landmark yet, this visit?
 const trekDir = new THREE.Vector3();
 let heading = null;
 function placeTrekker(s, dt, stops) {
@@ -257,7 +260,7 @@ function placeTrekker(s, dt, stops) {
     let look = null, amount = 0.85;
     if (stop.camp) look = stop.camp.screen;
     else if (stop.at === 'meadow') { look = MEADOW.mat; amount = 0.9; }
-    else if (stop.at === 'summit') { look = [camera.position.x, camera.position.z]; amount = smoothstep(0.6, 1, here); }
+    else if (stop.at === 'summit' && (summitBeat === 'turn' || summitBeat === 'wave')) { look = [camera.position.x, camera.position.z]; amount = 1; }
     if (!look) continue;
     let d = Math.atan2(look[0] - trekPos.x, look[1] - trekPos.z) - target;
     d = Math.atan2(Math.sin(d), Math.cos(d));
@@ -267,6 +270,7 @@ function placeTrekker(s, dt, stops) {
   if (heading === null) heading = target;
   let diff = target - heading;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+  facingCamera = Math.abs(diff) < 0.2;
   heading += diff * (1 - Math.exp(-dt * 5));
   trekker.place(trekPos.x, trekPos.z, heading);
 }
@@ -410,12 +414,37 @@ function tick(timestamp) {
 
   // The summit: as the sun breaks and the trekker has turned round, the closing words rise in
   // beside the flag, and he waves (once) at the same moment. Scrolling back down hides them.
+  // The summit, in three beats: he stretches as the sun breaks, turns round to face the camera,
+  // then waves just as the closing words rise in. Scrolling back down resets it all.
   const atTop = stops[stops.length - 1];
   if (atTop.here > 0.98 && atTop.shot > 0.9 && trekker.walking < 0.08 && !gliding) {
-    finale.show();
-    trekker.wave();
+    if (summitBeat === 'arrive') {
+      summitBeat = trekker.play('stretch') ? 'stretch' : 'turn';
+    } else if (summitBeat === 'stretch' && !trekker.playing('stretch')) {
+      summitBeat = 'turn';
+    } else if (summitBeat === 'turn' && facingCamera) {
+      summitBeat = 'wave';
+      finale.show();
+      trekker.wave();
+    }
   }
-  if (atTop.here < 0.6) { finale.hide(); trekker.resetWave(); }
+  if (atTop.here < 0.6) {
+    summitBeat = 'arrive';
+    finale.hide();
+    trekker.resetWave();
+  }
+
+  // At each landmark: he points at it as the camera arrives, then looks around while we watch.
+  camps.forEach((_, i) => {
+    const at = stops.find((st) => st.stop.camp === CAMPS[i]);
+    if (at.here > 0.9 && at.shot > 0.5 && !pointed[i]) {
+      pointed[i] = true;
+      trekker.play('point');
+    }
+    if (at.here < 0.5) pointed[i] = false;
+  });
+  const watching = stops.some((st) => st.stop.camp && st.here > 0.95);
+  trekker.setLoop(watching ? 'look' : null);
 
   // The sea of clouds rises with the light; the flag ripples.
   summit.update(time, mood.climb);

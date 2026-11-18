@@ -31,12 +31,12 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Sheet sway is hard to see when standing still in front of a sheet.
 - [x] Canvas looks flat and grey; add warm projector light across the whole cloth.
 - [x] Poles are plain sticks; add straps, lashing, tips, and pegs where the ropes meet the ground.
-- [ ] Opening a project: the camera glides close past the trekker's head on the way to the sheet.
+- [x] Opening a project: the camera glides close past the trekker's head on the way to the sheet.
 
 ## CLAUDE CODE: the trekker
-- [ ] Feet float or sink up to ~10 cm on steep slopes (knoll, summit); needs per-foot placement (IK).
-- [ ] The wave is small (hand only reaches head height); may need a more open Mixamo wave.
-- [ ] Faint glowing outline around the body looks like a sticker.
+- [x] Feet float or sink up to ~10 cm on steep slopes (knoll, summit); needs per-foot placement (IK).
+- [x] The wave is small (hand only reaches head height); may need a more open Mixamo wave.
+- [x] Faint glowing outline around the body looks like a sticker.
 - [ ] Character file is 11.5 MB; compress textures to get it under ~5 MB.
 
 ## CLAUDE CODE: gear check and pages
