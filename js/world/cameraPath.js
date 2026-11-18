@@ -9,7 +9,7 @@
 // makes the movement feel slow and calm.
 
 import * as THREE from 'three';
-import { groundHeight, smoothstep, trailDistanceAt, trailPointAt, trailDirectionAt, TRAIL_LENGTH, legacy } from './terrain.js';
+import { groundHeight, smoothstep, trailDistanceAt, trailPointAt, trailDirectionAt, TRAIL_LENGTH, LAKE_LEVEL, legacy } from './terrain.js';
 import { CAMPS, MEADOW, SUMMIT, STOPS } from './journey.js';
 
 // Hand-placed shots. pos = where the camera is, look = what it looks at. Heights are
@@ -64,11 +64,12 @@ export function createCameraPath() {
       const camp = campById[st.at];
       stop.camp = camp;
       stop.s = trailDistanceAt(camp.stop[0], camp.stop[1]);
-      stop.shot = {
-        pos: atGround(camp.view[0], camp.view[1], 2.1),
-        look: atGround(camp.look[0], camp.look[1], 1.9),
-        blendIn: camp.blendIn ?? 0.045, blendOut: 0.04,
-      };
+      // Almost straight in front of the film. For the lake, heights are above the water.
+      const lake = camp.kind === 'lake';
+      const pos = atGround(camp.view[0], camp.view[1], camp.viewHeight);
+      const look = atGround(camp.screen[0], camp.screen[1], camp.lookHeight);
+      if (lake) { pos.y = LAKE_LEVEL + camp.viewHeight; look.y = LAKE_LEVEL + camp.lookHeight; }
+      stop.shot = { pos, look, blendIn: camp.blendIn ?? 0.045, blendOut: 0.04 };
     } else if (st.at === 'meadow') {
       stop.s = trailDistanceAt(MEADOW.stop[0], MEADOW.stop[1]);
       // Arrive looking down at the kit on the mat, then lift the gaze up to the trekker before

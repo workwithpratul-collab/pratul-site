@@ -28,9 +28,9 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] Far tree cards turn slightly to face the camera (fix only if it costs no speed).
 
 ## CLAUDE CODE: project camps
-- [ ] Sheet sway is hard to see when standing still in front of a sheet.
-- [ ] Canvas looks flat and grey; add warm projector light across the whole cloth.
-- [ ] Poles are plain sticks; add straps, lashing, tips, and pegs where the ropes meet the ground.
+- [x] Sheet sway is hard to see when standing still in front of a sheet.
+- [x] Canvas looks flat and grey; add warm projector light across the whole cloth.
+- [x] Poles are plain sticks; add straps, lashing, tips, and pegs where the ropes meet the ground.
 - [ ] Opening a project: the camera glides close past the trekker's head on the way to the sheet.
 
 ## CLAUDE CODE: the trekker

@@ -15,7 +15,7 @@ export function createRidge(scene) {
   const rand = seededRandom(717);
   const [, kingsGarden, trinetra] = CAMPS;
   // Nothing grows right under a screen and its tent, or right in front of a camera spot.
-  const nearCamp = (x, z) => CAMPS.slice(1).some((c) => Math.hypot(x - c.sheet[0], z - c.sheet[1]) < 4.5 || Math.hypot(x - c.view[0], z - c.view[1]) < 5);
+  const nearCamp = (x, z) => CAMPS.slice(1).some((c) => Math.hypot(x - c.screen[0], z - c.screen[1]) < 5.5 || Math.hypot(x - c.view[0], z - c.view[1]) < 3);
 
   // ---------- Grass along the ridge, from just past DERMAÉ to where the meadow begins ----------
   const ridgeStart = trailDistanceAt(4, -164);
@@ -47,14 +47,14 @@ export function createRidge(scene) {
   // Trinetra stands on a knoll among a small group of pines (behind its screen, never in front).
   // King's Garden has only a lone pine and an oak on the slope below it: its backdrop is the valley.
   const tree = (x, z, scale, tint = 1) => ({ x, z, y: groundHeight(x, z), scale, rot: rand() * 6.28, tint: tint * (0.92 + rand() * 0.14) });
-  const [tx, tz] = trinetra.sheet;
+  const [tx, tz] = trinetra.screen;
   createNearTrees(scene, {
     pine: [
       tree(tx + 4.5, tz + 6, 6.5), tree(tx - 2.5, tz + 7.5, 7.5), tree(tx + 8.5, tz + 2, 5.5),
       tree(tx - 6.5, tz + 4.5, 5), tree(tx + 1.5, tz + 11, 8.5, 0.95),
-      tree(kingsGarden.sheet[0] - 9, kingsGarden.sheet[1] - 4, 5.5),
+      tree(kingsGarden.screen[0] - 9, kingsGarden.screen[1] - 4, 5.5),
     ],
-    oak: [tree(kingsGarden.sheet[0] + 10, kingsGarden.sheet[1] - 6, 4.2)],
+    oak: [tree(kingsGarden.screen[0] + 10, kingsGarden.screen[1] - 6, 4.2)],
   });
 
   // ---------- Mist in the valley below the rim ----------

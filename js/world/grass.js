@@ -130,6 +130,49 @@ export function createGrass(scene, { from, to, width = 20, perMetre = 120, color
   return group;
 }
 
+// Grass in a ring round a point (a lake's shore): tufts between the inner and outer radius, more
+// of them close to the inner edge, and a few flowers.
+export function createGrassPatch(scene, { centre, inner, outer, count, colors, flowers = 0, seed = 1 }) {
+  sharedTuft ??= tuftGeometry();
+  sharedFlower ??= flowerGeometry();
+  if (!sharedMaterial) {
+    sharedMaterial = new THREE.MeshLambertMaterial();
+    sharedMaterial.color = mood.ground;
+  }
+  const rand = seededRandom(seed);
+  const base = new THREE.Color(colors.base), lit = new THREE.Color(colors.lit), deep = new THREE.Color(colors.deep);
+  const petals = MATERIALS.meadow.flowers.map((h) => new THREE.Color(h));
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color();
+  const up = new THREE.Vector3(0, 1, 0);
+  const spot = () => {
+    const a = rand() * Math.PI * 2, r = inner + Math.pow(rand(), 1.6) * (outer - inner);
+    return [centre[0] + Math.sin(a) * r, centre[1] + Math.cos(a) * r];
+  };
+  const tufts = new THREE.InstancedMesh(sharedTuft, sharedMaterial, count);
+  for (let i = 0; i < count; i++) {
+    const [x, z] = spot();
+    p.set(x, groundHeight(x, z) - 0.02, z);
+    q.setFromAxisAngle(up, rand() * 6.28);
+    s.set(0.7 + rand() * 0.4, 0.2 + rand() * 0.28, 0.7 + rand() * 0.4);
+    tufts.setMatrixAt(i, m.compose(p, q, s));
+    tufts.setColorAt(i, c.copy(base).lerp(rand() < 0.6 ? lit : deep, rand() * 0.5));
+  }
+  tufts.computeBoundingSphere();
+  scene.add(tufts);
+  if (flowers) {
+    const blooms = new THREE.InstancedMesh(sharedFlower, sharedMaterial, flowers);
+    for (let i = 0; i < flowers; i++) {
+      const [x, z] = spot();
+      p.set(x, groundHeight(x, z) + 0.2 + rand() * 0.15, z);
+      const k = 0.5 + rand() * 0.5;
+      blooms.setMatrixAt(i, m.compose(p, q.identity(), s.set(k, k, k)));
+      blooms.setColorAt(i, petals[rand() < 0.7 ? 3 : 2]);
+    }
+    blooms.computeBoundingSphere();
+    scene.add(blooms);
+  }
+}
+
 // Grass colours for each zone (palette.js): the cool ridge grass and the sunlit alpine meadow.
 export const RIDGE_GRASS = { base: MATERIALS.ground.grass, lit: MATERIALS.ground.grassLit, deep: MATERIALS.ground.moss };
 export const MEADOW_GRASS = { base: MATERIALS.meadow.grass, lit: MATERIALS.meadow.grassLit, deep: MATERIALS.meadow.grassDeep };

@@ -10,47 +10,53 @@
 // =====================================================================
 // 1. PLACES
 // =====================================================================
-// The three project camps (outdoor camp cinemas). For each one:
-//   stop   where the trekker stops on the trail to watch
-//   sheet  where the canvas sheet stands (it turns to face `view`)
-//   view   where the camera stands for the arrival shot (behind the trekker)
-//   look   (optional) where that shot looks; by default a little left of the sheet
-//   tent   which side of the sheet the small tent sits on (1 = right, -1 = left, seen from the front)
+// The three project landmarks along the trail. Each plays its project's video on a surface of
+// its own: a lake's still water, a stone hut's glowing window, a trail signboard. For each:
+//   kind     'lake', 'hut' or 'sign' (built by landmarks.js)
+//   stop     where the trekker stops on the trail to watch
+//   screen   the middle of the video surface on the map (it turns to face `view`)
+//   view     where the camera stands for the arrival shot: almost straight in front of the video,
+//            close enough that it fills a good part of the screen, with the trekker just to one side
+//   viewHeight / lookHeight   how high the camera stands, and the height it looks at (metres
+//            above the ground there; for the lake, above the water)
 export const CAMPS = [
   {
+    // A small, still mountain lake where the first camp was: the project plays as a reflection
+    // on the water, seen from above the shore as the surface settles mirror-clear.
     id: 'dermae',
+    kind: 'lake',
     stop: [-0.5, -144],
-    sheet: [6.2, -147.2],
-    view: [-4.8, -135.5],
-    look: [4.0, -146.2],
-    tent: 1,
-    video: 'recordings/web/dermae.mp4',
+    screen: [6.4, -145.8],
+    radius: 5.4,
+    view: [-2.6, -142.1],
+    viewHeight: 5.6,
+    lookHeight: 0,
+    video: 'recordings/hd/dermae.mp4',
     label: 'label-dermae',
   },
   {
-    // On the valley side of the ridge: the screen hangs against the misty valley and the snowy range.
+    // A stone shepherd's hut on the valley side of the ridge: the film plays through its big window.
     id: 'kings-garden',
+    kind: 'hut',
     stop: [36, -174.6],
-    sheet: [41.5, -184.5],
-    view: [29, -168.2],
-    look: [42.1, -184.2],
-    tent: -1,
-    tentTurn: 0.5,
-    lanternSide: 1,
+    screen: [37.3, -179.5],
+    view: [32.96, -173.27],
+    viewHeight: 2.0,
+    lookHeight: 1.45,
     blendIn: 0.022,   // the trail passes right by this camera spot: take over only at the very end
-    video: 'recordings/web/kings-garden.mp4',
+    video: 'recordings/hd/kings-garden.mp4',
     label: 'label-kings-garden',
   },
   {
-    // Up on a small knoll on the other side, among a few pines, turned towards the dawn.
+    // A weathered trail signboard at a fork in the path: the film plays on the board's face.
     id: 'trinetra',
+    kind: 'sign',
     stop: [101, -165.3],
-    sheet: [106, -158.5],
-    view: [91, -172],
-    look: [105, -157.4],
-    tent: 1,
-    tentTurn: -0.35,
-    video: 'recordings/web/trinetra.mp4',
+    screen: [103.2, -160.9],
+    view: [97.6, -166.3],
+    viewHeight: 2.1,
+    lookHeight: 1.85,
+    video: 'recordings/hd/trinetra.mp4',
     label: 'label-trinetra',
   },
 ];

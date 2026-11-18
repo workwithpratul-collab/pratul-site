@@ -126,9 +126,10 @@ export function createForest(scene, { routeDistance, legacyRouteDistance, sky } 
     const route = routeDistance ? routeDistance(t.x, t.z) : 100;
     // Only where the new camera route passes closer than the old one did.
     if (route < NEAR_MIN_DISTANCE && route < legacyRoute(t.x, t.z) - 0.5) return false;
-    // Keep the new camps' screens and the view of them clear (DERMAÉ keeps its Phase 1 setting).
-    for (const c of CAMPS.slice(1)) {
-      if (distanceToSegment(t.x, t.z, c.view, c.sheet) < 7 || Math.hypot(t.x - c.sheet[0], t.z - c.sheet[1]) < 12) return false;
+    // Keep each landmark and the view of it clear.
+    for (const c of CAMPS) {
+      const room = c.kind === 'lake' ? c.radius + 4 : 9;
+      if (distanceToSegment(t.x, t.z, c.view, c.screen) < 5 || Math.hypot(t.x - c.screen[0], t.z - c.screen[1]) < room) return false;
     }
     const rose = y - (t.y ?? y);
     // Trees on the new ridge land, or on the open ridge well east of DERMAÉ (beyond the pines

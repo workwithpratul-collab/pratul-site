@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { NOISE_GLSL } from './glsl.js';
 import { mood, MATERIALS } from './palette.js';
+import { CAMPS } from './journey.js';
 
 // ---------- A tiny seeded random generator ----------
 // Math.random() gives different mountains every reload. A "seeded" random gives the
@@ -366,9 +367,10 @@ function landHeight(x, z) {
 // Small level "pads" where things stand: the camps, the gear-check mat, the summit.
 // [x, z, radius, lift] (lift raises a pad into a little knoll).
 const PADS = [
-  [41.5, -184.5, 7, 0],        // King's Garden screen
+  [38.4, -181.2, 6.5, 0],      // King's Garden: the stone hut's footing
   [36, -174.6, 4, 0],          // where the trekker watches it
-  [106, -158.5, 9, 1.4],       // Trinetra's knoll
+  [6.4, -145.8, 13, -0.2],     // DERMAÉ: a level meadow round the lake (so its banks are low and even)
+  [103.2, -160.9, 5.5, 0],     // Trinetra: the signboard at the fork
   [162.75, -245.8, 5, 0],      // the gear-check mat
   [193, -340, 4.5, 0],         // the summit top
 ];
@@ -404,8 +406,24 @@ function padded(x, z, y) {
   }
   return y;
 }
+// ---------- DERMAÉ's lake: a small basin scooped out of the ridge ----------
+// The water sits a little below the ground around it; inside the shoreline the bed dips gently,
+// and outside it the bank rises back to the natural ground over a few metres.
+const LAKE = CAMPS.find((c) => c.kind === 'lake');
+const LAKE_BANK = 3.5;
+export const LAKE_LEVEL = LAKE ? shapeHeight(LAKE.screen[0], LAKE.screen[1]) - 0.55 : 0;
+function lake(x, z, y) {
+  if (!LAKE) return y;
+  const d = Math.hypot(x - LAKE.screen[0], z - LAKE.screen[1]);
+  if (d > LAKE.radius + LAKE_BANK) return y;
+  const r = d / LAKE.radius;
+  const bed = LAKE_LEVEL - 1.1 * Math.max(0, 1 - r * r) + Math.max(0, d - LAKE.radius) * 0.25;
+  const w = 1 - smoothstep(LAKE.radius, LAKE.radius + LAKE_BANK, d);
+  return y + (Math.min(y, bed) - y) * w;
+}
+
 function landShape(x, z) {
-  return padded(x, z, shapeHeight(x, z));
+  return lake(x, z, padded(x, z, shapeHeight(x, z)));
 }
 
 // ---------- The trail, sampled densely, with a quick "nearest point" lookup ----------

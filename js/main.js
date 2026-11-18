@@ -10,7 +10,8 @@ import Lenis from 'lenis';
 import { createSky } from './world/sky.js';
 import { createMountains, createGround, trailPointAt, trailDirectionAt, smoothstep, SUMMIT_HEIGHT, TRAIL_LENGTH } from './world/terrain.js';
 import { createForest } from './world/forest.js';
-import { createBaseCamp, createProjectCamp, createCampLights } from './world/camp.js';
+import { createBaseCamp, createCampLights } from './world/camp.js';
+import { createLandmark } from './world/landmarks.js';
 import { createRidge } from './world/ridge.js';
 import { createMeadowZone } from './world/meadow.js';
 import { createSummitZone } from './world/summit.js';
@@ -91,20 +92,10 @@ const baseCamp = createBaseCamp(scene);
 const mist = createMist(scene);
 const trekker = createTrekker(scene, renderer, camera);
 
-// Scene 2: the ridge (grass, stones, trees, valley mist) and the project camps: outdoor camp
-// cinemas along the trail, one per project (journey.js). Each screen faces its camera spot.
+// Scene 2: the ridge (grass, stones, trees, valley mist) and the three project landmarks along
+// the trail: a still lake, a stone hut and a trail signboard (journey.js, landmarks.js).
 createRidge(scene);
-const camps = CAMPS.map((c, i) => createProjectCamp(scene, {
-  x: c.sheet[0],
-  z: c.sheet[1],
-  facing: Math.atan2(c.view[0] - c.sheet[0], c.view[1] - c.sheet[1]),
-  video: c.video,
-  renderer,
-  tent: c.tent,
-  tentTurn: c.tentTurn ?? 0,
-  lanternSide: c.lanternSide ?? c.tent,
-  variety: i > 0,          // DERMAÉ keeps its Phase 1 pebbles; the new camps get mixed stones
-}));
+const camps = CAMPS.map((c) => createLandmark(scene, c, { renderer }));
 const campLights = createCampLights(scene);
 campLights.update(camps, camera);
 // Scene 3: the meadow (grass, wildflowers, trees, stones, mist) and the gear check: the kit laid
@@ -264,7 +255,7 @@ function placeTrekker(s, dt, stops) {
   for (const { stop, here } of stops) {
     if (here <= 0) continue;
     let look = null, amount = 0.85;
-    if (stop.camp) look = stop.camp.sheet;
+    if (stop.camp) look = stop.camp.screen;
     else if (stop.at === 'meadow') { look = MEADOW.mat; amount = 0.9; }
     else if (stop.at === 'summit') { look = [camera.position.x, camera.position.z]; amount = smoothstep(0.6, 1, here); }
     if (!look) continue;

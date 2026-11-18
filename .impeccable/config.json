@@ -83,6 +83,12 @@
         ],
         "createdAt": "2026-11-17T13:52:10.104Z",
         "reason": "Claude design decision: 1.04 applies only to the display serif film-title headline (38-76px), carried over from Phase 1; body text uses 1.6"
+      },
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-11-18T03:34:19.819Z",
+        "reason": "Claude: Arial is used only in the deliberately plain 'before' mock-up of the before/after slider demo (css/pages.css, .mock--plain), to contrast with the polished 'after'"
       }
     ]
   }
