@@ -3,31 +3,121 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Trinetra · Pratul</title>
-  <meta name="description" content="Trinetra: A branding and signage agency that needed to show how a project goes from idea to finished hoarding.">
-  <link rel="icon" href="data:,">
+  <title>Trinetra · Signage &amp; branding concept · Pratul</title>
+  <meta name="description" content="Trinetra, a concept website for a branding and signage agency: a scroll film that walks through a real client job, step by step.">
+  <meta name="theme-color" content="#070b1a">
+  <!-- TODO(Pratul): replace SITE_URL with your domain. -->
+  <link rel="canonical" href="https://SITE_URL/case-studies/trinetra.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Pratul">
+  <meta property="og:title" content="Trinetra · a concept by Pratul">
+  <meta property="og:description" content="Trinetra, a concept website for a branding and signage agency: a scroll film that walks through a real client job, step by step.">
+  <meta property="og:url" content="https://SITE_URL/case-studies/trinetra.html">
+  <meta property="og:image" content="https://SITE_URL/assets/work/trinetra-1.jpg">
+  <meta property="og:image:alt" content="A large-format printer at work, under &quot;Printed in-house, colour-true.&quot;">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://SITE_URL/assets/work/trinetra-1.jpg">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/tokens.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages.css">
 </head>
-<body class="case">
-  <!-- Placeholder: the full case study is built in Phase 5. -->
+<body class="case-page">
+  <!-- The mist the film dissolved into clears as this page appears (js/case.js). -->
   <div id="veil" class="veil" aria-hidden="true"></div>
-  <main class="case__main">
-    <a class="skip-link case__back" href="../index.html?return=trinetra" data-back>
+
+  <header class="case-top">
+    <a class="skip-link" href="../index.html?return=trinetra" data-back>
       <svg class="skip-link__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M10.5 6h-8M5.5 2.5 2 6l3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Back to the trail
     </a>
-    <header class="section-heading">
-      <p class="section-heading__eyebrow">Case study <span>Signage &amp; branding · Concept</span></p>
-      <h1 class="section-heading__title">Trinetra</h1>
-      <p class="section-heading__lead">A branding and signage agency that needed to show how a project goes from idea to finished hoarding.</p>
+    <a class="site-nav__name" href="../index.html">Pratul</a>
+  </header>
+
+  <main class="case">
+    <header class="case-hero">
+      <p class="case-hero__meta project-label">
+        <span class="project-label__name">Signage &amp; branding</span>
+        <span class="project-label__type">YEAR</span><!-- TODO(Pratul): the year you made this -->
+        <span class="project-label__tag">Concept</span>
+      </p>
+      <h1>Trinetra</h1>
+      <p class="case-hero__lead">A concept website for a branding and signage agency.</p>
     </header>
-    <p class="case__soon">Full case study coming soon.</p>
+
+    <section class="case-block" aria-labelledby="h-problem">
+      <h2 id="h-problem">The business and its problem</h2>
+      <div class="case-block__body">
+        <p>A branding and signage agency.</p>
+        <p>It needed to show how a project goes from idea to finished hoarding.</p>
+      </div>
+    </section>
+
+    <section class="case-block" aria-labelledby="h-idea">
+      <h2 id="h-idea">My idea</h2>
+      <div class="case-block__body"><p>A scroll film that walks through a real client job, step by step.</p></div>
+    </section>
+
+    <figure class="browser" aria-labelledby="h-film">
+      <div class="browser__bar" aria-hidden="true">
+        <span class="browser__dots"><i></i><i></i><i></i></span>
+        <span class="browser__url">Trinetra · concept</span>
+      </div>
+      <div class="browser__screen">
+        <video src="../recordings/web/trinetra.mp4" poster="../assets/work/trinetra-1.jpg" muted loop playsinline preload="none" controls aria-label="A screen recording of the Trinetra website being scrolled."></video>
+        <button class="btn btn--secondary btn--small browser__play" type="button" hidden>Pause</button>
+      </div>
+      <figcaption class="visually-hidden" id="h-film">Screen recording of the Trinetra website.</figcaption>
+    </figure>
+
+    <section class="case-block" aria-labelledby="h-decisions">
+      <h2 id="h-decisions">Key decisions</h2>
+      <div class="case-block__body">
+        <!-- TODO(Pratul): these are written from your site recording; check they say it the way you would. -->
+        <ol class="case-decisions">
+          <li><strong>The job, in numbered steps</strong><span>The film moves through the work in order (printing in-house, the crew, the install) so a client sees exactly what they are paying for.</span></li>
+          <li><strong>Bold, outdoor-scale type</strong><span>Tall condensed headlines with a script accent, in the brand's purple and amber: type that would hold up on a billboard.</span></li>
+          <li><strong>It ends where the client wants to be</strong><span>The last scene is the finished hoarding lit up over the city at night, with two clear next steps: plan your hoarding, or see sample work.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="case-block" aria-labelledby="h-stills">
+      <h2 id="h-stills">Stills</h2>
+      <div class="gallery">
+        <figure><img src="../assets/work/trinetra-1-800.jpg" srcset="../assets/work/trinetra-1-800.jpg 800w, ../assets/work/trinetra-1.jpg 1600w" sizes="(min-width: 860px) 30vw, 100vw" width="1600" height="770" loading="lazy" alt="A large-format printer at work, under &quot;Printed in-house, colour-true.&quot;"></figure>
+        <figure><img src="../assets/work/trinetra-2-800.jpg" srcset="../assets/work/trinetra-2-800.jpg 800w, ../assets/work/trinetra-2.jpg 1600w" sizes="(min-width: 860px) 30vw, 100vw" width="1600" height="770" loading="lazy" alt="The installation crew in the workshop, under &quot;One team, start to finish.&quot;"></figure>
+        <figure><img src="../assets/work/trinetra-3-800.jpg" srcset="../assets/work/trinetra-3-800.jpg 800w, ../assets/work/trinetra-3.jpg 1600w" sizes="(min-width: 860px) 30vw, 100vw" width="1600" height="770" loading="lazy" alt="A lit Trinetra billboard over the city at night, beside &quot;Your brand, seen by the whole city.&quot;"></figure>
+      </div>
+    </section>
+
+    <nav class="case-actions" aria-label="Project">
+      <!-- TODO(Pratul): replace LIVE_URL_TRINETRA with the live site address (or remove this button). -->
+      <a class="btn btn--primary" href="LIVE_URL_TRINETRA" data-placeholder="LIVE_URL_TRINETRA" rel="noopener" target="_blank">View live site<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="skip-link" href="../index.html?return=trinetra" data-back>Back to the trail</a>
+      <a class="case-next" href="dermae.html"><span>Next project</span><strong>DERMAÉ</strong></a>
+    </nav>
   </main>
+
+  <footer class="footer footer--case">
+    <div class="footer__brand">
+      <p class="footer__name">Pratul</p>
+      <p class="footer__line">I build websites that stand out, for businesses that refuse to blend in.</p>
+    </div>
+    <nav class="footer__links" aria-label="Footer">
+      <a href="../index.html#work">All work</a>
+      <a href="../index.html#services">What I can build</a>
+      <a href="../index.html#about">About</a>
+      <a href="../index.html#contact">Contact</a>
+      <a href="https://github.com/workwithpratul-collab" rel="me noopener" target="_blank">GitHub</a>
+    </nav>
+    <a class="btn btn--primary btn--small" href="../index.html#contact">Book a call<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <p class="footer__small">© 2026 Pratul.</p>
+  </footer>
   <script type="module" src="../js/case.js"></script>
 </body>
 </html>

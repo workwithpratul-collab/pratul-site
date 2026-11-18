@@ -3,31 +3,122 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DERMAÉ · Pratul</title>
-  <meta name="description" content="DERMAÉ: A premium dermatology clinic that needed to feel luxurious and trustworthy, so people feel safe booking.">
-  <link rel="icon" href="data:,">
+  <title>DERMAÉ · Derma clinic concept · Pratul</title>
+  <meta name="description" content="DERMAÉ, a concept website for a premium dermatology clinic: a soft colour palette and a smooth scroll film that feels like a luxury advert.">
+  <meta name="theme-color" content="#070b1a">
+  <!-- TODO(Pratul): replace SITE_URL with your domain. -->
+  <link rel="canonical" href="https://SITE_URL/case-studies/dermae.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Pratul">
+  <meta property="og:title" content="DERMAÉ · a concept by Pratul">
+  <meta property="og:description" content="DERMAÉ, a concept website for a premium dermatology clinic: a soft colour palette and a smooth scroll film that feels like a luxury advert.">
+  <meta property="og:url" content="https://SITE_URL/case-studies/dermae.html">
+  <meta property="og:image" content="https://SITE_URL/assets/work/dermae-1.jpg">
+  <meta property="og:image:alt" content="The DERMAÉ hero: the wordmark and &quot;Specialist skin care, carefully considered.&quot; beside a drop of serum on skin.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://SITE_URL/assets/work/dermae-1.jpg">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/tokens.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages.css">
 </head>
-<body class="case">
-  <!-- Placeholder: the full case study is built in Phase 5. -->
+<body class="case-page">
+  <!-- The mist the film dissolved into clears as this page appears (js/case.js). -->
   <div id="veil" class="veil" aria-hidden="true"></div>
-  <main class="case__main">
-    <a class="skip-link case__back" href="../index.html?return=dermae" data-back>
+
+  <header class="case-top">
+    <a class="skip-link" href="../index.html?return=dermae" data-back>
       <svg class="skip-link__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M10.5 6h-8M5.5 2.5 2 6l3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Back to the trail
     </a>
-    <header class="section-heading">
-      <p class="section-heading__eyebrow">Case study <span>Derma clinic · Concept</span></p>
-      <h1 class="section-heading__title">DERMAÉ</h1>
-      <p class="section-heading__lead">A premium dermatology clinic that needed to feel luxurious and trustworthy, so people feel safe booking.</p>
+    <a class="site-nav__name" href="../index.html">Pratul</a>
+  </header>
+
+  <main class="case">
+    <header class="case-hero">
+      <p class="case-hero__meta project-label">
+        <span class="project-label__name">Derma clinic</span>
+        <span class="project-label__type">YEAR</span><!-- TODO(Pratul): the year you made this -->
+        <span class="project-label__tag">Concept</span>
+      </p>
+      <h1>DERMAÉ</h1>
+      <p class="case-hero__lead">A concept website for a premium dermatology clinic.</p>
     </header>
-    <p class="case__soon">Full case study coming soon.</p>
+
+    <section class="case-block" aria-labelledby="h-problem">
+      <h2 id="h-problem">The business and its problem</h2>
+      <div class="case-block__body">
+        <p>A premium dermatology clinic.</p>
+        <p>It needed to feel luxurious and trustworthy, so people feel safe booking.</p>
+      </div>
+    </section>
+
+    <section class="case-block" aria-labelledby="h-idea">
+      <h2 id="h-idea">My idea</h2>
+      <div class="case-block__body"><p>A soft colour palette and a smooth scroll film that feels like a luxury advert.</p></div>
+    </section>
+
+    <figure class="browser" aria-labelledby="h-film">
+      <div class="browser__bar" aria-hidden="true">
+        <span class="browser__dots"><i></i><i></i><i></i></span>
+        <span class="browser__url">DERMAÉ · concept</span>
+      </div>
+      <div class="browser__screen">
+        <video src="../recordings/web/dermae.mp4" poster="../assets/work/dermae-1.jpg" muted loop playsinline preload="none" controls aria-label="A screen recording of the DERMAÉ website being scrolled."></video>
+        <button class="btn btn--secondary btn--small browser__play" type="button" hidden>Pause</button>
+      </div>
+      <figcaption class="visually-hidden" id="h-film">Screen recording of the DERMAÉ website.</figcaption>
+    </figure>
+
+    <section class="case-block" aria-labelledby="h-decisions">
+      <h2 id="h-decisions">Key decisions</h2>
+      <div class="case-block__body">
+        <!-- TODO(Pratul): these are written from your site recording; check they say it the way you would. -->
+        <ol class="case-decisions">
+          <li><strong>A quiet, premium voice</strong><span>A fine serif wordmark on soft cream and sage, with plenty of space around every line: calm, not clinical.</span></li>
+          <li><strong>A scroll film like a luxury advert</strong><span>As you scroll, the page moves like a slow, polished advert instead of a list of services.</span></li>
+          <li><strong>Booking is always one step away</strong><span>&quot;Book a consultation&quot; stays in the top bar, and the page ends on a short, friendly consultation request.</span></li>
+          <li><strong>Honest demo content</strong><span>As a concept, the doctor profile and credentials are clearly marked as fictional on the page itself.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="case-block" aria-labelledby="h-stills">
+      <h2 id="h-stills">Stills</h2>
+      <div class="gallery">
+        <figure><img src="../assets/work/dermae-1-800.jpg" srcset="../assets/work/dermae-1-800.jpg 800w, ../assets/work/dermae-1.jpg 1600w" sizes="(min-width: 860px) 30vw, 100vw" width="1600" height="770" loading="lazy" alt="The DERMAÉ hero: the wordmark and &quot;Specialist skin care, carefully considered.&quot; beside a drop of serum on skin."></figure>
+        <figure><img src="../assets/work/dermae-2-800.jpg" srcset="../assets/work/dermae-2-800.jpg 800w, ../assets/work/dermae-2.jpg 1600w" sizes="(min-width: 860px) 30vw, 100vw" width="1600" height="770" loading="lazy" alt="A dermatologist examining a patient, under the line &quot;Specialist care, shaped by your goals.&quot;"></figure>
+        <figure><img src="../assets/work/dermae-3-800.jpg" srcset="../assets/work/dermae-3-800.jpg 800w, ../assets/work/dermae-3.jpg 1600w" sizes="(min-width: 860px) 30vw, 100vw" width="1600" height="770" loading="lazy" alt="A calm clinic waiting room beside &quot;Clear steps, from first visit to follow-up.&quot;"></figure>
+      </div>
+    </section>
+
+    <nav class="case-actions" aria-label="Project">
+      <!-- TODO(Pratul): replace LIVE_URL_DERMAE with the live site address (or remove this button). -->
+      <a class="btn btn--primary" href="LIVE_URL_DERMAE" data-placeholder="LIVE_URL_DERMAE" rel="noopener" target="_blank">View live site<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="skip-link" href="../index.html?return=dermae" data-back>Back to the trail</a>
+      <a class="case-next" href="kings-garden.html"><span>Next project</span><strong>The King's Garden</strong></a>
+    </nav>
   </main>
+
+  <footer class="footer footer--case">
+    <div class="footer__brand">
+      <p class="footer__name">Pratul</p>
+      <p class="footer__line">I build websites that stand out, for businesses that refuse to blend in.</p>
+    </div>
+    <nav class="footer__links" aria-label="Footer">
+      <a href="../index.html#work">All work</a>
+      <a href="../index.html#services">What I can build</a>
+      <a href="../index.html#about">About</a>
+      <a href="../index.html#contact">Contact</a>
+      <a href="https://github.com/workwithpratul-collab" rel="me noopener" target="_blank">GitHub</a>
+    </nav>
+    <a class="btn btn--primary btn--small" href="../index.html#contact">Book a call<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <p class="footer__small">© 2026 Pratul.</p>
+  </footer>
   <script type="module" src="../js/case.js"></script>
 </body>
 </html>
