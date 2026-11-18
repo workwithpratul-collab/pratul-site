@@ -2,8 +2,24 @@
 
 Small issues we chose to leave until final polish. Not blockers.
 
+Commit this file to Git whenever it changes, and never overwrite it with an older copy.
+
 ## Open checks (do these first)
-- [ ] Phase 2 sign-off: Pratul reviews the meadow and summit style frames (style-frames.html) and confirms they match base camp. Any changes feed into the Phase 3 world.
+- [ ] Phase 2 sign-off: Pratul reviews the meadow and summit style frames (style-frames.html) and confirms they match base camp.
+- [ ] Phase 3 recheck: Pratul scrolls the full climb and reviews base camp, a project camp, the meadow and the summit against base camp's quality.
+
+## Phase 3 findings
+Items marked (P4) are handled in Phase 4; recheck them afterwards.
+- [ ] (P4) Pacing: the trail is ~3.5x longer than Phase 1 but uses the same scroll length; the trekker covers 50-80 m per screen and feet can slide on a hard flick. Lengthen the scroll to about 12-14 screens.
+- [ ] Summit climb looks plain: smooth lilac snow, rock only as soft bands, and the summit top is a big bland dome in the final shot. Needs richness to match base camp.
+- [ ] Big pale, smooth hillside with sparse trees behind KING'S GARDEN and on the walk between camps.
+- [ ] Feet float or sink up to ~10 cm on steep slopes (knoll, summit). Needs per-foot placement (IK).
+- [ ] The wave is small (hand only reaches head height); find a more open Mixamo wave.
+- [ ] (P4) Ivory altitude meter is hard to read against the bright peach summit sky.
+- [ ] (P4) Gear-check mat is a plain stand-in and the camera stays ~12 m away; move closer for the gear check.
+- [ ] (P4) Camera passes close behind the DERMAE sheet when leaving it (only a pole and stones show).
+- [ ] (P4) Leaving the meadow, the trekker sits at the bottom-left edge of the frame for a moment.
+- [ ] (P4) The small "HI, I'M PRATUL." label above the headline was flagged as a generic AI-site pattern; consider folding the greeting into the headline.
 
 ## Project camp (cinema sheet)
 - [ ] Sheet sway is hard to see in the straight-on arrival shot; make it readable when standing still.
@@ -22,14 +38,6 @@ Small issues we chose to leave until final polish. Not blockers.
 ## Trekker
 - [ ] Faint glowing outline around the body looks like a sticker; soften or remove.
 - [ ] Character file is 11.5 MB; compress textures (VRoid's minimum export is 2048).
-
-## Phase 4 (P4): found in Phase 3, fixed in Phase 4
-- [x] (P4) Trekker covers too much ground per screen and his feet slide on a hard flick: 13 screen-heights, plus a walking speed limit (the film catches up instead of sliding his feet).
-- [x] (P4) Leaving DERMAÉ, the camera passed close behind its sheet: it now swaps to the trekker's far side and passes in front of the screen at a distance.
-- [x] (P4) Leaving the meadow, the trekker sat at the frame edge: the gaze now lifts to the trekker, then hands over to a closer follow camera.
-- [x] (P4) Small "Hi, I'm Pratul." label above the headline (the generic eyebrow look): folded into the headline as its first, quieter line.
-- [x] (P4) Altitude meter is hard to read against the bright summit sky: all film text switches to a day ink as first light breaks.
-- [x] (P4) Gear check camera is ~12 m from the mat: now ~3.5 m, looking down over the kit with the trekker behind it.
 
 ## Later phases
 - [ ] Mobile version (Phase 7).
