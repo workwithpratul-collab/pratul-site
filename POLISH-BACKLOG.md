@@ -21,6 +21,16 @@ Items marked (P4) are handled in Phase 4; recheck them afterwards.
 - [ ] (P4) Leaving the meadow, the trekker sits at the bottom-left edge of the frame for a moment.
 - [ ] (P4) The small "HI, I'M PRATUL." label above the headline was flagged as a generic AI-site pattern; consider folding the greeting into the headline.
 
+## Phase 5 findings
+- [ ] Placeholders to fill in: SITE_URL, FORMSPREE_ENDPOINT, YOUR_EMAIL, BOOKING_LINK, WHATSAPP_NUMBER, each project's YEAR and LIVE_URL_*, and the budget ranges on the contact form (all marked TODO(Pratul) in the files).
+- [ ] Case study "Key decisions" were written from the site recordings: Pratul to check they're accurate and in his words.
+- [ ] Below the film the pages are calm but plain: only the "descent" ridges and the footer's base camp carry the painted world. Consider soft painted transitions between sections.
+- [ ] The score rings show example numbers (98 / 100); replace with real Lighthouse scores once the site is live.
+- [ ] Work cards play their video on hover only; on touch screens visitors see the still (Phase 7).
+- [ ] The top navigation hides Work / About / Contact below 640 px wide (only "Book a call" stays); needs a small mobile menu (Phase 7).
+- [ ] 404.html uses root paths (/css/...), so it only styles correctly when the site is served from the domain root.
+- [ ] Fonts still load from Google Fonts; self-host them for speed and privacy.
+
 ## Project camp (cinema sheet)
 - [ ] Sheet sway is hard to see in the straight-on arrival shot; make it readable when standing still.
 - [ ] Canvas margin looks flat and grey; add warm projector light falling across the whole cloth.
