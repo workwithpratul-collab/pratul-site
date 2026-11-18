@@ -115,8 +115,12 @@ export function createTrekker(scene, renderer, camera, { onProgress, clips = nul
   };
 
   // ---------- Load the VRM ----------
+  // (Its own loading manager, so cancel() can stop the download: the mobile opening gives up on
+  // the live scene if he hasn't arrived in time, and shouldn't keep using the visitor's data.)
+  const manager = new THREE.LoadingManager();
+  const clipAbort = new AbortController();
   const ready = (async () => {
-    const loader = new GLTFLoader();
+    const loader = new GLTFLoader(manager);
     loader.register((parser) => new VRMLoaderPlugin(parser));
     const gltf = await loader.loadAsync(MODEL_URL, (e) => {
       if (onProgress && e.lengthComputable && e.total) onProgress(e.loaded / e.total);
@@ -160,7 +164,7 @@ export function createTrekker(scene, renderer, camera, { onProgress, clips = nul
       console.info('[trekker] Mixamo animations loaded:', Object.keys(state.actions).join(', '));
     };
     if (clips && clipFile) {
-      fetch(clipFile)
+      fetch(clipFile, { signal: clipAbort.signal })
         .then((res) => res.json())
         .then((json) => addClips(Object.fromEntries(clips.filter((n) => json[n]).map((n) => [n, THREE.AnimationClip.parse(json[n])]))))
         .catch((err) => console.warn('[trekker] Could not read', clipFile, err));
@@ -490,6 +494,8 @@ export function createTrekker(scene, renderer, camera, { onProgress, clips = nul
   return {
     root,
     ready,
+    // Stop downloading the character and his clips (nothing else changes).
+    cancel() { manager.abort(); clipAbort.abort(); },
     place,
     teleport,
     update,

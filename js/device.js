@@ -21,7 +21,19 @@
   var link = document.createElement('link');
   link.rel = 'modulepreload';
   link.href = (document.currentScript.getAttribute('src') || '').replace('device.js', mode === 'film' ? 'film.js' : 'mobile/mobile.js');
-  if (document.currentScript.dataset.preload !== 'false') document.head.appendChild(link);
+  if (document.currentScript.dataset.preload !== 'false') {
+    document.head.appendChild(link);
+    // The mobile page opens on a painted still of base camp: fetch it straight away, first in line.
+    if (mode !== 'film') {
+      var still = document.createElement('link');
+      still.rel = 'preload';
+      still.as = 'image';
+      still.setAttribute('imagesrcset', 'assets/mobile/basecamp-720.webp 720w, assets/mobile/basecamp-1080.webp 1080w, assets/mobile/basecamp-1440.webp 1440w');
+      still.setAttribute('imagesizes', '(min-aspect-ratio: 1/2) 100vw, 50vh');
+      still.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(still);
+    }
+  }
 
   function choose() {
     var mq = function (q) { return window.matchMedia(q).matches; };

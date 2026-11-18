@@ -121,7 +121,6 @@ html:not(.mobile-site) .m-only { display: none !important; }
   max-width: 600px;
   text-shadow: var(--text-scrim);
 }
-.m-hero__place { margin-bottom: var(--space-4); }
 .m-hero__title {
   margin: 0;
   font-family: var(--font-display);
@@ -363,12 +362,14 @@ html:not(.mobile-site) .m-only { display: none !important; }
   background: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  filter: drop-shadow(0 3px 4px var(--gear-shadow));
+  /* The paintings' own lilac shadow halos were cut away (they looked like stickers at this size);
+     this small, soft shadow in code takes their place. */
+  filter: drop-shadow(0 2px 2.5px var(--gear-shadow));
   transition: transform var(--duration) var(--ease-out), filter var(--duration) var(--ease-out), opacity var(--duration) var(--ease-out);
 }
 .flatlay__item img { width: 100%; height: 100%; display: block; pointer-events: none; }
 /* Tapped: it lifts off the mat a little, and its shadow spreads further away. The others rest. */
-.flatlay__item.is-picked { transform: translateY(-6px) scale(1.05); filter: drop-shadow(0 16px 14px var(--gear-shadow)); }
+.flatlay__item.is-picked { transform: translateY(-6px) scale(1.05); filter: drop-shadow(0 10px 9px var(--gear-shadow)); }
 .flatlay.has-pick .flatlay__item:not(.is-picked) { opacity: 0.82; }
 .flatlay__item:focus-visible { outline: var(--focus-ring); outline-offset: -12%; }
 /* What the item stands for. Its space is kept, so nothing below jumps when the words change. */
@@ -439,7 +440,9 @@ html:not(.mobile-site) .m-only { display: none !important; }
   isolation: isolate;
 }
 .m-summit__art { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 86%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 86%, transparent); }
-.m-summit__img { object-position: 50% 70%; }
+/* The still is shaped like a modern phone (1080 x 2340), with the trekker three-quarters of the
+   way down: on shorter screens it's cropped around him, so he's always whole and clear of the edge. */
+.m-summit__img { object-position: 50% 74%; }
 /* Day ink over the bright sky (tokens.css .is-day), like the film's summit. */
 .m-summit__text {
   position: absolute;
@@ -499,7 +502,6 @@ html:not(.mobile-site) .m-only { display: none !important; }
   .mobile-site .m-hero { min-height: 360px; }
   .mobile-site .m-hero__text { top: calc(env(safe-area-inset-top) + 64px); right: 42%; }
   .mobile-site .m-hero__title { font-size: clamp(24px, 4.2vw, 34px); }
-  .mobile-site .m-hero__place { margin-bottom: var(--space-2); }
   /* The button sits in the left column under the headline; the camp fills the right half. */
   .mobile-site .m-hero__actions { right: auto; bottom: calc(env(safe-area-inset-bottom) + var(--space-3)); width: min(44%, 320px); justify-items: start; }
   .mobile-site .m-hero__hint { align-items: flex-start; }
@@ -542,7 +544,12 @@ html:not(.mobile-site) .m-only { display: none !important; }
 .mobile-site .case-block__body p:first-child { font-size: var(--text-2xl); }
 /* The recording stays inside its browser frame, with a little air at the sides. */
 .mobile-site .browser { width: calc(100% - var(--space-4)); margin: var(--space-7) auto; }
-.mobile-site .browser__play { min-height: var(--tap); }
+/* Play / Pause sits below the recording (still inside its frame), not over it: on a narrow
+   screen the video is small, and a button on top would hide part of it. */
+.mobile-site .browser__screen { aspect-ratio: auto; display: grid; }
+.mobile-site .browser__screen video { position: static; width: 100%; height: auto; aspect-ratio: 1888 / 908; }
+.mobile-site .browser__play { position: static; justify-self: center; min-height: var(--tap); margin: var(--space-3) 0; }
+.mobile-site .browser__play[hidden] { display: none; }
 .mobile-site .case-actions { gap: var(--space-4); }
 .mobile-site .case-actions .btn { min-height: var(--tap); }
 .mobile-site .case-next { margin-left: 0; text-align: left; min-height: var(--tap); }

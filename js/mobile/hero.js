@@ -39,6 +39,10 @@ const SHOT_WIDE = {
 // Where the trekker stands (beside the path, a few steps from the lantern), and which way he faces
 // (radians; he looks up the trail towards the ridge, three-quarters away from us).
 const TREKKER = { x: -0.5, z: 0, heading: Math.PI * 1.1 };
+// Where the moon sits, in degrees from the middle of the shot: to the right of the headline and
+// above the ridge line, so it never hides behind the text on any phone (the film's moon is left).
+// ?moon=right,up in the address tries other spots.
+const MOON = { right: 9, up: 14 };
 // How often he looks around (seconds between glances), and for how long.
 const LOOK_EVERY = [9, 16];
 const LOOK_FOR = 5.5;
@@ -58,7 +62,9 @@ if (tune.has('trek')) { const v = tune.get('trek').split(',').map(Number); Objec
 
 // onSlow(ms): the phone couldn't keep up; onFail(reason): the scene couldn't be made at all.
 // Either way mobile.js keeps the painted still on screen instead.
-export async function startHero({ canvas, section, onSlow, onFail }) {
+// deadline: the moment (performance.now(), ms since the page opened) by which the trekker must
+// have arrived; if he hasn't, the still stays for good and the 3D is let go.
+export async function startHero({ canvas, section, onSlow, onFail, deadline = Infinity }) {
   // Building the world is split into small steps with a breath between them, so the page stays
   // responsive to taps and scrolling while it happens (one long block would freeze it).
   const breathe = () => new Promise((resolve) => setTimeout(resolve, 0));
@@ -84,7 +90,7 @@ export async function startHero({ canvas, section, onSlow, onFail }) {
   await breathe();
 
   // ---------- The world around base camp, at night ----------
-  const sky = createSky(scene);
+  const sky = createSky(scene, { moonDir: moonDirection() });
   const mountains = createMountains(scene);
   mountains.userData.applyMood();
   await breathe();
@@ -194,13 +200,24 @@ export async function startHero({ canvas, section, onSlow, onFail }) {
   // ---------- Start once he's here ----------
   // The painted still on screen already shows him, so the live scene must never arrive without
   // him: wait for the character and his two animations (if they can't load, the still stays).
+  // If he hasn't arrived by the deadline (a slow connection), the painted still stays: it already
+  // looks finished, and waiting longer would only make the scene change under the visitor's eyes.
+  const late = new Promise((resolve) => setTimeout(() => resolve('late'), Math.max(deadline - performance.now(), 0)));
+  let arrived;
   try {
-    await trekker.ready;
-    mark('trekker');
+    arrived = await Promise.race([trekker.ready.then(() => 'here'), late]);
   } catch (err) {
-    onFail?.('the trekker could not load');
+    arrived = 'failed';
+  }
+  if (arrived !== 'here') {
+    trekker.cancel();     // stop the download: this scene won't be shown, so don't spend the data
+    stop();
+    renderer.dispose();   // free the graphics memory: this scene won't be shown
+    onFail?.(arrived === 'late' ? 'the trekker took longer than 8 s to load' : 'the trekker could not load');
     return { stop };
   }
+  mark('trekker');
+  window.__hero.arrived = true;
   for (let waited = 0; !trekker.hasMixamo && waited < 4000; waited += 100) await new Promise((r) => setTimeout(r, 100));
   mark('clips');
   // Build every shader before the first frame; where the browser can, in the background
@@ -210,6 +227,16 @@ export async function startHero({ canvas, section, onSlow, onFail }) {
   started = true;
   run();
   return { stop };
+}
+
+// ---------- The moon's direction, from the shot (see MOON above) ----------
+function moonDirection() {
+  const m = tune.has('moon') ? tune.get('moon').split(',').map(Number) : [MOON.right, MOON.up];
+  const ahead = SHOT.look.clone().sub(SHOT.pos).setY(0).normalize();
+  ahead.applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(-m[0]));   // (negative = to the right)
+  const centreUp = Math.atan2(SHOT.look.y - SHOT.pos.y, Math.hypot(SHOT.look.x - SHOT.pos.x, SHOT.look.z - SHOT.pos.z));
+  ahead.y = Math.tan(centreUp + THREE.MathUtils.degToRad(m[1]));
+  return ahead.normalize();
 }
 
 // ---------- The trees around base camp ----------

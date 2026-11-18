@@ -63,16 +63,16 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Work cards only play video on hover, so touch screens see stills.
 - [x] Top navigation hides Work / About / Contact below 640 px; needs a small mobile menu.
 - [x] On a 390 px phone the page scrolls sideways: the mist veil (drawn 10% larger than the screen) and the landmark captions stick out past the edge.
-- [ ] The mobile opening waits for the full 2.7 MB character file: on slow 4G the live scene arrives after about 20 s (the painted still covers the wait). A mobile copy of the VRM without the 56 unused face shapes (0.6 MB) and with compressed vertex data could roughly halve it.
+- [x] The mobile opening waits for the full 2.7 MB character file: on slow 4G the live scene arrives after about 20 s (the painted still covers the wait). A mobile copy of the VRM without the 56 unused face shapes (0.6 MB) and with compressed vertex data could roughly halve it.
 - [ ] Phone frame rates were measured in desktop Chrome with phone emulation (processor slowed 4x), so the graphics chip was the PC's: real phone GPU load is untested. The hero swaps to its still if frames take over 42 ms, but check it on a real mid-range Android.
 - [ ] The version is chosen once, when the page loads: turning an iPad from portrait to landscape keeps the mobile page (and the reverse keeps the film) until a reload. An iPad with a mouse or trackpad attached, or a touch laptop in tablet mode, may get the other version.
-- [ ] Mobile project videos are the full 26-28 s recordings (0.5-0.95 MB each); a short 8-10 s loop of the best moment would cut that by more than half.
+- [x] Mobile project videos are the full 26-28 s recordings (0.5-0.95 MB each); a short 8-10 s loop of the best moment would cut that by more than half.
 - [ ] The landmark cards are fixed stills: the video on the lake is a flat warped overlay (no ripples or reflection), and the trekker isn't in the card scenes.
-- [ ] Summit finale on a phone: the trekker is small at the very bottom of the frame (a little cut on tall phones), and his wave is one frozen moment of the gesture.
-- [ ] On an iPhone SE the moon sits just behind the "2,850 m" label of the opening.
+- [x] Summit finale on a phone: the trekker is small at the very bottom of the frame (a little cut on tall phones), and his wave is one frozen moment of the gesture.
+- [x] On an iPhone SE the moon sits just behind the "2,850 m" label of the opening.
 - [ ] The scene parallax is gentle but simple: one picture drifting plus a band of CSS mist, not separately painted layers.
-- [ ] The painted gear on the mobile flat-lay still shows its baked lilac shadow halos (compass, rope) at this larger size.
-- [ ] Project pages at 360 px: the Play / Pause button covers a fair part of the small video in its frame.
+- [x] The painted gear on the mobile flat-lay still shows its baked lilac shadow halos (compass, rope) at this larger size.
+- [x] Project pages at 360 px: the Play / Pause button covers a fair part of the small video in its frame.
 - [ ] First paint on 4G varies (about 1.1 s to 3.3 s in tests) mostly with the Google Fonts stylesheet, which blocks drawing; self-hosting the fonts (listed above) would make it steady.
 
 ## Done

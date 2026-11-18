@@ -52,13 +52,30 @@ function useStill(reason) {
   hero.classList.add('is-still');
 }
 
-if (mode === 'mobile') {
+// How long the live scene may take: if the trekker hasn't arrived 8 s after the page opened, the
+// painted still stays. On a connection the browser already knows is slow (2G, 3G or "save data"),
+// the 3D isn't even downloaded.
+const HERO_DEADLINE_MS = 8000;
+const net = navigator.connection;
+const slowNet = !!net && (net.saveData || /(^|-)2g|3g/.test(net.effectiveType || ''));
+
+if (mode === 'mobile' && slowNet) useStill('slow connection');
+else if (mode === 'mobile') {
   // Wait until the page has painted its text and button, then for a quiet moment, so the 3D
   // download never competes with what the visitor sees first.
   const whenQuiet = (fn) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 1200 }) : setTimeout(fn, 300));
+  // The 8 s promise, kept even if the 3D code itself is still on its way: by then the trekker must
+  // be here, or the still stays (and the 3D isn't started at all).
+  let gaveUp = false;
+  setTimeout(() => {
+    if (window.__hero?.arrived) return;
+    gaveUp = true;
+    useStill('the trekker took longer than 8 s to load');
+  }, Math.max(HERO_DEADLINE_MS - performance.now(), 0));
   const start = () => whenQuiet(() => {
+    if (gaveUp) return;
     import('./hero.js')
-      .then((m) => m.startHero({ canvas, section: hero, onSlow: (ms) => useStill(`too slow (${Math.round(ms)} ms a frame)`), onFail: useStill }))
+      .then((m) => m.startHero({ canvas, section: hero, onSlow: (ms) => useStill(`too slow (${Math.round(ms)} ms a frame)`), onFail: useStill, deadline: HERO_DEADLINE_MS }))
       .catch((err) => useStill(err?.message || err));
   });
   if (document.readyState === 'complete') start();
