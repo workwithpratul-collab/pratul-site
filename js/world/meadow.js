@@ -10,7 +10,7 @@
 
 import * as THREE from 'three';
 import { createSky } from './sky.js';
-import { createMountains, noise2, smoothstep, seededRandom, groundHeight, nearestTrail, trailDistanceAt, trailDirectionAt } from './terrain.js';
+import { createMountains, noise2, smoothstep, seededRandom, groundHeight, nearestTrail, trailDistanceAt } from './terrain.js';
 import { createNearTrees, createStones, createStoneVariety, setWarmLights } from './forest.js';
 import { createGrass, MEADOW_GRASS } from './grass.js';
 import { MEADOW } from './journey.js';
@@ -297,7 +297,8 @@ function buildFlowers(rand) {
 export function createMeadowZone(scene) {
   const rand = seededRandom(4242);
   const [mx, mz] = MEADOW.mat;
-  const nearMat = (x, z) => Math.hypot(x - mx, z - mz) < 2.6 || Math.hypot(x - MEADOW.view[0], z - MEADOW.view[1]) < 5;
+  // Nothing grows on the mat or right around the camera spot (grass would fill the close shot).
+  const nearMat = (x, z) => Math.hypot(x - mx, z - mz) < 1.4 || Math.hypot(x - MEADOW.view[0], z - MEADOW.view[1]) < 2.5;
 
   // ---------- Grass and wildflowers, from the end of the ridge to the snow line ----------
   const start = trailDistanceAt(149, -200);
@@ -343,47 +344,5 @@ export function createMeadowZone(scene) {
     scene.add(strip);
   }
 
-  // ---------- The gear-check mat ----------
-  // A woven wool mat rolled out on the grass, with pale stripes near each end. The trekking
-  // gear will be laid out on it in Phase 4.
-  const mat = buildMat();
-  mat.position.set(mx, groundHeight(mx, mz) + 0.025, mz);
-  // Turned so its long side faces the trail.
-  const t = trailDistanceAt(MEADOW.stop[0], MEADOW.stop[1]);
-  const dir = trailDirectionAt(t);
-  mat.rotation.y = Math.atan2(dir.x, dir.z) + 0.25;
-  scene.add(mat);
-  return { mat };
-}
-
-// A thin rug: a gently rounded slab, coloured by vertices (indigo wool, pale stripes), with a
-// soft roll at one end. Lambert-lit, so it takes the morning light like everything else.
-function buildMat() {
-  const W = 1.9, D = 1.15;
-  const geo = new THREE.PlaneGeometry(W, D, 48, 16).rotateX(-Math.PI / 2);
-  const pos = geo.attributes.position;
-  const colors = new Float32Array(pos.count * 3);
-  const wool = new THREE.Color(MATERIALS.camp.mat), stripe = new THREE.Color(MATERIALS.camp.matStripe), c = new THREE.Color();
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i), z = pos.getZ(i);
-    const u = x / W + 0.5;    // 0..1 along the mat
-    // Edges sit a touch lower than the middle, so the mat drapes over the grass.
-    const edge = Math.min(u, 1 - u, z / D + 0.5, 0.5 - z / D) * 2;
-    pos.setY(i, Math.min(edge * 0.25, 0.015));
-    // Two pairs of stripes near each end.
-    const stripes = [0.1, 0.14, 0.86, 0.9].some((s) => Math.abs(u - s) < 0.012);
-    c.copy(wool).lerp(stripe, stripes ? 0.85 : 0);
-    c.multiplyScalar(0.95 + 0.08 * noise2(x * 9, z * 9, 12));
-    colors.set([c.r, c.g, c.b], i * 3);
-  }
-  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  geo.computeVertexNormals();
-  const material = new THREE.MeshLambertMaterial({ vertexColors: true });
-  const mesh = new THREE.Mesh(geo, material);
-  mesh.name = 'gear-mat';
-  // A soft roll of the same wool at the far end, as if it was just unrolled.
-  const roll = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, D * 0.98, 16).rotateX(Math.PI / 2), new THREE.MeshLambertMaterial({ color: MATERIALS.camp.mat }));
-  roll.position.set(W / 2 + 0.05, 0.06, 0);
-  mesh.add(roll);
-  return mesh;
+  // (The gear check itself, the kit on its canvas mat, is built by gear.js.)
 }

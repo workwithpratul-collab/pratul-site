@@ -174,8 +174,23 @@ export const MATERIALS = {
     rope: '#9a9484',
     groundsheet: '#3b3330',
     metal: '#3a3a40',
-    mat: '#5f678f',            // the gear-check mat: faded indigo wool (soft and cool, never warm)
-    matStripe: '#cfc6b6',      // its woven pale stripes
+  },
+  // The gear check: trekking kit laid out on a canvas mat. Soft, cool and slightly faded, like
+  // well-used gear; only the lantern glows warm (it is a light source).
+  gear: {
+    canvas: '#c3b9a8',         // the canvas mat
+    canvasEdge: '#9f9585',     // its folded, stitched border
+    body: '#4b5274',           // camera body, watch strap: dusky indigo
+    trim: '#323850',           // camera grip, lens ring
+    glass: '#8fa3c4',          // camera lens: cool glass
+    steel: '#9aa0b2',          // compass case, buckles
+    face: '#efe8dc',           // compass and watch faces
+    needle: '#5f678f',         // compass needle, watch hands
+    paper: '#e4dac6',          // the map
+    ink: '#8e9ab3',            // contour lines on the map
+    route: '#b88a8a',          // the route marked on the map (a faded rose, not a warm accent)
+    rope: '#7e9b90',           // coiled rope: weathered sage
+    ropeFleck: '#c9d3cc',      // its pale woven fleck
   },
   // Painted ground colours. These are "surface" colours: the light tints them.
   ground: {

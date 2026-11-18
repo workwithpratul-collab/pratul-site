@@ -369,7 +369,7 @@ const PADS = [
   [41.5, -184.5, 7, 0],        // King's Garden screen
   [36, -174.6, 4, 0],          // where the trekker watches it
   [106, -158.5, 9, 1.4],       // Trinetra's knoll
-  [164.2, -247.1, 7, 0],       // the gear-check mat
+  [162.75, -245.8, 5, 0],      // the gear-check mat
   [193, -340, 4.5, 0],         // the summit top
 ];
 

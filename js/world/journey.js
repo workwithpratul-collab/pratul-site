@@ -58,9 +58,14 @@ export const CAMPS = [
 // The meadow: the open, flat spot where the gear check will happen (Phase 4).
 export const MEADOW = {
   centre: [158, -238],      // the middle of the rolling grassland
-  stop: [161, -246],        // where the trekker stops
-  mat: [164.2, -247.1],     // the placeholder mat on the grass, just ahead and to the right
-  view: [161.7, -236.8],    // camera: high behind the trekker, so it looks down past them onto the mat
+  stop: [161, -246],        // where the trekker stops (and stands, or sits, beside the mat)
+  mat: [162.75, -245.8],    // the gear-check mat, just off the trail on the right, long side along it
+  // The camera comes down close on the far side of the mat: the kit fills the foreground and the
+  // trekker stands just behind it, looking down at their gear.
+  view: [165.7, -245.4],
+  viewHeight: 2.35,
+  look: [161.8, -245.9],    // just in front of the trekker's knees: the whole kit in the
+  lookHeight: 0.58,         // foreground, the trekker standing behind it
 };
 
 // The summit: the end of the trail, with the flag ("Book a call") beside it.

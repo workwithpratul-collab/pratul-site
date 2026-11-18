@@ -21,6 +21,9 @@ const ANIMATION_URLS = {
   walk: 'assets/animations/Walking.fbx',
   idle: 'assets/animations/Idle.fbx',
   wave: 'assets/animations/Waving.fbx',
+  // Optional: a sitting-on-the-ground loop for the gear check. If the file isn't there, the
+  // trekker simply stands beside the mat (see the Phase 4 notes for how to download it).
+  sit: 'assets/animations/Sitting.fbx',
 };
 const STRIDE = 0.72;           // metres per step, used to keep feet and ground in sync
 const MIXAMO_WALK_SPEED = 1.3; // metres per second the Mixamo "Walking" clip naturally covers
@@ -48,6 +51,8 @@ export function createTrekker(scene, renderer, camera) {
     phase: 0,            // where we are in the walk cycle
     blinkTimer: 2,
     waved: false,
+    sit: 0,              // 0 = standing, 1 = sitting (smoothly blended)
+    sitTarget: 0,
   };
 
   // ---------- Load the VRM ----------
@@ -141,7 +146,11 @@ export function createTrekker(scene, renderer, camera) {
       } else if (wave) {
         wave.setEffectiveWeight(0);
       }
-      if (idle) idle.setEffectiveWeight((1 - state.walkAmount) * (1 - waveW));
+      // Sitting (only if the clip exists, and never while walking): it takes over from idle.
+      const sit = state.actions.sit;
+      state.sit += ((sit ? state.sitTarget : 0) * (1 - state.walkAmount) - state.sit) * (1 - Math.exp(-dt * 1.5));
+      if (sit) sit.setEffectiveWeight(state.sit);
+      if (idle) idle.setEffectiveWeight((1 - state.walkAmount) * (1 - waveW) * (1 - state.sit));
       state.mixer.update(dt);
     } else {
       applyStandInPose(vrm, time, state.walkAmount, state.phase);
@@ -165,6 +174,11 @@ export function createTrekker(scene, renderer, camera) {
   }
 
   // Allow the wave to play again (after scrolling back down from the summit).
+  // Sit down (true) or stand up (false). Does nothing if there's no sitting animation.
+  function setSitting(on) {
+    state.sitTarget = on ? 1 : 0;
+  }
+
   function resetWave() {
     state.waved = false;
   }
@@ -184,6 +198,8 @@ export function createTrekker(scene, renderer, camera) {
     update,
     wave,
     resetWave,
+    setSitting,
+    get canSit() { return !!state.actions?.sit; },
     setLightLevel,
     get walking() { return state.walkAmount; },
     get hasMixamo() { return !!state.actions; },
