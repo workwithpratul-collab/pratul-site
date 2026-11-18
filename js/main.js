@@ -21,6 +21,13 @@ import { ZONES, LIGHT, ALTITUDE, FILM_SCREENS, MAX_WALK_SPEED, CAMPS, MEADOW } f
 import { mood, setClimb } from './world/palette.js';
 import { createAltitudeMeter } from './ui/altitude.js';
 import { createCursor } from './ui/cursor.js';
+import { createGear } from './world/gear.js';
+import { createIntro } from './ui/intro.js';
+import { createStory } from './ui/story.js';
+import { createCampUI } from './ui/camp-ui.js';
+import { createGearUI } from './ui/gear-ui.js';
+import { createFinale } from './ui/finale.js';
+import { veil, veilInstantly, mistColour } from './ui/veil.js';
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? You can also add ?fps to the address, or press F to toggle it.
@@ -35,6 +42,13 @@ const STILL_POINTS = { 0: 0, 1: 0.215 };   // the old ?still=1 meant "the ridge 
 const stillParam = params.has('still') ? Number(params.get('still')) || 0 : null;
 const STILL = stillParam === null ? null : (STILL_POINTS[stillParam] ?? Math.min(Math.max(stillParam, 0), 1));
 if (STILL !== null) document.documentElement.classList.add('is-still');
+// "Reduce motion" (a system setting): a calm version with gentle fades instead of camera
+// flights and no drifting text. Everything stays available.
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Coming back from a project page (?return=dermae): start in the mist, at the same spot.
+const RETURN_KEY = 'ascent:return';
+const returning = params.get('return');
+if (returning) veilInstantly();
 
 // ---------- 1. The renderer: turns the 3D scene into pixels on the canvas ----------
 const canvas = document.getElementById('scene');
@@ -85,7 +99,6 @@ const camps = CAMPS.map((c, i) => createProjectCamp(scene, {
   z: c.sheet[1],
   facing: Math.atan2(c.view[0] - c.sheet[0], c.view[1] - c.sheet[1]),
   video: c.video,
-  label: document.getElementById(c.label),
   renderer,
   tent: c.tent,
   tentTurn: c.tentTurn ?? 0,
@@ -94,8 +107,11 @@ const camps = CAMPS.map((c, i) => createProjectCamp(scene, {
 }));
 const campLights = createCampLights(scene);
 campLights.update(camps, camera);
-// Scene 3: the meadow (grass, wildflowers, trees, stones, mist and the gear-check mat).
+// Scene 3: the meadow (grass, wildflowers, trees, stones, mist) and the gear check: the kit laid
+// out on a canvas mat beside the trail, its long side running along the path.
 createMeadowZone(scene);
+const matDir = trailDirectionAt(cameraPath.stops.find((st) => st.at === 'meadow').s);
+const gear = createGear(scene, { position: MEADOW.mat, facing: Math.atan2(-matDir.z, matDir.x) });
 // Scene 4: the summit (the rising sea of clouds, snow peaks, rocks and the flag).
 const summit = createSummitZone(scene, { sunDir: sky.sunDir });
 
@@ -106,11 +122,20 @@ summit.update(0, 1);
 renderer.compile(scene, camera);
 summit.update(0, 0);
 
-// ---------- 6. Scrolling → progress (0 at the top, 1 at the bottom) ----------
-// The page is as tall as the film: FILM_SCREENS screen-heights of scrolling (journey.js).
-document.getElementById('scroll-track').style.height = `${(FILM_SCREENS + 1) * 100}vh`;
-// Lenis smooths the wheel/trackpad so scrolling glides instead of jumping in steps.
-const lenis = new Lenis({ lerp: 0.07, wheelMultiplier: 0.8, smoothWheel: true });
+// ---------- 6. Scrolling → progress (0 at the top of the film, 1 at its end) ----------
+// The film section is FILM_SCREENS screen-heights of scrolling (journey.js); below it the page
+// continues with the sections (placeholders for now).
+const film = document.getElementById('film');
+const stage = document.getElementById('stage');
+film.style.height = `${(FILM_SCREENS + 1) * 100}vh`;
+// Lenis smooths the wheel/trackpad so scrolling glides instead of jumping in steps. Links to
+// places on the page (#contact, #work...) glide there too. With "reduce motion" it's plain scrolling.
+const lenis = new Lenis({
+  lerp: 0.07,
+  wheelMultiplier: 0.8,
+  smoothWheel: !reduceMotion,
+  anchors: reduceMotion ? { immediate: true } : { duration: 2.4 },
+});
 gsap.registerPlugin(ScrollTrigger);
 // Let GSAP's clock drive Lenis, and tell ScrollTrigger whenever Lenis scrolls.
 lenis.on('scroll', ScrollTrigger.update);
@@ -119,7 +144,7 @@ gsap.ticker.lagSmoothing(0);
 
 const scroll = { target: 0, progress: 0 };
 ScrollTrigger.create({
-  trigger: '#scroll-track',
+  trigger: '#film',
   start: 'top top',
   end: 'bottom bottom',
   onUpdate: (self) => { scroll.target = self.progress; },
@@ -221,7 +246,7 @@ function placeTrekker(s, dt, stops) {
     if (here <= 0) continue;
     let look = null, amount = 0.85;
     if (stop.camp) look = stop.camp.sheet;
-    else if (stop.at === 'meadow') { look = MEADOW.mat; amount = 0.5; }
+    else if (stop.at === 'meadow') { look = MEADOW.mat; amount = 0.9; }
     else if (stop.at === 'summit') { look = [camera.position.x, camera.position.z]; amount = smoothstep(0.6, 1, here); }
     if (!look) continue;
     let d = Math.atan2(look[0] - trekPos.x, look[1] - trekPos.z) - target;
@@ -236,15 +261,60 @@ function placeTrekker(s, dt, stops) {
   trekker.place(trekPos.x, trekPos.z, heading);
 }
 
+// ---------- The interface on the film: story, camps, gear check, finale ----------
+const intro = createIntro({ reduceMotion });
+const story = createStory({ reduceMotion });
+const finale = createFinale({ reduceMotion });
+const campUI = createCampUI({ camps, defs: CAMPS, camera, cameraPath, reduceMotion, getProgress: () => scroll.progress });
+const gearUI = createGearUI({ gear, camera, lenis, reduceMotion });
+
+// ---------- "Skip film", and finishing the film for impatient scrollers ----------
+// The page glides down to the end of the film while the world dissolves into mist; the mist
+// clears on the summit and the camera drifts gently into the final shot. No fast-forward rush.
+let gliding = false;
+const filmEndScroll = () => film.offsetTop + film.offsetHeight - window.innerHeight;
+async function glideToEnd({ moveScroll = true } = {}) {
+  if (gliding) return;
+  gliding = true;
+  if (moveScroll && !reduceMotion) lenis.scrollTo(filmEndScroll(), { duration: 2.2, easing: (t) => 1 - Math.pow(1 - t, 3) });
+  await veil(true, { duration: reduceMotion ? 600 : 1000 });
+  jumpTo(1, { moveScroll });
+  if (!reduceMotion) {
+    // Start a little back down the ridge from the final shot, then settle into it.
+    const shot = cameraPath.stops[cameraPath.stops.length - 1].shot;
+    const f = cameraPath.focus;
+    f.look.copy(shot.look);
+    f.pos.copy(shot.pos).lerp(shot.look, -0.25);
+    f.pos.y += 3;
+    f.w = 1;
+    gsap.to(f, { w: 0, duration: 3.2, ease: 'power2.out', delay: 0.2 });
+  }
+  await new Promise((r) => setTimeout(r, 250));
+  await veil(false, { duration: reduceMotion ? 700 : 1800 });
+  gliding = false;
+}
+document.getElementById('skip').addEventListener('click', (e) => {
+  e.preventDefault();
+  glideToEnd();
+});
+
 // ---------- The loop: update, then draw, every frame ----------
 // Timer measures how much time passed since the last frame ("delta time").
 const timer = new THREE.Timer();
 let snapNextFrame = true;   // the first frame puts the camera exactly in place
+let shownMist = '';
 
 function tick(timestamp) {
   timer.update(timestamp);
   const dt = Math.min(timer.getDelta(), 0.1); // cap, so a hiccup never causes a big jump
   const time = timer.getElapsed();
+
+  // The visitor is heading (or already is) below the film while the trekker is still far behind:
+  // finish the film quietly in the background, so it's at the summit if they scroll back up.
+  if (lenis.targetScroll > filmEndScroll() + 20 && scroll.progress < 0.999) jumpTo(1, { moveScroll: false });
+  // Once the film has scrolled off the top of the screen (reading the sections below), stop
+  // drawing it: nobody can see it, and it saves the battery.
+  if (film.getBoundingClientRect().bottom < -50) return;
 
   // A second, gentle smoothing on top of Lenis, so the film never lurches.
   if (snapNextFrame) scroll.progress = scroll.target;
@@ -254,41 +324,64 @@ function tick(timestamp) {
   // the scroll freely.
   scroll.progress = snapNextFrame ? eased : limitWalk(scroll.progress, eased, dt);
   const p = scroll.progress;
+  // Scrolled right to the end of the film (and stopped there) while the trekker is still far
+  // behind: finish through the mist.
+  if (scroll.target > 0.995 && p < 0.9 && !gliding && !campUI.opening && lenis.targetScroll <= filmEndScroll() + 20) glideToEnd({ moveScroll: false });
 
   const s = cameraPath.update(camera, p, dt, snapNextFrame);   // metres along the trail
   const stops = cameraPath.stopInfo(p);
   placeTrekker(s, dt, stops);
   snapNextFrame = false;
 
-  // At the top: once the trekker has stopped and turned round, wave once (then back to idle).
-  // Scrolling back down below the summit lets the wave happen again on the next arrival.
-  const atTop = stops[stops.length - 1];
-  if (atTop.here > 0.98 && atTop.shot > 0.9 && trekker.walking < 0.08) trekker.wave();
-  if (atTop.here < 0.5) trekker.resetWave();
-
   // Light: one "climb" number (0 = night at base camp ... 1 = sunrise at the summit) sets the
   // palette's mood. Sky, fog, lights, mist, trees, mountains and the trekker all read from it,
-  // so they change together.
+  // so they change together. The text on top switches to the day ink as first light breaks.
   setClimb(lightAt(p));
   sky.applyMood();
   mountains.userData.applyMood();
+  stage.classList.toggle('is-day', mood.climb > 0.56);
+  // The world's mist colour, for the soft pane behind story text by day (style.css).
+  const mistHex = mistColour();
+  if (mistHex !== shownMist) { shownMist = mistHex; stage.style.setProperty('--mist', mistHex); }
   // As the camera climbs the summit, the nearer ranges sink below the sea of clouds.
   mountains.userData.setRise(smoothstep(62, 118, camera.position.y));
   trekker.setLightLevel(mood.character.level, mood.character.tint);
   altitude.update(p, metresAt(s / TRAIL_LENGTH), zoneName(p));
+  intro.update(p);
+  story.update(p);
 
   // Each project camp "wakes up" (projector on, video playing) as we arrive, and goes quiet
   // once we've walked on. Its video is only loaded while we're within reach of it in the
   // scroll ("wanted"), and let go again once we're well past it or back down the trail.
-  camps.forEach((camp, i) => {
-    const { arrive, leave } = stops.find((s) => s.stop.camp === CAMPS[i]).stop;
+  const nears = camps.map((camp, i) => {
+    const { arrive, leave } = stops.find((st) => st.stop.camp === CAMPS[i]).stop;
     const near = smoothstep(arrive - 0.08, arrive, p) * (1 - smoothstep(leave, leave + 0.06, p));
     // The first camp's video loads during the opening instead: the browser's very first video
     // start costs one long frame, and it's better spent while the curtain is still down.
     const wanted = p > (i === 0 ? -1 : arrive - 0.12) && p < leave + 0.1;
     camp.update(dt, camera, near, wanted, time);
+    return near;
   });
   campLights.update(camps, camera);
+  campUI.update(nears);
+
+  // The gear check: the kit can be explored once we've arrived and the camera has settled.
+  // If there's a sitting animation, the trekker sits down beside the mat meanwhile.
+  const atMeadow = stops.find((st) => st.stop.at === 'meadow');
+  const settled = atMeadow.here * smoothstep(atMeadow.stop.arrive, atMeadow.stop.arrive + 0.012, p) * (1 - smoothstep(atMeadow.stop.leave - 0.03, atMeadow.stop.leave, p));
+  gearUI.update(settled);
+  trekker.setSitting(settled > 0.9);
+  gear.update(dt, time);
+
+  // The summit: as the sun breaks and the trekker has turned round, the closing words rise in
+  // beside the flag, and he waves (once) at the same moment. Scrolling back down hides them.
+  const atTop = stops[stops.length - 1];
+  if (atTop.here > 0.98 && atTop.shot > 0.9 && trekker.walking < 0.08 && !gliding) {
+    finale.show();
+    trekker.wave();
+  }
+  if (atTop.here < 0.6) { finale.hide(); trekker.resetWave(); }
+
   // The sea of clouds rises with the light; the flag ripples.
   summit.update(time, mood.climb);
 
@@ -306,96 +399,42 @@ function tick(timestamp) {
 }
 renderer.setAnimationLoop(tick);
 
+// Jump straight to a point in the film (0..1): the page scroll, the film and the camera.
+function jumpTo(p, { moveScroll = true } = {}) {
+  if (moveScroll) lenis.scrollTo(film.offsetTop + p * (film.offsetHeight - window.innerHeight), { immediate: true, force: true });
+  scroll.target = p;
+  scroll.progress = p;
+  snapNextFrame = true;
+  heading = null;
+  trekker.teleport();
+}
+
 // A small hook so tests (and you, in the console) can peek at the state.
 window.__ascent = {
   ready: false,
   get fps() { return fps; },
   get progress() { return scroll.progress; },
   info: () => ({ trees: forest.counts, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
-  // Jump straight to a point in the film (0..1), for testing.
-  jump(p) {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    lenis.scrollTo(p * max, { immediate: true, force: true });
-    scroll.target = p;
-    snapNextFrame = true;
-    heading = null;
-    trekker.teleport();
-  },
+  jump: jumpTo,
   lenis,
   scene,   // handy in the console: e.g. __ascent.scene.getObjectByName("stones")
   camera,
   cameraPath,
+  trekker,
   // Which project videos are loaded right now (for testing the lazy loading).
   videos: () => camps.map((c, i) => `${CAMPS[i].id}:${c.videoElement ? (c.videoElement.paused ? 'loaded' : 'playing') : '-'}`).join(' '),
 };
 
-// ---------- 7. The opening text and the page "chrome" ----------
+// ---------- 7. The curtain, the opening, and coming back from a project ----------
 const curtain = document.getElementById('curtain');
-const intro = document.getElementById('intro');
-const hint = document.getElementById('scroll-hint');
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-// Split the headline into words, so each word can appear on its own.
-const headline = intro.querySelector('.intro__headline');
-headline.innerHTML = headline.textContent
-  .trim()
-  .split(/\s+/)   // split on spaces
-  .map((word) => `<span class="word">${word}</span>`)
-  .join(' ');
-
-// Soft reveal: "Hi, I'm Pratul." first, then the headline word by word, then the scroll hint.
-function revealIntro() {
-  if (reduceMotion) {
-    gsap.set(['.intro__hello', '.intro__headline .word', hint, '#altitude'], { opacity: 1 });
-    return;
-  }
-  const tl = gsap.timeline({ delay: 0.6 });
-  tl.fromTo('.intro__hello', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 1.4, ease: 'power2.out' })
-    .fromTo('.intro__headline .word',
-      { opacity: 0, y: 18, filter: 'blur(8px)' },
-      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.4, ease: 'power3.out', stagger: 0.07 },
-      '-=0.6')
-    .to(hint, { opacity: 1, duration: 1.2, ease: 'power1.out' }, '+=0.2')
-    .to('#altitude', { opacity: 1, duration: 1.6, ease: 'power1.out' }, '<');
-}
-
-// As the climb begins (the first half-screen of scrolling), the text drifts up and fades away.
-gsap.to(intro, {
-  opacity: 0,
-  y: -40,
-  ease: 'none',
-  scrollTrigger: { trigger: '#scroll-track', start: 'top top', end: () => `+=${window.innerHeight * 0.5}`, scrub: true },
-});
-ScrollTrigger.create({
-  trigger: '#scroll-track',
-  start: 'top top',
-  end: () => `+=${window.innerHeight * 0.25}`,
-  onUpdate: (self) => { if (self.progress > 0.05) gsap.to(hint, { opacity: 0, duration: 0.6, overwrite: true }); },
-});
-
-// Lift the curtain when the character is ready, or after 6 seconds at the most.
 let lifted = false;
 function liftCurtain() {
   if (lifted) return;
   lifted = true;
   curtain.classList.add('is-lifted');
-  revealIntro();
+  if (!returning) intro.reveal();
 }
 setTimeout(liftCurtain, 6000);
-
-// "Skip film": dip to black, jump to the end, fade back in (no fast-forward rush up the trail).
-document.getElementById('skip').addEventListener('click', (e) => {
-  e.preventDefault();
-  curtain.classList.add('is-dipping');
-  curtain.classList.remove('is-lifted');
-  setTimeout(() => {
-    window.__ascent.jump(1);
-    setTimeout(() => {
-      curtain.classList.add('is-lifted');
-      setTimeout(() => curtain.classList.remove('is-dipping'), 700);
-    }, 120);
-  }, 650);
-});
 
 // Tell tests the world is ready once the character has loaded (or failed to).
 trekker.ready
@@ -403,12 +442,25 @@ trekker.ready
   .finally(() => {
     window.__ascent.ready = true;
     if (STILL !== null) showStill();
+    if (returning) comeBack();
     liftCurtain();
   });
 
+// Back from a project page: same spot on the trail, rising out of the mist (camp-ui.js).
+function comeBack() {
+  let saved = null;
+  try { saved = JSON.parse(sessionStorage.getItem(RETURN_KEY)); } catch { /* nothing saved */ }
+  const stop = cameraPath.stops.find((st) => st.at === returning);
+  const progress = saved?.camp === returning ? saved.progress : stop?.arrive ?? 0;
+  history.replaceState(null, '', location.pathname);
+  intro.skip();
+  jumpTo(progress);
+  campUI.returnFrom(returning);
+}
+
 // Still mode: jump to the chosen moment, and (with &pause) stop drawing a few seconds later.
 function showStill() {
-  window.__ascent.jump(STILL);
+  jumpTo(STILL);
   if (!params.has('pause')) return;
   setTimeout(() => {
     renderer.setAnimationLoop(null);
