@@ -337,12 +337,12 @@ html:not(.mobile-site) .m-only { display: none !important; }
 .flatlay__items { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; }
 /* Where each item lies on the mat (the film's own layout, turned to fit a tall screen). */
 .flatlay__spot { position: absolute; left: var(--x); top: var(--y); width: var(--size); aspect-ratio: 1; translate: -50% -50%; rotate: var(--turn); }
-.flatlay__spot--camera  { --x: 67.9%; --y: 18.4%; --size: 52.6%; --turn: -5deg; }
+.flatlay__spot--camera  { --x: 67.9%; --y: 21%; --size: 52.6%; --turn: -5deg; }
 .flatlay__spot--map     { --x: 66.8%; --y: 50%;   --size: 50.5%; --turn: 3deg; }
-.flatlay__spot--lantern { --x: 66.8%; --y: 81.6%; --size: 48.4%; --turn: 6deg; }
-.flatlay__spot--compass { --x: 28.9%; --y: 18.4%; --size: 42.1%; --turn: -4deg; }
+.flatlay__spot--lantern { --x: 66.8%; --y: 79%; --size: 48.4%; --turn: 6deg; }
+.flatlay__spot--compass { --x: 28.9%; --y: 21%; --size: 42.1%; --turn: -4deg; }
 .flatlay__spot--rope    { --x: 27.9%; --y: 50%;   --size: 48.4%; --turn: -8deg; }
-.flatlay__spot--watch   { --x: 28.9%; --y: 81.6%; --size: 44.2%; --turn: 10deg; }
+.flatlay__spot--watch   { --x: 28.9%; --y: 79%; --size: 44.2%; --turn: 10deg; }
 .flatlay__item {
   display: block;
   width: 100%;
