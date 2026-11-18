@@ -1,53 +1,60 @@
-# Polish backlog (for Phase 6: the $50K polish)
+# Polish backlog
 
-Small issues we chose to leave until final polish. Not blockers.
+Everything we chose to fix later. Phase 6 fixes the CLAUDE CODE items, Phase 7 the MOBILE items,
+and Pratul does the PRATUL items in Phase 8.
 
-Commit this file to Git whenever it changes, and never overwrite it with an older copy.
+RULE FOR CLAUDE CODE: this is Pratul's file. Only tick items or add new ones under the right heading.
+Never delete items, never rewrite the file, never restore an older copy. Commit it whenever it changes.
 
-## Open checks (do these first)
-- [ ] Phase 2 sign-off: Pratul reviews the meadow and summit style frames (style-frames.html) and confirms they match base camp.
-- [ ] Phase 3 recheck: Pratul scrolls the full climb and reviews base camp, a project camp, the meadow and the summit against base camp's quality.
+## PRATUL: checks and decisions
+- [ ] Phase 2 sign-off: review the meadow and summit style frames (style-frames.html) against base camp.
+- [ ] Phase 3 recheck: scroll the full climb and compare base camp, a project camp, the meadow and the summit.
+- [ ] Fast-scroll catch-up: confirm the film never lags more than ~1.5 s behind the scroll (jogging, mist skip).
+- [ ] Judge the italic greeting "Hi, I'm Pratul." on screen (a design checker calls it a template look).
+- [ ] Judge the summit finale: the text sits in the open sky, not beside the flag.
+- [ ] Check the case-study "Key decisions" are accurate and in your own words.
+- [ ] Fill in placeholders (marked TODO(Pratul) in the files): SITE_URL, FORMSPREE_ENDPOINT, YOUR_EMAIL, BOOKING_LINK, WHATSAPP_NUMBER, each project's YEAR and LIVE_URL_*, contact-form budget ranges.
+- [ ] Test with a real screen reader (Windows Narrator), a touch screen, and the custom cursor with a real mouse.
+- [ ] After launch: replace the example score rings (98 / 100) with real Lighthouse scores.
+- [ ] Optional: download a ground-sitting Mixamo loop as assets/animations/Sitting.fbx for the gear check.
 
-## Phase 3 findings
-Items marked (P4) are handled in Phase 4; recheck them afterwards.
-- [ ] (P4) Pacing: the trail is ~3.5x longer than Phase 1 but uses the same scroll length; the trekker covers 50-80 m per screen and feet can slide on a hard flick. Lengthen the scroll to about 12-14 screens.
-- [ ] Summit climb looks plain: smooth lilac snow, rock only as soft bands, and the summit top is a big bland dome in the final shot. Needs richness to match base camp.
-- [ ] Big pale, smooth hillside with sparse trees behind KING'S GARDEN and on the walk between camps.
-- [ ] Feet float or sink up to ~10 cm on steep slopes (knoll, summit). Needs per-foot placement (IK).
-- [ ] The wave is small (hand only reaches head height); find a more open Mixamo wave.
-- [ ] (P4) Ivory altitude meter is hard to read against the bright peach summit sky.
-- [ ] (P4) Gear-check mat is a plain stand-in and the camera stays ~12 m away; move closer for the gear check.
-- [ ] (P4) Camera passes close behind the DERMAE sheet when leaving it (only a pole and stones show).
-- [ ] (P4) Leaving the meadow, the trekker sits at the bottom-left edge of the frame for a moment.
-- [ ] (P4) The small "HI, I'M PRATUL." label above the headline was flagged as a generic AI-site pattern; consider folding the greeting into the headline.
-
-## Phase 5 findings
-- [ ] Placeholders to fill in: SITE_URL, FORMSPREE_ENDPOINT, YOUR_EMAIL, BOOKING_LINK, WHATSAPP_NUMBER, each project's YEAR and LIVE_URL_*, and the budget ranges on the contact form (all marked TODO(Pratul) in the files).
-- [ ] Case study "Key decisions" were written from the site recordings: Pratul to check they're accurate and in his words.
-- [ ] Below the film the pages are calm but plain: only the "descent" ridges and the footer's base camp carry the painted world. Consider soft painted transitions between sections.
-- [ ] The score rings show example numbers (98 / 100); replace with real Lighthouse scores once the site is live.
-- [ ] Work cards play their video on hover only; on touch screens visitors see the still (Phase 7).
-- [ ] The top navigation hides Work / About / Contact below 640 px wide (only "Book a call" stays); needs a small mobile menu (Phase 7).
-- [ ] 404.html uses root paths (/css/...), so it only styles correctly when the site is served from the domain root.
-- [ ] Fonts still load from Google Fonts; self-host them for speed and privacy.
-
-## Project camp (cinema sheet)
-- [ ] Sheet sway is hard to see in the straight-on arrival shot; make it readable when standing still.
-- [ ] Canvas margin looks flat and grey; add warm projector light falling across the whole cloth.
-- [ ] Poles are plain sticks; add straps, lashing, tips, and pegs where the ropes meet the ground.
-
-## Trees
-- [ ] Pine nearest the tent shows a stripy orange band; make the warm glow soft.
-- [ ] Far tree cards turn slightly to face the camera (hard to spot at 26 m+); fix only if noticed.
-
-## Ground, stones, snow
-- [ ] Ground is plain: add grass texture and meadow detail, especially on the ridge under the cinema.
+## CLAUDE CODE: the world
+- [ ] Summit climb looks plain: smooth lilac snow, rock only as soft bands, big bland dome in the final shot.
+- [ ] Big pale, smooth hillside with sparse trees behind THE KING'S GARDEN and between camps.
+- [ ] Ground is plain: add grass and meadow detail, especially on the ridge under the cinema sheets.
 - [ ] Stones are all one rounded shape; add 3-4 different shapes.
-- [ ] Snow edges on the big far peak are blotchy and ragged; smooth them.
+- [ ] Snow edges on the big far peak are blotchy and ragged.
+- [ ] Pine nearest the base-camp tent shows a stripy orange band; make the warm glow soft.
+- [ ] Far tree cards turn slightly to face the camera (fix only if it costs no speed).
 
-## Trekker
-- [ ] Faint glowing outline around the body looks like a sticker; soften or remove.
-- [ ] Character file is 11.5 MB; compress textures (VRoid's minimum export is 2048).
+## CLAUDE CODE: project camps
+- [ ] Sheet sway is hard to see when standing still in front of a sheet.
+- [ ] Canvas looks flat and grey; add warm projector light across the whole cloth.
+- [ ] Poles are plain sticks; add straps, lashing, tips, and pegs where the ropes meet the ground.
+- [ ] Opening a project: the camera glides close past the trekker's head on the way to the sheet.
 
-## Later phases
-- [ ] Mobile version (Phase 7).
+## CLAUDE CODE: the trekker
+- [ ] Feet float or sink up to ~10 cm on steep slopes (knoll, summit); needs per-foot placement (IK).
+- [ ] The wave is small (hand only reaches head height); may need a more open Mixamo wave.
+- [ ] Faint glowing outline around the body looks like a sticker.
+- [ ] Character file is 11.5 MB; compress textures to get it under ~5 MB.
+
+## CLAUDE CODE: gear check and pages
+- [ ] Gear items are simple shapes, less rich than the camps.
+- [ ] Trekker stands idle behind the gear mat (use Sitting.fbx if it exists).
+- [ ] Pages below the film are calm but plain; bring more of the painted world into them.
+- [ ] 404.html uses root paths (/css/...), so it only styles correctly from the domain root.
+- [ ] Fonts load from Google Fonts; self-host them.
+
+## MOBILE (Phase 7)
+- [ ] Lighter, simpler version of the film for phones and tablets.
+- [ ] Work cards only play video on hover, so touch screens see stills.
+- [ ] Top navigation hides Work / About / Contact below 640 px; needs a small mobile menu.
+
+## Done
+- [x] (P4) Pacing: 13 screen-heights plus a walking speed limit, so feet don't slide.
+- [x] (P4) Camera no longer passes close behind the DERMAÉ sheet when leaving it.
+- [x] (P4) Trekker no longer sits at the frame edge when leaving the meadow.
+- [x] (P4) Greeting folded into the headline (no small label above it).
+- [x] (P4) Altitude meter readable against the bright summit sky.
+- [x] (P4) Gear-check camera moved in close (~3.5 m).
