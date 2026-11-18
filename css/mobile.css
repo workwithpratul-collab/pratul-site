@@ -178,7 +178,14 @@ html:not(.mobile-site) .m-only { display: none !important; }
    For weak devices and "reduce motion" (and as a fallback if the live scene can't run). */
 [data-mode="calm"] .m-hero__paint, .m-hero.is-still .m-hero__paint { display: block; }
 [data-mode="calm"] .m-hero__canvas, .m-hero.is-still .m-hero__canvas { display: none; }
-.m-hero__mist, .m-hero__glow { position: absolute; pointer-events: none; }
+.m-hero__mist, .m-hero__glow { display: none; position: absolute; pointer-events: none; }
+[data-mode="calm"] .m-hero__mist, [data-mode="calm"] .m-hero__glow,
+.m-hero.is-still .m-hero__mist, .m-hero.is-still .m-hero__glow { display: block; }
+/* The mobile version shows the same painted still at once (it's tiny, 24 KB), so the first screen
+   is complete straight away; the live scene then fades in over it, framed identically, so base
+   camp seems to come alive rather than appear. */
+[data-mode="mobile"] .m-hero__paint { display: block; transition: opacity 1.8s var(--ease-out); }
+.m-hero.is-live .m-hero__paint { opacity: 0; }
 /* A wide, soft band of moonlit mist drifting slowly across the trees. */
 .m-hero__mist {
   left: -40%;

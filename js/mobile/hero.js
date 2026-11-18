@@ -56,26 +56,46 @@ if (tune.has('shot')) {
 const MAX_DPR = tune.has('dpr') ? Number(tune.get('dpr')) : MAX_PIXEL_RATIO;
 if (tune.has('trek')) { const v = tune.get('trek').split(',').map(Number); Object.assign(TREKKER, { x: v[0], z: v[1], heading: v[2] ?? TREKKER.heading }); }
 
-export function startHero({ canvas, section, onSlow }) {
+// onSlow(ms): the phone couldn't keep up; onFail(reason): the scene couldn't be made at all.
+// Either way mobile.js keeps the painted still on screen instead.
+export async function startHero({ canvas, section, onSlow, onFail }) {
+  // Building the world is split into small steps with a breath between them, so the page stays
+  // responsive to taps and scrolling while it happens (one long block would freeze it).
+  const breathe = () => new Promise((resolve) => setTimeout(resolve, 0));
+  const marks = { start: Math.round(performance.now()) };   // (when each stage finished, for the speed tests)
+  const mark = (name) => { marks[name] = Math.round(performance.now()); };
+
   // ---------- Renderer, scene, camera ----------
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'default' });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NoToneMapping;   // our painted colours, shown exactly
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(SHOT.fov, 1, 0.1, 6000);
+  setClimb(0);                                       // night (palette.js): sky, fog, light, mist together
+
+  // ---------- The trekker first: he's the biggest download, so he starts arriving while we build ----------
+  // His two animations come from one small file made from the FBX clips (assets/animations/hero-clips.json,
+  // 0.25 MB instead of 1.9 MB). (?fbx in the address loads the original FBX files instead.)
+  const clipFile = tune.has('fbx') ? null : 'assets/animations/hero-clips.json';
+  // (No renderer or camera: he shouldn't compile the whole scene in one block when he arrives;
+  // it's compiled in the background below, once everything is here.)
+  const trekker = createTrekker(scene, null, null, { clips: ['idle', 'look'], clipFile });
+  trekker.place(TREKKER.x, TREKKER.z, TREKKER.heading);
+  await breathe();
 
   // ---------- The world around base camp, at night ----------
-  setClimb(0);                                       // night (palette.js): sky, fog, light, mist together
   const sky = createSky(scene);
   const mountains = createMountains(scene);
   mountains.userData.applyMood();
+  await breathe();
   // Only the land the camera can see from the camp, and the first stretch of the path.
   createGround(scene, { region: { minX: -150, maxX: 120, minZ: -230, maxZ: 40 }, trailMetres: 90 });
+  await breathe();
   createSmallForest(scene, { ...plantTrees(), facePoint: [SHOT.pos.x, SHOT.pos.z], sky });
+  await breathe();
   const camp = createBaseCamp(scene);
   const mist = createLowMist(scene);
-  const trekker = createTrekker(scene, renderer, camera, { clips: ['idle', 'look'] });
-  trekker.place(TREKKER.x, TREKKER.z, TREKKER.heading);
+  mark('built');
 
   // ---------- Size and framing ----------
   const base = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
@@ -144,9 +164,9 @@ export function startHero({ canvas, section, onSlow }) {
   }
 
   // ---------- Pausing: off screen, or the tab is hidden ----------
-  let onScreen = true, running = false, stopped = false;
+  let onScreen = true, running = false, stopped = false, started = false;
   function run() {
-    const want = onScreen && !document.hidden && !stopped;
+    const want = started && onScreen && !document.hidden && !stopped;
     if (want === running) return;
     running = want;
     renderer.setAnimationLoop(want ? tick : null);
@@ -156,19 +176,12 @@ export function startHero({ canvas, section, onSlow }) {
   document.addEventListener('visibilitychange', run);
   function stop() { stopped = true; run(); }
 
-  // Build every shader now, then start once the trekker is in (so he doesn't pop in later).
-  renderer.compile(scene, camera);
-  const ready = trekker.ready.catch((e) => console.warn('[hero] trekker failed to load', e));
-  Promise.race([ready, new Promise((r) => setTimeout(r, 9000))]).then(() => {
-    if (!stopped) renderer.compile(scene, camera);
-    run();
-  });
-
   // A small hook for testing in the console and in the device tests.
   window.__hero = {
     fps: 0,
     frames: 0,
-    ready,
+    ready: trekker.ready,
+    marks,
     info: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, pixelRatio: renderer.getPixelRatio() }),
     get running() { return running; },
     _t: 0, _n: 0,
@@ -177,6 +190,25 @@ export function startHero({ canvas, section, onSlow }) {
     camera,
     trekker,
   };
+
+  // ---------- Start once he's here ----------
+  // The painted still on screen already shows him, so the live scene must never arrive without
+  // him: wait for the character and his two animations (if they can't load, the still stays).
+  try {
+    await trekker.ready;
+    mark('trekker');
+  } catch (err) {
+    onFail?.('the trekker could not load');
+    return { stop };
+  }
+  for (let waited = 0; !trekker.hasMixamo && waited < 4000; waited += 100) await new Promise((r) => setTimeout(r, 100));
+  mark('clips');
+  // Build every shader before the first frame; where the browser can, in the background
+  // (compileAsync), so the page doesn't freeze while it happens.
+  await (renderer.compileAsync ? renderer.compileAsync(scene, camera) : renderer.compile(scene, camera));
+  mark('compiled');
+  started = true;
+  run();
   return { stop };
 }
 

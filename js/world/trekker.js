@@ -11,13 +11,16 @@
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 import { groundHeight } from './terrain.js';
 import { WIND_DIR, windGustAt } from './glsl.js';
 import { PRESETS, MATERIALS } from './palette.js';
 
 const MODEL_URL = 'assets/pratul-trekker.vrm';
+// The Mixamo files are FBX, read by three.js's FBXLoader. It's fetched only when FBX files are
+// actually loaded (the film), not by a scene that uses ready-made clips (the mobile opening).
+let fbxLoaderModule = null;
+const getFBXLoader = () => (fbxLoaderModule ??= import('three/addons/loaders/FBXLoader.js'));
 const ANIMATION_URLS = {
   walk: 'assets/animations/Walking.fbx',
   idle: 'assets/animations/Idle.fbx',
@@ -73,7 +76,11 @@ const NIGHT_TINT = new THREE.Color(PRESETS.night.character.tint);
 // onProgress (optional): called with 0..1 as the character file downloads (the loading screen).
 // clips (optional): load only these animations (e.g. ['idle', 'look'] for the mobile opening,
 // where he stands at base camp); by default the film's full set loads, in two batches.
-export function createTrekker(scene, renderer, camera, { onProgress, clips = null } = {}) {
+// clipFile (optional): read those clips from one small JSON file made from the FBX files (already
+// fitted to this character, with repeated keyframes removed) instead of the FBX files themselves.
+export function createTrekker(scene, renderer, camera, { onProgress, clips = null, clipFile = null } = {}) {
+  // (The film: start fetching the FBX reader now, alongside the character, as before.)
+  if (!clipFile) getFBXLoader();
   // `root` is what we move around the world; the VRM sits inside it.
   const root = new THREE.Group();
   root.name = 'trekker';
@@ -152,6 +159,13 @@ export function createTrekker(scene, renderer, camera, { onProgress, clips = nul
       }
       console.info('[trekker] Mixamo animations loaded:', Object.keys(state.actions).join(', '));
     };
+    if (clips && clipFile) {
+      fetch(clipFile)
+        .then((res) => res.json())
+        .then((json) => addClips(Object.fromEntries(clips.filter((n) => json[n]).map((n) => [n, THREE.AnimationClip.parse(json[n])]))))
+        .catch((err) => console.warn('[trekker] Could not read', clipFile, err));
+      return vrm;
+    }
     if (clips) {
       loadMixamoClips(vrm, clips).then(addClips);
       return vrm;
@@ -648,6 +662,7 @@ async function loadMixamoClips(vrm, names = Object.keys(ANIMATION_URLS)) {
 // Mixamo bones have different "rest" orientations from VRM bones, so each rotation is
 // corrected: rotate into world space using the Mixamo rest pose, then back into VRM space.
 async function loadMixamoAnimation(url, vrm, { dropHipTurn = false } = {}) {
+  const { FBXLoader } = await getFBXLoader();
   const asset = await new FBXLoader().loadAsync(url);
   const clip = THREE.AnimationClip.findByName(asset.animations, 'mixamo.com') || asset.animations[0];
   if (!clip) throw new Error('no animation in ' + url);

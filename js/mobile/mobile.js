@@ -58,7 +58,7 @@ if (mode === 'mobile') {
   const whenQuiet = (fn) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 1200 }) : setTimeout(fn, 300));
   const start = () => whenQuiet(() => {
     import('./hero.js')
-      .then((m) => m.startHero({ canvas, section: hero, onSlow: (ms) => useStill(`too slow (${Math.round(ms)} ms a frame)`) }))
+      .then((m) => m.startHero({ canvas, section: hero, onSlow: (ms) => useStill(`too slow (${Math.round(ms)} ms a frame)`), onFail: useStill }))
       .catch((err) => useStill(err?.message || err));
   });
   if (document.readyState === 'complete') start();
