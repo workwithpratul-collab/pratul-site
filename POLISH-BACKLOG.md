@@ -42,14 +42,15 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 ## CLAUDE CODE: gear check and pages
 - [x] Gear items are simple shapes, less rich than the camps.
 - [x] Trekker stands idle behind the gear mat (use Sitting.fbx if it exists).
-- [ ] Pages below the film are calm but plain; bring more of the painted world into them.
-- [ ] 404.html uses root paths (/css/...), so it only styles correctly from the domain root.
+- [x] Pages below the film are calm but plain; bring more of the painted world into them.
+- [x] 404.html uses root paths (/css/...), so it only styles correctly from the domain root.
 - [ ] Fonts load from Google Fonts; self-host them.
 
 ## MOBILE (Phase 7)
 - [ ] Lighter, simpler version of the film for phones and tablets.
 - [ ] Work cards only play video on hover, so touch screens see stills.
 - [ ] Top navigation hides Work / About / Contact below 640 px; needs a small mobile menu.
+- [ ] On a 390 px phone the page scrolls sideways: the mist veil (drawn 10% larger than the screen) and the landmark captions stick out past the edge.
 
 ## Done
 - [x] (P4) Pacing: 13 screen-heights plus a walking speed limit, so feet don't slide.

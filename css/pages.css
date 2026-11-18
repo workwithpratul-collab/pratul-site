@@ -27,10 +27,61 @@
 .descent__mid { fill: var(--art-ridge-mid); opacity: 0.85; }
 .descent__near { fill: var(--page-dawn); }
 .page-section {
-  padding: var(--space-9) 0;
+  /* Full width (out to the page edges), with the side margin as padding inside: so the painted
+     dividers and the sunrise light reach the edges of the window. */
+  margin-inline: calc(-1 * var(--gutter));
+  padding: var(--space-9) var(--gutter);
   scroll-margin-top: 0;   /* Lenis adds the nav-bar offset itself */
 }
-.page-section + .page-section { border-top: var(--hairline) solid var(--line-soft); }
+/* ---------- Painted dividers between the sections ----------
+   Instead of a hairline, each section opens under two soft layers of ridges with a band of mist
+   between them: the same painted mountains as the film, faint against the night page. The ridge
+   shapes are SVG masks (shape only); their colours come from tokens.css. All static CSS: no
+   images to load, nothing moving, no cost while scrolling. They sit behind the text. */
+.page-section { position: relative; isolation: isolate; }
+.page-section + .page-section::before,
+.page-section + .page-section::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 150px;
+  pointer-events: none;
+  /* each layer fades out downwards, so it melts into the page instead of ending in an edge */
+  -webkit-mask-image: var(--ridge), linear-gradient(to bottom, #000 45%, transparent);
+  mask-image: var(--ridge), linear-gradient(to bottom, #000 45%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+/* The far ridge: pale and faint, with the mist gathered along its foot. */
+.page-section + .page-section::before {
+  --ridge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 140' preserveAspectRatio='none'%3E%3Cpath d='M0 140V72L120 42L210 66L330 24L450 60L560 38L700 74L820 30L960 62L1080 20L1200 58L1330 34L1460 64L1600 42V140Z'/%3E%3C/svg%3E");
+  background:
+    linear-gradient(to bottom, transparent 30%, var(--art-mist) 75%, transparent),
+    var(--art-ridge-far);
+  opacity: 0.16;
+  transform: translateY(-62%);
+}
+/* The near ridge: a little deeper and lower, rolling rather than peaked. */
+.page-section + .page-section::after {
+  --ridge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 140' preserveAspectRatio='none'%3E%3Cpath d='M0 140V102C150 82 260 106 400 90S640 112 800 98S1080 114 1240 94S1500 102 1600 92V140Z'/%3E%3C/svg%3E");
+  background: var(--art-ridge-mid);
+  opacity: 0.22;
+  transform: translateY(-55%);
+}
+/* Every other divider is mirrored, so the ridgelines never repeat. */
+.page-section:nth-of-type(odd)::before, .page-section:nth-of-type(odd)::after { scale: -1 1; }
+
+/* ---------- Sunrise light ----------
+   A soft, warm glow from above on the sections that lead to a decision (the work and the
+   contact form), like the first sun over the ridge. Very faint, and behind everything. */
+#work, #contact {
+  background: radial-gradient(60% 460px at 72% 0, color-mix(in srgb, var(--art-glow) 12%, transparent), transparent 75%);
+}
 .page-section .section-heading { margin-bottom: var(--space-8); }
 .section-heading__title em { font-style: italic; color: var(--ink-muted); }
 
