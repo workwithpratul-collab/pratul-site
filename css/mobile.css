@@ -75,14 +75,27 @@ html:not(.mobile-site) .m-only { display: none !important; }
   background: linear-gradient(to bottom, var(--night-sky-top), var(--night-sky-mid) 42%, var(--night-horizon) 72%, var(--page));
 }
 .m-hero__art { position: absolute; inset: 0; z-index: -1; }
-.m-hero__canvas, .m-hero__still {
+.m-hero__canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   display: block;
 }
-.m-hero__still { object-fit: cover; object-position: 50% 100%; display: none; }
+/* The painting (calm version): a box the shape of the still (1:2), as big as needed to cover the
+   screen, anchored at the bottom. The still, its mist and the tent's glow all live inside it, so
+   they stay lined up whatever the phone's shape. */
+.m-hero__paint {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  height: max(100%, 200vw);
+  aspect-ratio: 1 / 2;
+  translate: -50% 0;
+  overflow: hidden;
+}
+.m-hero__still { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 /* The live scene fades in softly once it's ready (js/mobile/hero.js adds .is-live). */
 .m-hero__canvas { opacity: 0; transition: opacity 1.8s var(--ease-out); }
 .m-hero.is-live .m-hero__canvas { opacity: 1; }
@@ -160,27 +173,25 @@ html:not(.mobile-site) .m-only { display: none !important; }
 
 /* ---------- The calm opening: a painted still with gentle CSS motion ----------
    For weak devices and "reduce motion" (and as a fallback if the live scene can't run). */
-[data-mode="calm"] .m-hero__still, .m-hero.is-still .m-hero__still { display: block; }
-[data-mode="calm"] .m-hero__canvas { display: none; }
-.m-hero__mist, .m-hero__glow { display: none; position: absolute; pointer-events: none; }
-[data-mode="calm"] .m-hero__mist, [data-mode="calm"] .m-hero__glow,
-.m-hero.is-still .m-hero__mist, .m-hero.is-still .m-hero__glow { display: block; }
+[data-mode="calm"] .m-hero__paint, .m-hero.is-still .m-hero__paint { display: block; }
+[data-mode="calm"] .m-hero__canvas, .m-hero.is-still .m-hero__canvas { display: none; }
+.m-hero__mist, .m-hero__glow { position: absolute; pointer-events: none; }
 /* A wide, soft band of moonlit mist drifting slowly across the trees. */
 .m-hero__mist {
   left: -40%;
   right: -40%;
-  top: 44%;
-  height: 22%;
+  top: 33%;
+  height: 16%;
   background: radial-gradient(50% 50% at 50% 50%, var(--art-mist), transparent 72%);
   opacity: 0.7;
   animation: drift 46s ease-in-out infinite alternate;
 }
 /* The tent's warm glow, breathing as if a lamp inside flickers very gently.
-   --tent-x / --tent-y: where the tent is in the still (set below, measured from the picture). */
+   Its place is the tent's, measured when the still was rendered (51.5% across, 66.3% down). */
 .m-hero__glow {
-  left: var(--tent-x, 38%);
-  top: var(--tent-y, 70%);
-  width: 70vw;
+  left: 51.5%;
+  top: 66.3%;
+  width: 52%;
   aspect-ratio: 1;
   translate: -50% -50%;
   background: radial-gradient(closest-side, var(--tent-glow), transparent);

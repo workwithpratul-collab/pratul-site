@@ -263,9 +263,13 @@
        so they show at once, before any 3D has loaded. -->
   <section class="m-hero m-only" id="top" aria-labelledby="m-hero-title">
     <div class="m-hero__art" aria-hidden="true">
-      <img class="m-hero__still" src="assets/mobile/basecamp-720.webp" srcset="assets/mobile/basecamp-720.webp 720w, assets/mobile/basecamp-1080.webp 1080w" sizes="100vw" width="1080" height="1920" loading="lazy" decoding="async" alt="">
-      <span class="m-hero__mist"></span>
-      <span class="m-hero__glow"></span>
+      <!-- The painting: always shaped like the still (1:2) and covering the screen, so the drifting
+           mist and the tent's glow sit exactly over the painted forest and tent on any phone. -->
+      <div class="m-hero__paint">
+        <img class="m-hero__still" src="assets/mobile/basecamp-720.webp" srcset="assets/mobile/basecamp-720.webp 720w, assets/mobile/basecamp-1080.webp 1080w" sizes="(min-aspect-ratio: 1/2) 100vw, 50vh" width="1080" height="2160" loading="lazy" decoding="async" alt="">
+        <span class="m-hero__mist"></span>
+        <span class="m-hero__glow"></span>
+      </div>
       <canvas class="m-hero__canvas" id="hero-canvas"></canvas>
     </div>
     <div class="m-hero__text">

@@ -565,6 +565,9 @@ const SNOW = {
 const GRID = { minX: -260, minZ: -490, cellX: 1.3, cellZ: 560 / 430, segX: 446, segZ: 430 };
 const CHUNK = 64;   // cells per chunk side
 let gridHeights = null; // filled in by createGround()
+// The part of the grid that was built: [first column, last column, first row, last row] (vertex
+// indices). The film builds all of it; the mobile opening only the land around base camp.
+let gridBuilt = null;
 
 // Height of the ground *as it is actually drawn*. The ground is made of flat triangles,
 // so between grid points it is slightly different from getHeight(). Anything that must
@@ -574,6 +577,8 @@ export function groundHeight(x, z) {
   const gx = (x - GRID.minX) / GRID.cellX, gz = (z - GRID.minZ) / GRID.cellZ;
   const ix = Math.min(Math.max(Math.floor(gx), 0), GRID.segX - 1);
   const iz = Math.min(Math.max(Math.floor(gz), 0), GRID.segZ - 1);
+  // Outside a partly built grid there's no drawn ground: use the true shape of the land.
+  if (gridBuilt && (ix < gridBuilt[0] || ix >= gridBuilt[1] || iz < gridBuilt[2] || iz >= gridBuilt[3])) return getHeight(x, z);
   const fx = gx - ix, fz = gz - iz;
   const row = GRID.segX + 1;
   const hA = gridHeights[iz * row + ix];           // this corner
@@ -638,12 +643,22 @@ function groundColour(x, z, y, ny, c, tmp) {
   return c;
 }
 
-export function createGround(scene) {
+// Options (both for the mobile opening, which only needs the land around base camp):
+//   region       { minX, maxX, minZ, maxZ } in metres: build only this part of the grid
+//   trailMetres  draw only this much of the path, from base camp
+export function createGround(scene, { region = null, trailMetres = Infinity } = {}) {
   const cols = GRID.segX + 1, rows = GRID.segZ + 1;
+  // Which grid points to build (vertex indices, inclusive): all of them, or just the region.
+  const clampI = (v, max) => Math.min(Math.max(v, 0), max);
+  const ix0 = region ? clampI(Math.floor((region.minX - GRID.minX) / GRID.cellX), GRID.segX) : 0;
+  const ix1 = region ? clampI(Math.ceil((region.maxX - GRID.minX) / GRID.cellX), GRID.segX) : GRID.segX;
+  const iz0 = region ? clampI(Math.floor((region.minZ - GRID.minZ) / GRID.cellZ), GRID.segZ) : 0;
+  const iz1 = region ? clampI(Math.ceil((region.maxZ - GRID.minZ) / GRID.cellZ), GRID.segZ) : GRID.segZ;
+  gridBuilt = region ? [ix0, ix1, iz0, iz1] : null;
   // 1. Heights of every grid point.
   gridHeights = new Float32Array(cols * rows);
-  for (let iz = 0; iz < rows; iz++) {
-    for (let ix = 0; ix < cols; ix++) {
+  for (let iz = iz0; iz <= iz1; iz++) {
+    for (let ix = ix0; ix <= ix1; ix++) {
       gridHeights[iz * cols + ix] = getHeight(GRID.minX + ix * GRID.cellX, GRID.minZ + iz * GRID.cellZ);
     }
   }
@@ -651,10 +666,10 @@ export function createGround(scene) {
   //    neighbouring chunks shade exactly alike and their seams are invisible.
   const normals = new Float32Array(cols * rows * 3);
   const n = new THREE.Vector3();
-  for (let iz = 0; iz < rows; iz++) {
-    for (let ix = 0; ix < cols; ix++) {
-      const hL = gridHeights[iz * cols + Math.max(ix - 1, 0)], hR = gridHeights[iz * cols + Math.min(ix + 1, cols - 1)];
-      const hF = gridHeights[Math.max(iz - 1, 0) * cols + ix], hN = gridHeights[Math.min(iz + 1, rows - 1) * cols + ix];
+  for (let iz = iz0; iz <= iz1; iz++) {
+    for (let ix = ix0; ix <= ix1; ix++) {
+      const hL = gridHeights[iz * cols + Math.max(ix - 1, ix0)], hR = gridHeights[iz * cols + Math.min(ix + 1, ix1)];
+      const hF = gridHeights[Math.max(iz - 1, iz0) * cols + ix], hN = gridHeights[Math.min(iz + 1, iz1) * cols + ix];
       n.set((hL - hR) / (2 * GRID.cellX), 1, (hF - hN) / (2 * GRID.cellZ)).normalize();
       normals.set([n.x, n.y, n.z], (iz * cols + ix) * 3);
     }
@@ -662,8 +677,8 @@ export function createGround(scene) {
   // 3. Colours.
   const colors = new Float32Array(cols * rows * 3);
   const c = new THREE.Color(), tmp = new THREE.Color();
-  for (let iz = 0; iz < rows; iz++) {
-    for (let ix = 0; ix < cols; ix++) {
+  for (let iz = iz0; iz <= iz1; iz++) {
+    for (let ix = ix0; ix <= ix1; ix++) {
       const i = iz * cols + ix;
       groundColour(GRID.minX + ix * GRID.cellX, GRID.minZ + iz * GRID.cellZ, gridHeights[i], normals[i * 3 + 1], c, tmp);
       colors.set([c.r, c.g, c.b], i * 3);
@@ -677,9 +692,9 @@ export function createGround(scene) {
   mat.color = mood.ground;
   const group = new THREE.Group();
   group.name = 'ground';
-  for (let cz = 0; cz < GRID.segZ; cz += CHUNK) {
-    for (let cx = 0; cx < GRID.segX; cx += CHUNK) {
-      const nx = Math.min(CHUNK, GRID.segX - cx), nz = Math.min(CHUNK, GRID.segZ - cz);
+  for (let cz = iz0; cz < iz1; cz += CHUNK) {
+    for (let cx = ix0; cx < ix1; cx += CHUNK) {
+      const nx = Math.min(CHUNK, ix1 - cx), nz = Math.min(CHUNK, iz1 - cz);
       const count = (nx + 1) * (nz + 1);
       const pos = new Float32Array(count * 3), nor = new Float32Array(count * 3), col = new Float32Array(count * 3);
       let k = 0;
@@ -712,13 +727,15 @@ export function createGround(scene) {
     }
   }
   scene.add(group);
-  scene.add(createTrailStrip());
+  scene.add(createTrailStrip(trailMetres));
   return group;
 }
 
 // The visible path: a thin strip that follows the trail, with soft see-through edges.
-function createTrailStrip() {
-  const steps = Math.round(TRAIL_LENGTH * 6);
+// metres: how much of it to draw, from base camp (all of it, unless the scene only needs the start).
+function createTrailStrip(metres = Infinity) {
+  const drawn = Math.min(metres, TRAIL_LENGTH) / TRAIL_LENGTH;   // the share of the trail to draw
+  const steps = Math.round(TRAIL_LENGTH * 6 * drawn);
   const across = [-1, -0.55, 0, 0.55, 1];   // 5 vertices from left edge to right edge
   const alpha = [0, 0.85, 1, 0.85, 0];      // edges fade out, so the path looks painted on
   const halfWidth = 0.85;
@@ -732,7 +749,7 @@ function createTrailStrip() {
   const side = new THREE.Vector3();
 
   for (let i = 0; i <= steps; i++) {
-    const u = i / steps;
+    const u = (i / steps) * drawn;
     trailSpline2D.getPointAt(u, p);
     trailSpline2D.getTangentAt(u, tangent);
     side.set(-tangent.z, 0, tangent.x).normalize();
@@ -749,7 +766,8 @@ function createTrailStrip() {
       col.copy(pathCol).lerp(pathLit, noise2(x * 0.6, z * 0.6, 4));
       col.lerp(snowPath, smoothstep(72, 84, y) * 0.8);
       // Fade the path in at the start and out at the very top, so it has no hard ends.
-      const ends = smoothstep(0, 3, metres) * (1 - smoothstep(TRAIL_LENGTH - 6, TRAIL_LENGTH - 1, metres));
+      let ends = smoothstep(0, 3, metres) * (1 - smoothstep(TRAIL_LENGTH - 6, TRAIL_LENGTH - 1, metres));
+      if (drawn < 1) ends *= 1 - smoothstep(drawn * TRAIL_LENGTH - 12, drawn * TRAIL_LENGTH, metres);   // (a shortened path fades out softly)
       colors.push(col.r, col.g, col.b, alpha[k] * 0.9 * ends);
     });
     if (i < steps) {

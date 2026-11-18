@@ -71,7 +71,9 @@ const NIGHT_LEVEL = PRESETS.night.character.level;
 const NIGHT_TINT = new THREE.Color(PRESETS.night.character.tint);
 
 // onProgress (optional): called with 0..1 as the character file downloads (the loading screen).
-export function createTrekker(scene, renderer, camera, { onProgress } = {}) {
+// clips (optional): load only these animations (e.g. ['idle', 'look'] for the mobile opening,
+// where he stands at base camp); by default the film's full set loads, in two batches.
+export function createTrekker(scene, renderer, camera, { onProgress, clips = null } = {}) {
   // `root` is what we move around the world; the VRM sits inside it.
   const root = new THREE.Group();
   root.name = 'trekker';
@@ -150,6 +152,10 @@ export function createTrekker(scene, renderer, camera, { onProgress } = {}) {
       }
       console.info('[trekker] Mixamo animations loaded:', Object.keys(state.actions).join(', '));
     };
+    if (clips) {
+      loadMixamoClips(vrm, clips).then(addClips);
+      return vrm;
+    }
     const BASE_CLIPS = ['walk', 'idle', 'jog'];
     loadMixamoClips(vrm, BASE_CLIPS).then((clips) => {
       addClips(clips);

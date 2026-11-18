@@ -302,6 +302,18 @@ export function createNearTrees(scene, trees) {
   return { pines, oaks };
 }
 
+// A small forest for the mobile opening (js/mobile/hero.js): a few soft near trees and a band of
+// painted far cards, without planting the whole film's forest.
+// near: { pine: [...], oak: [...] } as for createNearTrees; cards: [{ x, z, y, height, tint, variant }];
+// facePoint: [x, z] the cards turn to face (the camera spot); sky: shares its key light direction.
+export function createSmallForest(scene, { near = {}, cards = [], facePoint = null, sky } = {}) {
+  if (sky) shared.uMoonDir.value = sky.keyDir;
+  const trees = createNearTrees(scene, near);
+  const cardMesh = makeCards(cards, { facePoint });
+  scene.add(cardMesh);
+  return { ...trees, cards: cardMesh };
+}
+
 // How far (x, z) is from the straight line between points a and b (on the map).
 function distanceToSegment(x, z, a, b) {
   const dx = b[0] - a[0], dz = b[1] - a[1];
@@ -578,7 +590,7 @@ export function createStoneVariety(scene, stones, rand = Math.random, colors = m
 const VARIANTS = 8;              // 6 pine shapes + 2 broadleaf shapes in one texture
 const CELL_W = 256, CELL_H = 512;
 
-function makeCards(cards) {
+function makeCards(cards, { facePoint = null } = {}) {
   const atlas = paintTreeAtlas();
   const geo = new THREE.PlaneGeometry(1, 1);
   geo.translate(0, 0.5, 0);      // pivot at the bottom middle (where the trunk meets the ground)
@@ -673,7 +685,8 @@ function makeCards(cards) {
   cards.forEach((c, i) => {
     const width = c.height * 0.5;   // the atlas cells are half as wide as they are tall
     let best = Infinity, bx = 0, bz = 0;
-    for (const [tx, tz] of trailSamples) {
+    if (facePoint) { best = -1; bx = facePoint[0]; bz = facePoint[1]; }   // (a fixed view: face it)
+    if (best >= 0) for (const [tx, tz] of trailSamples) {
       const d = (tx - c.x) * (tx - c.x) + (tz - c.z) * (tz - c.z);
       if (d < best) { best = d; bx = tx; bz = tz; }
     }
