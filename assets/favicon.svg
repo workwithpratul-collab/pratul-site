@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The site's mark: a night sky, a snowy peak and the warm summit flag. -->
+  <rect width="64" height="64" rx="14" fill="#0e1747"/>
+  <path d="M6 54 L26 24 L34 34 L40 26 L58 54 Z" fill="#6b6fa8"/>
+  <path d="M26 24 L31 31 L28 33 L25 30 L22 32 Z" fill="#dfe3f5"/>
+  <path d="M40 26 L40 12" stroke="#f5f0e8" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M40 12 L50 15.5 L40 19 Z" fill="#ffb877"/>
+</svg>
