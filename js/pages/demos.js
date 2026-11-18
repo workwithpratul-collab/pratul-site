@@ -54,6 +54,27 @@ function sliderDemo(el) {
   });
   range.addEventListener('pointerdown', () => { range.dataset.touched = '1'; });
   range.addEventListener('keydown', () => { range.dataset.touched = '1'; });
+
+  // Fingers: iPhones only let a range input be dragged by its small thumb, so a touch anywhere
+  // on the picture moves the line there and drags it. A vertical swipe still scrolls the page
+  // (touch-action: pan-y), and the mouse and keyboard keep the input's own behaviour.
+  range.style.touchAction = 'pan-y';
+  let fingerDown = false;
+  const follow = (e) => {
+    const r = range.getBoundingClientRect();
+    range.value = Math.round(Math.min(Math.max((e.clientX - r.left) / r.width, 0), 1) * 100);
+    set();
+  };
+  range.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'touch') return;
+    fingerDown = true;
+    range.setPointerCapture(e.pointerId);
+    follow(e);
+  });
+  range.addEventListener('pointermove', (e) => { if (fingerDown) follow(e); });
+  const lift = () => { fingerDown = false; };
+  range.addEventListener('pointerup', lift);
+  range.addEventListener('pointercancel', lift);
 }
 
 // ---------- 4. Online stores and booking: three calm steps ----------

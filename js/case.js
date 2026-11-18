@@ -6,7 +6,10 @@
 //  - Placeholder links (the live site address, until Pratul fills it in) explain themselves.
 
 const veil = document.getElementById('veil');
-const colour = sessionStorage.getItem('ascent:veil');
+// On the mobile page there's no film to dissolve from: the page simply fades in (css/mobile.css),
+// and going back is a plain link to that project's card.
+const mobile = document.documentElement.classList.contains('mobile-site');
+const colour = mobile ? null : sessionStorage.getItem('ascent:veil');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---------- Arrive inside the mist (if we came from the film), then let it clear ----------

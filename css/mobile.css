@@ -36,6 +36,9 @@ html:not(.mobile-site) .m-only { display: none !important; }
 .mobile-site .page-section .section-heading { margin-bottom: var(--space-7); }
 .mobile-site .section-heading__title { font-size: clamp(32px, 8.4vw, 48px); }
 .mobile-site .section-heading__lead { font-size: var(--text-base); }
+/* Everything you can tap is at least 44 px (the size of a fingertip), on every mobile page. */
+.mobile-site .btn, .mobile-site .skip-link { min-height: var(--tap); }
+.mobile-site .site-nav__name { min-width: var(--tap); }
 /* A thumb-sized primary button. */
 .mobile-site .btn--large { min-height: 52px; padding: 14px var(--space-6); font-size: 17px; }
 
@@ -500,4 +503,29 @@ html:not(.mobile-site) .m-only { display: none !important; }
   .m-chapter__img, .m-summit__img, .m-chapter__mist { transform: none; }
   .flatlay__item { transition: opacity var(--duration-fast) linear; }
   .flatlay__item.is-picked { transform: none; }
+}
+
+/* =====================================================================
+   12. THE PROJECT PAGES AND THE 404 ON A PHONE
+   ===================================================================== */
+/* No mist rolling in from the film (there's no film here): the page simply fades in softly. */
+.mobile-site .case-page .case-top,
+.mobile-site .case-page .case { animation: m-fade 0.7s var(--ease-out) both; }
+@keyframes m-fade { from { opacity: 0; } to { opacity: 1; } }
+.mobile-site .case-top { padding-top: calc(var(--space-4) + env(safe-area-inset-top)); }
+.mobile-site .case-top .skip-link, .mobile-site .case-top .site-nav__name { min-height: var(--tap); }
+.mobile-site .case-hero { padding: var(--space-6) 0 var(--space-6); }
+.mobile-site .case-hero__lead { font-size: var(--text-lg); }
+.mobile-site .case-block { padding: var(--space-7) 0; }
+.mobile-site .case-block__body { font-size: var(--text-base); }
+.mobile-site .case-block__body p:first-child { font-size: var(--text-2xl); }
+/* The recording stays inside its browser frame, with a little air at the sides. */
+.mobile-site .browser { width: calc(100% - var(--space-4)); margin: var(--space-7) auto; }
+.mobile-site .browser__play { min-height: var(--tap); }
+.mobile-site .case-actions { gap: var(--space-4); }
+.mobile-site .case-actions .btn { min-height: var(--tap); }
+.mobile-site .case-next { margin-left: 0; text-align: left; min-height: var(--tap); }
+.mobile-site .case-next strong { font-size: var(--text-2xl); }
+@media (prefers-reduced-motion: reduce) {
+  .mobile-site .case-page .case-top, .mobile-site .case-page .case { animation: none; }
 }

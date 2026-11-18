@@ -33,6 +33,14 @@ initScenes({ reduceMotion });
 initWorkCards({ reduceMotion });
 initGear();
 
+// Back from a project page ("Back to the trail", ?return=dermae): open at that project's card.
+const back = new URLSearchParams(location.search).get('return');
+if (back) {
+  history.replaceState(null, '', location.pathname);
+  const card = document.querySelector(`.work-card__scene[href*="${CSS.escape(back)}"]`)?.closest('.work-card');
+  if (card) requestAnimationFrame(() => card.scrollIntoView({ block: 'start', behavior: 'instant' }));
+}
+
 // ---------- 2. The live base camp (mobile version only) ----------
 const hero = document.getElementById('top');
 const canvas = document.getElementById('hero-canvas');

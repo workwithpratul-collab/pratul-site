@@ -179,7 +179,7 @@
   align-items: stretch;
   gap: 0;
   padding: var(--space-2) var(--gutter) var(--space-6);
-  background: color-mix(in srgb, var(--page-raised) 97%, transparent);
+  background: var(--page-raised);
   border-bottom: var(--hairline) solid var(--line-soft);
   opacity: 0;
   transform: translateY(-8px);
