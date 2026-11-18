@@ -81,10 +81,19 @@ export const SUMMIT = {
 // + 1 screens tall).
 export const FILM_SCREENS = 13;
 
-// The trekker's top speed, in metres per second: a brisk hike that the walk animation can
-// still match step for step. If you scroll faster than this, the film glides on behind your
-// scroll and catches up, rather than sliding his feet. Higher = more responsive, lower = calmer.
+// The trekker's top speed when the film is keeping up with the scroll, in metres per second:
+// a brisk pace his walk (and, above 2.4 m/s, his light jog) can match step for step.
 export const MAX_WALK_SPEED = 3.8;
+// If you scroll faster than that, the film falls behind. It never stays behind long: the
+// further back he is, the faster he goes (blending into a jog), closing the gap with a time
+// constant of CATCH_UP_SECONDS, and never slower than CATCH_UP_MIN_SPEED until he has caught up
+// (so the last few metres don't drag on). Over CATCH_UP_MAX_SPEED the camera would rush.
+export const CATCH_UP_SECONDS = 0.35;
+export const CATCH_UP_MIN_SPEED = 8;
+export const CATCH_UP_MAX_SPEED = 55;
+// A gap bigger than this (metres of trail) would take more than about 1.5 s to walk: the film
+// skips ahead behind a short, soft mist dissolve instead (a long flick, a scrollbar drag).
+export const MIST_SKIP_METRES = 50;
 
 // Each zone's share of the scroll (they add up to 1): base camp 15%, ridge 40%, meadow 25%, summit 20%.
 export const ZONES = [

@@ -17,7 +17,7 @@ import { createSummitZone } from './world/summit.js';
 import { createMist } from './world/mist.js';
 import { createTrekker } from './world/trekker.js';
 import { createCameraPath } from './world/cameraPath.js';
-import { ZONES, LIGHT, ALTITUDE, FILM_SCREENS, MAX_WALK_SPEED, CAMPS, MEADOW } from './world/journey.js';
+import { ZONES, LIGHT, ALTITUDE, FILM_SCREENS, MAX_WALK_SPEED, CATCH_UP_SECONDS, CATCH_UP_MIN_SPEED, CATCH_UP_MAX_SPEED, MIST_SKIP_METRES, CAMPS, MEADOW } from './world/journey.js';
 import { mood, setClimb } from './world/palette.js';
 import { createAltitudeMeter } from './ui/altitude.js';
 import { createCursor } from './ui/cursor.js';
@@ -160,13 +160,21 @@ function lightAt(p) {
   return LIGHT[LIGHT.length - 1][1];
 }
 
-// ---------- The walking speed limit ----------
-// From film progress "from", move towards "to", but never so far that the trekker would walk
-// more than MAX_WALK_SPEED x dt metres this frame. trekkerS() always rises with progress, so a
-// short halving search finds the furthest allowed point.
-function limitWalk(from, to, dt) {
+// ---------- The walking speed limit (and catching up) ----------
+// From film progress "from", move towards "to", but never so far that the trekker would cover
+// more than his allowed speed x dt metres this frame. Normally that's MAX_WALK_SPEED (his feet
+// match the ground). If the film has fallen behind the scroll ("gap", in metres), the allowed
+// speed rises so the gap closes in about CATCH_UP_SECONDS: he speeds up into a jog, the camera
+// with him. trekkerS() always rises with progress, so a short halving search finds the
+// furthest allowed point.
+let catchingUp = false;   // true from when he falls a few metres behind until he's caught up
+function limitWalk(from, to, dt, gap) {
   const s0 = cameraPath.trekkerS(from);
-  const step = MAX_WALK_SPEED * dt;
+  if (gap > 4) catchingUp = true;
+  else if (gap < 0.3) catchingUp = false;
+  const floor = catchingUp ? CATCH_UP_MIN_SPEED : MAX_WALK_SPEED;
+  const speed = Math.min(Math.max(floor, gap / CATCH_UP_SECONDS), CATCH_UP_MAX_SPEED);
+  const step = speed * dt;
   if (Math.abs(cameraPath.trekkerS(to) - s0) <= step) return to;
   let lo = from, hi = to;
   for (let i = 0; i < 18; i++) {
@@ -298,6 +306,26 @@ document.getElementById('skip').addEventListener('click', (e) => {
   glideToEnd();
 });
 
+// ---------- Skipping ahead through the mist (a very large jump: a scrollbar drag, a long flick) ----------
+// A short, soft dissolve: the mist rolls in, the film jumps to wherever the scroll is (and keeps
+// following it while the visitor is still dragging), then the mist clears.
+let skipping = false;
+async function mistSkip() {
+  skipping = true;
+  await veil(true, { duration: reduceMotion ? 400 : 450 });
+  // Wait until the scroll has settled (stopped moving for a moment), then clear.
+  let last = -1, still = 0;
+  while (still < 3) {
+    await new Promise((r) => setTimeout(r, 80));
+    const now = Math.round(lenis.scroll);
+    still = now === last ? still + 1 : 0;
+    last = now;
+  }
+  jumpTo(scroll.target, { moveScroll: false });
+  skipping = false;
+  await veil(false, { duration: reduceMotion ? 500 : 650 });
+}
+
 // ---------- The loop: update, then draw, every frame ----------
 // Timer measures how much time passed since the last frame ("delta time").
 const timer = new THREE.Timer();
@@ -322,11 +350,16 @@ function tick(timestamp) {
   // The walking speed limit: the film may only move as fast as the trekker can really walk
   // (MAX_WALK_SPEED). Through the pauses at each place he isn't walking, so there it follows
   // the scroll freely.
-  scroll.progress = snapNextFrame ? eased : limitWalk(scroll.progress, eased, dt);
+  // How far behind the scroll the trekker is, in metres of trail.
+  const gap = Math.abs(cameraPath.trekkerS(scroll.target) - cameraPath.trekkerS(scroll.progress));
+  if (skipping) {
+    // Under the mist: follow the scroll directly (no walking), until it's settled.
+    jumpTo(scroll.target, { moveScroll: false });
+  } else if (gap > MIST_SKIP_METRES && !gliding && !campUI.opening && lifted) {
+    mistSkip();
+  }
+  scroll.progress = snapNextFrame ? eased : limitWalk(scroll.progress, eased, dt, gap);
   const p = scroll.progress;
-  // Scrolled right to the end of the film (and stopped there) while the trekker is still far
-  // behind: finish through the mist.
-  if (scroll.target > 0.995 && p < 0.9 && !gliding && !campUI.opening && lenis.targetScroll <= filmEndScroll() + 20) glideToEnd({ moveScroll: false });
 
   const s = cameraPath.update(camera, p, dt, snapNextFrame);   // metres along the trail
   const stops = cameraPath.stopInfo(p);

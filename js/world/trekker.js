@@ -21,12 +21,28 @@ const ANIMATION_URLS = {
   walk: 'assets/animations/Walking.fbx',
   idle: 'assets/animations/Idle.fbx',
   wave: 'assets/animations/Waving.fbx',
+  // A light jog, for catching up when the visitor scrolls fast (blended in from the walk).
+  jog: 'assets/animations/Jogging.fbx',
   // Optional: a sitting-on-the-ground loop for the gear check. If the file isn't there, the
   // trekker simply stands beside the mat (see the Phase 4 notes for how to download it).
   sit: 'assets/animations/Sitting.fbx',
 };
 const STRIDE = 0.72;           // metres per step, used to keep feet and ground in sync
-const MIXAMO_WALK_SPEED = 1.3; // metres per second the Mixamo "Walking" clip naturally covers
+// The ground speed each Mixamo clip naturally covers (metres per second), measured from how
+// fast a planted foot moves back under the hips. Each clip is played faster or slower so his
+// feet always match the ground.
+// (Measured from the clips: tools in the Phase 4 notes.)
+const MIXAMO_WALK_SPEED = 1.6;
+const MIXAMO_JOG_SPEED = 1.75;
+// The Jogging clip holds three strides; we play one stride's worth, looping.
+const JOG_STRIDES = 3;
+// Between these speeds the walk hands over to the jog (and back again as he slows down).
+const JOG_FROM = 2.4, JOG_TO = 3.6;
+// The jog's left foot is forward a touch later in its stride than the walk's (0.24 vs 0.22).
+const JOG_PHASE = 0.02;
+// The fastest his legs will go: about 2.6x the jog's own pace (roughly 4.5 m/s). Faster than
+// that only happens for a moment while catching up after a hard flick.
+const MAX_CADENCE = 2.6;
 // How bright the character's colours are at night, and the cool moonlight tint (palette.js).
 const NIGHT_LEVEL = PRESETS.night.character.level;
 const NIGHT_TINT = new THREE.Color(PRESETS.night.character.tint);
@@ -53,6 +69,7 @@ export function createTrekker(scene, renderer, camera) {
     waved: false,
     sit: 0,              // 0 = standing, 1 = sitting (smoothly blended)
     sitTarget: 0,
+    stride: 0,           // walk / jog cycle position, 0..1 (shared by both, so they stay in step)
   };
 
   // ---------- Load the VRM ----------
@@ -115,7 +132,7 @@ export function createTrekker(scene, renderer, camera) {
     if (hasLast) {
       const moved = Math.hypot(root.position.x - lastPos.x, root.position.z - lastPos.z);
       const rawSpeed = dt > 0 ? moved / dt : 0;
-      state.speed += (Math.min(rawSpeed, 4) - state.speed) * (1 - Math.exp(-dt * 6));
+      state.speed += (Math.min(rawSpeed, 60) - state.speed) * (1 - Math.exp(-dt * 6));
       state.phase += moved * (Math.PI / STRIDE); // one full leg cycle every two strides
     }
     lastPos.copy(root.position);
@@ -129,12 +146,27 @@ export function createTrekker(scene, renderer, camera) {
 
     if (state.actions) {
       // Mixamo: blend between idle and walk, and match the walk speed to our real speed.
-      const { walk, idle, wave } = state.actions;
+      const { walk, idle, wave, jog } = state.actions;
+      // Walk or jog? Above a brisk walk he eases into the jog; slowing down, back into the walk.
+      const jogMix = jog ? smoothstepJS(JOG_FROM, JOG_TO, state.speed) : 0;
+      // Both clips share one stride rhythm ("phase", 0..1 per two steps), so their legs are always
+      // in step with each other while they blend. The rhythm follows the real ground speed.
       if (walk) {
-        walk.setEffectiveWeight(state.walkAmount);
-        // Match the stride to the real speed (a brisk walk at most, so it never looks like running).
-        // (main.js never lets him walk faster than MAX_WALK_SPEED, so this always keeps up.)
-        walk.setEffectiveTimeScale(THREE.MathUtils.clamp(state.speed / MIXAMO_WALK_SPEED, 0.6, 3.2));
+        const walkLen = walk.getClip().duration, jogLen = jog ? jog.getClip().duration / JOG_STRIDES : walkLen;
+        // How far one full stride cycle carries him: walk and jog cycles, blended.
+        const cycleMetres = MIXAMO_WALK_SPEED * walkLen * (1 - jogMix) + MIXAMO_JOG_SPEED * jogLen * jogMix;
+        // At very high speeds the stride can't keep up any more (a sprint would look silly):
+        // the rhythm is capped at MAX_CADENCE (a brisk run).
+        const rate = Math.min(state.speed / cycleMetres, MAX_CADENCE / jogLen);
+        state.stride = (state.stride + Math.max(rate, 0.6 / walkLen) * dt) % 1;
+        walk.setEffectiveTimeScale(0);
+        walk.time = state.stride * walkLen;
+        walk.setEffectiveWeight(state.walkAmount * (1 - jogMix));
+        if (jog) {
+          jog.setEffectiveTimeScale(0);
+          jog.time = ((state.stride + JOG_PHASE) % 1) * jogLen;
+          jog.setEffectiveWeight(state.walkAmount * jogMix);
+        }
       }
       // While waving, the wave takes over from the idle pose (both at once would halve the wave).
       // It fades in and out over its first and last 20%, so it starts and ends softly.
@@ -200,6 +232,8 @@ export function createTrekker(scene, renderer, camera) {
     resetWave,
     setSitting,
     get canSit() { return !!state.actions?.sit; },
+    // For testing: the measured speed and how much of the jog is showing.
+    get debug() { return { speed: state.speed, walk: state.walkAmount, jog: state.actions?.jog ? smoothstepJS(JOG_FROM, JOG_TO, state.speed) : 0, actions: state.actions, vrm: state.vrm }; },
     setLightLevel,
     get walking() { return state.walkAmount; },
     get hasMixamo() { return !!state.actions; },
