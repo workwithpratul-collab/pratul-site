@@ -17,6 +17,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { groundHeight, nearestTrail, noise2, smoothstep, seededRandom, legacy } from './terrain.js';
 import { mood } from './palette.js';
+import { WIND, WIND_GLSL } from './glsl.js';
 import { CAMPS } from './journey.js';
 
 // ---------- Painted colours ----------
@@ -48,7 +49,7 @@ const NEAR_MIN_DISTANCE = 6.5;   // no tree closer than this to the camera's rou
 // Values shared by every tree shader, so one update moves/colours them all.
 // The colours here are the palette's live colour objects, so they follow the time of day.
 const shared = {
-  uWind: { value: 0 },
+  uWind: WIND.time,   // the world's one breeze (glsl.js), so trees and grass move together
   uMoonDir: { value: new THREE.Vector3(-0.5, 0.36, -0.79).normalize() },  // replaced by the sky's key light direction
   uRim: { value: mood.trees.rim },
   uWarmPos: { value: new THREE.Vector3(-3.8, 0.8, -2.2) },     // base camp tent
@@ -164,9 +165,7 @@ export function createForest(scene, { routeDistance, legacyRouteDistance, sky } 
   return {
     count: near.pine.length + near.oak.length + cards.length,
     counts: { nearPines: near.pine.length, nearOaks: near.oak.length, cards: cards.length },
-    update(time) {
-      shared.uWind.value = time;
-    },
+    update() {},   // (the wind's clock is moved by main.js for the whole world)
     // Show or hide the whole forest (main.js hides it once it's far behind the camera).
     setVisible(visible) {
       pineMesh.visible = oakMesh.visible = cardMesh.visible = visible;
@@ -197,19 +196,24 @@ export function makePaintedMaterial({ colors, wind = true, roundness = 0.55, rim
       #include <fog_pars_vertex>
       attribute float aTrunk;      // 1 on trunk vertices, 0 on foliage / stone
       uniform float uWind, uRoundness;
+      ${WIND_GLSL}
       varying float vH, vTrunk;
       varying vec3 vNormalW, vWorld, vTint;
       void main() {
         vec3 p = position;
-        #ifdef USE_WIND
-          // Gentle sway: tops move, roots stay still, each tree on its own rhythm.
-          float phase = instanceMatrix[3].x * 0.37 + instanceMatrix[3].z * 0.21;
-          float bend = p.y * p.y;
-          p.x += sin(uWind * 0.9 + phase) * 0.012 * bend;
-          p.z += cos(uWind * 0.7 + phase) * 0.008 * bend;
-        #endif
         mat4 m = modelMatrix * instanceMatrix;
         vec4 world = m * vec4(p, 1.0);
+        #ifdef USE_WIND
+          // Trees bend gently with the passing gusts: the tops move, the roots stay still, and
+          // taller trees bend a little further. A slow sway of their own keeps them from moving
+          // in lockstep.
+          vec3 rootW = (m * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+          float treeH = length(m[1].xyz);
+          float bend = p.y * p.y * clamp(treeH / 8.0, 0.4, 1.4);
+          float g = windGust(rootW.xz, uWind - 0.6);
+          float own = sin(uWind * 0.9 + rootW.x * 0.37 + rootW.z * 0.21);
+          world.xz += WIND_DIR * (0.04 + g * 0.11) * bend + vec2(own * 0.02 * bend, 0.0);
+        #endif
         vWorld = world.xyz;
         // Lean the normals towards "pointing out from the middle", so each shape shades
         // like one soft rounded form instead of many small facets.
@@ -575,6 +579,7 @@ function makeCards(cards) {
       #include <fog_pars_vertex>
       attribute float aVariant;
       uniform float uWind;
+      ${WIND_GLSL}
       varying vec2 vUv;
       varying float vVariant;
       varying vec3 vTint;
@@ -586,7 +591,8 @@ function makeCards(cards) {
         // Turn to face the camera around the vertical axis only, so trees stay upright.
         vec3 camRight = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
         vec3 right = normalize(vec3(camRight.x, 0.0, camRight.z) + vec3(1e-5));
-        float sway = sin(uWind * 0.8 + centre.x * 0.3 + centre.z * 0.2) * 0.015 * position.y * position.y;
+        // Far trees sway only slightly with the gusts (a few centimetres at the top).
+        float sway = (windGust(centre.xz, uWind - 0.6) * 0.03 + sin(uWind * 0.8 + centre.x * 0.3 + centre.z * 0.2) * 0.008) * position.y * position.y;
         vec3 world = centre + right * (position.x + sway) * width + vec3(0.0, position.y * height, 0.0);
         vec4 mvPosition = viewMatrix * vec4(world, 1.0);
         gl_Position = projectionMatrix * mvPosition;

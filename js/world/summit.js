@@ -14,7 +14,7 @@ import { createSky } from './sky.js';
 import { createMountains, noise2, smoothstep, seededRandom, groundHeight } from './terrain.js';
 import { createStones, createStoneVariety, makePaintedMaterial, setWarmLights } from './forest.js';
 import { createTrekker } from './trekker.js';
-import { NOISE_GLSL } from './glsl.js';
+import { NOISE_GLSL, WIND_GLSL } from './glsl.js';
 import { makeMistMaterial } from './mist.js';
 import { mood, MATERIALS } from './palette.js';
 import { SUMMIT } from './journey.js';
@@ -188,6 +188,11 @@ export function createSummitZone(scene, { sunDir, cloudTop = 20 }) {
   flag.group.rotation.y = Math.atan2(sunFlat.x, sunFlat.z) + 0.5;
   scene.add(flag.group);
 
+  // ---------- 5. Fine snow blowing off the summit ridge, downwind like the flag ----------
+  const r = flag.group.rotation.y;
+  const spindrift = buildSpindrift({ sx, sz, topY, rand, dir: new THREE.Vector3(Math.cos(r), 0, -Math.sin(r)) });
+  scene.add(spindrift);
+
   // ---------- update: the clouds rise with the light ----------
   // climb: palette.js's climb (0 night ... 1 sunrise). The sea starts far below the valley floor
   // (out of sight, and not drawn at all), floods the valley as first light comes, and settles
@@ -205,9 +210,88 @@ export function createSummitZone(scene, { sunDir, cloudTop = 20 }) {
       u.uFogDensity.value = mood.fog.density;
     }
     flag.update(time);
+    // The spindrift shows once we're up in the snow (at sunrise), never in the dark valley.
+    const snowShow = smoothstep(0.85, 0.97, climb);
+    spindrift.visible = snowShow > 0.001;
+    spindrift.material.uniforms.uTime.value = time;
+    spindrift.material.uniforms.uShow.value = snowShow;
   }
   update(0, 0);
   return { update, flag: flag.group, topY };
+}
+
+// =====================================================================
+// Spindrift: fine snow lifted off the high ground by the wind, streaming out over the edge.
+// =====================================================================
+// About 500 grains, each a soft dot. Every grain starts on a high spot round the summit, drifts
+// downwind (dir), rising a little and wavering, then fades away; then it starts again. All of
+// that is worked out on the graphics card from the time, so it costs nothing per frame.
+// It's thickest when a gust passes (windGust, the world's one breeze).
+function buildSpindrift({ sx, sz, topY, rand, dir }) {
+  const COUNT = 700;
+  const starts = [], seeds = [];
+  for (let tries = 0; tries < COUNT * 20 && starts.length < COUNT * 3; tries++) {
+    const a = rand() * Math.PI * 2, rr = 1.5 + Math.pow(rand(), 0.9) * 15;
+    const x = sx + Math.cos(a) * rr, z = sz + Math.sin(a) * rr;
+    const y = groundHeight(x, z);
+    if (y < topY - 5) continue;   // only off the crest: the top and the ridges running from it
+    starts.push(x, y + 0.05, z);
+    seeds.push(rand(), rand(), rand());
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(starts.slice(0, COUNT * 3), 3));
+  geo.setAttribute('aSeed', new THREE.Float32BufferAttribute(seeds.slice(0, COUNT * 3), 3));
+  const material = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: {
+      uTime: { value: 0 },
+      uShow: { value: 0 },
+      uDir: { value: dir },
+      uColor: { value: mood.mountains.snowLit },
+      uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+    },
+    vertexShader: /* glsl */ `
+      uniform float uTime, uShow, uPixelRatio;
+      uniform vec3 uDir;
+      attribute vec3 aSeed;
+      varying float vAlpha;
+      ${WIND_GLSL}
+      void main() {
+        // Each grain lives about 3 to 5 seconds, then starts over from its spot.
+        float life = 3.0 + aSeed.x * 2.0;
+        float age = fract(uTime / life + aSeed.y);
+        vec3 side = vec3(-uDir.z, 0.0, uDir.x);
+        vec3 p = position
+          + uDir * age * (5.0 + aSeed.z * 5.0)                        // carried downwind
+          + vec3(0.0, 1.0, 0.0) * (age * 1.2 + sin(age * 6.0 + aSeed.x * 9.0) * 0.15)   // lifted, wavering
+          + side * sin(age * 4.0 + aSeed.z * 7.0) * 0.4;              // a little side-to-side
+        float gust = windGust(position.xz, uTime);
+        // A light drift all the time, thicker as each gust passes.
+        vAlpha = sin(age * 3.14159) * (0.35 + 0.65 * gust) * uShow * 0.8;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_Position = projectionMatrix * mv;
+        // Fine grains: a few pixels across nearby, smaller further off.
+        gl_PointSize = (2.5 + aSeed.x * 3.0) * uPixelRatio * clamp(14.0 / -mv.z, 0.5, 2.0);
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uColor;
+      varying float vAlpha;
+      void main() {
+        // A soft round dot (no hard edge).
+        float d = length(gl_PointCoord - 0.5);
+        float a = smoothstep(0.5, 0.1, d) * vAlpha;
+        if (a < 0.01) discard;
+        gl_FragColor = vec4(uColor, a);
+        #include <colorspace_fragment>
+      }
+    `,
+  });
+  const points = new THREE.Points(geo, material);
+  points.name = 'spindrift';
+  points.frustumCulled = false;   // the grains move away from their start spots
+  return points;
 }
 
 // Shared values for the summit's custom shaders (the palette's live colours).
@@ -571,14 +655,17 @@ function buildFlag() {
       uniform float uTime;
       varying float vShade;
       varying vec2 vUv;
+      ${WIND_GLSL}
       void main() {
         vUv = uv;
         vec3 p = position;
+        // Stronger as each gust of the world's breeze passes the pole, calmer in the lulls.
+        float gust = 0.7 + 0.6 * windGust(modelMatrix[3].xz, uTime);
         // Waves travel from the pole to the free edge, growing as they go (the pole holds it still).
         // Slow and gentle: a steady mountain breeze, never a flapping frenzy.
         float free = p.x / ${clothW.toFixed(2)};
         float w = sin(p.x * 4.5 - uTime * 2.4) * 0.12 + sin(p.x * 9.0 - uTime * 3.8 + p.y * 3.0) * 0.035;
-        p.z += w * free;
+        p.z += w * free * gust;
         p.y -= free * free * 0.06;   // the free corner droops a little
         // Shade the folds from the slope of the wave: light on one side of each ripple.
         float slope = cos(p.x * 4.5 - uTime * 2.4);

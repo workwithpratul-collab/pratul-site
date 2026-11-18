@@ -22,6 +22,7 @@ import { ZONES, LIGHT, ALTITUDE, FILM_SCREENS, MAX_WALK_SPEED, CATCH_UP_SECONDS,
 import { mood, setClimb } from './world/palette.js';
 import { createAltitudeMeter } from './ui/altitude.js';
 import { createCursor } from './ui/cursor.js';
+import { WIND } from './world/glsl.js';
 import { createGear } from './world/gear.js';
 import { createIntro } from './ui/intro.js';
 import { createStory } from './ui/story.js';
@@ -461,7 +462,7 @@ function tick(timestamp) {
   // Only draw what the camera can see: once we're up on the meadow, base camp's forest is far
   // behind us and sinking under the clouds, so its ~8,000 trees are skipped entirely.
   forest.setVisible(p < 0.66);
-  forest.update(time);
+  WIND.time.value = time;   // the one breeze that moves grass, flowers, trees (glsl.js)
   baseCamp.update(time);
   mist.update(time);
   trekker.update(dt, time);

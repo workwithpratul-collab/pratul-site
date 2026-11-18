@@ -14,6 +14,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 import { groundHeight } from './terrain.js';
+import { WIND_DIR, windGustAt } from './glsl.js';
 import { PRESETS, MATERIALS } from './palette.js';
 
 const MODEL_URL = 'assets/pratul-trekker.vrm';
@@ -210,6 +211,7 @@ export function createTrekker(scene, renderer, camera) {
       updateMoments(dt);
       state.mixer.update(dt);
       afterClips(dt);
+      blowHair(time);
     } else {
       applyStandInPose(vrm, time, state.walkAmount, state.phase);
     }
@@ -371,6 +373,26 @@ export function createTrekker(scene, renderer, camera) {
       vrm.humanoid.getRawBoneNode(f.side + 'Foot').getWorldPosition(v1);
       const slope = Math.atan2(groundAt(v1.x + fx * 0.15, v1.z + fz * 0.15) - groundAt(v1.x - fx * 0.1, v1.z - fz * 0.1), 0.25);
       foot.quaternion.multiply(qa.setFromAxisAngle(axisX, -THREE.MathUtils.clamp(slope, -0.6, 0.6)));
+    }
+  }
+
+  // ---------- Wind in his hair and hood ----------
+  // The hair and the hood's drawstrings hang on spring bones (the VRM file sets them up; the
+  // VRM update swings them). We add the world's breeze to their "gravity": a gentle push along
+  // the wind that rises and falls with the gusts passing him.
+  let springs = null;
+  const windVec = new THREE.Vector3(WIND_DIR[0], 0, WIND_DIR[1]).normalize();
+  const pull = new THREE.Vector3();
+  function blowHair(time) {
+    const manager = state.vrm.springBoneManager;
+    if (!manager) return;
+    springs ??= [...manager.joints].map((j) => ({ s: j.settings, dir: j.settings.gravityDir.clone(), power: j.settings.gravityPower }));
+    const g = windGustAt(root.position.x, root.position.z, time);
+    const wind = 0.08 + g * 0.22;
+    for (const sp of springs) {
+      pull.copy(sp.dir).multiplyScalar(sp.power).addScaledVector(windVec, wind);
+      sp.s.gravityPower = pull.length();
+      sp.s.gravityDir.copy(pull.normalize());
     }
   }
 

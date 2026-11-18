@@ -11,6 +11,7 @@
 import * as THREE from 'three';
 import { groundHeight, trailPointAt, trailDirectionAt, noise2, seededRandom } from './terrain.js';
 import { mood, MATERIALS } from './palette.js';
+import { addWind } from './glsl.js';
 
 const CHUNK_LENGTH = 30;   // metres of trail per chunk
 
@@ -41,7 +42,16 @@ function flowerGeometry() {
   return geo;
 }
 
-let sharedTuft = null, sharedFlower = null, sharedMaterial = null;
+let sharedTuft = null, sharedFlower = null, sharedMaterial = null, sharedBloomMaterial = null;
+// Blades bend in the wind from the root; flowers sway as a whole (glsl.js, addWind).
+function materials() {
+  if (!sharedMaterial) {
+    sharedMaterial = addWind(new THREE.MeshLambertMaterial());
+    sharedMaterial.color = mood.ground;   // the time-of-day tint, like the ground itself
+    sharedBloomMaterial = addWind(new THREE.MeshLambertMaterial(), { bloom: true });
+    sharedBloomMaterial.color = mood.ground;
+  }
+}
 
 // Plant grass (and optionally flowers) along the trail between `from` and `to` metres.
 //   width:    how far either side of the trail the grass reaches (metres)
@@ -52,10 +62,7 @@ let sharedTuft = null, sharedFlower = null, sharedMaterial = null;
 export function createGrass(scene, { from, to, width = 20, perMetre = 120, colors, flowers = 0, seed = 1, skip }) {
   sharedTuft ??= tuftGeometry();
   sharedFlower ??= flowerGeometry();
-  if (!sharedMaterial) {
-    sharedMaterial = new THREE.MeshLambertMaterial();
-    sharedMaterial.color = mood.ground;   // the time-of-day tint, like the ground itself
-  }
+  materials();
   const base = new THREE.Color(colors.base), lit = new THREE.Color(colors.lit), deep = new THREE.Color(colors.deep);
   const petals = MATERIALS.meadow.flowers.map((h) => new THREE.Color(h));
   const rand = seededRandom(seed);
@@ -111,7 +118,7 @@ export function createGrass(scene, { from, to, width = 20, perMetre = 120, color
       group.add(mesh);
     }
     if (blooms.length) {
-      const mesh = new THREE.InstancedMesh(sharedFlower, sharedMaterial, blooms.length);
+      const mesh = new THREE.InstancedMesh(sharedFlower, sharedBloomMaterial, blooms.length);
       blooms.forEach((b, i) => {
         p.set(b.x, b.y + 0.18 + rand() * 0.2, b.z);
         const k = 0.6 + rand() * 0.6;
@@ -135,10 +142,7 @@ export function createGrass(scene, { from, to, width = 20, perMetre = 120, color
 export function createGrassPatch(scene, { centre, inner, outer, count, colors, flowers = 0, seed = 1 }) {
   sharedTuft ??= tuftGeometry();
   sharedFlower ??= flowerGeometry();
-  if (!sharedMaterial) {
-    sharedMaterial = new THREE.MeshLambertMaterial();
-    sharedMaterial.color = mood.ground;
-  }
+  materials();
   const rand = seededRandom(seed);
   const base = new THREE.Color(colors.base), lit = new THREE.Color(colors.lit), deep = new THREE.Color(colors.deep);
   const petals = MATERIALS.meadow.flowers.map((h) => new THREE.Color(h));
@@ -160,7 +164,7 @@ export function createGrassPatch(scene, { centre, inner, outer, count, colors, f
   tufts.computeBoundingSphere();
   scene.add(tufts);
   if (flowers) {
-    const blooms = new THREE.InstancedMesh(sharedFlower, sharedMaterial, flowers);
+    const blooms = new THREE.InstancedMesh(sharedFlower, sharedBloomMaterial, flowers);
     for (let i = 0; i < flowers; i++) {
       const [x, z] = spot();
       p.set(x, groundHeight(x, z) + 0.2 + rand() * 0.15, z);
