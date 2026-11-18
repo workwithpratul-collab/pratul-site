@@ -26,18 +26,27 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Snow edges on the big far peak are blotchy and ragged.
 - [x] Pine nearest the base-camp tent shows a stripy orange band; make the warm glow soft.
 - [x] Far tree cards turn slightly to face the camera (fix only if it costs no speed).
+- [ ] The open slope right of the path just before THE KING'S GARDEN (0.33) is still quite bare; the trail zig-zags across it, so trees can't go there without crowding the path.
+- [ ] The new painted brush strokes in the ground barely show in the night light on the ridge.
+- [ ] Summit final shot: the middle of the knoll is still smooth snow (crags only at its edges); drifts there are too close to the snow colour to read.
 
 ## CLAUDE CODE: project camps
 - [x] Sheet sway is hard to see when standing still in front of a sheet.
 - [x] Canvas looks flat and grey; add warm projector light across the whole cloth.
 - [x] Poles are plain sticks; add straps, lashing, tips, and pegs where the ropes meet the ground.
 - [x] Opening a project: the camera glides close past the trekker's head on the way to the sheet.
+- [ ] One ~60 ms frame when each landmark's video first starts playing (the browser starting a video decoder); a small hitch while the camera moves.
+- [ ] The trekker is large in frame at TRINETRA's sign, and the KING'S GARDEN arrival cuts him at the right edge.
+- [ ] DERMAÉ's lake water is still a little saturated blue.
 
 ## CLAUDE CODE: the trekker
 - [x] Feet float or sink up to ~10 cm on steep slopes (knoll, summit); needs per-foot placement (IK).
 - [x] The wave is small (hand only reaches head height); may need a more open Mixamo wave.
 - [x] Faint glowing outline around the body looks like a sticker.
 - [x] Character file is 11.5 MB; compress textures to get it under ~5 MB.
+- [ ] The eleven animation clips are 7.5 MB of FBX (Idle alone is 1 MB); a compact clip format would roughly halve that download.
+- [ ] Foot placement is a simple two-bone fix: on the steepest summit spots a foot can still sit ~2 cm into the snow.
+- [ ] The turn-on-the-spot steps (TurnLeft / TurnRight) were checked by their blend weights only, not filmed up close.
 
 ## CLAUDE CODE: gear check and pages
 - [x] Gear items are simple shapes, less rich than the camps.
@@ -45,6 +54,8 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Pages below the film are calm but plain; bring more of the painted world into them.
 - [x] 404.html uses root paths (/css/...), so it only styles correctly from the domain root.
 - [ ] Fonts load from Google Fonts; self-host them.
+- [ ] The painted gear images are more detailed and more realistic than the painted world around them, with warmer, saturated reds (rope, camera leather) than rule 3 allows outside light sources.
+- [ ] 404.html: relative paths work at the site root or in a subfolder, but not for a missing address several folders deep (the host may need to point at 404.html).
 
 ## MOBILE (Phase 7)
 - [ ] Lighter, simpler version of the film for phones and tablets.
