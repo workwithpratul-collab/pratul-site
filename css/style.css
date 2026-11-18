@@ -375,34 +375,6 @@ html.lenis, html.lenis body { height: auto; }
 }
 .veil.is-on { opacity: 1; }
 
-/* ---------- Below the film: the page continues (placeholders for Phase 5) ---------- */
-.content {
-  position: relative;
-  z-index: 3;
-  background: var(--page);
-  padding: var(--space-9) var(--gutter);
-}
-.page-section {
-  min-height: 70vh;
-  padding: var(--space-9) 0;
-  scroll-margin-top: var(--space-7);
-}
-.page-section + .page-section { border-top: var(--hairline) solid var(--ink-faint); }
-.placeholder-list {
-  display: grid;
-  gap: var(--space-4);
-  max-width: 720px;
-  margin-top: var(--space-7);
-  padding-left: var(--space-5);
-  color: var(--ink-muted);
-}
-.placeholder-list strong { color: var(--ink); font-weight: var(--weight-semibold); }
-.placeholder-list a { color: var(--ink); }
-.placeholder-list li { scroll-margin-top: 30vh; }
-/* A gentle highlight on the item a gear link lands on. */
-.placeholder-list li:target { color: var(--ink); }
-.placeholder-list li:target::marker { color: var(--accent); }
-
 /* People who ask their system for less motion get no breathing line. */
 @media (prefers-reduced-motion: reduce) {
   .scroll-hint::after { animation: none; }
@@ -413,20 +385,3 @@ html.lenis, html.lenis body { height: auto; }
 .is-still .overlay { display: none; }
 .is-still, .is-still body { scrollbar-width: none; }
 .is-still ::-webkit-scrollbar { display: none; }
-
-/* ---------- Case study pages (placeholders for Phase 5) ---------- */
-.case__main {
-  min-height: 100vh;
-  display: grid;
-  align-content: center;
-  gap: var(--space-7);
-  padding: var(--space-9) var(--gutter);
-}
-.case__back { justify-self: start; }
-.case__soon {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  color: var(--ink-muted);
-}

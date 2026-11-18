@@ -83,6 +83,39 @@
   --ink-day-faint: rgba(42, 32, 66, 0.36);
   --text-scrim-day: 0 0 2px rgba(255, 242, 232, 0.5), 0 1px 22px rgba(255, 236, 220, 0.7);
 
+  /* Illustration colours for the pages below the film (the little scroll-film demo, the ridges
+     the page "descends" through, the 404 scene). They are the film's pre-dawn palette
+     (js/world/palette.js), so the pages feel like the same painted world. */
+  --art-sky-top: #0a1440;
+  --art-sky-low: #4a4f86;
+  --art-glow: #f2a17c;              /* the dawn glow / sun: a light source, so it may be warm */
+  --art-ridge-far: #6b6fa8;
+  --art-ridge-mid: #4a5878;
+  --art-ridge-near: #2f4b62;
+  --art-ridge-front: #172a3d;
+  --art-mist: rgba(144, 148, 192, 0.5);
+  --art-trekker: #c8463c;           /* the trekker's red jacket */
+  /* The page below the film starts in the last of the dawn light and darkens as you descend. */
+  --page-dawn: #1b1d3f;
+  --field: rgba(245, 240, 232, 0.05);          /* form field fill */
+  --field-line: rgba(245, 240, 232, 0.22);
+  --danger: #f2a6a0;                            /* form errors: a soft rose, readable on the night page */
+  --line-soft: rgba(245, 240, 232, 0.08);       /* hairlines between sections and around cards */
+  --line: rgba(245, 240, 232, 0.12);
+  --card: rgba(245, 240, 232, 0.03);            /* the faint lift of a card on the night page */
+  --glow-soft: rgba(255, 184, 119, 0.12);       /* a lit waypoint's halo */
+  --accent-line: rgba(255, 184, 119, 0.5);
+  --shadow-deep: rgba(0, 0, 0, 0.6);
+  /* The "before / after" demo: a deliberately generic grey page, and a calm polished one. */
+  --mock-plain-bg: #e9e9e9;
+  --mock-plain-ink: #444444;
+  --mock-plain-block: #c9c9c9;
+  --mock-plain-link: #2a5bd7;
+  --mock-polished-bg: #f1ece3;
+  --mock-polished-ink: #24331f;
+  --mock-polished-soft: #5d7257;
+  --mock-polished-cta: #2f4a2a;
+
   /* ---------- Spacing (only these steps) ---------- */
   --space-1: 4px;
   --space-2: 8px;

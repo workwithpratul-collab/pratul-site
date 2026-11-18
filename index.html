@@ -3,8 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pratul · The Ascent</title>
-  <meta name="description" content="Pratul builds websites that stand out, for businesses that refuse to blend in.">
+  <title>Pratul · Web designer and developer · The Ascent</title>
+  <meta name="description" content="I'm Pratul, a web designer and developer. I build websites that stand out, for businesses that refuse to blend in: cinematic scroll films, interactive 3D, and design that guides visitors to book or buy.">
+  <meta name="theme-color" content="#070b1a">
+
+  <!-- Sharing previews (WhatsApp, LinkedIn, X...). TODO(Pratul): replace SITE_URL with your domain. -->
+  <link rel="canonical" href="https://SITE_URL/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pratul">
+  <meta property="og:title" content="Pratul · Websites people remember">
+  <meta property="og:description" content="I build websites that stand out, for businesses that refuse to blend in. Scroll up a mountain to see how.">
+  <meta property="og:url" content="https://SITE_URL/">
+  <meta property="og:image" content="https://SITE_URL/assets/share.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="A trekker in a red jacket at a night camp on a mountain ridge, watching a project film projected on a canvas sheet.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Pratul · Websites people remember">
+  <meta name="twitter:description" content="I build websites that stand out, for businesses that refuse to blend in.">
+  <meta name="twitter:image" content="https://SITE_URL/assets/share.jpg">
+
+  <!-- Who this site is about, for search engines. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Pratul",
+    "jobTitle": "Web designer and developer",
+    "description": "Builds websites that stand out, for businesses that refuse to blend in.",
+    "url": "https://SITE_URL/",
+    "image": "https://SITE_URL/assets/about/trekker.jpg",
+    "sameAs": ["https://github.com/workwithpratul-collab"],
+    "knowsAbout": ["Web design", "Web development", "Scroll animation", "Three.js", "SEO"]
+  }
+  </script>
 
   <!-- Fonts (see css/tokens.css): a soft serif for headlines, a warm sans for body text,
        a mono for small labels. To be self-hosted later. -->
@@ -12,12 +44,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- An empty icon, so the browser stops asking for favicon.ico. -->
-  <link rel="icon" href="data:,">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
 
   <!--
     The import map tells the browser where to find each library when our code says
@@ -160,58 +192,324 @@
   </section>
 
   <!-- ===================== BELOW THE FILM ===================== -->
-  <!-- Placeholders for Phase 5. The altitudes count down: after the summit, the page walks
-       back down the mountain. -->
+  <!-- After the summit the page walks back down the mountain: each section's altitude counts down.
+       Its scripts (js/pages/) only load once the visitor nears the end of the film. -->
+
+  <!-- The top navigation: hidden during the film, it settles in once the film has scrolled away. -->
+  <header class="site-nav" id="site-nav" aria-label="Site">
+    <a class="site-nav__name" href="#film">Pratul</a>
+    <nav class="site-nav__links" aria-label="Sections">
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+      <a class="btn btn--primary btn--small" href="#contact">Book a call</a>
+    </nav>
+  </header>
+
   <main id="content" class="content">
+    <div class="descent" aria-hidden="true">
+      <svg viewBox="0 0 1600 300" preserveAspectRatio="none">
+        <path class="descent__far" d="M0 210 L160 150 L300 190 L470 120 L640 185 L820 135 L1000 190 L1180 140 L1380 195 L1600 150 V300 H0Z"/>
+        <path class="descent__mid" d="M0 245 L210 200 L400 235 L610 190 L830 240 L1050 205 L1270 245 L1450 215 L1600 235 V300 H0Z"/>
+        <path class="descent__near" d="M0 280 Q400 250 800 272 T1600 262 V300 H0Z"/>
+      </svg>
+    </div>
+
+    <!-- ========== WHAT I CAN BUILD ========== -->
     <section class="page-section" id="services" aria-labelledby="services-title">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">4,410 m <span>Services</span></p>
-        <h2 class="section-heading__title" id="services-title">What I can build</h2>
-        <p class="section-heading__lead">Placeholder: the full section arrives in Phase 5.</p>
+        <p class="section-heading__eyebrow">4,410 m <span>What I can build</span></p>
+        <h2 class="section-heading__title" id="services-title">Websites that make a business feel as good as it is.</h2>
+        <p class="section-heading__lead">Five things I build. Each card has a small live demo: try them.</p>
       </header>
-      <ul class="placeholder-list">
-        <li id="services-films"><strong>Cinematic websites</strong>: scroll films and motion that make a brand feel big.</li>
-        <li id="services-3d"><strong>Interactive experiences</strong>: 3D product views, sliders and effects visitors can play with.</li>
-        <li id="services-design"><strong>Design that converts</strong>: layouts that guide visitors to book, buy or call.</li>
-        <li id="services-booking"><strong>Online stores and booking</strong>: ordering, enquiry and WhatsApp flows.</li>
-        <li id="services-seo"><strong>Found</strong>: SEO, so customers find you.</li>
-        <li id="services-speed"><strong>Fast</strong>: speed, so they stay.</li>
-      </ul>
+
+      <div class="services">
+        <article class="service" id="services-films" aria-labelledby="sv-films">
+          <div class="service__demo demo-films" data-demo="films" aria-hidden="true">
+            <div class="demo-films__sky"></div>
+            <div class="demo-films__sun"></div>
+            <div class="demo-films__layer" data-depth="0.15"><svg viewBox="0 0 400 200" preserveAspectRatio="none"><path d="M0 120 L40 80 L80 100 L130 50 L180 95 L230 60 L290 105 L340 70 L400 95 V200 H0Z"/></svg></div>
+            <div class="demo-films__layer" data-depth="0.35"><svg viewBox="0 0 400 200" preserveAspectRatio="none"><path d="M0 145 L60 115 L110 135 L170 100 L230 130 L300 105 L360 130 L400 118 V200 H0Z"/></svg></div>
+            <div class="demo-films__mist"></div>
+            <div class="demo-films__layer" data-depth="0.6"><svg viewBox="0 0 400 200" preserveAspectRatio="none"><path d="M0 170 Q60 150 120 165 T240 160 T400 165 V200 H0Z"/></svg></div>
+            <div class="demo-films__walker"></div>
+            <div class="demo-films__layer" data-depth="1"><svg viewBox="0 0 400 200" preserveAspectRatio="none"><path d="M0 188 Q100 176 200 186 T400 182 V200 H0Z"/></svg></div>
+          </div>
+          <div class="service__body">
+            <p class="service__item">The camera</p>
+            <h3 class="service__title" id="sv-films">Cinematic websites</h3>
+            <p class="service__text">Scroll films and motion that make a brand feel big. As visitors scroll, the story moves: layers glide past each other at their own pace, like this little scene does as you scroll the page.</p>
+          </div>
+        </article>
+
+        <article class="service" id="services-3d" aria-labelledby="sv-3d">
+          <div class="service__demo demo-3d" data-demo="three">
+            <canvas class="demo-3d__canvas" aria-label="A trekking lantern in 3D. Drag to spin it, or use the arrow keys." role="img" tabindex="0"></canvas>
+            <p class="demo-3d__hint" aria-hidden="true">Drag to spin</p>
+          </div>
+          <div class="service__body">
+            <p class="service__item">The lantern</p>
+            <h3 class="service__title" id="sv-3d">Interactive experiences</h3>
+            <p class="service__text">3D product views, sliders and effects visitors can play with. People remember what they touched: turn this lantern round with your mouse or finger.</p>
+          </div>
+        </article>
+
+        <article class="service" id="services-design" aria-labelledby="sv-design">
+          <div class="service__demo demo-slider" data-demo="slider">
+            <div class="demo-slider__pane demo-slider__pane--before" aria-hidden="true">
+              <div class="mock mock--plain">
+                <span class="mock__bar"></span><span class="mock__title">Welcome to our website</span>
+                <span class="mock__line"></span><span class="mock__line mock__line--short"></span>
+                <span class="mock__grid"><i></i><i></i><i></i></span><span class="mock__link">Click here</span>
+              </div>
+            </div>
+            <div class="demo-slider__pane demo-slider__pane--after" aria-hidden="true">
+              <div class="mock mock--polished">
+                <span class="mock__eyebrow">Skin clinic</span>
+                <span class="mock__title">Skin care, carefully considered.</span>
+                <span class="mock__line"></span>
+                <span class="mock__cta">Book a consultation</span>
+                <span class="mock__proof">Mon–Sat · Same-week visits</span>
+              </div>
+            </div>
+            <div class="demo-slider__handle" aria-hidden="true"><span></span></div>
+            <label class="visually-hidden" for="slider-range">Compare a plain layout with a polished one</label>
+            <input class="demo-slider__range" id="slider-range" type="range" min="0" max="100" value="50">
+            <p class="demo-slider__labels" aria-hidden="true"><span>Before</span><span>After</span></p>
+          </div>
+          <div class="service__body">
+            <p class="service__item">The compass</p>
+            <h3 class="service__title" id="sv-design">Design that converts</h3>
+            <p class="service__text">Layouts that guide visitors to book, buy or call. One clear message, one clear next step. Drag the line to compare a plain page with a guided one.</p>
+          </div>
+        </article>
+
+        <article class="service" id="services-booking" aria-labelledby="sv-booking">
+          <div class="service__demo demo-booking" data-demo="booking">
+            <ol class="demo-booking__steps" aria-hidden="true"><li class="is-on">Service</li><li>Time</li><li>Confirm</li></ol>
+            <div class="demo-booking__step" data-step="0">
+              <p class="demo-booking__q" id="bk-q0">What would you like?</p>
+              <div class="demo-booking__choices" role="group" aria-labelledby="bk-q0">
+                <button type="button" data-pick="Consultation">Consultation</button>
+                <button type="button" data-pick="Plant delivery">Plant delivery</button>
+                <button type="button" data-pick="Site visit">Site visit</button>
+              </div>
+            </div>
+            <div class="demo-booking__step" data-step="1" hidden>
+              <p class="demo-booking__q" id="bk-q1">Pick a time</p>
+              <div class="demo-booking__choices" role="group" aria-labelledby="bk-q1">
+                <button type="button" data-pick="Tue 10:00">Tue 10:00</button>
+                <button type="button" data-pick="Wed 15:30">Wed 15:30</button>
+                <button type="button" data-pick="Fri 11:00">Fri 11:00</button>
+              </div>
+            </div>
+            <div class="demo-booking__step" data-step="2" hidden>
+              <p class="demo-booking__q" id="bk-summary">Ready to book</p>
+              <div class="demo-booking__choices">
+                <button type="button" class="is-primary" data-confirm>Confirm</button>
+                <button type="button" data-restart>Start again</button>
+              </div>
+            </div>
+            <div class="demo-booking__step" data-step="3" hidden>
+              <p class="demo-booking__done" role="status">Booked. A confirmation is on its way on WhatsApp. <span>(Just a demo: nothing was sent.)</span></p>
+              <div class="demo-booking__choices"><button type="button" data-restart>Try again</button></div>
+            </div>
+          </div>
+          <div class="service__body">
+            <p class="service__item">The rope</p>
+            <h3 class="service__title" id="sv-booking">Online stores and booking</h3>
+            <p class="service__text">Ordering, enquiry and WhatsApp flows that hold together. Three calm steps, no dead ends. Try booking something.</p>
+          </div>
+        </article>
+
+        <article class="service service--wide" aria-labelledby="sv-found">
+          <div class="service__demo demo-score" data-demo="score" aria-hidden="true">
+            <div class="demo-score__ring" id="services-speed" data-score="98"><svg viewBox="0 0 120 120"><circle class="demo-score__track" cx="60" cy="60" r="52"/><circle class="demo-score__fill" cx="60" cy="60" r="52"/></svg><span class="demo-score__num">0</span><span class="demo-score__label">Speed</span></div>
+            <div class="demo-score__ring" id="services-seo" data-score="100"><svg viewBox="0 0 120 120"><circle class="demo-score__track" cx="60" cy="60" r="52"/><circle class="demo-score__fill" cx="60" cy="60" r="52"/></svg><span class="demo-score__num">0</span><span class="demo-score__label">SEO</span></div>
+          </div>
+          <div class="service__body">
+            <p class="service__item">The map and the watch</p>
+            <h3 class="service__title" id="sv-found">Found and fast</h3>
+            <p class="service__text">SEO and speed, so customers find you and stay. Clean structure search engines understand, and pages that load before anyone thinks of leaving. <span class="service__note">(The rings show example scores, the kind a well-built page aims for.)</span></p>
+          </div>
+        </article>
+      </div>
+
+      <!-- TODO(Pratul): add any other tools you use day to day. -->
+      <p class="tools"><span class="tools__label">Tools</span> HTML · CSS · JavaScript · Three.js · GSAP · Lenis · VRoid · Mixamo</p>
     </section>
+
+    <!-- ========== WORK ========== -->
     <section class="page-section" id="work" aria-labelledby="work-title">
       <header class="section-heading">
         <p class="section-heading__eyebrow">3,980 m <span>Work</span></p>
-        <h2 class="section-heading__title" id="work-title">All work</h2>
-        <p class="section-heading__lead">Placeholder: the full section arrives in Phase 5.</p>
+        <h2 class="section-heading__title" id="work-title">Selected work</h2>
+        <p class="section-heading__lead">Three projects, labelled honestly: two concepts and one pitch demo.</p>
       </header>
-      <ul class="placeholder-list">
-        <li><a href="case-studies/dermae.html">DERMAÉ</a>: a premium dermatology clinic (concept).</li>
-        <li><a href="case-studies/kings-garden.html">The King's Garden</a>: a plant nursery (pitch demo).</li>
-        <li><a href="case-studies/trinetra.html">Trinetra</a>: a branding and signage agency (concept).</li>
-      </ul>
+      <div class="work">
+        <article class="work-card" data-video="recordings/web/dermae.mp4">
+          <a class="work-card__media" href="case-studies/dermae.html" tabindex="-1" aria-hidden="true">
+            <img src="assets/work/dermae-1-800.jpg" srcset="assets/work/dermae-1-800.jpg 800w, assets/work/dermae-1.jpg 1600w" sizes="(min-width: 900px) 60vw, 100vw" width="1600" height="770" loading="lazy" alt="">
+          </a>
+          <div class="work-card__body">
+            <p class="project-label"><span class="project-label__name">DERMAÉ</span><span class="project-label__type">Derma clinic</span><span class="project-label__tag">Concept</span></p>
+            <h3 class="work-card__title">A premium dermatology clinic that needed to feel luxurious and trustworthy.</h3>
+            <p class="work-card__text">A soft colour palette and a smooth scroll film that feels like a luxury advert.</p>
+            <a class="btn btn--secondary" href="case-studies/dermae.html">View case study<span class="visually-hidden">: DERMAÉ</span><svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          </div>
+        </article>
+        <article class="work-card" data-video="recordings/web/kings-garden.mp4">
+          <a class="work-card__media" href="case-studies/kings-garden.html" tabindex="-1" aria-hidden="true">
+            <img src="assets/work/kings-garden-1-800.jpg" srcset="assets/work/kings-garden-1-800.jpg 800w, assets/work/kings-garden-1.jpg 1600w" sizes="(min-width: 900px) 60vw, 100vw" width="1600" height="770" loading="lazy" alt="">
+          </a>
+          <div class="work-card__body">
+            <p class="project-label"><span class="project-label__name">The King's Garden</span><span class="project-label__type">Plant nursery</span><span class="project-label__tag">Pitch demo</span></p>
+            <h3 class="work-card__title">A plant nursery that needed buyers to trust ordering plants online.</h3>
+            <p class="work-card__text">A cinematic film of the nursery's work and 360° plants you can explore.</p>
+            <a class="btn btn--secondary" href="case-studies/kings-garden.html">View case study<span class="visually-hidden">: The King's Garden</span><svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          </div>
+        </article>
+        <article class="work-card" data-video="recordings/web/trinetra.mp4">
+          <a class="work-card__media" href="case-studies/trinetra.html" tabindex="-1" aria-hidden="true">
+            <img src="assets/work/trinetra-3-800.jpg" srcset="assets/work/trinetra-3-800.jpg 800w, assets/work/trinetra-3.jpg 1600w" sizes="(min-width: 900px) 60vw, 100vw" width="1600" height="770" loading="lazy" alt="">
+          </a>
+          <div class="work-card__body">
+            <p class="project-label"><span class="project-label__name">Trinetra</span><span class="project-label__type">Signage &amp; branding</span><span class="project-label__tag">Concept</span></p>
+            <h3 class="work-card__title">A branding and signage agency that needed to show how a project goes from idea to finished hoarding.</h3>
+            <p class="work-card__text">A scroll film that walks through a real client job, step by step.</p>
+            <a class="btn btn--secondary" href="case-studies/trinetra.html">View case study<span class="visually-hidden">: Trinetra</span><svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          </div>
+        </article>
+      </div>
     </section>
+
+    <!-- ========== HOW I WORK ========== -->
     <section class="page-section" id="how-i-work" aria-labelledby="how-title">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">3,600 m <span>Process</span></p>
-        <h2 class="section-heading__title" id="how-title">How I work</h2>
-        <p class="section-heading__lead">Placeholder: understand, design the experience, build, launch and refine.</p>
+        <p class="section-heading__eyebrow">3,600 m <span>How I work</span></p>
+        <h2 class="section-heading__title" id="how-title">Four waypoints, from first chat to launch.</h2>
       </header>
+      <ol class="steps">
+        <li class="step"><span class="step__dot" aria-hidden="true"></span><p class="step__num">01</p><h3 class="step__title">Understand</h3><p class="step__text">I learn your business, your customers, and what makes you different.</p></li>
+        <li class="step"><span class="step__dot" aria-hidden="true"></span><p class="step__num">02</p><h3 class="step__title">Design the experience</h3><p class="step__text">I plan how your visitors should feel and what they should do, including the interactions you want.</p></li>
+        <li class="step"><span class="step__dot" aria-hidden="true"></span><p class="step__num">03</p><h3 class="step__title">Build</h3><p class="step__text">I bring it to life, sharing progress so you can give feedback along the way.</p></li>
+        <li class="step"><span class="step__dot" aria-hidden="true"></span><p class="step__num">04</p><h3 class="step__title">Launch and refine</h3><p class="step__text">We go live, test on real devices, and polish.</p></li>
+      </ol>
+      <p class="steps__note">I work with businesses worldwide, communicate clearly across time zones, and share progress along the way.</p>
     </section>
+
+    <!-- ========== ABOUT ========== -->
     <section class="page-section" id="about" aria-labelledby="about-title">
       <header class="section-heading">
         <p class="section-heading__eyebrow">3,180 m <span>About</span></p>
-        <h2 class="section-heading__title" id="about-title">About me</h2>
-        <p class="section-heading__lead">Placeholder: the full story arrives in Phase 5.</p>
+        <h2 class="section-heading__title" id="about-title">I'm Pratul, a web designer and developer.</h2>
       </header>
+      <div class="about">
+        <figure class="about__portrait">
+          <img src="assets/about/trekker.jpg" width="900" height="1125" loading="lazy" alt="Pratul's illustrated trekker character in a red jacket, standing on an alpine meadow at first light.">
+          <figcaption>The trekker from the film above: that's me.</figcaption>
+        </figure>
+        <div class="about__story">
+          <p>I fell in love with code because of what it can show. A few lines can become a view that stops you, like reaching the top of a trail and seeing the whole valley open up below.</p>
+          <p>That's how I see websites too. The climb is the hard part: understanding a business, its people, and what makes it different. The view at the top is what its customers get to feel.</p>
+          <p>I work with businesses worldwide, from India to anywhere.</p>
+          <p class="about__interests">When I'm not building, I'm on a trail, in the gym, on a football pitch, or lost in a book.</p>
+        </div>
+      </div>
     </section>
+
+    <!-- ========== CONTACT ========== -->
     <section class="page-section" id="contact" aria-labelledby="contact-title">
       <header class="section-heading">
         <p class="section-heading__eyebrow">2,850 m <span>Contact</span></p>
-        <h2 class="section-heading__title" id="contact-title">Let's build yours.</h2>
-        <p class="section-heading__lead">Placeholder: booking a call arrives in Phase 5.</p>
+        <h2 class="section-heading__title" id="contact-title">Websites people remember. <em>Let's build yours.</em></h2>
+        <p class="section-heading__lead">Tell me a little about your business and what you'd like your website to do.</p>
       </header>
+      <div class="contact">
+        <!-- TODO(Pratul): replace FORMSPREE_ENDPOINT with your Formspree form ID. -->
+        <form class="form" id="contact-form" action="https://formspree.io/f/FORMSPREE_ENDPOINT" method="POST" novalidate>
+          <div class="field">
+            <label for="f-name">Your name</label>
+            <input id="f-name" name="name" type="text" autocomplete="name" required aria-describedby="f-name-err">
+            <p class="field__error" id="f-name-err"></p>
+          </div>
+          <div class="field">
+            <label for="f-email">Email</label>
+            <input id="f-email" name="email" type="email" autocomplete="email" required aria-describedby="f-email-err">
+            <p class="field__error" id="f-email-err"></p>
+          </div>
+          <div class="field field--wide">
+            <label for="f-business">Business or website <span class="field__optional">(optional)</span></label>
+            <input id="f-business" name="business" type="text" autocomplete="organization" placeholder="e.g. a clinic in Pune, or yourbusiness.com">
+          </div>
+          <fieldset class="field field--wide field--choices" aria-describedby="f-need-err">
+            <legend>What do you need?</legend>
+            <label class="chip"><input type="checkbox" name="need" value="New website"><span>New website</span></label>
+            <label class="chip"><input type="checkbox" name="need" value="Redesign"><span>Redesign</span></label>
+            <label class="chip"><input type="checkbox" name="need" value="Scroll film or 3D"><span>Scroll film or 3D</span></label>
+            <label class="chip"><input type="checkbox" name="need" value="Online store or booking"><span>Online store or booking</span></label>
+            <label class="chip"><input type="checkbox" name="need" value="SEO and speed"><span>SEO and speed</span></label>
+            <p class="field__error" id="f-need-err"></p>
+          </fieldset>
+          <div class="field field--wide">
+            <label for="f-budget">Budget range <span class="field__optional">(optional)</span></label>
+            <!-- TODO(Pratul): check these ranges and currency suit you. -->
+            <select id="f-budget" name="budget">
+              <option value="">Not sure yet</option>
+              <option>Under ₹50,000 / $600</option>
+              <option>₹50,000–1,50,000 / $600–1,800</option>
+              <option>₹1,50,000–4,00,000 / $1,800–5,000</option>
+              <option>Over ₹4,00,000 / $5,000</option>
+            </select>
+          </div>
+          <div class="field field--wide">
+            <label for="f-message">Message</label>
+            <textarea id="f-message" name="message" rows="5" required aria-describedby="f-message-err" placeholder="What are you hoping your website will do?"></textarea>
+            <p class="field__error" id="f-message-err"></p>
+          </div>
+          <div class="form__actions">
+            <button class="btn btn--primary" type="submit">Send message<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <p class="form__status" id="form-status" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+        <aside class="contact__aside" aria-label="Other ways to reach me">
+          <p class="contact__label">Prefer to talk?</p>
+          <!-- TODO(Pratul): replace BOOKING_LINK, YOUR_EMAIL and WHATSAPP_NUMBER (digits only, with country code). -->
+          <a class="btn btn--primary" href="BOOKING_LINK" data-placeholder="BOOKING_LINK">Book a call<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a class="contact__link" href="mailto:YOUR_EMAIL" data-placeholder="YOUR_EMAIL"><span>Email</span>YOUR_EMAIL</a>
+          <a class="contact__link" href="https://wa.me/WHATSAPP_NUMBER" data-placeholder="WHATSAPP_NUMBER"><span>WhatsApp</span>Message me on WhatsApp</a>
+          <p class="contact__note">Based in India, working with businesses anywhere.</p>
+        </aside>
+      </div>
     </section>
   </main>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer" aria-labelledby="footer-title">
+    <!-- Back where we started: base camp at night, a tent glowing under the ridges. -->
+    <div class="footer__scene" aria-hidden="true">
+      <svg viewBox="0 0 1600 220" preserveAspectRatio="none">
+        <path class="fs-far" d="M0 140 L180 70 L330 120 L520 40 L700 115 L880 60 L1060 125 L1250 55 L1420 110 L1600 80 V220 H0Z"/>
+        <path class="fs-mid" d="M0 175 L220 130 L430 165 L640 120 L860 170 L1080 135 L1300 172 L1600 140 V220 H0Z"/>
+        <path class="fs-near" d="M0 205 Q400 182 800 200 T1600 196 V220 H0Z"/>
+      </svg>
+      <span class="footer__tent"></span>
+    </div>
+    <div class="footer__brand">
+      <p class="footer__name" id="footer-title">Pratul</p>
+      <p class="footer__line">I build websites that stand out, for businesses that refuse to blend in.</p>
+    </div>
+    <nav class="footer__links" aria-label="Footer">
+      <a href="#services">What I can build</a>
+      <a href="#work">Work</a>
+      <a href="#how-i-work">How I work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+      <a href="https://github.com/workwithpratul-collab" rel="me noopener" target="_blank">GitHub</a>
+    </nav>
+    <a class="skip-link footer__top" href="#film">Back to base camp<svg class="skip-link__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 10.5v-8M2.5 5.5 6 2l3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <p class="footer__small">© 2026 Pratul. Built by hand: plain HTML, CSS and JavaScript.</p>
+  </footer>
 
   <script type="module" src="js/main.js"></script>
 </body>

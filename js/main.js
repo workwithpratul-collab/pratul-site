@@ -134,8 +134,19 @@ const lenis = new Lenis({
   lerp: 0.07,
   wheelMultiplier: 0.8,
   smoothWheel: !reduceMotion,
-  anchors: reduceMotion ? { immediate: true } : { duration: 2.4 },
+  // (offset: leave room for the top navigation bar below the film)
+  anchors: reduceMotion ? { immediate: true, offset: -72 } : { duration: 2.4, offset: -72 },
 });
+
+// ---------- The pages below the film ----------
+// Their scripts (demos, work cards, contact form...) are only fetched once the visitor comes
+// within two screens of them, so they never slow down the film.
+let pagesLoaded = false;
+new IntersectionObserver(([entry]) => {
+  if (!entry.isIntersecting || pagesLoaded) return;
+  pagesLoaded = true;
+  import('./pages/pages.js').then((m) => m.initPages({ lenis }));
+}, { rootMargin: '200% 0px' }).observe(document.getElementById('content'));
 gsap.registerPlugin(ScrollTrigger);
 // Let GSAP's clock drive Lenis, and tell ScrollTrigger whenever Lenis scrolls.
 lenis.on('scroll', ScrollTrigger.update);
