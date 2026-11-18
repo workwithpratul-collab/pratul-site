@@ -39,6 +39,14 @@ const ONE_SHOTS = ['wave', 'point', 'stretch', 'sitToStand'];
 // own turn of the hips is dropped (otherwise he would turn twice as far).
 const DROP_HIP_TURN = ['turnLeft', 'turnRight'];
 // The bigger wave: which arm waves in the Waving clip, and how much higher it is lifted (radians).
+// Sitting down and standing up use SitToStand.fbx: he's fully up by 4.4 s into it (the rest is
+// standing still), and it plays a little faster than recorded, so it takes about 3 seconds.
+// Getting up again starts 0.6 s in (he's already shifting his weight) and plays twice as fast:
+// the visitor wants to move on, so it takes under two seconds.
+const SIT_UP_END = 4.4;
+const SIT_SPEED = 1.4;
+const SIT_UP_START = 0.6;
+const STAND_SPEED = 2.0;
 const WAVE_ARM = 'rightUpperArm';
 const WAVE_LIFT = 1.0;    // (positive for this VRM 0.x model, which faces the other way)
 const STRIDE = 0.72;           // metres per step, used to keep feet and ground in sync
@@ -234,12 +242,14 @@ export function createTrekker(scene, renderer, camera) {
     // Sitting down, sitting, and standing up again (SitToStand played backwards, then forwards).
     const sts = A.sitToStand, sit = A.sit;
     if (sts && sit) {
-      const want = state.sitWanted && standing > 0.9;
-      const len = sts.getClip().duration;
+      // (Getting up is decided by sitWanted alone: main.js keeps him still until he's up.)
+      const want = state.sitWanted && (standing > 0.9 || state.sitPhase !== 'stand');
+      // Only the part of the clip where he actually gets up is used (the rest is standing still).
+      const len = Math.min(SIT_UP_END, sts.getClip().duration);
       if (state.sitPhase === 'stand' && want) {
         state.sitPhase = 'down';
         sts.reset();
-        sts.setEffectiveTimeScale(-1);
+        sts.setEffectiveTimeScale(-SIT_SPEED);
         sts.time = len;
         sts.play();
       } else if (state.sitPhase === 'down' && !want) {
@@ -247,7 +257,7 @@ export function createTrekker(scene, renderer, camera) {
         const from = sts.time;
         state.sitPhase = 'up';
         sts.reset();
-        sts.setEffectiveTimeScale(1);
+        sts.setEffectiveTimeScale(STAND_SPEED);
         sts.time = from;
         sts.play();
       } else if (state.sitPhase === 'down' && sts.time <= 0.02) {
@@ -255,7 +265,8 @@ export function createTrekker(scene, renderer, camera) {
       } else if (state.sitPhase === 'sit' && !want) {
         state.sitPhase = 'up';
         sts.reset();
-        sts.setEffectiveTimeScale(1);
+        sts.setEffectiveTimeScale(STAND_SPEED);
+        sts.time = SIT_UP_START;
         sts.play();
       } else if (state.sitPhase === 'up' && sts.time >= len - 0.02) {
         state.sitPhase = 'stand';
@@ -377,7 +388,22 @@ export function createTrekker(scene, renderer, camera) {
   // Hold a looping pose while standing ('look'), or null for plain idle.
   function setLoop(name) { state.loop = name; }
   // Turn the head towards a point in the world (or null to look ahead again).
-  function lookAt(point) { state.lookTarget = point; }
+  // The head turns (afterClips) and the VRM's own look-at moves the eyes to the same point.
+  const eyeTarget = new THREE.Object3D();
+  function lookAt(point) {
+    state.lookTarget = point;
+    const look = state.vrm?.lookAt;
+    if (!look) return;
+    if (point) {
+      eyeTarget.position.copy(point);
+      look.target = eyeTarget;
+      look.autoUpdate = true;
+    } else {
+      look.target = null;
+      look.autoUpdate = false;
+      look.reset?.();
+    }
+  }
 
   // The summit wave (once per arrival).
   function wave() {

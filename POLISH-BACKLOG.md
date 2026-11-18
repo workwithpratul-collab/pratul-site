@@ -40,8 +40,8 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] Character file is 11.5 MB; compress textures to get it under ~5 MB.
 
 ## CLAUDE CODE: gear check and pages
-- [ ] Gear items are simple shapes, less rich than the camps.
-- [ ] Trekker stands idle behind the gear mat (use Sitting.fbx if it exists).
+- [x] Gear items are simple shapes, less rich than the camps.
+- [x] Trekker stands idle behind the gear mat (use Sitting.fbx if it exists).
 - [ ] Pages below the film are calm but plain; bring more of the painted world into them.
 - [ ] 404.html uses root paths (/css/...), so it only styles correctly from the domain root.
 - [ ] Fonts load from Google Fonts; self-host them.

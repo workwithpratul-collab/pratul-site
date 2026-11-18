@@ -191,6 +191,7 @@ export const MATERIALS = {
     route: '#b88a8a',          // the route marked on the map (a faded rose, not a warm accent)
     rope: '#7e9b90',           // coiled rope: weathered sage
     ropeFleck: '#c9d3cc',      // its pale woven fleck
+    shadow: '#3f4a66',         // the soft shadow under each painted item: a cool dusk blue, never black
   },
   // Painted ground colours. These are "surface" colours: the light tints them.
   ground: {

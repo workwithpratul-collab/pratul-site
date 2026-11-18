@@ -371,7 +371,7 @@ const PADS = [
   [36, -174.6, 4, 0],          // where the trekker watches it
   [6.4, -145.8, 13, -0.2],     // DERMAÉ: a level meadow round the lake (so its banks are low and even)
   [103.2, -160.9, 5.5, 0],     // Trinetra: the signboard at the fork
-  [162.75, -245.8, 5, 0],      // the gear-check mat
+  [162.3, -245.8, 5, 0],       // the gear-check mat
   [193, -340, 4.5, 0],         // the summit top
 ];
 

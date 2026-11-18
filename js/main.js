@@ -102,7 +102,7 @@ campLights.update(camps, camera);
 // out on a canvas mat beside the trail, its long side running along the path.
 createMeadowZone(scene);
 const matDir = trailDirectionAt(cameraPath.stops.find((st) => st.at === 'meadow').s);
-const gear = createGear(scene, { position: MEADOW.mat, facing: Math.atan2(-matDir.z, matDir.x) });
+const gear = createGear(scene, { position: MEADOW.mat, facing: Math.atan2(-matDir.z, matDir.x), renderer });
 // Scene 4: the summit (the rising sea of clouds, snow peaks, rocks and the flag).
 const summit = createSummitZone(scene, { sunDir: sky.sunDir });
 
@@ -169,6 +169,8 @@ function lightAt(p) {
 // speed rises so the gap closes in about CATCH_UP_SECONDS: he speeds up into a jog, the camera
 // with him. trekkerS() always rises with progress, so a short halving search finds the
 // furthest allowed point.
+const STAND_UP_WAIT = 1.2;
+let standUpWait = 0;
 let catchingUp = false;   // true from when he falls a few metres behind until he's caught up
 function limitWalk(from, to, dt, gap) {
   const s0 = cameraPath.trekkerS(from);
@@ -280,7 +282,8 @@ const intro = createIntro({ reduceMotion });
 const story = createStory({ reduceMotion });
 const finale = createFinale({ reduceMotion });
 const campUI = createCampUI({ camps, defs: CAMPS, camera, cameraPath, reduceMotion, getProgress: () => scroll.progress });
-const gearUI = createGearUI({ gear, camera, lenis, reduceMotion });
+// While an item is hovered, the seated trekker looks at it.
+const gearUI = createGearUI({ gear, camera, lenis, reduceMotion, onHover: (id) => trekker.lookAt(id ? gear.centres[id] : null) });
 
 // ---------- "Skip film", and finishing the film for impatient scrollers ----------
 // The page glides down to the end of the film while the world dissolves into mist; the mist
@@ -364,7 +367,11 @@ function tick(timestamp) {
   } else if (gap > MIST_SKIP_METRES && !gliding && !campUI.opening && lifted) {
     mistSkip();
   }
-  scroll.progress = snapNextFrame ? eased : limitWalk(scroll.progress, eased, dt, gap);
+  // Leaving the gear check, he stands up before walking on: the film waits for him, but never
+  // for more than STAND_UP_WAIT seconds (then the walk blends in as he finishes getting up).
+  standUpWait = trekker.sitting === 'up' ? standUpWait + dt : 0;
+  if (standUpWait > 0 && standUpWait < STAND_UP_WAIT && !skipping && !gliding) { /* hold still */ }
+  else scroll.progress = snapNextFrame ? eased : limitWalk(scroll.progress, eased, dt, gap);
   const p = scroll.progress;
 
   const s = cameraPath.update(camera, p, dt, snapNextFrame);   // metres along the trail
@@ -408,6 +415,7 @@ function tick(timestamp) {
   // If there's a sitting animation, the trekker sits down beside the mat meanwhile.
   const atMeadow = stops.find((st) => st.stop.at === 'meadow');
   const settled = atMeadow.here * smoothstep(atMeadow.stop.arrive, atMeadow.stop.arrive + 0.012, p) * (1 - smoothstep(atMeadow.stop.leave - 0.03, atMeadow.stop.leave, p));
+  if (p > 0.4) gear.prepare();   // the paintings load once we're well on the way (not at base camp)
   gearUI.update(settled);
   trekker.setSitting(settled > 0.9);
   gear.update(dt, time);

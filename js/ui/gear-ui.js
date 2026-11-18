@@ -6,16 +6,19 @@
 
 import * as THREE from 'three';
 
-export function createGearUI({ gear, camera, lenis, reduceMotion }) {
+export function createGearUI({ gear, camera, lenis, reduceMotion, onHover = () => {} }) {
   const root = document.getElementById('gear-ui');
   const links = [...root.querySelectorAll('.gear-ui__item')];
-  const v = new THREE.Vector3();
+  const v = new THREE.Vector3(), edge = new THREE.Vector3(), right = new THREE.Vector3();
   let shown = false;
 
   for (const a of links) {
     const id = a.dataset.item;
-    const on = () => gear.setGlow(id, true);
-    const off = () => gear.setGlow(id, false);
+    // Near-row labels open below their item, so they never cover the item behind.
+    a.classList.toggle('is-near', !!gear.near[id]);
+    // onHover tells the film which item is being looked at (the trekker turns his head to it).
+    const on = () => { gear.setGlow(id, true); onHover(id); };
+    const off = () => { gear.setGlow(id, false); onHover(null); };
     a.addEventListener('pointerenter', on);
     a.addEventListener('pointerleave', off);
     a.addEventListener('focus', on);
@@ -36,14 +39,20 @@ export function createGearUI({ gear, camera, lenis, reduceMotion }) {
     if (visible !== shown) {
       shown = visible;
       root.hidden = !visible;
-      if (!visible) links.forEach((a) => gear.setGlow(a.dataset.item, false));
+      if (!visible) { links.forEach((a) => gear.setGlow(a.dataset.item, false)); onHover(null); }
     }
     if (!visible) return;
     const w = window.innerWidth, h = window.innerHeight;
+    right.setFromMatrixColumn(camera.matrixWorld, 0);   // the camera's "sideways"
     for (const a of links) {
-      v.copy(gear.centres[a.dataset.item]).project(camera);
+      const id = a.dataset.item;
+      v.copy(gear.centres[id]).project(camera);
       const x = (v.x * 0.5 + 0.5) * w, y = (-v.y * 0.5 + 0.5) * h;
-      a.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+      // Each link is a circle covering its item: the item's size, as it looks from here.
+      edge.copy(gear.centres[id]).addScaledVector(right, gear.radii[id]).project(camera);
+      const r = Math.max(Math.abs(edge.x - v.x) * 0.5 * w, 24);
+      a.style.width = a.style.height = `${(r * 2).toFixed(1)}px`;
+      a.style.transform = `translate3d(${(x - r).toFixed(1)}px, ${(y - r).toFixed(1)}px, 0)`;
     }
   }
   return { update };

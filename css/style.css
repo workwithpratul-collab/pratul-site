@@ -246,14 +246,13 @@ html.lenis, html.lenis body { height: auto; }
   color: var(--ink-muted);
 }
 .gear-ui__list { list-style: none; padding: 0; }
-/* Each item's link is a small round target centred on the item (positioned by JavaScript). */
+/* Each item's link is a round target covering the item (sized and placed by JavaScript). */
 .gear-ui__item {
   position: absolute;
   left: 0;
   top: 0;
   width: 64px;
   height: 64px;
-  margin: -32px 0 0 -32px;
   border-radius: 50%;
   color: var(--ink);
   text-decoration: none;
@@ -288,6 +287,7 @@ html.lenis, html.lenis body { height: auto; }
   color: var(--accent);
 }
 .gear-ui__tip { font-size: var(--text-sm); }
+.gear-ui__item.is-near .gear-ui__label { bottom: auto; top: calc(100% - 6px); transform: translate(-50%, -6px); }
 .gear-ui__item:hover .gear-ui__label, .gear-ui__item:focus-visible .gear-ui__label {
   opacity: 1;
   transform: translate(-50%, 0);
