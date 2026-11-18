@@ -333,7 +333,7 @@ html:not(.mobile-site) .m-only { display: none !important; }
 .m-gear .section-heading { margin-inline: auto; }
 .flatlay {
   position: relative;
-  width: min(100%, 400px);
+  width: min(86%, 360px);
   margin: 0 auto;
   aspect-ratio: 1 / 2;
 }
@@ -372,17 +372,29 @@ html:not(.mobile-site) .m-only { display: none !important; }
 .flatlay.has-pick .flatlay__item:not(.is-picked) { opacity: 0.82; }
 .flatlay__item:focus-visible { outline: var(--focus-ring); outline-offset: -12%; }
 /* What the item stands for. Its space is kept, so nothing below jumps when the words change. */
+/* It's a small glass caption that stays at the bottom of the screen while the mat is in view
+   (position: sticky), so whichever item you tap, its words appear right where your thumb is. */
 .flatlay__readout {
+  position: sticky;
+  bottom: calc(env(safe-area-inset-bottom) + var(--space-3));
+  z-index: 2;
   display: grid;
   justify-items: center;
-  align-content: start;
-  gap: var(--space-2);
-  min-height: 150px;
-  margin-top: var(--space-6);
+  align-content: center;
+  gap: var(--space-1);
+  width: min(100%, 440px);
+  min-height: 132px;
+  margin: var(--space-6) auto 0;
+  padding: var(--space-4) var(--space-5);
+  border: var(--hairline) solid var(--surface-line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-strong);
+  -webkit-backdrop-filter: blur(var(--surface-blur));
+  backdrop-filter: blur(var(--surface-blur));
   text-align: center;
 }
-.flatlay__name { font-family: var(--font-display); font-size: var(--text-3xl); line-height: var(--leading-heading); }
-.flatlay__line { max-width: 34ch; color: var(--ink-muted); }
+.flatlay__name { font-family: var(--font-display); font-size: var(--text-2xl); line-height: var(--leading-heading); }
+.flatlay__line { max-width: 34ch; color: var(--ink-muted); font-size: var(--text-sm); }
 .flatlay__more {
   display: inline-flex;
   align-items: center;
@@ -488,7 +500,9 @@ html:not(.mobile-site) .m-only { display: none !important; }
   .mobile-site .m-hero__text { top: calc(env(safe-area-inset-top) + 64px); right: 42%; }
   .mobile-site .m-hero__title { font-size: clamp(24px, 4.2vw, 34px); }
   .mobile-site .m-hero__place { margin-bottom: var(--space-2); }
-  .mobile-site .m-hero__actions { left: auto; right: var(--gutter); width: min(40%, 320px); }
+  /* The button sits in the left column under the headline; the camp fills the right half. */
+  .mobile-site .m-hero__actions { right: auto; bottom: calc(env(safe-area-inset-bottom) + var(--space-3)); width: min(44%, 320px); justify-items: start; }
+  .mobile-site .m-hero__hint { align-items: flex-start; }
   .mobile-site .m-chapter { height: 100svh; min-height: 340px; }
   .mobile-site .m-summit { min-height: 360px; }
   .mobile-site .m-summit__text { top: 18%; right: 40%; gap: var(--space-4); }

@@ -17,6 +17,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] Test with a real screen reader (Windows Narrator), a touch screen, and the custom cursor with a real mouse.
 - [ ] After launch: replace the example score rings (98 / 100) with real Lighthouse scores.
 - [ ] Optional: download a ground-sitting Mixamo loop as assets/animations/Sitting.fbx for the gear check.
+- [ ] Phase 7 check: open the mobile page on your own phone (and a friend's Android), scroll the whole climb, play with the gear check and the demos, and send the form; then open the site on a laptop and confirm the film.
 
 ## CLAUDE CODE: the world
 - [x] Summit climb looks plain: smooth lilac snow, rock only as soft bands, big bland dome in the final shot.
@@ -58,10 +59,21 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] 404.html: relative paths work at the site root or in a subfolder, but not for a missing address several folders deep (the host may need to point at 404.html).
 
 ## MOBILE (Phase 7)
-- [ ] Lighter, simpler version of the film for phones and tablets.
-- [ ] Work cards only play video on hover, so touch screens see stills.
-- [ ] Top navigation hides Work / About / Contact below 640 px; needs a small mobile menu.
-- [ ] On a 390 px phone the page scrolls sideways: the mist veil (drawn 10% larger than the screen) and the landmark captions stick out past the edge.
+- [x] Lighter, simpler version of the film for phones and tablets.
+- [x] Work cards only play video on hover, so touch screens see stills.
+- [x] Top navigation hides Work / About / Contact below 640 px; needs a small mobile menu.
+- [x] On a 390 px phone the page scrolls sideways: the mist veil (drawn 10% larger than the screen) and the landmark captions stick out past the edge.
+- [ ] The mobile opening waits for the full 2.7 MB character file: on slow 4G the live scene arrives after about 20 s (the painted still covers the wait). A mobile copy of the VRM without the 56 unused face shapes (0.6 MB) and with compressed vertex data could roughly halve it.
+- [ ] Phone frame rates were measured in desktop Chrome with phone emulation (processor slowed 4x), so the graphics chip was the PC's: real phone GPU load is untested. The hero swaps to its still if frames take over 42 ms, but check it on a real mid-range Android.
+- [ ] The version is chosen once, when the page loads: turning an iPad from portrait to landscape keeps the mobile page (and the reverse keeps the film) until a reload. An iPad with a mouse or trackpad attached, or a touch laptop in tablet mode, may get the other version.
+- [ ] Mobile project videos are the full 26-28 s recordings (0.5-0.95 MB each); a short 8-10 s loop of the best moment would cut that by more than half.
+- [ ] The landmark cards are fixed stills: the video on the lake is a flat warped overlay (no ripples or reflection), and the trekker isn't in the card scenes.
+- [ ] Summit finale on a phone: the trekker is small at the very bottom of the frame (a little cut on tall phones), and his wave is one frozen moment of the gesture.
+- [ ] On an iPhone SE the moon sits just behind the "2,850 m" label of the opening.
+- [ ] The scene parallax is gentle but simple: one picture drifting plus a band of CSS mist, not separately painted layers.
+- [ ] The painted gear on the mobile flat-lay still shows its baked lilac shadow halos (compass, rope) at this larger size.
+- [ ] Project pages at 360 px: the Play / Pause button covers a fair part of the small video in its frame.
+- [ ] First paint on 4G varies (about 1.1 s to 3.3 s in tests) mostly with the Google Fonts stylesheet, which blocks drawing; self-hosting the fonts (listed above) would make it steady.
 
 ## Done
 - [x] (P4) Pacing: 13 screen-heights plus a walking speed limit, so feet don't slide.

@@ -34,7 +34,7 @@ const SHOT = {
 const SHOT_WIDE = {
   fov: 38,
   pos: new THREE.Vector3(1.2, 1.7, 11.5),
-  look: new THREE.Vector3(-2.4, 2.1, -6),
+  look: new THREE.Vector3(-7.4, 2.1, -6),   // (looking a little left, so the camp sits in the right half, clear of the text)
 };
 // Where the trekker stands (beside the path, a few steps from the lantern), and which way he faces
 // (radians; he looks up the trail towards the ridge, three-quarters away from us).

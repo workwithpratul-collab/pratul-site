@@ -11,3 +11,6 @@ ehthumbs.db
 !.vscode/settings.json
 
 # Note: assets/ and recordings/ are deliberately NOT ignored.
+
+# Test screenshots (Phase 7 device checks): kept on disk, not in Git.
+tests/
