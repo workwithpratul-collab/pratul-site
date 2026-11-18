@@ -19,13 +19,13 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] Optional: download a ground-sitting Mixamo loop as assets/animations/Sitting.fbx for the gear check.
 
 ## CLAUDE CODE: the world
-- [ ] Summit climb looks plain: smooth lilac snow, rock only as soft bands, big bland dome in the final shot.
-- [ ] Big pale, smooth hillside with sparse trees behind THE KING'S GARDEN and between camps.
-- [ ] Ground is plain: add grass and meadow detail, especially on the ridge under the cinema sheets.
-- [ ] Stones are all one rounded shape; add 3-4 different shapes.
-- [ ] Snow edges on the big far peak are blotchy and ragged.
-- [ ] Pine nearest the base-camp tent shows a stripy orange band; make the warm glow soft.
-- [ ] Far tree cards turn slightly to face the camera (fix only if it costs no speed).
+- [x] Summit climb looks plain: smooth lilac snow, rock only as soft bands, big bland dome in the final shot.
+- [x] Big pale, smooth hillside with sparse trees behind THE KING'S GARDEN and between camps.
+- [x] Ground is plain: add grass and meadow detail, especially on the ridge under the cinema sheets.
+- [x] Stones are all one rounded shape; add 3-4 different shapes.
+- [x] Snow edges on the big far peak are blotchy and ragged.
+- [x] Pine nearest the base-camp tent shows a stripy orange band; make the warm glow soft.
+- [x] Far tree cards turn slightly to face the camera (fix only if it costs no speed).
 
 ## CLAUDE CODE: project camps
 - [x] Sheet sway is hard to see when standing still in front of a sheet.

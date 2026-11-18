@@ -198,8 +198,10 @@ function buildMountainLayer(layer, index) {
         // Snow: near the top of high peaks, with a broken, painterly lower edge.
         if (uSnow > 0.0) {
           float snowDepth = mix(40.0, 200.0, smoothstep(uSnowLine, uSnowLine + 500.0, vCrest));
-          float edge = fbm(vec2(p.x * 14.0 + vY * 0.01, vY * 0.02)) * 0.8;
-          float snow = 1.0 - smoothstep(snowDepth * (0.35 + edge), snowDepth * (0.55 + edge), depth);
+          // The lower edge: long, smooth tongues of snow reaching down the gullies (broad, gentle
+          // noise), fading softly into the rock, never blotchy.
+          float edge = (fbm(vec2(p.x * 4.0 + vY * 0.002, vY * 0.004)) - 0.5) * 0.5 + 0.2;
+          float snow = 1.0 - smoothstep(snowDepth * (0.3 + edge), snowDepth * (0.62 + edge), depth);
           snow *= smoothstep(uSnowLine - 40.0, uSnowLine + 40.0, vCrest) * uSnow;
           vec3 snowCol = mix(uSnowShade, uSnowLit, lit);
           // At dawn, the lit snow catches a little warm light.
@@ -597,6 +599,12 @@ function groundColour(x, z, y, ny, c, tmp) {
   c.copy(GROUND.forest).lerp(GROUND.moss, smoothstep(0.45, 0.75, patch));
   tmp.copy(GROUND.grass).lerp(GROUND.grassLit, smoothstep(0.5, 0.85, patch * 0.7 + fine * 0.3));
   c.lerp(tmp, altitude);
+  // On the open slopes: long, loose brush strokes of moss and of lighter grass, so a hillside
+  // is never one flat pale tone (like the painted grass in the style references).
+  const stroke = noise2(x * 0.06 + z * 0.02, z * 0.15 - x * 0.02, 41);
+  const dab = noise2(x * 0.2, z * 0.09, 43);
+  c.lerp(GROUND.forest, smoothstep(0.54, 0.78, stroke) * 0.7 * altitude);
+  c.lerp(GROUND.grassLit, smoothstep(0.6, 0.84, 1 - stroke * 0.7 + (dab - 0.5) * 0.5) * 0.6 * altitude);
   c.lerp(GROUND.valley, smoothstep(5, -40, y) * smoothstep(-150, -190, z));
   // Trodden earth around base camp, broken up by noise so the edge looks natural.
   const camp = 1 - smoothstep(3.5, 8, Math.hypot(x + 2.5, z + 0.5) + (patch - 0.5) * 4);

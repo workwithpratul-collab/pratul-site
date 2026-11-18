@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 import { groundHeight, seededRandom } from './terrain.js';
-import { createStones, setSecondWarmLight } from './forest.js';
+import { createStoneVariety, setSecondWarmLight } from './forest.js';
 import { mood, MATERIALS } from './palette.js';
 
 const L = MATERIALS.lights;   // light-source colours (the only strong warm colours in the world)
@@ -102,8 +102,10 @@ export function createBaseCamp(scene) {
     { x: 2.2, z: -3.5, s: 0.7 }, { x: 2.9, z: -2.8, s: 0.36 }, { x: -2.4, z: -5.8, s: 0.45 },
     { x: 3.4, z: 4.5, s: 0.5 }, { x: -4.4, z: 3.6, s: 0.4 },
   ];
-  // Soft, rounded painted stones (same painted style as the trees; see forest.js).
-  createStones(scene, rocks.map((r) => ({ x: r.x, z: r.z, s: r.s * 1.35 })), seededRandom(77));
+  // Soft painted stones in several shapes (boulders, slabs, twins; see forest.js), so no two
+  // look copy-pasted.
+  const camRand = seededRandom(77);
+  createStoneVariety(scene, rocks.map((r, i) => ({ x: r.x, z: r.z, s: r.s * 1.35, shape: [0, 1, 3, 0, 3, 1, 0, 1][i] })), camRand);
 
   scene.add(group);
 

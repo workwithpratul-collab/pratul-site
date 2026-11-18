@@ -216,6 +216,8 @@ export const MATERIALS = {
     snow: '#f4ecef',
     snowShade: '#b5aacb',
     rock: '#5e5068',
+    rockTop: '#8a7b8c',        // the tops of crags, a little lighter (dusted with snow)
+    drift: '#ddd2dc',          // wind-packed snow drifts (a touch deeper than fresh snow)
     flagCloth: '#e46a3c',      // the "Book a call" flag: one warm note, like a tent
     flagPole: '#4a3e3a',
   },

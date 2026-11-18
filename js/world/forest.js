@@ -15,7 +15,7 @@
 
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { groundHeight, nearestTrail, noise2, smoothstep, seededRandom, legacy } from './terrain.js';
+import { groundHeight, nearestTrail, noise2, smoothstep, seededRandom, legacy, trailPointAt, TRAIL_LENGTH } from './terrain.js';
 import { mood } from './palette.js';
 import { WIND, WIND_GLSL } from './glsl.js';
 import { CAMPS } from './journey.js';
@@ -239,13 +239,15 @@ export function makePaintedMaterial({ colors, wind = true, roundness = 0.55, rim
       varying float vH, vTrunk;
       varying vec3 vNormalW, vWorld, vTint;
 
-      // How much warm light a point gets from a tent: only on surfaces that face it,
-      // strong close by and fading quickly, so it reads as a glow, not a brown tint.
+      // How much warm light a point gets from a tent: strong close by and fading quickly, so it
+      // reads as a glow, not a brown tint. It leans only gently on which way a surface faces
+      // (wrapped light), so a pine's stacked tiers don't each catch a hard orange band: the
+      // light falls across the whole tree as one soft wash.
       float warmFrom(vec3 lightPos, vec3 n) {
         vec3 L = lightPos - vWorld;
         float d2 = dot(L, L);
-        float facing = max(dot(n, normalize(L)), 0.0);
-        return facing * facing / (1.0 + d2 * 0.16);
+        float facing = dot(n, normalize(L)) * 0.5 + 0.5;
+        return (0.2 + 0.8 * facing * facing) * 0.7 / (1.0 + d2 * 0.18);
       }
 
       void main() {
@@ -468,6 +470,7 @@ export function createStones(scene, stones, rand = Math.random) {
 // copy-pasted. Each is still soft (low-frequency noise only, no sharp facets), 1 unit tall.
 //   0 boulder: a big round lump     1 slab: low, wide and flat-topped, like a split rock
 //   2 standing stone: tall, leaning, tapering   3 twin: two lumps grown together
+//   4 crag: a blocky, leaning rock with broad flat faces and soft edges (mountain rock)
 function buildStoneShapes() {
   const shape = (seed, fn, detail = [32, 20]) => {
     const geo = new THREE.SphereGeometry(0.5, detail[0], detail[1]);
@@ -486,6 +489,7 @@ function buildStoneShapes() {
     geo.computeVertexNormals();
     return flag(geo, 0);
   };
+  const cube = new THREE.Vector3();
   const lumpy = (v, seed, amount) => 1 - amount / 2 + amount * noise2(v.x * 2.2 + v.y * 1.3 + seed, v.z * 2.2 - v.y * 0.7, 31 + seed);
   return [
     shape(1, (v, s) => {
@@ -519,16 +523,28 @@ function buildStoneShapes() {
       v.y -= shoulder * shoulder * 0.25;
       if (v.y < -0.3) v.y = -0.3 + (v.y + 0.3) * 0.3;
     }),
+    shape(5, (v, s) => {
+      // A crag: the sphere pushed most of the way out to a cube (flat faces, rounded edges,
+      // so it reads as rock without hard facets), then lumpy, taller, and leaning.
+      const m = Math.max(Math.abs(v.x), Math.abs(v.y), Math.abs(v.z));
+      v.lerp(cube.copy(v).divideScalar(m * 2), 0.6);
+      v.multiplyScalar(lumpy(v, s, 0.2));
+      v.y *= 1.3;
+      v.x += (v.y + 0.65) * 0.16;
+      v.z *= 0.8;
+      if (v.y < -0.45) v.y = -0.45 + (v.y + 0.45) * 0.3;
+    }, [40, 28]),
   ];
 }
 
-// stones: [{ x, z, s, y?, shape? }] (shape 0..3, chosen at random if missing).
-// One instanced mesh per shape: four draw calls for any number of stones.
+// stones: [{ x, z, s, y?, shape?, tall?, long?, turn? }] (shape 0..4; 0..3 chosen at random if
+// missing). tall / long override the height and length (for snow drifts), turn the direction.
+// One instanced mesh per shape: one draw call per shape, for any number of stones.
 let stoneShapes = null;
 export function createStoneVariety(scene, stones, rand = Math.random, colors = mood.stones) {
   stoneShapes ??= buildStoneShapes();
   const material = makePaintedMaterial({ colors, wind: false, roundness: 0.3, rim: 0.7 });
-  const groups = [[], [], [], []];
+  const groups = [[], [], [], [], []];
   for (const st of stones) groups[st.shape ?? Math.floor(rand() * 4)].push(st);
   const meshes = [];
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3();
@@ -540,9 +556,9 @@ export function createStoneVariety(scene, stones, rand = Math.random, colors = m
     list.forEach((st, i) => {
       // Sunk a little into the ground, so no stone looks like it was set down on top.
       p.set(st.x, (st.y ?? groundHeight(st.x, st.z)) - st.s * 0.15, st.z);
-      q.setFromAxisAngle(up, rand() * Math.PI * 2);
-      const tall = shape === 2 ? 1.3 : shape === 1 ? 0.5 : 0.75;
-      sc.set(st.s * (1.0 + rand() * 0.4), st.s * tall * (0.85 + rand() * 0.3), st.s * (0.85 + rand() * 0.3));
+      q.setFromAxisAngle(up, st.turn ?? rand() * Math.PI * 2);
+      const tall = st.tall ?? (shape === 2 ? 1.3 : shape === 1 ? 0.5 : shape === 4 ? 1.0 : 0.75);
+      sc.set(st.s * (st.long ?? 1.0 + rand() * 0.4), st.s * tall * (0.85 + rand() * 0.3), st.s * (0.85 + rand() * 0.3));
       m.compose(p, q, sc);
       mesh.setMatrixAt(i, m);
       color.setScalar(0.88 + rand() * 0.22);
@@ -588,9 +604,9 @@ function makeCards(cards) {
         vec3 centre = (modelMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
         float width = length(instanceMatrix[0].xyz);
         float height = length(instanceMatrix[1].xyz);
-        // Turn to face the camera around the vertical axis only, so trees stay upright.
-        vec3 camRight = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
-        vec3 right = normalize(vec3(camRight.x, 0.0, camRight.z) + vec3(1e-5));
+        // Each card was turned once, when it was planted, to face the nearest stretch of trail
+        // (where the camera passes), so it never visibly swivels as the camera moves.
+        vec3 right = normalize(instanceMatrix[0].xyz);
         // Far trees sway only slightly with the gusts (a few centimetres at the top).
         float sway = (windGust(centre.xz, uWind - 0.6) * 0.03 + sin(uWind * 0.8 + centre.x * 0.3 + centre.z * 0.2) * 0.008) * position.y * position.y;
         vec3 world = centre + right * (position.x + sway) * width + vec3(0.0, position.y * height, 0.0);
@@ -646,10 +662,23 @@ function makeCards(cards) {
   const variant = new Float32Array(cards.length);
   const m = new THREE.Matrix4();
   const color = new THREE.Color();
+  // Points along the whole trail, every 8 m: each card faces the nearest one.
+  const trailSamples = [];
+  const tp = new THREE.Vector3();
+  for (let along = 0; along <= TRAIL_LENGTH; along += 8) {
+    trailPointAt(along, tp);
+    trailSamples.push([tp.x, tp.z]);
+  }
+  const q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), pos = new THREE.Vector3(), sc = new THREE.Vector3();
   cards.forEach((c, i) => {
     const width = c.height * 0.5;   // the atlas cells are half as wide as they are tall
-    m.makeScale(width, c.height, 1);
-    m.setPosition(c.x, c.y - 0.4, c.z);
+    let best = Infinity, bx = 0, bz = 0;
+    for (const [tx, tz] of trailSamples) {
+      const d = (tx - c.x) * (tx - c.x) + (tz - c.z) * (tz - c.z);
+      if (d < best) { best = d; bx = tx; bz = tz; }
+    }
+    q.setFromAxisAngle(up, Math.atan2(bx - c.x, bz - c.z));
+    m.compose(pos.set(c.x, c.y - 0.4, c.z), q, sc.set(width, c.height, 1));
     mesh.setMatrixAt(i, m);
     color.setScalar(c.tint);
     mesh.setColorAt(i, color);

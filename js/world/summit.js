@@ -11,7 +11,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createSky } from './sky.js';
-import { createMountains, noise2, smoothstep, seededRandom, groundHeight } from './terrain.js';
+import { createMountains, noise2, smoothstep, seededRandom, groundHeight, nearestTrail } from './terrain.js';
 import { createStones, createStoneVariety, makePaintedMaterial, setWarmLights } from './forest.js';
 import { createTrekker } from './trekker.js';
 import { NOISE_GLSL, WIND_GLSL } from './glsl.js';
@@ -180,6 +180,72 @@ export function createSummitZone(scene, { sunDir, cloudTop = 20 }) {
   }
   createStoneVariety(scene, stones, rand);
 
+  // ---------- 3b. Crags, ridges and drifts: the summit's character ----------
+  // Bare rock breaks through the snow in lines running down from the top (ridges, like the
+  // arêtes of a real peak), the biggest crags on the steep flanks. On the downwind side of
+  // many crags the wind has banked a smooth snow drift. Rock tops are dusted pale.
+  const rockColors = { bottom: new THREE.Color(MATERIALS.summit.rock), top: new THREE.Color(MATERIALS.summit.rockTop) };
+  const driftColors = { bottom: new THREE.Color(MATERIALS.summit.snowShade), top: new THREE.Color(MATERIALS.summit.drift) };
+  const windR = Math.atan2(sunFlat.x, sunFlat.z) + 0.5;               // the way the flag streams
+  const lee = new THREE.Vector2(Math.cos(windR), -Math.sin(windR));    // downwind
+  const crags = [], drifts = [];
+  // A drift is long and low: it's pressed into the slope at its lowest point, so neither end
+  // ever hangs in the air.
+  const addDrift = (x, z, s) => {
+    const ax = Math.cos(windR) * s * 0.9, az = -Math.sin(windR) * s * 0.9;
+    const low = Math.min(groundHeight(x, z), groundHeight(x + ax, z + az), groundHeight(x - ax, z - az));
+    const high = Math.max(groundHeight(x, z), groundHeight(x + ax, z + az), groundHeight(x - ax, z - az),
+      groundHeight(x + az, z - ax), groundHeight(x - az, z + ax));
+    if (high - low > s * 0.18) return;   // too steep for snow to bank (it would stick out)
+    drifts.push({ x, z, y: low - s * 0.1, s, shape: 0, tall: 0.22, long: 1.8, turn: windR });
+  };
+  const clear = (x, z) => nearestTrail(x, z).distance > 3.2 && Math.hypot(x - sx, z - sz) > 4.5
+    && Math.hypot(x - SUMMIT.flag[0], z - SUMMIT.flag[1]) > 3;
+  for (let i = 0; i < 3000 && crags.length < 75; i++) {
+    const a = rand() * Math.PI * 2, r = 4.5 + Math.pow(rand(), 0.9) * 50;
+    const x = sx + Math.cos(a) * r, z = sz + Math.sin(a) * r;
+    const y = groundHeight(x, z);
+    // On the summit cone; lower down only close beside the climb, where they're seen up close
+    // (scattered over the whole face, the meadow would see them as blocks on the slope).
+    const fromTrail = nearestTrail(x, z).distance;
+    if (y < 64 || (y < 76 && fromTrail > 16) || !clear(x, z)) continue;
+    // Ridges: rock gathers along the folds of a "ridged" noise, in lines down the mountain.
+    const ridge = 1 - Math.abs(noise2(x * 0.045 + z * 0.02, z * 0.045 - x * 0.02, 131) * 2 - 1);
+    const slope = Math.abs(groundHeight(x + 1, z) - y) + Math.abs(groundHeight(x, z + 1) - y);
+    if (ridge < 0.72 && slope < 0.9) continue;
+    const big = smoothstep(6, 30, r);
+    // (never a giant right beside the path: up close a big one reads as a blob)
+    const sz2 = Math.min((0.7 + rand() * 1.0) * (1 + big * 1.5), fromTrail < 7 ? 1.8 : 9);
+    crags.push({ x, z, y: y - sz2 * 0.3, s: sz2, shape: rand() < 0.7 ? 4 : 1 });
+    // A drift banked on the lee side (smooth, low and long).
+    if (rand() < 0.65) {
+      const dx = x + lee.x * sz2 * 0.8, dz = z + lee.y * sz2 * 0.8;
+      if (clear(dx, dz)) addDrift(dx, dz, sz2 * 1.1);
+    }
+  }
+  // The final shot: a few crags on the knoll's flanks either side of the view (the camera looks
+  // along FINAL_LOOK at the top), so the trekker stands on a real rocky summit, not a smooth dome.
+  // (along: metres beyond the top, negative towards the camera; side: metres to the right of the
+  // view; then size). The top is a small knoll that drops away steeply, so from the camera only a
+  // few metres round the top are in frame: these spots were chosen to land inside it.
+  const fl = FINAL_LOOK, fr = [-fl[1], fl[0]];
+  for (const [along, side, size, drift] of [
+    [0, -4.2, 0.8, 1], [2, -4.6, 1.2, 0], [-1, -5, 0.6, 0], [3.2, -3.6, 0.7, 0],
+    [2, 4.2, 1.0, 1], [3, 4.6, 1.3, 0], [1, 3.4, 0.5, 0],
+    // (size 0: no rock, just a low wind drift across the open snow in front of him)
+    [-3, -2, 0, 1.5], [-2, -3.2, 0, 1.2], [2, -2.2, 0, 1.0],
+  ]) {
+    const x = sx + fl[0] * along + fr[0] * side, z = sz + fl[1] * along + fr[1] * side;
+    // (small rocks: they may sit closer in than the big crags, but never on the path or
+    // beside the trekker and the flag)
+    if (nearestTrail(x, z).distance < 2.2 || Math.hypot(x - sx, z - sz) < 2.5 || Math.hypot(x - SUMMIT.flag[0], z - SUMMIT.flag[1]) < 2) continue;
+    if (!size) { addDrift(x, z, drift); continue; }
+    crags.push({ x, z, y: groundHeight(x, z) - size * 0.32, s: size, shape: 4 });
+    if (drift) addDrift(x + lee.x * size, z + lee.y * size, size * 1.2);
+  }
+  createStoneVariety(scene, crags, rand, rockColors);
+  createStoneVariety(scene, drifts, rand, driftColors);
+
   // ---------- 4. The flag: the one warm note in the cold air ("Book a call") ----------
   const flag = buildFlag();
   const [fx, fz] = SUMMIT.flag;
@@ -293,6 +359,9 @@ function buildSpindrift({ sx, sz, topY, rand, dir }) {
   points.frustumCulled = false;   // the grains move away from their start spots
   return points;
 }
+
+// The direction the film's final shot looks across the summit (x, z), from cameraPath.js.
+const FINAL_LOOK = [0.39, -0.92];
 
 // Shared values for the summit's custom shaders (the palette's live colours).
 function summitUniforms(sunDir) {
