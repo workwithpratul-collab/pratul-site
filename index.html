@@ -38,59 +38,179 @@
   </script>
 </head>
 <body>
-  <!-- The 3D world is drawn here. It stays fixed behind everything. -->
-  <canvas id="scene" aria-hidden="true"></canvas>
-
-  <!-- Painterly finishing layers: a faint paper grain and a soft dark edge (vignette). -->
-  <div id="vignette" aria-hidden="true"></div>
+  <!-- A soft dark cover that fades away once the world is ready. -->
+  <div id="curtain" aria-hidden="true"></div>
+  <!-- Soft mist that rolls in for transitions (opening a project, skipping the film). Its colour
+       is the world's current mist colour (js/ui/veil.js). -->
+  <div id="veil" class="veil" aria-hidden="true"></div>
+  <!-- A faint paper grain over everything, like paint on paper. -->
   <div id="grain" aria-hidden="true"></div>
 
-  <!-- A soft black cover that fades away once the world is ready. -->
-  <div id="curtain" aria-hidden="true"></div>
+  <!-- ===================== THE FILM ===================== -->
+  <!-- This tall section is what you scroll through; its height decides how long the film lasts
+       (set from journey.js). The stage inside stays pinned to the screen ("sticky") until the
+       film ends, then scrolls away and the page continues below. -->
+  <section id="film" class="film" aria-label="The Ascent: a short film about my work. Scroll to climb.">
+    <div class="film__stage" id="stage">
+      <!-- The 3D world is drawn here. -->
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <div id="vignette" aria-hidden="true"></div>
 
-  <!-- All real text lives in this HTML layer, on top of the canvas. -->
-  <div id="overlay">
-    <header class="intro" id="intro">
-      <p class="intro__hello">Hi, I'm Pratul.</p>
-      <h1 class="intro__headline">I build websites that stand out, for businesses that refuse to blend in.</h1>
-    </header>
+      <!-- All real text lives in this HTML layer, on top of the canvas. -->
+      <div id="overlay" class="overlay">
+        <header class="intro" id="intro">
+          <h1 class="intro__headline">
+            <span class="intro__hello">Hi, I'm Pratul.</span>
+            <span class="intro__statement">I build websites that stand out, for businesses that refuse to blend in.</span>
+          </h1>
+        </header>
+        <p class="scroll-hint" id="scroll-hint">Scroll to begin the climb</p>
 
-    <p class="scroll-hint" id="scroll-hint">Scroll to begin the climb</p>
+        <!-- Story moments: each appears softly at its point of the climb (js/ui/story.js). -->
+        <div class="moment moment--left" data-from="0.05" data-to="0.13">
+          <p class="moment__quote">The climb is the hard part: understanding a business, its people, and what makes it different.</p>
+          <p class="moment__note">The view at the top is what its customers get to feel.</p>
+        </div>
+        <div class="moment moment--left" data-from="0.158" data-to="0.207">
+          <header class="section-heading">
+            <p class="section-heading__eyebrow">3,180 m <span>The ridge</span></p>
+            <h2 class="section-heading__title">Selected work</h2>
+            <p class="section-heading__lead">Three projects, each pitched at its own camp along the ridge. Stop at a screen to watch, or open the project.</p>
+          </header>
+        </div>
+        <div class="moment moment--story" data-from="0.535" data-to="0.585">
+          <p class="moment__eyebrow">About me</p>
+          <p class="moment__lead">I'm Pratul, a web designer and developer.</p>
+          <p class="moment__text">I fell in love with code because of what it can show. A few lines can become a view that stops you, like reaching the top of a trail and seeing the whole valley open up below.</p>
+        </div>
+        <div class="moment moment--story" data-from="0.585" data-to="0.63">
+          <p class="moment__text">That's how I see websites too. The climb is the hard part: understanding a business, its people, and what makes it different. The view at the top is what its customers get to feel.</p>
+          <p class="moment__text">When I'm not building, I'm on a trail, in the gym, on a football pitch, or lost in a book. I work with businesses worldwide, from India to anywhere.</p>
+        </div>
 
-    <!-- Small labels that float under each project's screen (positioned by JavaScript). -->
-    <p class="camp-label project-label" id="label-dermae">
-      <span class="project-label__name">DERMAÉ</span>
-      <span class="project-label__type">Derma clinic</span>
-      <span class="project-label__tag">Concept</span>
-    </p>
-    <p class="camp-label project-label" id="label-kings-garden">
-      <span class="project-label__name">The King's Garden</span>
-      <span class="project-label__type">Plant nursery</span>
-      <span class="project-label__tag">Pitch demo</span>
-    </p>
-    <p class="camp-label project-label" id="label-trinetra">
-      <span class="project-label__name">Trinetra</span>
-      <span class="project-label__type">Signage &amp; branding</span>
-      <span class="project-label__tag">Concept</span>
-    </p>
+        <!-- The project camps: a link laid over each screen (positioned by js/ui/camp-ui.js), its
+             label, and a "View project" pill that appears on hover or keyboard focus. -->
+        <div class="camp-ui" data-camp="dermae">
+          <a class="camp-ui__hit" href="case-studies/dermae.html" hidden><span class="visually-hidden">DERMAÉ, a derma clinic concept: view project</span></a>
+          <div class="camp-ui__caption" aria-hidden="true">
+            <p class="project-label">
+              <span class="project-label__name">DERMAÉ</span>
+              <span class="project-label__type">Derma clinic</span>
+              <span class="project-label__tag">Concept</span>
+            </p>
+            <span class="btn btn--secondary btn--small camp-ui__cta">View project<svg class="btn__arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+        </div>
+        <div class="camp-ui" data-camp="kings-garden">
+          <a class="camp-ui__hit" href="case-studies/kings-garden.html" hidden><span class="visually-hidden">The King's Garden, a plant nursery pitch demo: view project</span></a>
+          <div class="camp-ui__caption" aria-hidden="true">
+            <p class="project-label">
+              <span class="project-label__name">The King's Garden</span>
+              <span class="project-label__type">Plant nursery</span>
+              <span class="project-label__tag">Pitch demo</span>
+            </p>
+            <span class="btn btn--secondary btn--small camp-ui__cta">View project<svg class="btn__arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+        </div>
+        <div class="camp-ui" data-camp="trinetra">
+          <a class="camp-ui__hit" href="case-studies/trinetra.html" hidden><span class="visually-hidden">Trinetra, a signage and branding concept: view project</span></a>
+          <div class="camp-ui__caption" aria-hidden="true">
+            <p class="project-label">
+              <span class="project-label__name">Trinetra</span>
+              <span class="project-label__type">Signage &amp; branding</span>
+              <span class="project-label__tag">Concept</span>
+            </p>
+            <span class="btn btn--secondary btn--small camp-ui__cta">View project<svg class="btn__arrow" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+        </div>
 
-    <a class="skip skip-link" id="skip" href="#end">
-      Skip film
-      <svg class="skip-link__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 1.5v8M2.5 6.5 6 10l3.5-3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
+        <!-- The gear check: one link over each item on the mat (positioned by js/ui/gear-ui.js). -->
+        <nav class="gear-ui" id="gear-ui" aria-labelledby="gear-title" hidden>
+          <p class="gear-ui__title" id="gear-title">Gear check <span>Every item is a skill</span></p>
+          <ul class="gear-ui__list">
+            <li><a class="gear-ui__item" data-item="camera" href="#services-films"><span class="gear-ui__label"><span class="gear-ui__name">Camera</span><span class="gear-ui__tip">Cinematic scroll films that make a brand feel big.</span></span></a></li>
+            <li><a class="gear-ui__item" data-item="lantern" href="#services-3d"><span class="gear-ui__label"><span class="gear-ui__name">Lantern</span><span class="gear-ui__tip">3D and lighting effects visitors can play with.</span></span></a></li>
+            <li><a class="gear-ui__item" data-item="compass" href="#services-design"><span class="gear-ui__label"><span class="gear-ui__name">Compass</span><span class="gear-ui__tip">Clear design that guides visitors to book or buy.</span></span></a></li>
+            <li><a class="gear-ui__item" data-item="map" href="#services-seo"><span class="gear-ui__label"><span class="gear-ui__name">Map</span><span class="gear-ui__tip">SEO, so customers can find you on Google.</span></span></a></li>
+            <li><a class="gear-ui__item" data-item="rope" href="#services-booking"><span class="gear-ui__label"><span class="gear-ui__name">Rope</span><span class="gear-ui__tip">Forms, booking and WhatsApp flows that hold together.</span></span></a></li>
+            <li><a class="gear-ui__item" data-item="watch" href="#services-speed"><span class="gear-ui__label"><span class="gear-ui__name">Watch</span><span class="gear-ui__tip">Fast loading, so nobody waits.</span></span></a></li>
+          </ul>
+        </nav>
 
-    <!-- How high we are: rises with the scroll and doubles as the progress bar (js/ui/altitude.js). -->
-    <div class="altitude" id="altitude" aria-hidden="true"></div>
+        <!-- The summit finale: appears as the sun breaks (js/ui/finale.js). -->
+        <div class="finale" id="finale" hidden>
+          <h2 class="finale__line">Websites people remember. <em>Let's build yours.</em></h2>
+          <div class="finale__actions">
+            <a class="btn btn--primary" href="#contact">Book a call<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <a class="finale__more" href="#work">See all work</a>
+          </div>
+        </div>
 
-    <div class="fps" id="fps" hidden>-- fps</div>
-  </div>
+        <a class="skip skip-link" id="skip" href="#film-end">
+          Skip film
+          <svg class="skip-link__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 1.5v8M2.5 6.5 6 10l3.5-3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
 
-  <!--
-    This tall empty block is what you actually scroll through.
-    Its height decides how long the film lasts.
-  -->
-  <main id="scroll-track" aria-label="The Ascent, a scrolling film">
-    <div id="end"></div>
+        <!-- How high we are: rises with the climb and doubles as the progress bar (js/ui/altitude.js). -->
+        <div class="altitude" id="altitude" aria-hidden="true"></div>
+        <div class="fps" id="fps" hidden>-- fps</div>
+      </div>
+    </div>
+    <div id="film-end" class="film__end"></div>
+  </section>
+
+  <!-- ===================== BELOW THE FILM ===================== -->
+  <!-- Placeholders for Phase 5. The altitudes count down: after the summit, the page walks
+       back down the mountain. -->
+  <main id="content" class="content">
+    <section class="page-section" id="services" aria-labelledby="services-title">
+      <header class="section-heading">
+        <p class="section-heading__eyebrow">4,410 m <span>Services</span></p>
+        <h2 class="section-heading__title" id="services-title">What I can build</h2>
+        <p class="section-heading__lead">Placeholder: the full section arrives in Phase 5.</p>
+      </header>
+      <ul class="placeholder-list">
+        <li id="services-films"><strong>Cinematic websites</strong>: scroll films and motion that make a brand feel big.</li>
+        <li id="services-3d"><strong>Interactive experiences</strong>: 3D product views, sliders and effects visitors can play with.</li>
+        <li id="services-design"><strong>Design that converts</strong>: layouts that guide visitors to book, buy or call.</li>
+        <li id="services-booking"><strong>Online stores and booking</strong>: ordering, enquiry and WhatsApp flows.</li>
+        <li id="services-seo"><strong>Found</strong>: SEO, so customers find you.</li>
+        <li id="services-speed"><strong>Fast</strong>: speed, so they stay.</li>
+      </ul>
+    </section>
+    <section class="page-section" id="work" aria-labelledby="work-title">
+      <header class="section-heading">
+        <p class="section-heading__eyebrow">3,980 m <span>Work</span></p>
+        <h2 class="section-heading__title" id="work-title">All work</h2>
+        <p class="section-heading__lead">Placeholder: the full section arrives in Phase 5.</p>
+      </header>
+      <ul class="placeholder-list">
+        <li><a href="case-studies/dermae.html">DERMAÉ</a>: a premium dermatology clinic (concept).</li>
+        <li><a href="case-studies/kings-garden.html">The King's Garden</a>: a plant nursery (pitch demo).</li>
+        <li><a href="case-studies/trinetra.html">Trinetra</a>: a branding and signage agency (concept).</li>
+      </ul>
+    </section>
+    <section class="page-section" id="how-i-work" aria-labelledby="how-title">
+      <header class="section-heading">
+        <p class="section-heading__eyebrow">3,600 m <span>Process</span></p>
+        <h2 class="section-heading__title" id="how-title">How I work</h2>
+        <p class="section-heading__lead">Placeholder: understand, design the experience, build, launch and refine.</p>
+      </header>
+    </section>
+    <section class="page-section" id="about" aria-labelledby="about-title">
+      <header class="section-heading">
+        <p class="section-heading__eyebrow">3,180 m <span>About</span></p>
+        <h2 class="section-heading__title" id="about-title">About me</h2>
+        <p class="section-heading__lead">Placeholder: the full story arrives in Phase 5.</p>
+      </header>
+    </section>
+    <section class="page-section" id="contact" aria-labelledby="contact-title">
+      <header class="section-heading">
+        <p class="section-heading__eyebrow">2,850 m <span>Contact</span></p>
+        <h2 class="section-heading__title" id="contact-title">Let's build yours.</h2>
+        <p class="section-heading__lead">Placeholder: booking a call arrives in Phase 5.</p>
+      </header>
+    </section>
   </main>
 
   <script type="module" src="js/main.js"></script>

@@ -69,6 +69,14 @@
   border-color: var(--surface-line-hover);
 }
 
+/* Small: for buttons that sit inside the film beside small labels ("View project" at a camp). */
+.btn--small {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  line-height: 20px;
+  gap: var(--space-2);
+}
+
 /* =====================================================================
    2. "SKIP FILM" LINK
    ===================================================================== */
@@ -335,7 +343,7 @@
    ===================================================================== */
 /* Darker edges pull the eye to the middle, like a film frame. */
 #vignette {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
@@ -346,7 +354,7 @@
 #grain {
   position: fixed;
   inset: 0;
-  z-index: 1;
+  z-index: 30;   /* over the film and the page below, under the mist veil */
   pointer-events: none;
   opacity: 0.07;
   mix-blend-mode: overlay;

@@ -26,10 +26,10 @@ Small issues we chose to leave until final polish. Not blockers.
 ## Phase 4 (P4): found in Phase 3, fixed in Phase 4
 - [x] (P4) Trekker covers too much ground per screen and his feet slide on a hard flick: 13 screen-heights, plus a walking speed limit (the film catches up instead of sliding his feet).
 - [x] (P4) Leaving DERMAÉ, the camera passed close behind its sheet: it now swaps to the trekker's far side and passes in front of the screen at a distance.
-- [ ] (P4) Leaving the meadow, the trekker sat at the frame edge.
-- [ ] (P4) Small "Hi, I'm Pratul." label above the headline (the generic eyebrow look): fold it into the headline.
-- [ ] (P4) Altitude meter is hard to read against the bright summit sky.
-- [ ] (P4) Gear check camera is ~12 m from the mat: move much closer.
+- [x] (P4) Leaving the meadow, the trekker sat at the frame edge: the gaze now lifts to the trekker, then hands over to a closer follow camera.
+- [x] (P4) Small "Hi, I'm Pratul." label above the headline (the generic eyebrow look): folded into the headline as its first, quieter line.
+- [x] (P4) Altitude meter is hard to read against the bright summit sky: all film text switches to a day ink as first light breaks.
+- [x] (P4) Gear check camera is ~12 m from the mat: now ~3.5 m, looking down over the kit with the trekker behind it.
 
 ## Later phases
 - [ ] Mobile version (Phase 7).
