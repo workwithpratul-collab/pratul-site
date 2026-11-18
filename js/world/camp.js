@@ -127,8 +127,7 @@ export function createBaseCamp(scene) {
 // slightly soft, with its light spilling onto the grass. A small orange tent and a lantern
 // sit beside it, so it feels like part of a trek camp.
 //
-// options: { x, z, facing, video, label, renderer, tent, tentTurn, lanternSide, variety }
-//   label:       the HTML caption element
+// options: { x, z, facing, video, renderer, tent, tentTurn, lanternSide, variety }
 //   tent:        which side of the sheet the tent sits on (1 = right, -1 = left, seen from the front)
 //   tentTurn:    extra turn of the tent (radians), so no two camps are pitched alike
 //   lanternSide: which side the lantern stands on (defaults to the tent's side)
@@ -138,7 +137,7 @@ export function createBaseCamp(scene) {
 // to whichever camp is nearest. Every light costs time on every pixel of the screen, so
 // sharing keeps the film fast however many camps there are.
 export function createProjectCamp(scene, {
-  x, z, facing, video: videoSrc, label, renderer,
+  x, z, facing, video: videoSrc, renderer,
   tent: tentSide = 1, tentTurn = 0, lanternSide = tentSide, variety = false,
 }) {
   const group = new THREE.Group();
@@ -204,6 +203,7 @@ export function createProjectCamp(scene, {
   const sheetUniforms = {
     uVideo: { value: placeholder },
     uOn: { value: 0 },                                     // 0 = projector off, 1 = on
+    uHover: { value: 0 },                                  // 0..1: the pointer (or keyboard focus) is on this screen
     uTime: { value: 0 },
     uCanvas: { value: new THREE.Color(GEAR.canvas) },        // pale canvas in moonlight
     uSize: { value: new THREE.Vector2(sheetW, sheetH) },
@@ -252,7 +252,7 @@ export function createProjectCamp(scene, {
       #include <common>
       #include <fog_pars_fragment>
       uniform sampler2D uVideo;
-      uniform float uOn;
+      uniform float uOn, uHover;
       uniform vec3 uCanvas;
       uniform vec2 uSize, uVid;
       varying vec2 vUv;
@@ -295,6 +295,9 @@ export function createProjectCamp(scene, {
         col = mix(col, pic * weave, edge * on);
         col += vec3(1.0, 0.86, 0.7) * edge * through * 0.12;
         col *= vShade;
+        // On hover the projection brightens a touch, like the projector turned up (and the
+        // canvas around it catches a little more of its warm light).
+        col *= 1.0 + uHover * 0.14 * (edge * on + 0.4);
 
         gl_FragColor = vec4(col, 1.0);
         #include <colorspace_fragment>
@@ -399,11 +402,19 @@ export function createProjectCamp(scene, {
     sheetUniforms.uVideo.value = placeholder;
   }
 
-  // The caption sits centred just under the sheet.
-  const labelAnchor = new THREE.Vector3(0, sheetBottom - 0.12, 0.2);
-  const projected = new THREE.Vector3();
-  let on = 0;   // 0..1, fades the projection in once the video is ready
+  let on = 0;      // 0..1, fades the projection in once the video is ready
+  let hover = 0;   // 0..1, eases towards the hover target
+  let hoverTarget = 0;
   const levels = { spill: 0, tent: 14, lantern: 6 };   // what the shared lights should be here
+
+  // The sheet's four corners and the point under its middle (for the caption), in the world.
+  // camp-ui.js projects them onto the screen to lay the HTML link exactly over the sheet.
+  const corners = [[-1, 1], [1, 1], [1, -1], [-1, -1]].map(([sx, sy]) =>
+    group.localToWorld(new THREE.Vector3(sx * sheetW / 2, sheetCentreY + sy * sheetH / 2, 0.15)));
+  const captionPoint = group.localToWorld(new THREE.Vector3(0, sheetBottom - 0.12, 0.2));
+  const centre = group.localToWorld(new THREE.Vector3(0, sheetCentreY, 0.1));
+  // A spot straight in front of the sheet, for the camera to glide to when the project opens.
+  const front = group.localToWorld(new THREE.Vector3(0, sheetCentreY + 0.05, 2.6));
 
   // ---------- update: called every frame ----------
   // near: 0 when far away, 1 when we've arrived at this camp.
@@ -420,32 +431,23 @@ export function createProjectCamp(scene, {
     // Fade the projection up gently, and the light it spills with it.
     const target = videoReady && near > 0.25 ? 1 : 0;
     on += (target - on) * (1 - Math.exp(-dt * 1.6));
+    hover += (hoverTarget - hover) * (1 - Math.exp(-dt * 6));
     sheetUniforms.uOn.value = on * 0.92;
+    sheetUniforms.uHover.value = hover;
     sheetUniforms.uTime.value = time;
-    glowMat.opacity = on * 0.16;
+    glowMat.opacity = on * (0.16 + hover * 0.06);
 
     const flicker = 1 + Math.sin(time * 7.7 + x) * 0.03 + Math.sin(time * 12.3 + 0.4) * 0.02;
     lanternHalo.material.opacity = 0.45 * flicker;
-    levels.spill = on * 5;
+    levels.spill = on * (5 + hover * 1.5);
     levels.lantern = 6 * flicker;
-
-    // Place the HTML caption: turn the 3D anchor into a screen position.
-    if (label) {
-      projected.copy(labelAnchor);
-      group.localToWorld(projected);
-      projected.project(camera);    // now x,y are -1..1 across the screen
-      const inFront = projected.z < 1;
-      const px = (projected.x * 0.5 + 0.5) * window.innerWidth;
-      const py = (-projected.y * 0.5 + 0.5) * window.innerHeight;
-      const show = inFront ? THREE.MathUtils.clamp((near - 0.6) / 0.3, 0, 1) : 0;
-      if (show > 0) label.style.transform = `translate3d(${px.toFixed(1)}px, ${py.toFixed(1)}px, 0) translate(-50%, 0)`;
-      // Never fully 0: keeping the caption "barely there" means the browser has already drawn it,
-      // so it fades in without a stutter.
-      label.style.opacity = Math.max(show, 0.001).toFixed(3);
-    }
   }
 
-  return { group, update, sheet, anchors, levels, get videoElement() { return video; } };
+  return {
+    group, update, sheet, anchors, levels, corners, captionPoint, centre, front,
+    setHover(v) { hoverTarget = v ? 1 : 0; },
+    get videoElement() { return video; },
+  };
 }
 
 // ---------- The shared camp lights ----------
@@ -542,7 +544,7 @@ function buildDomeTent() {
 }
 
 // ---------- The lantern: a small metal base, glowing glass, a cap and a handle ----------
-function buildLantern() {
+export function buildLantern() {
   const group = new THREE.Group();
   const metal = new THREE.MeshLambertMaterial({ color: GEAR.metal });
   const glass = new THREE.MeshBasicMaterial({ color: L.lanternGlass }); // "Basic" ignores lights: it IS the light

@@ -30,6 +30,8 @@ const FOLLOW_KEYS = [
   { s: 176, back: 9.5, height: 4.4, side: -1.6, lookAhead: 6, lookHeight: 1.3 },
   { s: 205, back: 9.5, height: 4.6, side: 2.6, lookAhead: 6.5, lookHeight: 1.3 },   // the open ridge: look down over the trekker
   { s: 330, back: 10, height: 3.8, side: 2.2, lookAhead: 9, lookHeight: 1.2 },    // the meadow
+  // Leaving the gear check: close behind, the trekker well inside the frame as the path steepens.
+  { s: 392, back: 8.5, height: 3.2, side: 1.6, lookAhead: 6, lookHeight: 1.7 },
   { s: 425, back: 10, height: 5, side: 2, lookAhead: 5, lookHeight: 1.5 },        // the summit climb: just over the trekker's head
 ];
 function followAt(s) {
@@ -69,14 +71,13 @@ export function createCameraPath() {
       };
     } else if (st.at === 'meadow') {
       stop.s = trailDistanceAt(MEADOW.stop[0], MEADOW.stop[1]);
-      // Arrive looking down past the trekker at the mat on the grass, then slowly lift the
-      // gaze up the slope towards the summit before walking on.
-      const summitLook = atGround(SUMMIT.top[0], SUMMIT.top[1], -38);
-      const mat = atGround(MEADOW.mat[0], MEADOW.mat[1], 0.15);
+      // Arrive looking down at the kit on the mat, then lift the gaze up to the trekker before
+      // walking on (the follow camera then looks up the trail towards the summit).
+      const look = atGround(MEADOW.look[0], MEADOW.look[1], MEADOW.lookHeight);
       stop.shot = {
-        pos: atGround(MEADOW.view[0], MEADOW.view[1], 4.6),
-        look: mat,
-        look2: mat.clone().lerp(summitLook, 0.2),
+        pos: atGround(MEADOW.view[0], MEADOW.view[1], MEADOW.viewHeight),
+        look,
+        look2: atGround(MEADOW.stop[0], MEADOW.stop[1], 1.3),
         // A short blend-in: the camera spot is on the trail behind the stop, so the shot only
         // takes over once the trekker has walked past it.
         blendIn: 0.03, blendOut: 0.05,
@@ -177,6 +178,8 @@ export function createCameraPath() {
   }
 
   // ---------- 4. The camera itself, eased every frame ----------
+  // focus: set by transitions. w = 0 (follow the film) ... 1 (look from focus.pos at focus.look).
+  const focus = { pos: new THREE.Vector3(), look: new THREE.Vector3(), w: 0 };
   const desiredPos = new THREE.Vector3();
   const desiredLook = new THREE.Vector3();
   const shotLook = new THREE.Vector3();
@@ -205,6 +208,12 @@ export function createCameraPath() {
       if (st.shot.look2) shotLook.lerp(st.shot.look2, smoothstep(st.arrive + st.hold * 0.55, st.leave + 0.03, progress));
       desiredPos.lerp(st.shot.pos, w);
       desiredLook.lerp(shotLook, w);
+    }
+
+    // A transition can take the camera over (e.g. gliding up to a screen when a project opens).
+    if (focus.w > 0) {
+      desiredPos.lerp(focus.pos, focus.w);
+      desiredLook.lerp(focus.look, focus.w);
     }
 
     // Never dip into the ground.
@@ -243,7 +252,7 @@ export function createCameraPath() {
     }));
   }
 
-  return { update, routeDistance, legacyRouteDistance: buildLegacyRoute(), trekkerS, stopInfo, stops, camRail, lookRail, trailLength };
+  return { update, focus, routeDistance, legacyRouteDistance: buildLegacyRoute(), trekkerS, stopInfo, stops, camRail, lookRail, trailLength };
 }
 
 // Average each point with its neighbours a few times: sharp corners become soft curves.
