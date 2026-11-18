@@ -263,6 +263,15 @@ function placeTrekker(s, dt, stops) {
   trailPointAt(s, trekPos);
   trailDirectionAt(s, trekDir);
   let target = Math.atan2(trekDir.x, trekDir.z);
+  // At a landmark he steps off the trail to his viewing spot beside the project (journey.js,
+  // "spot") as the camera arrives, and back onto the trail as we leave. The walk animation
+  // follows his movement, so he walks there.
+  for (const { stop, here } of stops) {
+    if (!stop.camp?.spot || here <= 0) continue;
+    const w = smoothstep(0.25, 0.9, here);
+    trekPos.x += (stop.camp.spot[0] - trekPos.x) * w;
+    trekPos.z += (stop.camp.spot[1] - trekPos.z) * w;
+  }
   // At a camp, turn to face its screen. At the gear check, turn a little towards the mat.
   // At the summit, turn right round to face the camera (to wave goodbye).
   for (const { stop, here } of stops) {
@@ -502,6 +511,7 @@ window.__ascent = {
   cameraPath,
   trekker,
   // Which project videos are loaded right now (for testing the lazy loading).
+  landmarks: camps,   // (tests: the landmark objects, e.g. for framing checks)
   videos: () => camps.map((c, i) => `${CAMPS[i].id}:${c.videoElement ? (c.videoElement.paused ? 'loaded' : 'playing') : '-'}`).join(' '),
 };
 

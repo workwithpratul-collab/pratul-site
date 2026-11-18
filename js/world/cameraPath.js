@@ -67,7 +67,8 @@ export function createCameraPath() {
       // Almost straight in front of the film. For the lake, heights are above the water.
       const lake = camp.kind === 'lake';
       const pos = atGround(camp.view[0], camp.view[1], camp.viewHeight);
-      const look = atGround(camp.screen[0], camp.screen[1], camp.lookHeight);
+      const lookAt = camp.look ?? camp.screen;   // (the shot's own look point, if it has one)
+      const look = atGround(lookAt[0], lookAt[1], camp.lookHeight);
       if (lake) { pos.y = LAKE_LEVEL + camp.viewHeight; look.y = LAKE_LEVEL + camp.lookHeight; }
       stop.shot = { pos, look, blendIn: camp.blendIn ?? 0.045, blendOut: 0.04 };
     } else if (st.at === 'meadow') {

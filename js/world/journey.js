@@ -19,6 +19,11 @@
 //            close enough that it fills a good part of the screen, with the trekker just to one side
 //   viewHeight / lookHeight   how high the camera stands, and the height it looks at (metres
 //            above the ground there; for the lake, above the water)
+// The arrival shots (the same rules at all three landmarks, found by a framing search): the
+// project is the hero, seen from the front and filling about half the frame; the trekker steps
+// off the trail to "spot", beside the project and about level with it, so he is fully in frame,
+// small (about a quarter of its height), a third of the way in from one edge, pointing at it and
+// never in front of it. view / viewHeight: the camera; look / lookHeight: where it looks.
 export const CAMPS = [
   {
     // A small, still mountain lake where the first camp was: the project plays as a reflection
@@ -28,9 +33,11 @@ export const CAMPS = [
     stop: [-0.5, -144],
     screen: [6.4, -145.8],
     radius: 5.4,
-    view: [-2.6, -142.1],
-    viewHeight: 5.6,
-    lookHeight: 0,
+    spot: [1.87, -150.32],     // where the trekker steps to and stands (see "the arrival shots" above)
+    view: [-5.19, -142.69],
+    viewHeight: 7.5,           // (for the lake: above the water)
+    look: [4.59, -147.61],
+    lookHeight: 0.33,
     video: 'recordings/hd/dermae.mp4',
     label: 'label-dermae',
   },
@@ -40,9 +47,11 @@ export const CAMPS = [
     kind: 'hut',
     stop: [36, -174.6],
     screen: [37.3, -179.5],
-    view: [32.96, -173.27],
-    viewHeight: 2.0,
-    lookHeight: 1.45,
+    spot: [34.46, -177.46],
+    view: [42.46, -171.94],
+    viewHeight: 1.4,
+    look: [36.56, -178.82],
+    lookHeight: 1.11,
     blendIn: 0.022,   // the trail passes right by this camera spot: take over only at the very end
     video: 'recordings/hd/kings-garden.mp4',
     label: 'label-kings-garden',
@@ -53,9 +62,11 @@ export const CAMPS = [
     kind: 'sign',
     stop: [101, -165.3],
     screen: [103.2, -160.9],
-    view: [97.6, -166.3],
-    viewHeight: 2.1,
-    lookHeight: 1.85,
+    spot: [102.14, -165.4],
+    view: [93.19, -159.58],
+    viewHeight: 3.6,
+    look: [102.72, -162.69],
+    lookHeight: 1.3,
     video: 'recordings/hd/trinetra.mp4',
     label: 'label-trinetra',
   },

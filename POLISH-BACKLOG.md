@@ -28,7 +28,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Far tree cards turn slightly to face the camera (fix only if it costs no speed).
 - [ ] The open slope right of the path just before THE KING'S GARDEN (0.33) is still quite bare; the trail zig-zags across it, so trees can't go there without crowding the path.
 - [ ] The new painted brush strokes in the ground barely show in the night light on the ridge.
-- [ ] Summit final shot: the middle of the knoll is still smooth snow (crags only at its edges); drifts there are too close to the snow colour to read.
+- [x] Summit final shot: the middle of the knoll is still smooth snow (crags only at its edges); drifts there are too close to the snow colour to read.
 
 ## CLAUDE CODE: project camps
 - [x] Sheet sway is hard to see when standing still in front of a sheet.
@@ -36,7 +36,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Poles are plain sticks; add straps, lashing, tips, and pegs where the ropes meet the ground.
 - [x] Opening a project: the camera glides close past the trekker's head on the way to the sheet.
 - [ ] One ~60 ms frame when each landmark's video first starts playing (the browser starting a video decoder); a small hitch while the camera moves.
-- [ ] The trekker is large in frame at TRINETRA's sign, and the KING'S GARDEN arrival cuts him at the right edge.
+- [x] The trekker is large in frame at TRINETRA's sign, and the KING'S GARDEN arrival cuts him at the right edge.
 - [ ] DERMAÉ's lake water is still a little saturated blue.
 
 ## CLAUDE CODE: the trekker

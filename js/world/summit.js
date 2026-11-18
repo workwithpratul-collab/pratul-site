@@ -243,6 +243,8 @@ export function createSummitZone(scene, { sunDir, cloudTop = 20 }) {
     crags.push({ x, z, y: groundHeight(x, z) - size * 0.32, s: size, shape: 4 });
     if (drift) addDrift(x + lee.x * size, z + lee.y * size, size * 1.2);
   }
+  // The knoll itself, where the finale is played: painted snow, rock, ridges, cornices, stones.
+  buildKnoll(scene, { sx, sz, sunDir, windR, rand, crags, drifts, addDrift, at: (along, side) => [sx + fl[0] * along + fr[0] * side, sz + fl[1] * along + fr[1] * side] });
   createStoneVariety(scene, crags, rand, rockColors);
   createStoneVariety(scene, drifts, rand, driftColors);
 
@@ -358,6 +360,147 @@ function buildSpindrift({ sx, sz, topY, rand, dir }) {
   points.name = 'spindrift';
   points.frustumCulled = false;   // the grains move away from their start spots
   return points;
+}
+
+// =====================================================================
+// The summit knoll: the snowy top the trekker stands on in the final shot.
+// =====================================================================
+// Without this it's one smooth dome. Here it gets the character of the rest of the summit, kept
+// calm because the closing words sit beside it:
+//  1. a painted snow surface laid exactly over the knoll: wind-carved ripples running with the
+//     wind, lilac in the hollows, warm sunrise light on the faces turned to the sun, and patches
+//     of bare rock breaking through; it fades softly into the plain snow at its edge,
+//  2. rock slabs breaking through, almost flush with the snow,
+//  3. low wind ridges (sastrugi) lying along the wind,
+//  4. small cornices: overhanging snow lips on the knoll's rim,
+//  5. small stones scattered round the foot of the flag.
+// Nothing near where the trekker stands, the flag pole, or the path.
+// at(along, side): a point so many metres along the final shot's view from the top, and to its
+// right (see FINAL_LOOK).
+function buildKnoll(scene, { sx, sz, sunDir, windR, rand, crags, drifts, addDrift, at }) {
+  const [fx, fz] = SUMMIT.flag;
+  const clearOf = (x, z, r) => Math.hypot(x - sx, z - sz) > 1.6 + r && Math.hypot(x - fx, z - fz) > 0.5 + r && nearestTrail(x, z).distance > 1.3 + r;
+
+  // 1. The painted snow surface.
+  const R = 10, N = 100;
+  const geo = new THREE.PlaneGeometry(R * 2, R * 2, N, N).rotateX(-Math.PI / 2);
+  const pos = geo.attributes.position, nor = geo.attributes.normal;
+  const n = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    const x = sx + pos.getX(i), z = sz + pos.getZ(i);
+    pos.setXYZ(i, x, groundHeight(x, z) + 0.012, z);
+    // A soft, rounded normal (from the slope over a metre and a half), so the light falls smoothly.
+    n.set(groundHeight(x - 0.8, z) - groundHeight(x + 0.8, z), 1.6, groundHeight(x, z - 0.8) - groundHeight(x, z + 0.8)).normalize();
+    nor.setXYZ(i, n.x, n.y, n.z);
+  }
+  // Two glazes over the knoll's own lit snow (like a painter glazing over a base coat), so its
+  // warm sunrise colour stays exactly as it is underneath:
+  //  - a "multiply" glaze that only darkens: lilac in the troughs between the wind ripples, and
+  //    the patches of bare rock,
+  //  - a soft additive glaze that only lightens: warm sunrise light on the ripple crests and the
+  //    slopes turned to the sun.
+  // Both fade out towards the edge, into the plain snow.
+  const makeGlaze = (lighten) => new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    blending: lighten ? THREE.AdditiveBlending : THREE.MultiplyBlending,
+    premultipliedAlpha: !lighten,   // (three.js's multiply blending needs this)
+    uniforms: {
+      uCentre: { value: new THREE.Vector2(sx, sz) },
+      uRadius: { value: R },
+      uWind: { value: new THREE.Vector2(Math.cos(windR), -Math.sin(windR)) },
+      uKeep: { value: new THREE.Vector4(sx, sz, fx, fz) },
+      // The palette's live colours.
+      uSnowLit: { value: mood.mountains.snowLit },
+      uSnowShade: { value: mood.mountains.snowShade },
+      uRock: { value: new THREE.Color(MATERIALS.summit.rock) },
+      uGlow: { value: mood.sky.glow },
+      uSunDir: { value: sunDir },
+    },
+    vertexShader: /* glsl */ `
+      varying vec3 vWorld, vNormalW;
+      void main() {
+        vWorld = position;
+        vNormalW = normal;
+        gl_Position = projectionMatrix * viewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uSnowLit, uSnowShade, uRock, uGlow, uSunDir;
+      uniform vec2 uCentre, uWind;
+      uniform vec4 uKeep;
+      uniform float uRadius;
+      varying vec3 vWorld, vNormalW;
+      ${NOISE_GLSL}
+      void main() {
+        vec2 p = vWorld.xz;
+        float fade = 1.0 - smoothstep(uRadius * 0.5, uRadius, length(p - uCentre));
+        // How much the slope faces the low sun (wrapped: no hard edge).
+        float lit = smoothstep(-0.2, 0.9, dot(normalize(vNormalW), uSunDir));
+        // Wind-carved ripples: long soft ridges running with the wind, wavering, in drifts.
+        vec2 across = vec2(-uWind.y, uWind.x);
+        float ripple = sin(dot(p, across) * 4.6 + fbm(p * 0.25) * 7.0) * 0.75
+          + sin(dot(p, across) * 9.0 + dot(p, uWind) * 0.8 + fbm(p * 0.6) * 4.0) * 0.25;   // finer ripples on top
+        float patchy = smoothstep(0.3, 0.65, fbm(p * 0.3 + 3.0));
+        float trough = smoothstep(0.2, -0.9, ripple) * patchy;
+        float crest = smoothstep(0.3, 1.0, ripple) * patchy;
+        // Bare rock breaking through in a few patches (never round the trekker or the flag).
+        float keep = smoothstep(1.4, 2.6, distance(p, uKeep.xy)) * smoothstep(0.8, 1.6, distance(p, uKeep.zw));
+        float rockN = fbm(p * vec2(0.5, 0.32) + 11.0) + (fbm(p * 1.6) - 0.5) * 0.2;
+        float rock = smoothstep(0.6, 0.65, rockN) * keep;
+        #ifdef LIGHTEN
+          vec3 glow = uGlow * (crest * 0.08 + lit * 0.07) * (1.0 - rock);
+          gl_FragColor = vec4(glow * fade, 1.0);
+        #else
+          vec3 shade = uSnowShade / max(uSnowLit, vec3(0.05));     // lilac, as a darkening factor
+          vec3 stone = uRock / max(uSnowLit, vec3(0.05));          // the rock, likewise
+          vec3 k = mix(vec3(1.0), shade, trough * 0.26 + (1.0 - lit) * 0.08);
+          // (rock is darkened only part of the way: the darkest it gets is a soft lilac grey)
+          k = mix(k, clamp(stone * 2.0, 0.0, 1.0), rock * 0.65);
+          k += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0;
+          gl_FragColor = vec4(mix(vec3(1.0), clamp(k, 0.0, 1.0), fade), 1.0);
+        #endif
+      }
+    `,
+    defines: lighten ? { LIGHTEN: '' } : {},
+  });
+  const surface = new THREE.Mesh(geo, makeGlaze(false));
+  surface.name = 'summit-knoll';
+  surface.renderOrder = -2;   // under the trekker's soft shadow
+  const light = new THREE.Mesh(geo, makeGlaze(true));
+  light.name = 'summit-knoll-light';
+  light.renderOrder = -1;
+  scene.add(surface, light);
+
+  // 2. Rock slabs breaking through, almost flush with the snow.
+  for (const [along, side, size] of [[-2.6, -2.6, 0.9], [0.8, -3.4, 0.7], [-1.2, 2.9, 0.55], [2.4, 3.6, 0.6], [-3.6, -1.2, 0.45], [-1.3, -2.3, 0.55], [1.3, 2.3, 0.45]]) {
+    const [x, z] = at(along, side);
+    if (!clearOf(x, z, size * 0.6)) continue;
+    crags.push({ x, z, y: groundHeight(x, z) - size * 0.38, s: size, shape: 1 });
+  }
+  // 3. Low wind ridges lying along the wind.
+  for (const [along, side, size] of [[-1.6, -1.3, 1.3], [-2.8, 1.2, 1.0], [1.6, -1.8, 1.1], [-0.4, 2.2, 0.9], [-4.2, -2.6, 1.2]]) {
+    const [x, z] = at(along, side);
+    if (!clearOf(x, z, size * 0.5)) continue;
+    const before = drifts.length;
+    addDrift(x, z, size);
+    if (drifts.length > before) Object.assign(drifts[drifts.length - 1], { tall: 0.14, long: 2.4 });
+  }
+  // 4. Small cornices on the rim: snow lips curling over the edge.
+  for (const [along, side, size] of [[-0.5, -5.4, 1.1], [1.5, -5.0, 0.9], [0.5, 5.0, 1.0], [2.5, 4.4, 0.8]]) {
+    const [x, z] = at(along, side);
+    drifts.push({ x, z, y: groundHeight(x, z) - size * 0.05, s: size, shape: 0, tall: 0.3, long: 2.0, turn: Math.atan2(x - sx, z - sz) + Math.PI / 2 });
+  }
+  // 5. Small stones round the foot of the flag.
+  for (let i = 0; i < 8; i++) {
+    const a = rand() * Math.PI * 2, r = 0.55 + rand() * 1.0;
+    const x = fx + Math.cos(a) * r, z = fz + Math.sin(a) * r;
+    if (Math.hypot(x - sx, z - sz) < 1.8) continue;
+    const size = 0.12 + rand() * 0.2;
+    crags.push({ x, z, y: groundHeight(x, z) - size * 0.2, s: size, shape: [0, 1, 3][i % 3] });
+  }
 }
 
 // The direction the film's final shot looks across the summit (x, z), from cameraPath.js.
