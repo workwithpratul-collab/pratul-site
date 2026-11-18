@@ -37,7 +37,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Feet float or sink up to ~10 cm on steep slopes (knoll, summit); needs per-foot placement (IK).
 - [x] The wave is small (hand only reaches head height); may need a more open Mixamo wave.
 - [x] Faint glowing outline around the body looks like a sticker.
-- [ ] Character file is 11.5 MB; compress textures to get it under ~5 MB.
+- [x] Character file is 11.5 MB; compress textures to get it under ~5 MB.
 
 ## CLAUDE CODE: gear check and pages
 - [x] Gear items are simple shapes, less rich than the camps.

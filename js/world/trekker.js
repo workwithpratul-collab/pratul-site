@@ -131,11 +131,13 @@ export function createTrekker(scene, renderer, camera, { onProgress } = {}) {
     // Build the character's shaders right away (while the curtain is down), not mid-scroll.
     if (renderer && camera) renderer.compile(scene, camera);
 
-    // Try to load Mixamo animations in the background. Missing files are fine.
-    loadMixamoClips(vrm).then((clips) => {
+    // Load the Mixamo animations in the background, in two batches: first the three base camp
+    // needs (walk, idle, jog), then, a little later, the moments used further up the trail
+    // (pointing, sitting, stretching, waving...). Missing files are fine.
+    const addClips = (clips) => {
       if (!clips) return;
-      state.mixer = new THREE.AnimationMixer(vrm.scene);
-      state.actions = {};
+      state.mixer ??= new THREE.AnimationMixer(vrm.scene);
+      state.actions ??= {};
       for (const [name, clip] of Object.entries(clips)) {
         const action = state.mixer.clipAction(clip);
         if (ONE_SHOTS.includes(name)) {
@@ -146,7 +148,16 @@ export function createTrekker(scene, renderer, camera, { onProgress } = {}) {
         action.setEffectiveWeight(name === 'idle' ? 1 : 0);
         state.actions[name] = action;
       }
-      console.info('[trekker] Mixamo animations loaded:', Object.keys(clips).join(', '));
+      console.info('[trekker] Mixamo animations loaded:', Object.keys(state.actions).join(', '));
+    };
+    const BASE_CLIPS = ['walk', 'idle', 'jog'];
+    loadMixamoClips(vrm, BASE_CLIPS).then((clips) => {
+      addClips(clips);
+      if (!clips) return;
+      // The rest once the opening has settled (when the browser is idle, or after 3 s at most).
+      const later = () => loadMixamoClips(vrm, Object.keys(ANIMATION_URLS).filter((n) => !BASE_CLIPS.includes(n))).then(addClips);
+      if ('requestIdleCallback' in window) requestIdleCallback(later, { timeout: 3000 });
+      else setTimeout(later, 1500);
     });
     return vrm;
   })();
@@ -606,9 +617,10 @@ const MIXAMO_TO_VRM = {
 };
 
 // Load every animation file that exists. Returns null if none were found.
-async function loadMixamoClips(vrm) {
+// names: which clips to load (default: all of them).
+async function loadMixamoClips(vrm, names = Object.keys(ANIMATION_URLS)) {
   const results = await Promise.all(
-    Object.entries(ANIMATION_URLS).map(async ([name, url]) => {
+    names.map((name) => [name, ANIMATION_URLS[name]]).map(async ([name, url]) => {
       try {
         return [name, await loadMixamoAnimation(url, vrm, { dropHipTurn: DROP_HIP_TURN.includes(name) })];
       } catch (err) {
@@ -619,7 +631,7 @@ async function loadMixamoClips(vrm) {
     })
   );
   const clips = Object.fromEntries(results.filter(([, clip]) => clip));
-  if (!clips.walk && !clips.idle) {
+  if (names.includes('walk') && !clips.walk && !clips.idle) {
     console.info('[trekker] No Mixamo animations in assets/animations/ yet, using the stand-in pose.');
     return null;
   }

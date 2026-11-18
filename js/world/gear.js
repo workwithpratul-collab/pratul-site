@@ -47,10 +47,16 @@ export function createGear(scene, { position, facing, renderer }) {
 
   // A flat card lying on the ground, with the image's top pointing to the mat's far side.
   const card = (w, h) => new THREE.PlaneGeometry(w, h).rotateX(-Math.PI / 2);
+  // Until the paintings arrive, every material holds a 1-pixel stand-in texture and is fully
+  // transparent. That way their shaders are already the final ones (built behind the loading
+  // screen with everything else), and swapping in the real paintings later costs no stutter.
+  const blank = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
+  blank.colorSpace = THREE.SRGBColorSpace;   // (the same as the paintings, so the shader is identical)
+  blank.needsUpdate = true;
 
   // The mat. (Everything here is drawn in a fixed order, bottom layer first, so the thin flat
   // layers never flicker against each other.)
-  const matMaterial = new THREE.MeshLambertMaterial({ transparent: true, depthWrite: false, visible: false });
+  const matMaterial = new THREE.MeshLambertMaterial({ transparent: true, depthWrite: false, map: blank, opacity: 0 });
   const mat = new THREE.Mesh(card(MAT.length, MAT.width), matMaterial);
   mat.position.y = 0.01;
   mat.renderOrder = 1;
@@ -63,13 +69,13 @@ export function createGear(scene, { position, facing, renderer }) {
     holder.rotation.y = spot.turn;
     group.add(holder);
     // The shadow: the item's own shape, blurred, a little offset (as if the light is behind us).
-    const shadowMaterial = new THREE.MeshBasicMaterial({ color: G.shadow, transparent: true, opacity: 0.5, depthWrite: false, visible: false, fog: true });
+    const shadowMaterial = new THREE.MeshBasicMaterial({ color: G.shadow, transparent: true, opacity: 0, depthWrite: false, map: blank, fog: true });
     const shadow = new THREE.Mesh(card(spot.size * 1.08, spot.size * 1.08), shadowMaterial);
     shadow.position.y = 0.012;
     shadow.renderOrder = 2;
     // The painted item. Lambert so the meadow's morning light falls on it like everything else;
     // the emissive glow (its own colours, brightened) is the hover glow.
-    const material = new THREE.MeshLambertMaterial({ transparent: true, depthWrite: false, visible: false, emissive: 0xffffff, emissiveIntensity: 0 });
+    const material = new THREE.MeshLambertMaterial({ transparent: true, depthWrite: false, map: blank, emissive: 0xffffff, emissiveMap: blank, emissiveIntensity: 0, opacity: 0 });
     const object = new THREE.Mesh(card(spot.size, spot.size), material);
     object.position.y = 0.016;
     object.renderOrder = 3;
@@ -93,36 +99,48 @@ export function createGear(scene, { position, facing, renderer }) {
   scene.add(halo);
 
   // ---------- Loading the paintings (only when we're on the way to the meadow) ----------
+  // The images are decoded off the main thread (image bitmaps, where the browser supports them),
+  // then handed to the graphics card one per frame, so loading never interrupts the film.
   let started = false, loaded = false;
-  function prepare() {
+  const ua = navigator.userAgent;
+  const useBitmaps = typeof createImageBitmap !== 'undefined' && !/^((?!chrome|android).)*safari/i.test(ua)
+    && !(/firefox\/(\d+)/i.test(ua) && Number(ua.match(/firefox\/(\d+)/i)[1]) < 98);
+  const loader = useBitmaps
+    ? new THREE.ImageBitmapLoader().setOptions({ imageOrientation: 'flipY', premultiplyAlpha: 'none' })
+    : new THREE.TextureLoader();
+  const nextFrame = () => new Promise((r) => requestAnimationFrame(r));
+  function loadPainting(name) {
+    return new Promise((resolve) => loader.load(FOLDER + name + EXT, (result) => {
+      const tex = useBitmaps ? new THREE.Texture(result) : result;
+      if (useBitmaps) tex.flipY = false;   // (the bitmap was already flipped while decoding)
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = anisotropy;          // keeps them crisp seen at a slant
+      tex.needsUpdate = true;
+      resolve(tex);
+    }, undefined, () => resolve(null)));
+  }
+  async function prepare() {
     if (started) return;
     started = true;
-    const loader = new THREE.TextureLoader();
-    const load = (name) => new Promise((resolve) => loader.load(FOLDER + name + EXT, (t) => {
-      t.colorSpace = THREE.SRGBColorSpace;
-      t.anisotropy = anisotropy;   // keeps them crisp seen at a slant
-      resolve(t);
-    }, undefined, () => resolve(null)));
-    Promise.all(['mat', ...Object.keys(items)].map(async (name) => [name, await load(name)])).then((list) => {
-      for (const [name, tex] of list) {
-        if (!tex) continue;
-        if (name === 'mat') {
-          matMaterial.map = tex;
-          matMaterial.visible = true;
-          matMaterial.needsUpdate = true;
-          continue;
-        }
-        const item = items[name];
-        item.material.map = tex;
-        item.material.emissiveMap = tex;
-        item.material.visible = true;
-        item.material.needsUpdate = true;
-        item.shadowMaterial.alphaMap = shadowFrom(tex.image);
-        item.shadowMaterial.visible = true;
-        item.shadowMaterial.needsUpdate = true;
+    const names = ['mat', ...Object.keys(items)];
+    const textures = await Promise.all(names.map(loadPainting));
+    for (let i = 0; i < names.length; i++) {
+      const tex = textures[i];
+      if (!tex) continue;
+      if (renderer) renderer.initTexture(tex);   // upload now, one painting per frame
+      if (names[i] === 'mat') {
+        matMaterial.map = tex;
+        matMaterial.opacity = 1;
+      } else {
+        const item = items[names[i]];
+        item.material.map = item.material.emissiveMap = tex;
+        item.material.opacity = 1;
+        item.shadowMaterial.map = shadowFrom(tex.image, tex.flipY);
+        if (renderer) renderer.initTexture(item.shadowMaterial.map);
       }
-      loaded = true;
-    });
+      await nextFrame();
+    }
+    loaded = true;
   }
 
   function setGlow(id, on) {
@@ -148,26 +166,26 @@ export function createGear(scene, { position, facing, renderer }) {
   return { group, centres, radii, near, setGlow, update, prepare };
 }
 
-// A soft shadow shape from a painting: its outline (alpha), blurred, on a small canvas.
-// Only the alpha is used, so the shadow takes its colour from the palette.
-function shadowFrom(image) {
-  const size = 256, pad = 14;
+// A soft shadow shape from a painting: its outline as a white silhouette, blurred. Used as the
+// shadow's texture, so the shadow takes its colour from the palette and its softness from here.
+// The blur is free: the outline is drawn tiny (24 px) and smoothly scaled back up, which softens
+// every edge. (No blur filter and no pixel-by-pixel work: it takes well under a millisecond.)
+function shadowFrom(image, flipY = true) {
+  const tiny = document.createElement('canvas');
+  tiny.width = tiny.height = 24;
+  const t = tiny.getContext('2d');
+  t.drawImage(image, 1, 1, 22, 22);              // a 1-pixel margin, so the blur fades out inside
+  t.globalCompositeOperation = 'source-in';       // keep the shape, paint it white
+  t.fillStyle = '#fff';
+  t.fillRect(0, 0, 24, 24);
   const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
+  canvas.width = canvas.height = 128;
   const ctx = canvas.getContext('2d');
-  ctx.filter = 'blur(9px)';
-  // Drawn slightly smaller than the card, so the blur fades out before the card's edge.
-  ctx.drawImage(image, pad, pad, size - pad * 2, size - pad * 2);
-  // alphaMap reads the green channel: turn the blurred alpha into white-on-black.
-  const data = ctx.getImageData(0, 0, size, size);
-  const px = data.data;
-  for (let i = 0; i < px.length; i += 4) {
-    const a = px[i + 3];
-    px[i] = px[i + 1] = px[i + 2] = a;
-    px[i + 3] = 255;
-  }
-  ctx.putImageData(data, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(tiny, 0, 0, 128, 128);
   const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = THREE.NoColorSpace;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.flipY = flipY;   // the same way up as the painting it came from
   return tex;
 }
