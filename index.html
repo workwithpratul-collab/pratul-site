@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Which version this device gets (the full film, the mobile page, or its calm version).
+       It runs first, before anything is drawn, so the right version shows with no flash. -->
+  <script src="js/device.js"></script>
   <title>Pratul · Web designer and developer · The Ascent</title>
   <meta name="description" content="I'm Pratul, a web designer and developer. I build websites that stand out, for businesses that refuse to blend in: cinematic scroll films, interactive 3D, and design that guides visitors to book or buy.">
   <meta name="theme-color" content="#070b1a">
@@ -50,6 +53,9 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/pages.css">
+  <!-- The mobile page (phones and portrait tablets). Every rule in it applies only when
+       js/device.js chose the mobile or calm version, so the film never sees it. -->
+  <link rel="stylesheet" href="css/mobile.css">
 
   <!--
     The import map tells the browser where to find each library when our code says
@@ -235,13 +241,45 @@
   <!-- The top navigation: hidden during the film, it settles in once the film has scrolled away. -->
   <header class="site-nav" id="site-nav" aria-label="Site">
     <a class="site-nav__name" href="#film">Pratul</a>
-    <nav class="site-nav__links" aria-label="Sections">
+    <!-- On phones (and any window narrower than 640 px) the links fold into a small menu that this
+         button opens and closes (js/ui/menu.js). On wider screens the button is hidden. -->
+    <button class="site-nav__menu" id="menu-button" type="button" aria-expanded="false" aria-controls="site-links">
+      <span class="site-nav__menu-label">Menu</span>
+      <span class="site-nav__menu-icon" aria-hidden="true"><i></i><i></i></span>
+    </button>
+    <nav class="site-nav__links" id="site-links" aria-label="Sections">
       <a href="#work">Work</a>
       <a href="#about">About</a>
       <a href="#contact">Contact</a>
       <a class="btn btn--primary btn--small" href="#contact">Book a call</a>
     </nav>
   </header>
+
+  <!-- ===================== THE MOBILE OPENING ===================== -->
+  <!-- Phones and portrait tablets only (the m-only class hides it from the film). Base camp at
+       night: on most phones a small live 3D scene (js/mobile/hero.js) fades in over the night
+       sky; on the calm version it's a painted still of the same scene, with mist drifting across
+       it and the tent's glow breathing softly (pure CSS). The text and the button are plain HTML,
+       so they show at once, before any 3D has loaded. -->
+  <section class="m-hero m-only" id="top" aria-labelledby="m-hero-title">
+    <div class="m-hero__art" aria-hidden="true">
+      <img class="m-hero__still" src="assets/mobile/basecamp-720.webp" srcset="assets/mobile/basecamp-720.webp 720w, assets/mobile/basecamp-1080.webp 1080w" sizes="100vw" width="1080" height="1920" loading="lazy" decoding="async" alt="">
+      <span class="m-hero__mist"></span>
+      <span class="m-hero__glow"></span>
+      <canvas class="m-hero__canvas" id="hero-canvas"></canvas>
+    </div>
+    <div class="m-hero__text">
+      <p class="section-heading__eyebrow m-hero__place">2,850 m <span>Base camp</span></p>
+      <h1 class="m-hero__title" id="m-hero-title">
+        <span class="m-hero__hello">Hi, I'm Pratul.</span>
+        <span class="m-hero__statement">I build websites that stand out, for businesses that refuse to blend in.</span>
+      </h1>
+    </div>
+    <div class="m-hero__actions">
+      <a class="btn btn--primary btn--large" href="#contact">Book a call<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="m-hero__hint" href="#m-ridge">Scroll to begin the climb</a>
+    </div>
+  </section>
 
   <main id="content" class="content">
     <div class="descent" aria-hidden="true">
@@ -255,7 +293,7 @@
     <!-- ========== WHAT I CAN BUILD ========== -->
     <section class="page-section" id="services" aria-labelledby="services-title">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">4,410 m <span>What I can build</span></p>
+        <p class="section-heading__eyebrow" data-m-eyebrow="4,020 m|What I can build">4,410 m <span>What I can build</span></p>
         <h2 class="section-heading__title" id="services-title">Websites that make a business feel as good as it is.</h2>
         <p class="section-heading__lead">Five things I build. Each card has a small live demo: try them.</p>
       </header>
@@ -376,15 +414,33 @@
       <p class="tools"><span class="tools__label">Tools</span> HTML · CSS · JavaScript · Three.js · GSAP · Lenis · VRoid · Mixamo</p>
     </section>
 
+    <!-- ========== (mobile) THE RIDGE, PRE-DAWN ========== -->
+    <!-- A painted still from the film (rendered from the real 3D world), drifting gently as you
+         scroll, with the climb line from the film in its open sky. -->
+    <div class="m-chapter m-chapter--ridge m-only" id="m-ridge">
+      <div class="m-chapter__art" aria-hidden="true">
+        <img class="m-chapter__img" src="assets/mobile/ridge-720.webp" srcset="assets/mobile/ridge-720.webp 720w, assets/mobile/ridge-1080.webp 1080w" sizes="100vw" width="1080" height="1440" loading="lazy" decoding="async" alt="">
+        <span class="m-chapter__mist"></span>
+      </div>
+      <div class="m-chapter__text">
+        <p class="m-chapter__quote">The climb is the hard part: understanding a business, its people, and what makes it different.</p>
+        <p class="m-chapter__note">The view at the top is what its customers get to feel.</p>
+      </div>
+    </div>
+
     <!-- ========== WORK ========== -->
     <section class="page-section" id="work" aria-labelledby="work-title">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">3,980 m <span>Work</span></p>
+        <p class="section-heading__eyebrow" data-m-eyebrow="3,180 m|The ridge">3,980 m <span>Work</span></p>
         <h2 class="section-heading__title" id="work-title">Selected work</h2>
-        <p class="section-heading__lead">Three projects, labelled honestly: two concepts and one pitch demo.</p>
+        <p class="section-heading__lead"><span class="f-only">Three projects, labelled honestly: two concepts and one pitch demo.</span><span class="m-only">Three projects, each pitched at its own camp along the ridge: two concepts and one pitch demo. Tap one to open it.</span></p>
       </header>
       <div class="work">
         <article class="work-card" data-video="recordings/web/dermae.mp4">
+          <!-- (mobile) the still mountain lake from the film, with the video placed in its frame (js/mobile/work.js) -->
+          <a class="work-card__scene m-only" href="case-studies/dermae.html" tabindex="-1" aria-hidden="true" data-mobile-video="recordings/mobile/dermae.mp4" data-quad="">
+            <img src="assets/mobile/landmark-dermae-720.webp" srcset="assets/mobile/landmark-dermae-720.webp 720w, assets/mobile/landmark-dermae-1080.webp 1080w" sizes="(min-width: 700px) 600px, 100vw" width="1080" height="1350" loading="lazy" decoding="async" alt="">
+          </a>
           <a class="work-card__media" href="case-studies/dermae.html" tabindex="-1" aria-hidden="true">
             <img src="assets/work/dermae-1-800.jpg" srcset="assets/work/dermae-1-800.jpg 800w, assets/work/dermae-1.jpg 1600w" sizes="(min-width: 900px) 60vw, 100vw" width="1600" height="770" loading="lazy" alt="">
           </a>
@@ -392,10 +448,14 @@
             <p class="project-label"><span class="project-label__name">DERMAÉ</span><span class="project-label__type">Derma clinic</span><span class="project-label__tag">Concept</span></p>
             <h3 class="work-card__title">A premium dermatology clinic that needed to feel luxurious and trustworthy.</h3>
             <p class="work-card__text">A soft colour palette and a smooth scroll film that feels like a luxury advert.</p>
-            <a class="btn btn--secondary" href="case-studies/dermae.html">View case study<span class="visually-hidden">: DERMAÉ</span><svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <a class="btn btn--secondary" href="case-studies/dermae.html"><span class="f-only">View case study</span><span class="m-only">View project</span><span class="visually-hidden">: DERMAÉ</span><svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
           </div>
         </article>
         <article class="work-card" data-video="recordings/web/kings-garden.mp4">
+          <!-- (mobile) the stone hut's window from the film, with the video placed in its frame (js/mobile/work.js) -->
+          <a class="work-card__scene m-only" href="case-studies/kings-garden.html" tabindex="-1" aria-hidden="true" data-mobile-video="recordings/mobile/kings-garden.mp4" data-quad="">
+            <img src="assets/mobile/landmark-kings-garden-720.webp" srcset="assets/mobile/landmark-kings-garden-720.webp 720w, assets/mobile/landmark-kings-garden-1080.webp 1080w" sizes="(min-width: 700px) 600px, 100vw" width="1080" height="1350" loading="lazy" decoding="async" alt="">
+          </a>
           <a class="work-card__media" href="case-studies/kings-garden.html" tabindex="-1" aria-hidden="true">
             <img src="assets/work/kings-garden-1-800.jpg" srcset="assets/work/kings-garden-1-800.jpg 800w, assets/work/kings-garden-1.jpg 1600w" sizes="(min-width: 900px) 60vw, 100vw" width="1600" height="770" loading="lazy" alt="">
           </a>
@@ -403,10 +463,14 @@
             <p class="project-label"><span class="project-label__name">The King's Garden</span><span class="project-label__type">Plant nursery</span><span class="project-label__tag">Pitch demo</span></p>
             <h3 class="work-card__title">A plant nursery that needed buyers to trust ordering plants online.</h3>
             <p class="work-card__text">A cinematic film of the nursery's work and 360° plants you can explore.</p>
-            <a class="btn btn--secondary" href="case-studies/kings-garden.html">View case study<span class="visually-hidden">: The King's Garden</span><svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <a class="btn btn--secondary" href="case-studies/kings-garden.html"><span class="f-only">View case study</span><span class="m-only">View project</span><span class="visually-hidden">: The King's Garden</span><svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
           </div>
         </article>
         <article class="work-card" data-video="recordings/web/trinetra.mp4">
+          <!-- (mobile) the trail signboard from the film, with the video placed in its frame (js/mobile/work.js) -->
+          <a class="work-card__scene m-only" href="case-studies/trinetra.html" tabindex="-1" aria-hidden="true" data-mobile-video="recordings/mobile/trinetra.mp4" data-quad="">
+            <img src="assets/mobile/landmark-trinetra-720.webp" srcset="assets/mobile/landmark-trinetra-720.webp 720w, assets/mobile/landmark-trinetra-1080.webp 1080w" sizes="(min-width: 700px) 600px, 100vw" width="1080" height="1350" loading="lazy" decoding="async" alt="">
+          </a>
           <a class="work-card__media" href="case-studies/trinetra.html" tabindex="-1" aria-hidden="true">
             <img src="assets/work/trinetra-3-800.jpg" srcset="assets/work/trinetra-3-800.jpg 800w, assets/work/trinetra-3.jpg 1600w" sizes="(min-width: 900px) 60vw, 100vw" width="1600" height="770" loading="lazy" alt="">
           </a>
@@ -414,7 +478,7 @@
             <p class="project-label"><span class="project-label__name">Trinetra</span><span class="project-label__type">Signage &amp; branding</span><span class="project-label__tag">Concept</span></p>
             <h3 class="work-card__title">A branding and signage agency that needed to show how a project goes from idea to finished hoarding.</h3>
             <p class="work-card__text">A scroll film that walks through a real client job, step by step.</p>
-            <a class="btn btn--secondary" href="case-studies/trinetra.html">View case study<span class="visually-hidden">: Trinetra</span><svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <a class="btn btn--secondary" href="case-studies/trinetra.html"><span class="f-only">View case study</span><span class="m-only">View project</span><span class="visually-hidden">: Trinetra</span><svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
           </div>
         </article>
       </div>
@@ -423,7 +487,7 @@
     <!-- ========== HOW I WORK ========== -->
     <section class="page-section" id="how-i-work" aria-labelledby="how-title">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">3,600 m <span>How I work</span></p>
+        <p class="section-heading__eyebrow" data-m-eyebrow="4,230 m|How I work">3,600 m <span>How I work</span></p>
         <h2 class="section-heading__title" id="how-title">Four waypoints, from first chat to launch.</h2>
       </header>
       <ol class="steps">
@@ -435,10 +499,22 @@
       <p class="steps__note">I work with businesses worldwide, communicate clearly across time zones, and share progress along the way.</p>
     </section>
 
+    <!-- ========== (mobile) THE MEADOW, FIRST LIGHT ========== -->
+    <div class="m-chapter m-chapter--meadow m-only" id="m-meadow">
+      <div class="m-chapter__art" aria-hidden="true">
+        <img class="m-chapter__img" src="assets/mobile/meadow-720.webp" srcset="assets/mobile/meadow-720.webp 720w, assets/mobile/meadow-1080.webp 1080w" sizes="100vw" width="1080" height="1440" loading="lazy" decoding="async" alt="">
+        <span class="m-chapter__mist"></span>
+      </div>
+      <div class="m-chapter__text">
+        <p class="m-chapter__place">The meadow</p>
+        <p class="m-chapter__title">First light.</p>
+      </div>
+    </div>
+
     <!-- ========== ABOUT ========== -->
     <section class="page-section" id="about" aria-labelledby="about-title">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">3,180 m <span>About</span></p>
+        <p class="section-heading__eyebrow" data-m-eyebrow="3,840 m|About me">3,180 m <span>About</span></p>
         <h2 class="section-heading__title" id="about-title">I'm Pratul, a web designer and developer.</h2>
       </header>
       <div class="about">
@@ -455,10 +531,52 @@
       </div>
     </section>
 
+    <!-- ========== (mobile) THE GEAR CHECK ========== -->
+    <!-- The kit laid out on the canvas mat, painted (the same paintings as the film's gear check).
+         Tap an item: it lifts a little and its skill appears below; tap it again, or "See how",
+         to go to that skill in "What I can build" (js/mobile/gear.js). -->
+    <section class="page-section m-only m-gear" id="gear" aria-labelledby="gear-check-title">
+      <header class="section-heading">
+        <p class="section-heading__eyebrow">3,860 m <span>Gear check</span></p>
+        <h2 class="section-heading__title" id="gear-check-title">Every item is a skill.</h2>
+        <p class="section-heading__lead">The kit laid out before the last climb. Tap an item to see what it stands for.</p>
+      </header>
+      <div class="flatlay">
+        <img class="flatlay__mat" src="assets/mobile/gear/mat.webp" width="600" height="1200" loading="lazy" decoding="async" alt="">
+        <ul class="flatlay__items" aria-label="Gear on the mat">
+            <li class="flatlay__spot flatlay__spot--camera"><button class="flatlay__item" type="button" data-item="camera" data-href="#services-films" data-line="Cinematic scroll films that make a brand feel big." aria-describedby="flatlay-readout"><img src="assets/mobile/gear/camera.webp" width="360" height="360" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Camera</span></button></li>
+            <li class="flatlay__spot flatlay__spot--map"><button class="flatlay__item" type="button" data-item="map" data-href="#services-seo" data-line="SEO, so customers can find you on Google." aria-describedby="flatlay-readout"><img src="assets/mobile/gear/map.webp" width="360" height="360" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Map</span></button></li>
+            <li class="flatlay__spot flatlay__spot--lantern"><button class="flatlay__item" type="button" data-item="lantern" data-href="#services-3d" data-line="3D and lighting effects visitors can play with." aria-describedby="flatlay-readout"><img src="assets/mobile/gear/lantern.webp" width="360" height="360" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Lantern</span></button></li>
+            <li class="flatlay__spot flatlay__spot--compass"><button class="flatlay__item" type="button" data-item="compass" data-href="#services-design" data-line="Clear design that guides visitors to book or buy." aria-describedby="flatlay-readout"><img src="assets/mobile/gear/compass.webp" width="360" height="360" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Compass</span></button></li>
+            <li class="flatlay__spot flatlay__spot--rope"><button class="flatlay__item" type="button" data-item="rope" data-href="#services-booking" data-line="Forms, booking and WhatsApp flows that hold together." aria-describedby="flatlay-readout"><img src="assets/mobile/gear/rope.webp" width="360" height="360" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Rope</span></button></li>
+            <li class="flatlay__spot flatlay__spot--watch"><button class="flatlay__item" type="button" data-item="watch" data-href="#services-speed" data-line="Fast loading, so nobody waits." aria-describedby="flatlay-readout"><img src="assets/mobile/gear/watch.webp" width="360" height="360" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Watch</span></button></li>
+        </ul>
+      </div>
+      <div class="flatlay__readout" id="flatlay-readout" aria-live="polite">
+        <p class="flatlay__name">Six items on the mat</p>
+        <p class="flatlay__line">Tap one to see the skill it stands for.</p>
+        <a class="flatlay__more" href="#services" hidden>See how<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+    </section>
+
+    <!-- ========== (mobile) THE SUMMIT, SUNRISE ========== -->
+    <!-- The film's last shot as a painted still: the sun breaking over the sea of clouds, the
+         trekker waving beside the flag. The closing words sit in the open sky above him. -->
+    <section class="m-summit m-only" id="m-summit" aria-labelledby="m-summit-title">
+      <div class="m-summit__art" aria-hidden="true">
+        <img class="m-summit__img" src="assets/mobile/summit-720.webp" srcset="assets/mobile/summit-720.webp 720w, assets/mobile/summit-1080.webp 1080w" sizes="100vw" width="1080" height="1920" loading="lazy" decoding="async" alt="">
+      </div>
+      <div class="m-summit__text is-day">
+        <p class="section-heading__eyebrow">4,410 m <span>The summit</span></p>
+        <h2 class="m-summit__line" id="m-summit-title">Websites people remember. <em>Let's build yours.</em></h2>
+        <a class="btn btn--primary btn--large" href="#contact">Book a call<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+    </section>
+
     <!-- ========== CONTACT ========== -->
     <section class="page-section" id="contact" aria-labelledby="contact-title">
       <header class="section-heading">
-        <p class="section-heading__eyebrow">2,850 m <span>Contact</span></p>
+        <p class="section-heading__eyebrow" data-m-eyebrow="4,410 m|Book a call">2,850 m <span>Contact</span></p>
         <h2 class="section-heading__title" id="contact-title">Websites people remember. <em>Let's build yours.</em></h2>
         <p class="section-heading__lead">Tell me a little about your business and what you'd like your website to do.</p>
       </header>
@@ -545,9 +663,32 @@
       <a href="https://github.com/workwithpratul-collab" rel="me noopener" target="_blank">GitHub</a>
     </nav>
     <a class="skip-link footer__top" href="#film">Back to base camp<svg class="skip-link__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 10.5v-8M2.5 5.5 6 2l3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <p class="footer__film-note m-only">The full film is best on a laptop or desktop.</p>
     <p class="footer__small">© 2026 Pratul. Built by hand: plain HTML, CSS and JavaScript.</p>
   </footer>
 
+  <!-- The mobile page tells the climb in order (night to sunrise), so a few sections sit in a
+       different order from the desktop page, and their altitudes count up instead of down.
+       This runs before the page is first drawn, so nothing jumps. -->
+  <script>
+    (function () {
+      if (!document.documentElement.classList.contains('mobile-site')) return;
+      // The top bar is always there, with its links folded into the small menu (js/ui/menu.js).
+      document.getElementById('site-nav').classList.add('has-menu', 'is-shown');
+      var summit = document.getElementById('m-summit');
+      // After the meadow and the gear check: what I can build, and how I work; then the summit.
+      summit.parentNode.insertBefore(document.getElementById('services'), summit);
+      summit.parentNode.insertBefore(document.getElementById('how-i-work'), summit);
+      // Altitudes for the way up ("3,180 m|The ridge").
+      [].forEach.call(document.querySelectorAll('[data-m-eyebrow]'), function (p) {
+        var parts = p.getAttribute('data-m-eyebrow').split('|');
+        p.firstChild.nodeValue = parts[0] + ' ';
+        p.querySelector('span').textContent = parts[1];
+      });
+      // Links back to the start point at the mobile opening (the film isn't on this page).
+      [].forEach.call(document.querySelectorAll('a[href="#film"]'), function (a) { a.setAttribute('href', '#top'); });
+    })();
+  </script>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

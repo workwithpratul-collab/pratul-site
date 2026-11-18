@@ -2,24 +2,35 @@
 // the film, so none of it slows the film down).
 
 import { initDemos } from './demos.js';
+import { initMenu } from '../ui/menu.js';
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-export function initPages({ lenis }) {
-  initNav();
+// lenis: the smooth scroller (the film), or on the mobile page a small stand-in with the same
+// scrollTo / on('scroll') that uses the browser's own scrolling (js/mobile/mobile.js).
+// mobile: true on the mobile page, where the work cards are handled by js/mobile/work.js.
+export function initPages({ lenis, mobile = false }) {
+  initNav({ mobile });
+  initMenu();
   initDemos({ lenis });
-  initWork();
+  if (!mobile) initWork();
   initSteps();
   initContact({ lenis });
   initPlaceholders({ lenis });
 }
 
 // ---------- The top navigation: only once the film has scrolled away ----------
-function initNav() {
+// (On the mobile page it's always there: see-through over the opening scene, then a soft glass
+// bar once you've scrolled past it.)
+function initNav({ mobile }) {
   const nav = document.getElementById('site-nav');
   const film = document.getElementById('film');
+  const hero = document.getElementById('top');
   const links = [...nav.querySelectorAll('.site-nav__links a:not(.btn)')];
-  const update = () => {
+  const update = mobile ? () => {
+    nav.classList.add('is-shown');
+    nav.classList.toggle('is-solid', hero.getBoundingClientRect().bottom < 120);
+  } : () => {
     // Once the film has mostly left the screen (its bottom edge above the middle).
     nav.classList.toggle('is-shown', film.getBoundingClientRect().bottom < window.innerHeight * 0.5);
   };
@@ -41,6 +52,9 @@ function initNav() {
 
 // ---------- Work cards: the still gently gives way to the muted, looping video ----------
 // The video file is only fetched the first time someone hovers (or focuses) a card.
+// On a touch screen there's no hover: there, each card plays while it's well on screen, and
+// pauses when it scrolls away (and a tap on the picture still opens the project).
+const touchOnly = window.matchMedia('(hover: none)').matches;
 function initWork() {
   for (const card of document.querySelectorAll('.work-card')) {
     const media = card.querySelector('.work-card__media');
@@ -61,10 +75,13 @@ function initWork() {
       // Pause once the still has faded back in.
       setTimeout(() => { if (video && !card.classList.contains('is-playing')) video.pause(); }, 900);
     };
-    card.addEventListener('pointerenter', play);
-    card.addEventListener('pointerleave', pause);
+    card.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse' || e.pointerType === 'pen') play(); });
+    card.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' || e.pointerType === 'pen') pause(); });
     card.addEventListener('focusin', play);
     card.addEventListener('focusout', pause);
+    if (touchOnly) {
+      new IntersectionObserver(([entry]) => (entry.isIntersecting ? play() : pause()), { threshold: 0.6 }).observe(media);
+    }
   }
 }
 

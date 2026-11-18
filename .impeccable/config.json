@@ -89,6 +89,24 @@
         "value": "arial",
         "createdAt": "2026-11-18T03:34:19.819Z",
         "reason": "Claude: Arial is used only in the deliberately plain 'before' mock-up of the before/after slider demo (css/pages.css, .mock--plain), to contrast with the polished 'after'"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-18T12:35:10.487Z",
+        "reason": "Claude: the flagged #444444 is the deliberately plain 'before' mock in the slider demo, drawn on its own #e9e9e9 pane, not on the page colour"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-18T12:35:10.643Z",
+        "reason": "Claude: the amber halo on the primary Book a call button is the lantern light CLAUDE.md rule 3 (warm means light) reserves for it"
       }
     ]
   }

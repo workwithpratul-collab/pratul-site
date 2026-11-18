@@ -1,0 +1,492 @@
+/* mobile.css: the mobile page, for phones and portrait tablets ("cinematic, but not a film").
+   js/device.js puts .mobile-site on <html> for the mobile and calm versions, and every rule here
+   starts with it, so the desktop film never sees any of this.
+   The page tells the same climb as the film, from night at base camp to sunrise at the summit:
+   a live 3D base camp (or its painted still), then painted scenes from the film between calm,
+   readable sections. Colours come from tokens.css only. */
+
+/* =====================================================================
+   0. WHICH VERSION: parts that exist on only one of them
+   ===================================================================== */
+/* m-only: only on the mobile page. f-only: only on the film's page. */
+html:not(.mobile-site) .m-only { display: none !important; }
+.mobile-site .f-only { display: none !important; }
+/* The film's own parts: its loading screen, the film itself, its mist veil and its ridge edge. */
+.mobile-site #curtain,
+.mobile-site #film,
+.mobile-site #veil,
+.mobile-site .descent { display: none; }
+
+/* =====================================================================
+   1. THE PAGE
+   ===================================================================== */
+.mobile-site { scroll-behavior: smooth; scroll-padding-top: 64px; -webkit-text-size-adjust: 100%; }
+/* Nothing may ever push the page sideways on a narrow screen. */
+.mobile-site body { overflow-x: clip; }
+/* The paper grain is a full-screen layer drawn over everything: lovely on a big screen, but on a
+   phone it costs smoothness while scrolling for a texture nobody can see at that size. */
+.mobile-site #grain { display: none; }
+/* The page climbs from night to sunrise: its colour warms from navy through pre-dawn indigo and
+   first-light lilac to the deep plum of sunrise, never black and always dark enough for ivory text. */
+.mobile-site .content {
+  padding-bottom: 0;
+  background: linear-gradient(to bottom, var(--page) 0%, var(--page-predawn) 18%, var(--page-firstlight) 48%, var(--page-sunrise) 100%);
+}
+.mobile-site .page-section { padding: var(--space-8) var(--gutter); }
+.mobile-site .page-section .section-heading { margin-bottom: var(--space-7); }
+.mobile-site .section-heading__title { font-size: clamp(32px, 8.4vw, 48px); }
+.mobile-site .section-heading__lead { font-size: var(--text-base); }
+/* A thumb-sized primary button. */
+.mobile-site .btn--large { min-height: 52px; padding: 14px var(--space-6); font-size: 17px; }
+
+/* =====================================================================
+   2. THE TOP BAR AND ITS MENU
+   ===================================================================== */
+/* Always there on the mobile page: see-through over the opening scene, a soft glass bar after. */
+.mobile-site .site-nav {
+  padding: calc(var(--space-2) + env(safe-area-inset-top)) var(--gutter) var(--space-2);
+  background: transparent;
+  border-bottom-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transition: background-color var(--duration) var(--ease-out), border-color var(--duration) var(--ease-out), opacity var(--duration-slow) var(--ease-out);
+}
+.mobile-site .site-nav.is-shown, .mobile-site .site-nav { transform: none; opacity: 1; visibility: visible; }
+.mobile-site .site-nav.is-solid, .mobile-site .site-nav.is-open {
+  background: var(--surface-strong);
+  border-bottom-color: var(--line-soft);
+  -webkit-backdrop-filter: blur(var(--surface-blur));
+  backdrop-filter: blur(var(--surface-blur));
+}
+.mobile-site .site-nav__name { display: inline-flex; align-items: center; min-height: var(--tap); text-shadow: var(--text-scrim); }
+
+/* =====================================================================
+   3. THE OPENING: BASE CAMP AT NIGHT
+   ===================================================================== */
+.mobile-site .m-hero {
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  max-height: 1180px;
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--ink);
+  /* The night sky, painted at once while the 3D (or the still) arrives. */
+  background: linear-gradient(to bottom, var(--night-sky-top), var(--night-sky-mid) 42%, var(--night-horizon) 72%, var(--page));
+}
+.m-hero__art { position: absolute; inset: 0; z-index: -1; }
+.m-hero__canvas, .m-hero__still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.m-hero__still { object-fit: cover; object-position: 50% 100%; display: none; }
+/* The live scene fades in softly once it's ready (js/mobile/hero.js adds .is-live). */
+.m-hero__canvas { opacity: 0; transition: opacity 1.8s var(--ease-out); }
+.m-hero.is-live .m-hero__canvas { opacity: 1; }
+/* A soft wash of night sky at the top and ground at the bottom, so the text always reads. */
+.m-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, color-mix(in srgb, var(--night-sky-top) 55%, transparent), transparent 42%),
+    linear-gradient(to top, color-mix(in srgb, var(--page) 70%, transparent), transparent 26%);
+}
+.m-hero__text {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 84px);
+  left: var(--gutter);
+  right: var(--gutter);
+  max-width: 600px;
+  text-shadow: var(--text-scrim);
+}
+.m-hero__place { margin-bottom: var(--space-4); }
+.m-hero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: clamp(31px, 8.6vw, 54px);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+}
+.m-hero__hello { display: block; font-style: italic; color: var(--ink-muted); margin-bottom: 0.12em; }
+.m-hero__statement { display: block; }
+.m-hero__actions {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: calc(env(safe-area-inset-bottom) + var(--space-5));
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+}
+.m-hero__actions .btn { width: min(100%, 360px); justify-content: center; }
+.m-hero__hint {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: var(--tap);
+  padding-top: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  text-decoration: none;
+  text-shadow: var(--text-scrim);
+}
+/* The same slowly breathing line as the film's hint (style.css). */
+.m-hero__hint::after {
+  content: "";
+  width: 1px;
+  height: 22px;
+  margin-top: var(--space-2);
+  background: linear-gradient(var(--ink-muted), transparent);
+  transform-origin: top;
+  animation: breathe 2.8s ease-in-out infinite;
+}
+.m-hero__hint:focus-visible { outline: var(--focus-ring); outline-offset: 4px; }
+/* The text arrives softly, like the film's title: a short rise out of nothing. */
+.m-hero__text > *, .m-hero__actions { animation: m-rise 1.1s var(--ease-out) both; }
+.m-hero__title { animation-delay: 0.12s; }
+.m-hero__actions { animation-delay: 0.35s; }
+@keyframes m-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* ---------- The calm opening: a painted still with gentle CSS motion ----------
+   For weak devices and "reduce motion" (and as a fallback if the live scene can't run). */
+[data-mode="calm"] .m-hero__still, .m-hero.is-still .m-hero__still { display: block; }
+[data-mode="calm"] .m-hero__canvas { display: none; }
+.m-hero__mist, .m-hero__glow { display: none; position: absolute; pointer-events: none; }
+[data-mode="calm"] .m-hero__mist, [data-mode="calm"] .m-hero__glow,
+.m-hero.is-still .m-hero__mist, .m-hero.is-still .m-hero__glow { display: block; }
+/* A wide, soft band of moonlit mist drifting slowly across the trees. */
+.m-hero__mist {
+  left: -40%;
+  right: -40%;
+  top: 44%;
+  height: 22%;
+  background: radial-gradient(50% 50% at 50% 50%, var(--art-mist), transparent 72%);
+  opacity: 0.7;
+  animation: drift 46s ease-in-out infinite alternate;
+}
+/* The tent's warm glow, breathing as if a lamp inside flickers very gently.
+   --tent-x / --tent-y: where the tent is in the still (set below, measured from the picture). */
+.m-hero__glow {
+  left: var(--tent-x, 38%);
+  top: var(--tent-y, 70%);
+  width: 70vw;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: radial-gradient(closest-side, var(--tent-glow), transparent);
+  mix-blend-mode: screen;
+  animation: tent-glow 7s ease-in-out infinite;
+}
+@keyframes tent-glow {
+  0%, 100% { opacity: 0.72; }
+  28%      { opacity: 0.9; }
+  46%      { opacity: 0.78; }
+  71%      { opacity: 1; }
+}
+
+/* =====================================================================
+   4. THE PAINTED SCENES BETWEEN THE SECTIONS (ridge, meadow, summit)
+   ===================================================================== */
+/* Each is a still from the real 3D world, full width, melting into the page at the top and the
+   bottom. As you scroll it drifts a little slower than the page, and its mist a little faster
+   (js/mobile/scenes.js moves them with --shift; only transforms, so it stays smooth). */
+.mobile-site .m-chapter {
+  position: relative;
+  margin-inline: calc(-1 * var(--gutter));
+  height: min(128vw, 88svh);
+  min-height: 420px;
+  max-height: 980px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.m-chapter__art, .m-summit__art {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 78%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 78%, transparent);
+}
+.m-chapter__img, .m-summit__img {
+  position: absolute;
+  left: 0;
+  top: -9%;
+  width: 100%;
+  height: 118%;
+  object-fit: cover;
+  object-position: 50% 60%;
+  transform: translate3d(0, calc(var(--shift, 0) * 7%), 0);
+  will-change: transform;
+}
+.m-chapter__mist {
+  position: absolute;
+  left: -30%;
+  right: -30%;
+  top: 52%;
+  height: 26%;
+  background: radial-gradient(50% 50% at 50% 50%, var(--art-mist), transparent 72%);
+  opacity: 0.55;
+  transform: translate3d(calc(var(--shift, 0) * -6%), calc(var(--shift, 0) * -40%), 0);
+  will-change: transform;
+}
+.m-chapter__text {
+  position: absolute;
+  top: 13%;
+  left: var(--gutter);
+  right: var(--gutter);
+  max-width: 560px;
+  text-shadow: var(--text-scrim);
+}
+.m-chapter__quote {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 7vw, 40px);
+  line-height: var(--leading-heading);
+  text-wrap: balance;
+}
+.m-chapter__note { margin-top: var(--space-4); color: var(--ink-muted); font-size: var(--text-lg); text-wrap: pretty; }
+.m-chapter__place {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.m-chapter__title { font-family: var(--font-display); font-style: italic; font-size: clamp(40px, 11vw, 64px); line-height: 1; margin-top: var(--space-2); }
+
+/* =====================================================================
+   5. SELECTED WORK: one landmark per project
+   ===================================================================== */
+.mobile-site .work { gap: var(--space-8); }
+.mobile-site .work-card,
+.mobile-site .work-card:nth-child(even) { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+.mobile-site .work-card__media { display: none; }
+/* The landmark from the film, as a painted still; the project's video plays in its frame. */
+.work-card__scene {
+  position: relative;
+  display: block;
+  margin-inline: calc(-1 * var(--gutter));
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--page-predawn);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent);
+  mask-image: linear-gradient(to bottom, #000 82%, transparent);
+}
+.work-card__scene > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+/* The video, warped (js/mobile/work.js) so its corners sit exactly on the frame's corners. */
+.work-card__video {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-out);
+  pointer-events: none;
+}
+.work-card.is-playing .work-card__video { opacity: var(--screen-opacity, 1); }
+/* The lake shows the film as a reflection on still water: a little softer and darker. */
+.work-card__scene[data-surface="water"] .work-card__video { --screen-opacity: 0.86; filter: saturate(0.85) brightness(0.9); }
+.mobile-site .work-card__body { gap: var(--space-3); }
+.mobile-site .work-card__title { font-size: clamp(22px, 6vw, 28px); }
+.mobile-site .work-card__text { display: none; }
+.mobile-site .work-card__body .btn { min-height: var(--tap); margin-top: var(--space-2); }
+.mobile-site .work-card .project-label { flex-wrap: wrap; white-space: normal; row-gap: var(--space-2); }
+@media (min-width: 700px) {
+  .work-card__scene { margin-inline: auto; width: min(100%, 600px); }
+  .mobile-site .work-card { justify-items: center; }
+  .mobile-site .work-card__body { width: min(100%, 600px); }
+}
+
+/* =====================================================================
+   6. THE GEAR CHECK: the kit laid out on the mat
+   ===================================================================== */
+.m-gear .section-heading { margin-inline: auto; }
+.flatlay {
+  position: relative;
+  width: min(100%, 400px);
+  margin: 0 auto;
+  aspect-ratio: 1 / 2;
+}
+.flatlay__mat {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 18px 26px var(--gear-shadow));
+}
+.flatlay__items { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; }
+/* Where each item lies on the mat (the film's own layout, turned to fit a tall screen). */
+.flatlay__spot { position: absolute; left: var(--x); top: var(--y); width: var(--size); aspect-ratio: 1; translate: -50% -50%; rotate: var(--turn); }
+.flatlay__spot--camera  { --x: 67.9%; --y: 18.4%; --size: 52.6%; --turn: -5deg; }
+.flatlay__spot--map     { --x: 66.8%; --y: 50%;   --size: 50.5%; --turn: 3deg; }
+.flatlay__spot--lantern { --x: 66.8%; --y: 81.6%; --size: 48.4%; --turn: 6deg; }
+.flatlay__spot--compass { --x: 28.9%; --y: 18.4%; --size: 42.1%; --turn: -4deg; }
+.flatlay__spot--rope    { --x: 27.9%; --y: 50%;   --size: 48.4%; --turn: -8deg; }
+.flatlay__spot--watch   { --x: 28.9%; --y: 81.6%; --size: 44.2%; --turn: 10deg; }
+.flatlay__item {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 3px 4px var(--gear-shadow));
+  transition: transform var(--duration) var(--ease-out), filter var(--duration) var(--ease-out), opacity var(--duration) var(--ease-out);
+}
+.flatlay__item img { width: 100%; height: 100%; display: block; pointer-events: none; }
+/* Tapped: it lifts off the mat a little, and its shadow spreads further away. The others rest. */
+.flatlay__item.is-picked { transform: translateY(-6px) scale(1.05); filter: drop-shadow(0 16px 14px var(--gear-shadow)); }
+.flatlay.has-pick .flatlay__item:not(.is-picked) { opacity: 0.82; }
+.flatlay__item:focus-visible { outline: var(--focus-ring); outline-offset: -12%; }
+/* What the item stands for. Its space is kept, so nothing below jumps when the words change. */
+.flatlay__readout {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: var(--space-2);
+  min-height: 150px;
+  margin-top: var(--space-6);
+  text-align: center;
+}
+.flatlay__name { font-family: var(--font-display); font-size: var(--text-3xl); line-height: var(--leading-heading); }
+.flatlay__line { max-width: 34ch; color: var(--ink-muted); }
+.flatlay__more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap);
+  padding: 0 var(--space-2);
+  color: var(--accent);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}
+.flatlay__more[hidden] { display: none; }
+.flatlay__more:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
+.flatlay__readout.is-changed > * { animation: m-rise 0.6s var(--ease-out) both; }
+
+/* =====================================================================
+   7. WHAT I CAN BUILD, HOW I WORK, ABOUT: tuned for a narrow screen
+   ===================================================================== */
+.mobile-site .service__body { padding: var(--space-5); }
+.mobile-site .service__title { font-size: var(--text-2xl); }
+.mobile-site .service--wide { grid-template-columns: minmax(0, 1fr); }
+.mobile-site .demo-booking { padding: var(--space-5); }
+.mobile-site .demo-booking__steps { gap: var(--space-2); flex-wrap: wrap; }
+.mobile-site .demo-booking__choices button { min-height: var(--tap); }
+.mobile-site .demo-score { gap: var(--space-6); padding: var(--space-6) var(--space-4) var(--space-7); }
+.mobile-site .demo-score__ring { width: min(38vw, 150px); }
+.mobile-site .tools { font-size: var(--text-sm); }
+.mobile-site .steps__note { font-size: var(--text-base); }
+.mobile-site .about__story { font-size: var(--text-base); }
+.mobile-site .about__story p:first-child { font-size: var(--text-2xl); }
+.mobile-site .about__portrait { max-width: 420px; }
+
+/* =====================================================================
+   8. THE SUMMIT: the closing words in the sunrise sky, and "Book a call"
+   ===================================================================== */
+.mobile-site .m-summit {
+  position: relative;
+  margin-inline: calc(-1 * var(--gutter));
+  height: 100svh;
+  min-height: 600px;
+  max-height: 1100px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.m-summit__art { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 86%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 86%, transparent); }
+.m-summit__img { object-position: 50% 70%; }
+/* Day ink over the bright sky (tokens.css .is-day), like the film's summit. */
+.m-summit__text {
+  position: absolute;
+  top: 12%;
+  left: var(--gutter);
+  right: var(--gutter);
+  max-width: 560px;
+  display: grid;
+  justify-items: start;
+  gap: var(--space-5);
+  color: var(--ink);
+  text-shadow: var(--text-scrim);
+}
+.m-summit__text .section-heading__eyebrow { color: var(--ink-muted); }
+.m-summit__line {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: clamp(36px, 10.4vw, 60px);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+}
+.m-summit__line em { display: block; color: var(--ink-muted); }
+.m-summit__text .btn { text-shadow: none; }
+
+/* =====================================================================
+   9. CONTACT AND FOOTER
+   ===================================================================== */
+/* The summit just said "Websites people remember. Let's build yours.": the form doesn't repeat it
+   on screen (screen readers still hear the section's name). */
+.mobile-site #contact-title {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.mobile-site #contact { padding-top: var(--space-7); }
+.mobile-site .contact__aside { padding: var(--space-5); }
+.mobile-site .chip span { display: inline-flex; align-items: center; min-height: var(--tap); }
+.mobile-site .field input, .mobile-site .field select, .mobile-site .field textarea { min-height: 48px; font-size: var(--text-base); }
+.mobile-site .form__actions .btn { min-height: 52px; }
+.mobile-site .contact__link { min-height: var(--tap); align-content: center; }
+.mobile-site .footer { padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom)); }
+.mobile-site .footer__links a { display: inline-flex; align-items: center; min-height: var(--tap); }
+.mobile-site .footer__top { min-height: var(--tap); }
+.footer__film-note {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-caption);
+  color: var(--ink-muted);
+}
+
+/* =====================================================================
+   10. PHONES ON THEIR SIDE (landscape: a short, wide screen)
+   ===================================================================== */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mobile-site .m-hero { min-height: 360px; }
+  .mobile-site .m-hero__text { top: calc(env(safe-area-inset-top) + 64px); right: 42%; }
+  .mobile-site .m-hero__title { font-size: clamp(24px, 4.2vw, 34px); }
+  .mobile-site .m-hero__place { margin-bottom: var(--space-2); }
+  .mobile-site .m-hero__actions { left: auto; right: var(--gutter); width: min(40%, 320px); }
+  .mobile-site .m-chapter { height: 100svh; min-height: 340px; }
+  .mobile-site .m-summit { min-height: 360px; }
+  .mobile-site .m-summit__text { top: 18%; right: 40%; gap: var(--space-4); }
+  .mobile-site .m-summit__line { font-size: clamp(28px, 5vw, 40px); }
+  .work-card__scene { aspect-ratio: 16 / 10; margin-inline: auto; width: min(100%, 640px); }
+  .mobile-site .flatlay { width: min(100%, 300px); }
+}
+
+/* =====================================================================
+   11. REDUCE MOTION: no drifting, no rising; things simply appear
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-site { scroll-behavior: auto; }
+  .m-hero__text > *, .m-hero__actions, .flatlay__readout.is-changed > * { animation: none; }
+  .m-hero__hint::after { animation: none; }
+  .m-hero__mist { animation: none; }
+  /* The tent's glow still breathes, very slowly: a light, not a movement. */
+  .m-hero__glow { animation-duration: 12s; }
+  .m-chapter__img, .m-summit__img, .m-chapter__mist { transform: none; }
+  .flatlay__item { transition: opacity var(--duration-fast) linear; }
+  .flatlay__item.is-picked { transform: none; }
+}

@@ -97,6 +97,18 @@
   --art-trekker: #c8463c;           /* the trekker's red jacket */
   /* The page below the film starts in the last of the dawn light and darkens as you descend. */
   --page-dawn: #1b1d3f;
+  /* The mobile page (css/mobile.css) climbs the other way, from night to sunrise: its background
+     warms as you scroll down, through each scene's deep colour (rule 2: navy at night, lilac and
+     plum by sunrise), never black, and always dark enough for ivory text. */
+  --night-sky-top: #03061a;                   /* palette.js night sky: top, middle, horizon */
+  --night-sky-mid: #0e1747;
+  --night-horizon: #25336a;
+  --page-predawn: #141a3e;
+  --page-firstlight: #23234a;
+  --page-sunrise: #33284a;
+  --tent-glow: rgba(255, 138, 46, 0.5);       /* the tent's glow (palette tentGlow), for the calm opening */
+  --gear-shadow: rgba(63, 74, 102, 0.6);      /* under each painted gear item: dusk blue, never black (palette gear.shadow) */
+  --tap: 44px;                                 /* the smallest thing a thumb should have to hit */
   --field: rgba(245, 240, 232, 0.05);          /* form field fill */
   --field-line: rgba(245, 240, 232, 0.22);
   --danger: #f2a6a0;                            /* form errors: a soft rose, readable on the night page */
