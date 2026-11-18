@@ -70,7 +70,8 @@ const MAX_CADENCE = 2.6;
 const NIGHT_LEVEL = PRESETS.night.character.level;
 const NIGHT_TINT = new THREE.Color(PRESETS.night.character.tint);
 
-export function createTrekker(scene, renderer, camera) {
+// onProgress (optional): called with 0..1 as the character file downloads (the loading screen).
+export function createTrekker(scene, renderer, camera, { onProgress } = {}) {
   // `root` is what we move around the world; the VRM sits inside it.
   const root = new THREE.Group();
   root.name = 'trekker';
@@ -108,7 +109,9 @@ export function createTrekker(scene, renderer, camera) {
   const ready = (async () => {
     const loader = new GLTFLoader();
     loader.register((parser) => new VRMLoaderPlugin(parser));
-    const gltf = await loader.loadAsync(MODEL_URL);
+    const gltf = await loader.loadAsync(MODEL_URL, (e) => {
+      if (onProgress && e.lengthComputable && e.total) onProgress(e.loaded / e.total);
+    });
     const vrm = gltf.userData.vrm;
 
     // Clean-ups recommended by three-vrm: drop unused data, merge skeletons (faster).

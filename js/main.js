@@ -39,6 +39,11 @@ const MAX_PIXEL_RATIO = 2;
 // Still mode, for the style frames: ?still=0 shows base camp, ?still=0.215 the first ridge camp
 // (any point of the film, 0..1), as a clean picture with no text. Add &pause to stop drawing
 // once it has settled (saves the GPU when several frames sit on one page).
+// The loading screen (index.html) shows this progress, 0..1. The code has arrived by now: 20%.
+// Building the world takes it to 30%, and the trekker's download fills the rest.
+const reportProgress = (value) => window.dispatchEvent(new CustomEvent('ascent:progress', { detail: value }));
+reportProgress(0.2);
+
 const params = new URLSearchParams(location.search);
 const STILL_POINTS = { 0: 0, 1: 0.215 };   // the old ?still=1 meant "the ridge camp"
 const stillParam = params.has('still') ? Number(params.get('still')) || 0 : null;
@@ -91,7 +96,7 @@ const forest = createForest(scene, {
 });
 const baseCamp = createBaseCamp(scene);
 const mist = createMist(scene);
-const trekker = createTrekker(scene, renderer, camera);
+const trekker = createTrekker(scene, renderer, camera, { onProgress: (f) => reportProgress(0.3 + f * 0.68) });
 
 // Scene 2: the ridge (grass, stones, trees, valley mist) and the three project landmarks along
 // the trail: a still lake, a stone hut and a trail signboard (journey.js, landmarks.js).
@@ -106,6 +111,8 @@ const matDir = trailDirectionAt(cameraPath.stops.find((st) => st.at === 'meadow'
 const gear = createGear(scene, { position: MEADOW.mat, facing: Math.atan2(-matDir.z, matDir.x), renderer });
 // Scene 4: the summit (the rising sea of clouds, snow peaks, rocks and the flag).
 const summit = createSummitZone(scene, { sunDir: sky.sunDir });
+
+reportProgress(0.3);   // the world is built
 
 // Build every shader now, while the curtain is still down. Otherwise three.js compiles each
 // one the first time its object comes into view, which causes a small stutter mid-scroll.
@@ -504,8 +511,14 @@ let lifted = false;
 function liftCurtain() {
   if (lifted) return;
   lifted = true;
-  curtain.classList.add('is-lifted');
-  if (!returning) intro.reveal();
+  // Let the count reach 100 for a moment, then dissolve into base camp.
+  reportProgress(1);
+  setTimeout(() => {
+    curtain.classList.add('is-lifted');
+    if (!returning) intro.reveal();
+    curtain.addEventListener('transitionend', () => curtain.classList.add('is-gone'), { once: true });
+    setTimeout(() => curtain.classList.add('is-gone'), 2500);   // (in case no transition runs)
+  }, 450);
 }
 setTimeout(liftCurtain, 6000);
 

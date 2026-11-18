@@ -40,7 +40,7 @@
 .btn:hover .btn__arrow, .btn.is-hover .btn__arrow { transform: translateX(4px); }
 .btn:active { transform: scale(0.98); }
 .btn:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: var(--focus-ring);
   outline-offset: 3px;
 }
 

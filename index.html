@@ -70,8 +70,45 @@
   </script>
 </head>
 <body>
-  <!-- A soft dark cover that fades away once the world is ready. -->
-  <div id="curtain" aria-hidden="true"></div>
+  <!-- The loading screen: a night sky that brightens as the world loads, a trail that draws
+       itself up to a summit, and a quiet percentage. It's plain HTML and CSS, so it shows at once,
+       before any script has arrived; it dissolves into base camp when the essentials are ready. -->
+  <div id="curtain" class="loader" aria-hidden="true">
+    <svg class="loader__art" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+      <path class="loader__ridge loader__ridge--far" d="M0 900V630L180 570L330 610L520 515L700 570L860 480L1010 425L1160 505L1330 455L1480 540L1600 505V900Z"/>
+      <path class="loader__ridge loader__ridge--near" d="M0 900V730C200 690 380 740 560 700S900 730 1100 690S1450 720 1600 700V900Z"/>
+      <path id="loader-trail" class="loader__trail" pathLength="1" d="M760 900C780 830 700 800 760 750S900 700 860 650S760 590 880 548S1000 470 1010 425"/>
+      <circle id="loader-lamp" class="loader__lamp" cx="760" cy="900" r="5"/>
+    </svg>
+    <p class="loader__count"><span id="loader-count">0</span>%</p>
+  </div>
+  <script>
+    // The loading screen's progress. main.js reports real progress as an "ascent:progress"
+    // event (0..1: the code, the world being built, the trekker downloading). Until the first
+    // report, it creeps gently towards 15% while the code downloads. The number and the trail
+    // ease towards the target, so they never jump.
+    (function () {
+      var curtain = document.getElementById('curtain');
+      var count = document.getElementById('loader-count');
+      var trail = document.getElementById('loader-trail');
+      var lamp = document.getElementById('loader-lamp');
+      var shown = 0, target = 0, start = performance.now();
+      window.addEventListener('ascent:progress', function (e) { target = Math.max(target, e.detail); });
+      function frame(now) {
+        var creep = 0.15 * (1 - Math.exp(-(now - start) / 2500));
+        shown += (Math.max(target, creep) - shown) * 0.08;
+        curtain.style.setProperty('--p', shown.toFixed(4));
+        count.textContent = Math.min(Math.round(shown * 100), 100);
+        // The lantern at the head of the trail.
+        var head = trail.getPointAtLength(trail.getTotalLength() * shown);
+        lamp.setAttribute('cx', head.x.toFixed(1));
+        lamp.setAttribute('cy', head.y.toFixed(1));
+        // Stop once the curtain has lifted and finished fading.
+        if (!curtain.classList.contains('is-gone')) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    })();
+  </script>
   <!-- Soft mist that rolls in for transitions (opening a project, skipping the film). Its colour
        is the world's current mist colour (js/ui/veil.js). -->
   <div id="veil" class="veil" aria-hidden="true"></div>

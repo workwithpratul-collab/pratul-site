@@ -139,6 +139,10 @@
   --duration-fast: 300ms;   /* colour and opacity on hover */
   --duration: 500ms;        /* small movements */
   --duration-slow: 900ms;   /* reveals */
+  /* Keyboard focus: the same ivory ring everywhere. Over the film (where the picture behind can be
+     bright) it gets a soft dark halo, so it always shows. */
+  --focus-ring: 2px solid var(--ink);
+  --focus-halo: rgba(12, 15, 36, 0.4);
 }
 
 /* Day mode: inside the film, once first light breaks, text switches to the day ink.
