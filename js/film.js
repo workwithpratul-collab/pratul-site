@@ -84,42 +84,91 @@ const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerH
 // low morning light still lays warm gold on the meadow and the snow instead of only grazing them.
 const sky = createSky(scene, { sunLightDir: new THREE.Vector3(0.62, 0.32, -0.78) });
 
+// ---------- Building in small steps ----------
+// Building the whole world at once used to freeze the page for almost a second. Instead each part
+// is built in its own short task, and between parts we hand the browser a moment back, so it can
+// keep the page responsive (answer scrolls and clicks) while the world comes together.
+const yieldToBrowser = () => new Promise((resolve) => {
+  if (globalThis.scheduler?.yield) scheduler.yield().then(resolve);
+  else setTimeout(resolve, 0);
+});
+const buildTimes = {};
+async function step(name, build) {
+  await yieldToBrowser();
+  const t = performance.now();
+  const result = build();
+  buildTimes[name] = Math.round(performance.now() - t);
+  return result;
+}
+
 // ---------- 5. The world ----------
 // The camera path is worked out first, so the forest can keep trees off the camera's route.
-const cameraPath = createCameraPath();
-const mountains = createMountains(scene);
-createGround(scene);
-const forest = createForest(scene, {
+const cameraPath = await step('cameraPath', () => createCameraPath());
+const mountains = await step('mountains', () => createMountains(scene));
+await step('ground', () => createGround(scene, { pause: yieldToBrowser }));
+const forest = await step('forest', () => createForest(scene, {
   routeDistance: cameraPath.routeDistance,
   legacyRouteDistance: cameraPath.legacyRouteDistance,
   sky,
-});
-const baseCamp = createBaseCamp(scene);
-const mist = createMist(scene);
-const trekker = createTrekker(scene, renderer, camera, { onProgress: (f) => reportProgress(0.3 + f * 0.68) });
+}));
+const baseCamp = await step('baseCamp', () => createBaseCamp(scene));
+const mist = await step('mist', () => createMist(scene));
+const trekker = await step('trekker', () => createTrekker(scene, renderer, camera, { onProgress: (f) => reportProgress(0.3 + f * 0.68) }));
 
 // Scene 2: the ridge (grass, stones, trees, valley mist) and the three project landmarks along
 // the trail: a still lake, a stone hut and a trail signboard (journey.js, landmarks.js).
-createRidge(scene);
-const camps = CAMPS.map((c) => createLandmark(scene, c, { renderer }));
+await step('ridge', () => createRidge(scene));
+const camps = await step('landmarks', () => CAMPS.map((c) => createLandmark(scene, c, { renderer })));
 const campLights = createCampLights(scene);
 campLights.update(camps, camera);
 // Scene 3: the meadow (grass, wildflowers, trees, stones, mist) and the gear check: the kit laid
 // out on a canvas mat beside the trail, its long side running along the path.
-createMeadowZone(scene);
+await step('meadow', () => createMeadowZone(scene));
 const matDir = trailDirectionAt(cameraPath.stops.find((st) => st.at === 'meadow').s);
-const gear = createGear(scene, { position: MEADOW.mat, facing: Math.atan2(-matDir.z, matDir.x), renderer });
+const gear = await step('gear', () => createGear(scene, { position: MEADOW.mat, facing: Math.atan2(-matDir.z, matDir.x), renderer }));
 // Scene 4: the summit (the rising sea of clouds, snow peaks, rocks and the flag).
-const summit = createSummitZone(scene, { sunDir: sky.sunDir });
+const summit = await step('summit', () => createSummitZone(scene, { sunDir: sky.sunDir }));
 
 reportProgress(0.3);   // the world is built
 
 // Build every shader now, while the curtain is still down. Otherwise three.js compiles each
 // one the first time its object comes into view, which causes a small stutter mid-scroll.
 // (The sea of clouds and the far peaks start hidden, so show them for this one moment.)
+// compileAsync asks the graphics driver to compile them in the background (where the browser
+// supports it), instead of freezing the page for over half a second.
 summit.update(0, 1);
-renderer.compile(scene, camera);
+await renderer.compileAsync(scene, camera);
 summit.update(0, 0);
+
+// The first frame also has to send every picture (texture) and shape (mesh) to the graphics card,
+// which used to take half a second in one go. Do it piece by piece instead, with a pause between
+// pieces, while the opening still covers the canvas.
+async function warmUp() {
+  const textures = new Set();
+  scene.traverse((o) => {
+    for (const m of [].concat(o.material || [])) {
+      for (const v of Object.values(m)) if (v?.isTexture) textures.add(v);
+      if (m.uniforms) for (const u of Object.values(m.uniforms)) if (u?.value?.isTexture) textures.add(u.value);
+    }
+  });
+  for (const t of textures) {
+    if (t.isVideoTexture || !t.image) continue;
+    renderer.initTexture(t);
+    await yieldToBrowser();
+  }
+  // Then draw the opening shot one part at a time (each draw uploads only that part's shapes).
+  cameraPath.update(camera, 0, 0, true);
+  // (Lights stay on: hiding one changes every shader's light count, forcing them all to rebuild.)
+  const hasLight = (o) => { let found = false; o.traverse((x) => { if (x.isLight) found = true; }); return found; };
+  const parts = scene.children.filter((c) => c.visible && !hasLight(c));
+  parts.forEach((c) => { c.visible = false; });
+  for (const c of parts) {
+    c.visible = true;
+    renderer.render(scene, camera);
+    await yieldToBrowser();
+  }
+}
+await warmUp();
 
 // ---------- 6. Scrolling → progress (0 at the top of the film, 1 at its end) ----------
 // The film section is FILM_SCREENS screen-heights of scrolling (journey.js); below it the page
@@ -537,7 +586,7 @@ window.__ascent = {
   ready: false,
   get fps() { return fps; },
   get progress() { return scroll.progress; },
-  info: () => ({ trees: forest.counts, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
+  info: () => ({ trees: forest.counts, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, textures: renderer.info.memory.textures, geometries: renderer.info.memory.geometries, build: buildTimes }),
   jump: jumpTo,
   lenis,
   scene,   // handy in the console: e.g. __ascent.scene.getObjectByName("stones")

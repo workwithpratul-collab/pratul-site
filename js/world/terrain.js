@@ -646,7 +646,9 @@ function groundColour(x, z, y, ny, c, tmp) {
 // Options (both for the mobile opening, which only needs the land around base camp):
 //   region       { minX, maxX, minZ, maxZ } in metres: build only this part of the grid
 //   trailMetres  draw only this much of the path, from base camp
-export function createGround(scene, { region = null, trailMetres = Infinity } = {}) {
+// pause: an optional async function, called every few dozen rows. film.js passes one that hands
+// the browser a moment back, so this big job (about 0.3 s) never freezes the page in one go.
+export async function createGround(scene, { region = null, trailMetres = Infinity, pause = null } = {}) {
   const cols = GRID.segX + 1, rows = GRID.segZ + 1;
   // Which grid points to build (vertex indices, inclusive): all of them, or just the region.
   const clampI = (v, max) => Math.min(Math.max(v, 0), max);
@@ -658,6 +660,7 @@ export function createGround(scene, { region = null, trailMetres = Infinity } = 
   // 1. Heights of every grid point.
   gridHeights = new Float32Array(cols * rows);
   for (let iz = iz0; iz <= iz1; iz++) {
+    if (pause && iz % 40 === 39) await pause();
     for (let ix = ix0; ix <= ix1; ix++) {
       gridHeights[iz * cols + ix] = getHeight(GRID.minX + ix * GRID.cellX, GRID.minZ + iz * GRID.cellZ);
     }
@@ -678,6 +681,7 @@ export function createGround(scene, { region = null, trailMetres = Infinity } = 
   const colors = new Float32Array(cols * rows * 3);
   const c = new THREE.Color(), tmp = new THREE.Color();
   for (let iz = iz0; iz <= iz1; iz++) {
+    if (pause && iz % 60 === 59) await pause();
     for (let ix = ix0; ix <= ix1; ix++) {
       const i = iz * cols + ix;
       groundColour(GRID.minX + ix * GRID.cellX, GRID.minZ + iz * GRID.cellZ, gridHeights[i], normals[i * 3 + 1], c, tmp);
