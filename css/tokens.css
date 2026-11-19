@@ -5,14 +5,70 @@
    The film's colours (sky, mist, light) live in js/world/palette.js. These are the
    interface colours that sit ON TOP of the film, chosen to read on all four times of day. */
 
+/* ---------- Fonts (self-hosted, assets/fonts/; see DESIGN.md §3) ----------
+   Four small files, cut down ("subset") to only the characters the site uses.
+   font-display: swap shows the text at once in a fallback font, then swaps the real one in.
+   The "fallback" faces are ordinary system fonts stretched to the real fonts' exact widths and
+   heights (size-adjust and the overrides), so the swap moves nothing on the page. */
+@font-face {
+  font-family: "Zodiak";
+  src: url("../assets/fonts/zodiak-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Zodiak";
+  src: url("../assets/fonts/zodiak-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Switzer";
+  src: url("../assets/fonts/switzer-variable.woff2") format("woff2");
+  font-weight: 400 500;   /* one variable file covers both weights we use */
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../assets/fonts/jetbrains-mono.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Zodiak fallback";
+  src: local("Georgia");
+  size-adjust: 112.9%; ascent-override: 87.69%; descent-override: 23.03%; line-gap-override: 7.97%;
+}
+@font-face {
+  font-family: "Zodiak fallback";
+  src: local("Georgia Italic"), local("Georgia-Italic");
+  font-style: italic;
+  size-adjust: 113.77%; ascent-override: 87.02%; descent-override: 24.61%; line-gap-override: 7.91%;
+}
+@font-face {
+  font-family: "Switzer fallback";
+  src: local("Arial");
+  size-adjust: 101.01%; ascent-override: 97.02%; descent-override: 24.75%; line-gap-override: 8.91%;
+}
+@font-face {
+  font-family: "JetBrains Mono fallback";
+  src: local("Consolas");
+  size-adjust: 109.13%; ascent-override: 93.47%; descent-override: 27.49%; line-gap-override: 0%;
+}
+
 :root {
   /* ---------- Fonts ----------
-     Display: Instrument Serif, a soft, high-contrast serif for headlines (the "film title" voice).
-     Body:    Manrope, a clean, open sans with friendly rounded shapes (warm, never cold or techy).
-     Mono:    IBM Plex Mono, for small labels, numbers and captions (the "field notes" voice). */
-  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
-  --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+     Display: Zodiak, a serif with sharp wedge serifs: carved, alpine headlines; its italic
+              carries the one amber accent word.
+     Body:    Switzer, a quiet, precise sans that stays readable at 17px on dark.
+     Mono:    JetBrains Mono, only for real measurements (altitude, counts, time). */
+  --font-display: "Zodiak", "Zodiak fallback", Georgia, serif;
+  --font-body: "Switzer", "Switzer fallback", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "JetBrains Mono fallback", Consolas, monospace;
 
   /* ---------- Type scale (px steps, the same ladder everywhere) ---------- */
   --text-2xs: 11px;    /* the smallest text allowed: tiny caps labels and tags (never below 11px) */
@@ -199,6 +255,68 @@
   --h-cloud: rgba(243, 236, 226, 0.16);     /* the soft cloud drifting over the phone hero */
   --h-tile: #29243f;                        /* a tool tile in the carousel */
   --h-error: #f2a6a0;                       /* form errors: a soft rose */
-  /* The mockups' headings: a light, open serif (Newsreader 300), with Manrope and Plex Mono. */
-  --h-font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  /* One display serif across the whole site (DESIGN.md §3). */
+  --h-font-display: var(--font-display);   /* (was Newsreader: now one serif everywhere) */
+}
+
+/* ---------- The premium redesign (DESIGN.md) ----------
+   The palette, type scale, spacing and motion of the homepage (film text, hero, sections).
+   css/home.css and css/style.css use these. Every text colour here meets WCAG AA on --night. */
+:root {
+  /* Palette */
+  --night: #1c1a33;          /* page base: deep indigo */
+  --plum: #221d36;           /* deeper plum moments (work, footer) */
+  --dusk: #2a2442;           /* raised surfaces: form fields, frames */
+  --deep: #15132a;           /* the darkest value anywhere (never black) */
+  --cream: #f3ece2;          /* primary text: 14.4:1 on --night */
+  --lavender: #b8aed6;       /* secondary text: 8.1:1 */
+  --lavender-quiet: #9d93c2; /* labels and measurements only: 5.9:1 */
+  --lavender-light: #ddd5ee; /* secondary text over the live sky (hero): 11:1 on --night */
+  --amber: #f6a04d;          /* emphasis only: accent word, primary button, flag, focus: 8.1:1 */
+  --amber-hi: #ffb874;       /* amber, turned up (hover) */
+  --amber-ink: #1c1a33;      /* text on amber */
+  --amber-glow: rgba(246, 160, 77, 0.32);
+  --hair: rgba(243, 236, 226, 0.14);       /* hairlines */
+  --hair-strong: rgba(243, 236, 226, 0.32);
+  --veil-night: rgba(21, 19, 42, 0.86);    /* the calm band behind text over paintings */
+
+  /* The page is one continuous gradient: the rest of the day on the mountain (DESIGN.md §1).
+     Morning lilac under the hero, dusk plum at the work, night indigo by the tent. */
+  --page-arc: linear-gradient(180deg,
+    #2b2546 0%, #26213f 9%, #221d36 22%, #241e3a 34%, #2a2241 46%,
+    #221d38 58%, #1c1a33 70%, #18162d 84%, #15132a 100%);
+
+  /* Type scale (DESIGN.md §3) */
+  --t-display: clamp(52px, 7.4vw, 112px);
+  --t-heading: clamp(40px, 5vw, 76px);
+  --t-heading-sm: clamp(34px, 3.6vw, 56px);
+  --t-line: clamp(28px, 3vw, 44px);
+  --t-lead: clamp(19px, 1.5vw, 22px);
+  --t-body: clamp(17px, 1.15vw, 18px);
+  --t-ui: 16px;
+  --t-label: 14px;          /* the floor: nothing smaller anywhere */
+  --lh-display: 0.98;
+  --lh-heading: 1.02;
+  --lh-body: 1.6;
+  --track-display: -0.025em;
+  --track-heading: -0.018em;
+  --track-measure: 0.12em;  /* mono measurements in capitals */
+  --measure: 62ch;          /* longest comfortable line of body text */
+
+  /* Space (DESIGN.md §4) */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+  --s-5: clamp(20px, 2vw, 24px);
+  --s-6: clamp(28px, 3vw, 40px);
+  --s-7: clamp(40px, 5vw, 64px);
+  --s-8: clamp(64px, 8vw, 120px);
+  --s-9: clamp(96px, 13vw, 200px);
+  --page-gutter: clamp(16px, 5vw, 96px);
+  --content: 1320px;
+
+  /* Motion (DESIGN.md §5): one family. Arrivals ease out like a camera settling. */
+  --ease-arrive: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-flow: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-fast: 320ms;
+  --t-base: 700ms;
+  --t-slow: 1400ms;
 }

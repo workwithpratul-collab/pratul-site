@@ -4,6 +4,7 @@
 // painted. That way the right version shows from the very first frame: no flash, no layout jump.
 //
 //   film    the full 3D film: desktops, laptops, and big landscape tablets with a strong GPU
+//           (the page paints first; three.js and the world load after, see js/site.js)
 //   mobile  phones and portrait tablets: no film and no 3D at all. A light, fast page that opens
 //           on the summit hero (a painting with a slow drifting cloud layer in CSS)
 //   calm    the same page as mobile, for "reduce motion" or a browser with no WebGL: the
@@ -21,9 +22,20 @@
   // Fetch the right code early, while the rest of the page is still arriving.
   var link = document.createElement('link');
   link.rel = 'modulepreload';
-  link.href = (document.currentScript.getAttribute('src') || '').replace('device.js', mode === 'film' ? 'film.js' : 'mobile/mobile.js');
+  link.href = (document.currentScript.getAttribute('src') || '').replace('device.js', mode === 'film' ? 'site.js' : 'mobile/mobile.js');
   if (document.currentScript.dataset.preload !== 'false') {
     document.head.appendChild(link);
+    // The film opens on a poster of its first frame (index.html), so that's the first thing to fetch.
+    if (mode === 'film') {
+      var poster = document.createElement('link');
+      poster.rel = 'preload';
+      poster.as = 'image';
+      // (The same choice as css/style.css makes: the larger picture on wide or sharp screens.)
+      var large = window.innerWidth >= 1300 || (window.devicePixelRatio || 1) >= 1.5;
+      poster.href = 'assets/poster/opening-' + (large ? '1920' : '1280') + '.webp';
+      poster.setAttribute('fetchpriority', 'high');
+      document.head.appendChild(poster);
+    }
     // The phone page opens on the summit painting: fetch it straight away, first in line, so the
     // first screen paints fast (css/home.css shows it as the hero's background).
     if (mode !== 'film') {

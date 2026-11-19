@@ -96,16 +96,20 @@ export function createCameraPath() {
   // The summit, the trekker and the flag sit right of centre with the sun beyond them, so the
   // left half of the frame (open sky over the sea of clouds) is free for the final words.
   function summitShot() {
+    const SUMMIT_FRAME = { back: 11, side: 3.5, height: 2.2, turn: 28, lookHeight: 0.6 };
     const [tx, tz] = SUMMIT.top;
     const sun = new THREE.Vector3(0.62, 0, -0.78).normalize();   // where the sun rises (sky.js)
     const right = new THREE.Vector3(-sun.z, 0, sun.x);           // to the right of facing the sun
-    // Stand 9 m back from the top, 2.5 m to the right of the line to the sun...
-    const pos = new THREE.Vector3(tx - sun.x * 9 + right.x * 2.5, groundHeight(tx, tz) + 2.4, tz - sun.z * 9 + right.z * 2.5);
-    // ...and look about 24° left of the sun: it sits on the right, the trekker just right of centre.
-    const turn = THREE.MathUtils.degToRad(24);
+    // The hero frame (references/mockups/1-desktop-hero.png): the knoll rises from the bottom
+    // right, the trekker and flag stand in the right third, and the left half is calm sky over
+    // the sea of clouds, where the hero's words sit.
+    // Stand back from the top and a little to the right of the line to the sun...
+    const pos = new THREE.Vector3(tx - sun.x * SUMMIT_FRAME.back + right.x * SUMMIT_FRAME.side, groundHeight(tx, tz) + SUMMIT_FRAME.height, tz - sun.z * SUMMIT_FRAME.back + right.z * SUMMIT_FRAME.side);
+    // ...and look well left of the sun, so the sun and the summit sit on the right.
+    const turn = THREE.MathUtils.degToRad(SUMMIT_FRAME.turn);
     const dir = sun.clone().applyAxisAngle(up, turn);
     const look = pos.clone().addScaledVector(dir, 40);
-    look.y = groundHeight(tx, tz) - 1.5;
+    look.y = groundHeight(tx, tz) + SUMMIT_FRAME.lookHeight;
     return { pos, look, blendIn: 0.06, blendOut: 0 };
   }
 

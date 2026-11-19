@@ -1,28 +1,49 @@
-// story.js: the short text moments along the climb (index.html, .moment).
-// Each has data-from / data-to: the stretch of the film (0..1) where it's on screen. It fades in
-// at the start of its stretch, rising a few pixels, and fades out again as we walk on.
+// story.js: the text beats along the climb (index.html, .moment).
+//
+// Each beat has data-from / data-to: the stretch of the film (0..1) where it's on screen, and
+// data-place: where in the frame it sits (css/style.css), chosen for its shot so it never covers
+// the trekker, a landmark or the sun.
+// As the film reaches a beat, its main line is set line by line (each line rises out of a mask,
+// SplitText), then the smaller text fades up beneath it. Walking on, the beat fades away.
 
-const FADE = 0.012;   // how much of the film each fade takes (about a sixth of a screen)
+import { gsap, lineReveal, reduceMotion, EASE } from '../core.js';
 
-const smooth = (a, b, x) => {
-  const t = Math.min(Math.max((x - a) / (b - a), 0), 1);
-  return t * t * (3 - 2 * t);
-};
-
-export function createStory({ reduceMotion }) {
+export function createStory() {
   const moments = [...document.querySelectorAll('.moment')].map((el) => ({
-    el, from: Number(el.dataset.from), to: Number(el.dataset.to), shown: -1,
+    el, from: Number(el.dataset.from), to: Number(el.dataset.to), on: false, tl: null,
   }));
-  // p = film progress. Only touches the page when a moment's look actually changes.
+
+  function build(m) {
+    const line = m.el.querySelector('.moment__line');
+    const text = m.el.querySelector('.moment__text');
+    const tl = lineReveal(line, { stagger: 0.1 });
+    if (text) {
+      tl.fromTo(text, { opacity: 0, y: reduceMotion ? 0 : 12 },
+        { opacity: 1, y: 0, duration: 1.1, ease: EASE.arrive }, reduceMotion ? 0 : 0.5);
+    }
+    return tl;
+  }
+  function show(m) {
+    m.on = true;
+    gsap.killTweensOf(m.el);
+    gsap.set(m.el, { opacity: 1, visibility: 'visible' });
+    m.tl ??= build(m);
+    m.tl.restart();
+  }
+  function hide(m) {
+    m.on = false;
+    gsap.to(m.el, {
+      opacity: 0, duration: 0.6, ease: 'sine.out',
+      onComplete: () => { if (!m.on) m.el.style.visibility = 'hidden'; },
+    });
+  }
+
+  // p = film progress. Only acts when a beat enters or leaves its stretch.
   function update(p) {
     for (const m of moments) {
-      const a = smooth(m.from, m.from + FADE, p) * (1 - smooth(m.to - FADE, m.to, p));
-      const rounded = Math.round(a * 200) / 200;
-      if (rounded === m.shown) continue;
-      m.shown = rounded;
-      m.el.style.opacity = rounded;
-      m.el.style.visibility = rounded > 0 ? 'visible' : 'hidden';
-      if (!reduceMotion) m.el.style.transform = `translateY(${((1 - rounded) * 14).toFixed(1)}px)`;
+      const inside = p >= m.from && p <= m.to;
+      if (inside && !m.on) show(m);
+      else if (!inside && m.on) hide(m);
     }
   }
   return { update };

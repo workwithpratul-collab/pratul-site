@@ -119,12 +119,13 @@ export const PRESETS = {
   sunrise: {
     label: 'Sunrise',
     place: 'The summit',
-    sky: { top: '#36508f', mid: '#c995ad', horizon: '#ffcf96', glow: '#ffb46e', glowStrength: 1, stars: 0, moon: 0, sun: 1 },
-    fog: { color: '#f6c6a8', density: 0.0032 },
-    ambient: { sky: '#c2bce2', ground: '#6e5258', intensity: 2.6 },   // lilac: shaded snow goes cool, the sun side gold
+    // (Matched to the hero mockup: deep navy-indigo above, a warm peach-amber band at the horizon.)
+    sky: { top: '#23213f', mid: '#7c5c88', horizon: '#f7b07a', glow: '#ffa95e', glowStrength: 1, stars: 0, moon: 0, sun: 1 },
+    fog: { color: '#d9a2a6', density: 0.0032 },
+    ambient: { sky: '#b3a7da', ground: '#5c4862', intensity: 2.5 },   // lilac: shaded snow goes cool, the sun side gold
     key: { color: '#ffd09a', intensity: 3.1, fromSun: 1 },
-    mist: { air: '#ffe4cc', treeFeet: '#f6d8c6', valley: '#ffdcc2' },
-    clouds: { lit: '#ffe6c8', shade: '#b7a6c8' },
+    mist: { air: '#e8b8b2', treeFeet: '#e6c0ba', valley: '#d9a8b0' },
+    clouds: { lit: '#f7cdb6', shade: '#8f7cab' },   // a soft lavender sea, peach where the sun lands
     ground: '#ffe8d2',
     warm: '#ffb46a',
     trees: {
@@ -136,8 +137,8 @@ export const PRESETS = {
     stones: { bottom: '#5a4a5a', top: '#c09ea2' },
     wood: { bottom: '#5a4038', top: '#a07a5e' },
     mountains: {
-      layers: ['#4c4268', '#6c5c88', '#927ca2', '#b69cba'],
-      snowLit: '#fff2de', snowShade: '#ab9cc6', snowWarmth: 1,
+      layers: ['#3c3462', '#594a7c', '#7f6a98', '#a68bb0'],
+      snowLit: '#ffe2c4', snowShade: '#9c8bc2', snowWarmth: 1,
     },
     character: { level: 0.95, tint: '#fff0e4' },
   },
@@ -225,6 +226,23 @@ export const MATERIALS = {
   characterRim: '#5a6ec8',
   // Mist is made lighter towards this colour (moonlit vapour).
   mistLift: '#dfe6ff',
+  // The hero's ambience: slow motes of light in the summit air (motes.js). Cool lilac motes are
+  // dust in the shade; the few warm ones have caught the sun (Rule 3: warm means light).
+  motes: { cool: '#d4c8f2', warm: '#ffc78f' },
+  // The work section's prayer-flag ridge at dusk (js/carousels/ridge.js). Fog is the page colour
+  // there, so far panels melt into the page. Flags are soft and cool; only lanterns are warm.
+  ridge: {
+    fog: '#241e3a',
+    layers: ['#3b3159', '#2e2749', '#221c38'],   // far, middle, near ridge (distance is paler)
+    snow: '#8c7fae',
+    frame: '#2a2442', bar: '#15132a', dot: '#4a4268',
+    flags: ['#b9aee0', '#d9b8c9', '#efe2cf', '#9fb6b0', '#8f9fd0'],
+    string: '#7d74a3',
+    pole: '#3a3152',
+    lantern: '#ffbf78',
+  },
+  // The tools section's lanterns at the summit (js/carousels/lanterns.js).
+  lanterns: { paper: '#fbead2', paperEdge: '#f2cfa4', glow: '#ffb468', orbit: '#5d5384' },
 };
 
 // =====================================================================

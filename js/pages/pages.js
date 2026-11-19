@@ -1,56 +1,64 @@
-// pages.js: everything after the film's summit hero: the top bar, the work slider, the showreel,
-// the About toggle, the testimonial, the tools carousel and the contact form.
-// The film (js/film.js) loads it once the visitor nears the end of the film; the phone page
-// (js/mobile/mobile.js) loads it straight away. Nothing here needs 3D or an animation library.
+// pages.js: everything below the film: the top bar, services, the work ridge (or slider), the
+// process trail, about, the tools, the contact form and the showreel.
+//
+// Desktop (site.js) and the phone page (mobile/mobile.js) both use it. Phones get no animation
+// library and no 3D: everything here works with plain CSS transitions and the browser's own
+// scrolling. On desktop, the two 3D carousels are fetched only when their section comes near.
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isFilm = !document.documentElement.classList.contains('mobile-site');
 
-// lenis: the film's smooth scroller, or on the phone page a small stand-in with the same
+// lenis: the smooth scroller on desktop, or on the phone page a small stand-in with the same
 // scrollTo() that uses the browser's own scrolling (js/mobile/mobile.js).
-export function initPages({ lenis }) {
-  initNav({ lenis });
+export async function initPages({ lenis, desktop = false }) {
+  // Desktop already has GSAP loaded (core.js); phones never load it.
+  const core = desktop ? await import('../core.js') : null;
+  initNav();
   initMenu();
-  initSlider();
-  initProcess();
-  initShowreel();
+  initServices({ lenis });
+  initWork({ core });
+  initProcess({ core });
   initAbout();
   initTestimonial();
-  initCarousel();
+  initTools({ core });
   initContact({ lenis });
   initPlaceholders({ lenis });
-  initReveal();
+  initShowreel();
+  initReveal({ core });
+}
+
+// Run fn once, when el comes within `margin` of the screen.
+function whenNear(el, fn, margin = '100% 0px') {
+  const io = new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting) return;
+    io.disconnect();
+    fn();
+  }, { rootMargin: margin });
+  io.observe(el);
+}
+// Toggle .is-in on el while it's (mostly) on screen; once only, unless `again`.
+function markIn(el, { margin = '0px 0px -20% 0px', again = false } = {}) {
+  const io = new IntersectionObserver(([e]) => {
+    if (e.isIntersecting) { el.classList.add('is-in'); if (!again) io.disconnect(); }
+    else if (again) el.classList.remove('is-in');
+  }, { rootMargin: margin });
+  io.observe(el);
 }
 
 // ---------- The top bar ----------
-// Film: hidden during the film; it appears (see-through) as the hero fades in (film.js puts
-// .hero-in on <html>), and turns into soft glass once the hero has scrolled away.
-// Phone: always there; glass once you've scrolled past the hero.
-function initNav({ lenis }) {
+// Desktop: site.js shows and hides it with the hero. Phones: it's always there, and turns into a
+// soft bar once the hero has scrolled away. Both: the link of the section being read is marked.
+function initNav() {
   const nav = document.getElementById('site-nav');
-  const hero = document.getElementById('hero');
-  const film = document.getElementById('film');
-  const root = document.documentElement;
-  const update = () => {
-    const past = hero.getBoundingClientRect().bottom < 90;
-    nav.classList.toggle('is-shown', !isFilm || root.classList.contains('hero-in') || film.getBoundingClientRect().bottom < window.innerHeight * 0.5);
-    nav.classList.toggle('is-solid', past);
-  };
-  window.addEventListener('scroll', update, { passive: true });
-  // (.hero-in changes while the film plays, so also check it a few times a second.)
-  if (isFilm) setInterval(update, 250);
-  update();
-
-  // "Pratul" goes back to the summit hero: on the film that's the end of the film section (the
-  // hero fully faded in), on the phone page it's the top.
-  nav.querySelector('[data-to-top]').addEventListener('click', (e) => {
-    e.preventDefault();
-    const top = isFilm ? film.offsetTop + film.offsetHeight - window.innerHeight : 0;
-    lenis.scrollTo(top, { duration: reduceMotion ? 0 : 1.6 });
-  });
-
-  // Mark the link of the section we're reading (the one crossing the middle of the screen).
-  const links = [...nav.querySelectorAll('.h-nav__links a')];
+  if (!isFilm) {
+    const hero = document.getElementById('hero');
+    new IntersectionObserver(([e]) => nav.classList.toggle('is-solid', !e.isIntersecting), { rootMargin: '-80px 0px 0px' }).observe(hero);
+    nav.querySelector('[data-to-top]').addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+  }
+  const links = [...nav.querySelectorAll('.nav__links a')];
   const sections = links.map((a) => document.querySelector(a.getAttribute('href')));
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
@@ -61,96 +69,93 @@ function initNav({ lenis }) {
   sections.forEach((s) => s && io.observe(s));
 }
 
-// ---------- The phone menu: the button opens the links below the bar ----------
+// ---------- The phone menu ----------
 // Escape, choosing a link, or tapping anywhere outside closes it again.
 function initMenu() {
   const nav = document.getElementById('site-nav');
-  const button = nav.querySelector('.h-nav__menu');
+  const button = nav.querySelector('.nav__menu');
   const setOpen = (open) => {
     nav.classList.toggle('is-open', open);
     button.setAttribute('aria-expanded', String(open));
     button.setAttribute('aria-label', open ? 'Close menu' : 'Menu');
   };
   button.addEventListener('click', () => setOpen(!nav.classList.contains('is-open')));
-  nav.querySelector('.h-nav__links').addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+  nav.querySelector('.nav__links').addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && nav.classList.contains('is-open')) { setOpen(false); button.focus(); }
   });
   document.addEventListener('pointerdown', (e) => { if (!nav.contains(e.target)) setOpen(false); });
 }
 
-// ---------- Process: a glowing dot on the ridge above each step ----------
-// The ridge's height (0..1 down the painting) at points across it (0..1), measured from
-// assets/redesign/bg-process.png. The painting is always shown at its own 3:2 shape, so these
-// hold at any width. For each step we find the middle of its column, read the ridge height
-// there, and put the dot on it; a dotted line joins the dots.
-const RIDGE = [[0, 0.678], [0.0625, 0.676], [0.125, 0.667], [0.1875, 0.669], [0.25, 0.659], [0.3125, 0.647], [0.375, 0.645], [0.4375, 0.622], [0.5, 0.618], [0.5625, 0.614], [0.625, 0.606], [0.6875, 0.591], [0.75, 0.563], [0.8125, 0.575], [0.875, 0.578], [0.9375, 0.6], [1, 0.612]];
-function ridgeAt(f) {
-  for (let i = 1; i < RIDGE.length; i++) {
-    const [x0, y0] = RIDGE[i - 1], [x1, y1] = RIDGE[i];
-    if (f <= x1) return y0 + ((y1 - y0) * (f - x0)) / (x1 - x0);
-  }
-  return RIDGE[RIDGE.length - 1][1];
-}
-function initProcess() {
-  const art = document.querySelector('.process__art');
-  const dots = [...art.querySelectorAll('.process__dot')];
-  const line = art.querySelector('.process__line polyline');
-  const steps = [...document.querySelectorAll('.process__steps .step')];
-  function place() {
-    const box = art.getBoundingClientRect();
-    if (!box.width) return;
-    // Phones show the steps as a 2 x 2 grid: there the dots take four equal places instead.
-    const twoRows = steps[2].offsetTop > steps[0].offsetTop + 10;
-    const points = steps.map((step, i) => {
-      const r = step.getBoundingClientRect();
-      const x = twoRows ? ((i + 0.5) / 4) * box.width : r.left + r.width / 2 - box.left;
-      const y = ridgeAt(x / box.width) * box.height;
-      dots[i].style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
+// ---------- Services: the active line and its piece of gear ----------
+// The active row is the one under the pointer or keyboard focus; otherwise the one in the middle
+// of the screen, so the gear changes gently as you scroll the list too.
+function initServices({ lenis }) {
+  const rows = [...document.querySelectorAll('.svc__row')];
+  const pics = [...document.querySelectorAll('.svc__gear img')];
+  const wide = window.matchMedia('(min-width: 901px)');
+  let hovered = null, centred = rows[0];
+  const show = () => {
+    const row = hovered || centred;
+    rows.forEach((r) => r.classList.toggle('is-active', r === row));
+    pics.forEach((img) => img.classList.toggle('is-active', img.dataset.gear === row?.dataset.gear));
+  };
+  for (const r of rows) {
+    r.addEventListener('pointerenter', () => { hovered = r; show(); });
+    r.addEventListener('pointerleave', () => { hovered = null; show(); });
+    r.addEventListener('focus', () => { hovered = r; show(); });
+    r.addEventListener('blur', () => { hovered = null; show(); });
+    // Choosing a service: the contact form opens with that need already ticked.
+    r.addEventListener('click', (e) => {
+      e.preventDefault();
+      const box = document.querySelector(`#contact-form input[name="need"][value="${r.dataset.need}"]`);
+      if (box) box.checked = true;
+      openForm(false);
+      lenis.scrollTo('#contact', { duration: reduceMotion ? 0 : 1.6 });
+      setTimeout(() => document.getElementById('f-name').focus({ preventScroll: true }), reduceMotion ? 0 : 1600);
     });
-    line.setAttribute('points', points.join(' '));
   }
-  new ResizeObserver(place).observe(art);
-  place();
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { centred = e.target; show(); }
+  }, { rootMargin: '-48% 0px -48% 0px' });
+  rows.forEach((r) => io.observe(r));
+  // The pictures only download on screens that show them, as the section nears.
+  if (wide.matches) {
+    whenNear(document.getElementById('services'), () => {
+      for (const img of pics) { img.srcset = img.dataset.srcset; img.src = img.dataset.src; }
+    }, '150% 0px');
+  }
+  show();
 }
 
-// ---------- The work slider ----------
-// The track scrolls sideways by itself (a swipe, a trackpad, the keyboard). The arrows move it one
-// slide at a time; "01 / 03" and the progress line follow whichever slide is in the middle.
-function initSlider() {
-  const root = document.querySelector('[data-slider]');
-  const track = root.querySelector('.slider__track');
+// ---------- Work: the 3D ridge (desktop) or the swipe slider ----------
+function initWork({ core }) {
+  const root = document.querySelector('[data-ridge]');
+  const track = root.querySelector('[data-track]');
   const slides = [...track.querySelectorAll('.slide')];
   const current = root.querySelector('[data-current]');
-  const bar = root.querySelector('[data-progress]');
   const prev = root.querySelector('[data-prev]');
   const next = root.querySelector('[data-next]');
-  let index = 0;
+  let index = -1;
+  let ridge = null;   // the 3D ridge, once loaded
 
-  // Slides line up with the page's left edge (the track's left padding, css/home.css), so
-  // "showing slide i" means scrolling to its left edge minus that padding.
-  const startOf = (s) => s.offsetLeft - track.offsetLeft - parseFloat(getComputedStyle(track).paddingLeft);
-  // Which slide is closest to that resting place right now.
-  function nearest() {
-    let best = 0, dist = Infinity;
-    slides.forEach((s, i) => {
-      const d = Math.abs(startOf(s) - track.scrollLeft);
-      if (d < dist) { dist = d; best = i; }
-    });
-    return best;
-  }
+  // Show project i: the counter, the buttons, and (with 3D) which words are shown.
   function show(i) {
+    if (i === index) return;
     index = i;
     current.textContent = String(i + 1).padStart(2, '0');
-    bar.style.transform = `scaleX(${(i + 1) / slides.length})`;
     prev.disabled = i === 0;
     next.disabled = i === slides.length - 1;
-    slides.forEach((s, n) => s.classList.toggle('is-current', n === i));
+    slides.forEach((s, n) => {
+      s.classList.toggle('is-current', n === i);
+      if (ridge) s.inert = n !== i;   // only the front project's link can be reached
+    });
   }
   function go(i) {
-    const s = slides[Math.max(0, Math.min(slides.length - 1, i))];
-    track.scrollTo({ left: startOf(s), behavior: reduceMotion ? 'auto' : 'smooth' });
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    if (ridge) { ridge.goTo(i); return; }
+    const s = slides[i];
+    track.scrollTo({ left: s.offsetLeft - track.offsetLeft - parseFloat(getComputedStyle(track).paddingLeft), behavior: reduceMotion ? 'auto' : 'smooth' });
   }
   prev.addEventListener('click', () => go(index - 1));
   next.addEventListener('click', () => go(index + 1));
@@ -158,112 +163,129 @@ function initSlider() {
     if (e.key === 'ArrowRight') { e.preventDefault(); go(index + 1); }
     if (e.key === 'ArrowLeft') { e.preventDefault(); go(index - 1); }
   });
+  // The slider: whichever slide is nearest its resting place is the current one.
   let ticking = false;
   track.addEventListener('scroll', () => {
-    if (ticking) return;
+    if (ticking || ridge) return;
     ticking = true;
-    requestAnimationFrame(() => { ticking = false; const i = nearest(); if (i !== index) show(i); });
+    requestAnimationFrame(() => {
+      ticking = false;
+      let best = 0, dist = Infinity;
+      slides.forEach((s, n) => {
+        const d = Math.abs(s.offsetLeft - track.offsetLeft - parseFloat(getComputedStyle(track).paddingLeft) - track.scrollLeft);
+        if (d < dist) { dist = d; best = n; }
+      });
+      show(best);
+    });
   }, { passive: true });
   show(0);
 
   // Back from a case study on the phone page (?return=dermae): open the slider on that project.
   const back = new URLSearchParams(location.search).get('return');
   const at = slides.findIndex((s) => s.dataset.slug === back);
-  if (at > 0 && !isFilm) requestAnimationFrame(() => { track.scrollLeft = startOf(slides[at]); show(at); });
-}
+  if (at > 0 && !isFilm) requestAnimationFrame(() => { go(at); show(at); });
 
-// ---------- The showreel ----------
-// A <dialog> (the browser's own lightbox: it traps focus and closes with Escape). The video is only
-// fetched when it's opened, and it stops when it's closed.
-function initShowreel() {
-  const dialog = document.getElementById('showreel');
-  const video = dialog.querySelector('video');
-  const length = document.querySelector('[data-reel-length]');
-  // Show the real length, read from the file itself once it's known.
-  video.addEventListener('loadedmetadata', () => {
-    const s = Math.round(video.duration);
-    if (length && s) length.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-  });
-  for (const b of document.querySelectorAll('[data-showreel]')) {
-    b.addEventListener('click', () => {
-      dialog.showModal();
-      requestAnimationFrame(() => dialog.classList.add('is-open'));
-      video.play().catch(() => {});
-    });
+  // Desktop with 3D: load the ridge as the section nears.
+  if (core && !document.documentElement.classList.contains('no-film')) {
+    whenNear(root, async () => {
+      try {
+        const { createRidge } = await import('../carousels/ridge.js');
+        ridge = await createRidge({ root, slides, core, onChange: show });
+        index = -1;
+        show(ridge.index);
+      } catch (err) {
+        console.error('[ridge] staying with the slider', err);
+      }
+    }, '150% 0px');
   }
-  const close = () => {
-    dialog.classList.remove('is-open');
-    video.pause();
-    // Let the soft fade finish, then close for real.
-    setTimeout(() => dialog.close(), reduceMotion ? 0 : 350);
-  };
-  dialog.querySelector('[data-close-reel]').addEventListener('click', close);
-  // A click on the dark backdrop (outside the video) closes it too.
-  dialog.addEventListener('click', (e) => { if (e.target === dialog) close(); });
-  dialog.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
 }
 
-// ---------- About: "More about me" opens the rest of the story in place ----------
+// ---------- Process: the trail draws itself as you scroll ----------
+// --drawn (0..1) on the trail sets how much of the glowing line is drawn (css/home.css); each stage
+// lights up once the line has reached it.
+function initProcess({ core }) {
+  const trail = document.querySelector('.trail');
+  const stages = [...trail.querySelectorAll('.stage')];
+  const ats = stages.map((s) => parseFloat(s.style.getPropertyValue('--at')) || 0);
+  let shown = -1;
+  const set = (v) => {
+    v = Math.round(v * 500) / 500;
+    if (v === shown) return;
+    shown = v;
+    trail.style.setProperty('--drawn', v);
+    stages.forEach((s, i) => s.classList.toggle('is-lit', v >= ats[i] - 0.02));
+  };
+  if (reduceMotion) { set(1); return; }
+  if (core) {
+    // Desktop: the line follows the scroll exactly, from the trail entering to its middle.
+    core.ScrollTrigger.create({
+      trigger: trail,
+      start: 'top 85%',
+      end: 'bottom 55%',
+      onUpdate: (st) => set(st.progress),
+    });
+    return;
+  }
+  // Phones: the same, measured once per frame while the trail is on screen.
+  let raf = 0, on = false;
+  const measure = () => {
+    raf = 0;
+    const r = trail.getBoundingClientRect();
+    const h = window.innerHeight;
+    set(Math.min(Math.max((h * 0.85 - r.top) / (r.height + h * 0.3), 0), 1));
+  };
+  new IntersectionObserver(([e]) => { on = e.isIntersecting; if (on) measure(); }).observe(trail);
+  window.addEventListener('scroll', () => { if (on && !raf) raf = requestAnimationFrame(measure); }, { passive: true });
+}
+
+// ---------- About: the portrait's mask opens as the section arrives ----------
 function initAbout() {
-  const button = document.querySelector('[data-about-more]');
-  const more = document.getElementById('about-more');
-  button.addEventListener('click', () => {
-    const open = more.hidden;
-    more.hidden = !open;
-    button.setAttribute('aria-expanded', String(open));
-    button.querySelector('[data-label]').textContent = open ? 'Show less' : 'More about me';
-  });
+  markIn(document.getElementById('about'), { margin: '0px 0px -25% 0px' });
 }
 
 // ---------- The testimonial: shown only once a real quote has been written in ----------
 function initTestimonial() {
   const section = document.getElementById('testimonial');
-  const quote = section.querySelector('[data-quote]');
-  section.hidden = quote.textContent.trim() === '';
+  section.hidden = section.querySelector('[data-quote]').textContent.trim() === '';
 }
 
-// ---------- The tools carousel: a touch pauses it (a mouse pauses it with CSS :hover) ----------
-function initCarousel() {
-  const c = document.querySelector('[data-carousel]');
-  let resume;
-  c.addEventListener('touchstart', () => { clearTimeout(resume); c.classList.add('is-paused'); }, { passive: true });
-  c.addEventListener('touchend', () => { resume = setTimeout(() => c.classList.remove('is-paused'), 1500); });
-}
-
-// ---------- Every section's heading, text and cards fade up gently as they arrive, once ----------
-// (16 px, 600 ms, ease-out: css/home.css. Things in the same section follow each other by 80 ms.)
-function initReveal() {
-  if (reduceMotion) return;
-  const items = document.querySelectorAll('.h-eyebrow, .h-title, .h-lead, .card, .slider, .step, .about__story, .about__chips, [data-about-more], .stat, .tools__note, .carousel, .contact__lead, .contact__actions, .h-form, .h-footer__brand, .h-footer__col');
-  const io = new IntersectionObserver((entries) => {
-    for (const e of entries) {
-      if (!e.isIntersecting) continue;
-      const el = e.target;
-      el.classList.add('is-in');
-      io.unobserve(el);
-      // Once it has arrived, hand the element back to its own styles (so a card's hover lift
-      // isn't slowed by the arrival's delay).
-      el.addEventListener('transitionend', () => {
-        el.classList.remove('reveal', 'is-in');
-        el.style.transitionDelay = '';
-      }, { once: true });
+// ---------- Tools: lanterns (desktop 3D) or the marquee (phones) ----------
+function initTools({ core }) {
+  const root = document.querySelector('[data-lanterns]');
+  const list = root.querySelector('.lanterns__list');
+  if (core && !document.documentElement.classList.contains('no-film')) {
+    whenNear(root, async () => {
+      try {
+        const { createLanterns } = await import('../carousels/lanterns.js');
+        await createLanterns({ root, core });
+      } catch (err) {
+        console.error('[lanterns] staying with the marquee', err);
+        makeMarquee();
+      }
+    }, '150% 0px');
+    return;
+  }
+  makeMarquee();
+  function makeMarquee() {
+    // A seamless loop: the same logos twice in a row; the copies are hidden from screen readers.
+    if (list.dataset.looped) return;
+    list.dataset.looped = '1';
+    for (const li of [...list.children]) {
+      const copy = li.cloneNode(true);
+      copy.setAttribute('aria-hidden', 'true');
+      list.appendChild(copy);
     }
-  }, { rootMargin: '0px 0px -12% 0px' });
-  const count = new Map();
-  items.forEach((el) => {
-    const section = el.closest('section, footer');
-    const n = count.get(section) || 0;
-    count.set(section, n + 1);
-    el.classList.add('reveal');
-    el.style.transitionDelay = `${Math.min(n, 6) * 0.08}s`;
-    io.observe(el);
-  });
+    // A touch pauses it (a mouse pauses it with CSS :hover); it carries on a moment later.
+    let resume;
+    root.addEventListener('touchstart', () => { clearTimeout(resume); root.classList.add('is-paused'); }, { passive: true });
+    root.addEventListener('touchend', () => { resume = setTimeout(() => root.classList.remove('is-paused'), 1800); });
+  }
 }
 
-// ---------- Contact form ----------
-// On the film, "Send a message" opens the form in place. The fields are checked kindly before
-// sending. Until the Formspree form is connected (the action still says FORMSPREE_ENDPOINT), it
-// says so plainly instead of pretending to send.
+// ---------- Contact ----------
+// The lantern brightens as the section arrives. On the film, "Send a message" opens the form in
+// place. The fields are checked kindly before sending. Until the Formspree form is connected (the
+// action still says FORMSPREE_ENDPOINT), it says so plainly instead of pretending to send.
 function openForm(focus = true) {
   const form = document.getElementById('contact-form');
   form.classList.add('is-open');
@@ -271,6 +293,7 @@ function openForm(focus = true) {
   if (focus) form.elements.name.focus({ preventScroll: true });
 }
 function initContact({ lenis }) {
+  markIn(document.getElementById('contact'), { margin: '0px 0px -30% 0px' });
   const form = document.getElementById('contact-form');
   const status = document.getElementById('form-status');
   const button = form.querySelector('button[type="submit"]');
@@ -299,7 +322,6 @@ function initContact({ lenis }) {
     if (message.value.trim().length < 10) problems.push(message);
     return problems;
   }
-  // Clear a field's error as soon as it's fixed.
   form.addEventListener('input', (e) => { if (e.target.closest('.field.has-error')) check(); });
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -319,7 +341,7 @@ function initContact({ lenis }) {
       const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
       if (!res.ok) throw new Error(`status ${res.status}`);
       const done = document.createElement('div');
-      done.className = 'h-form-done';
+      done.className = 'form-done';
       done.setAttribute('role', 'status');
       done.tabIndex = -1;
       done.innerHTML = '<h3>Thank you. Your message is on its way.</h3><p>I\'ll read it properly and reply to the email you gave.</p>';
@@ -338,6 +360,7 @@ function initContact({ lenis }) {
 function initPlaceholders({ lenis }) {
   for (const a of document.querySelectorAll('[data-placeholder]')) {
     if (!a.getAttribute('href').includes(a.dataset.placeholder)) continue;
+    a.removeAttribute('target');
     a.addEventListener('click', (e) => {
       e.preventDefault();
       openForm(false);
@@ -346,4 +369,65 @@ function initPlaceholders({ lenis }) {
       document.getElementById('f-name').focus({ preventScroll: true });
     });
   }
+}
+
+// ---------- The showreel ----------
+// A <dialog> (the browser's own lightbox: it traps focus and closes with Escape). The video is only
+// fetched when it's opened, and it stops when it's closed.
+function initShowreel() {
+  const dialog = document.getElementById('showreel');
+  const video = dialog.querySelector('video');
+  const length = document.querySelector('[data-reel-length]');
+  video.addEventListener('loadedmetadata', () => {
+    const s = Math.round(video.duration);
+    if (length && s) length.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  });
+  for (const b of document.querySelectorAll('[data-showreel]')) {
+    b.addEventListener('click', () => {
+      dialog.showModal();
+      requestAnimationFrame(() => dialog.classList.add('is-open'));
+      video.play().catch(() => {});
+    });
+  }
+  const close = () => {
+    dialog.classList.remove('is-open');
+    video.pause();
+    setTimeout(() => dialog.close(), reduceMotion ? 0 : 350);
+  };
+  dialog.querySelector('[data-close-reel]').addEventListener('click', close);
+  dialog.addEventListener('click', (e) => { if (e.target === dialog) close(); });
+  dialog.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
+}
+
+// ---------- Arrivals ----------
+// Desktop: each section heading is set line by line as it arrives (the same reveal as the film's
+// words). Everywhere: the blocks beneath fade up softly, once, a beat after one another.
+function initReveal({ core }) {
+  if (reduceMotion) return;
+  if (core) {
+    for (const h of document.querySelectorAll('.page .heading')) {
+      h.style.opacity = '0';
+      const tl = core.lineReveal(h, { stagger: 0.1 });
+      core.ScrollTrigger.create({ trigger: h, start: 'top 82%', once: true, onEnter: () => tl.play() });
+    }
+  }
+  const items = document.querySelectorAll('.page .lead, .svc li, .stage, .about__standfirst, .about__story, .about__chips, .about__facts, .contact__actions, .footer__brand, .footer__col, .ridge__controls' + (core ? '' : ', .page .heading'));
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      e.target.classList.add('is-in');
+      io.unobserve(e.target);
+      // Once arrived, hand the element back to its own styles (so later hovers aren't delayed).
+      e.target.addEventListener('transitionend', () => { e.target.classList.remove('reveal', 'is-in'); e.target.style.transitionDelay = ''; }, { once: true });
+    }
+  }, { rootMargin: '0px 0px -10% 0px' });
+  const count = new Map();
+  items.forEach((el) => {
+    const group = el.closest('section, footer');
+    const n = count.get(group) || 0;
+    count.set(group, n + 1);
+    el.classList.add('reveal');
+    el.style.transitionDelay = `${Math.min(n, 5) * 0.08}s`;
+    io.observe(el);
+  });
 }
