@@ -124,7 +124,6 @@ export async function createRidge({ root, slides, core, onChange }) {
   const spans = [];
   for (let i = 1; i + 1 < tops.length; i += 2) spans.push([tops[i], tops[i + 1]]);
   // and a short run off each end, into the haze
-  spans.unshift([tops[0].clone().add(new THREE.Vector3(-3.5, -0.6, -1)), tops[0]]);
   spans.push([tops[tops.length - 1], tops[tops.length - 1].clone().add(new THREE.Vector3(3.5, 0.4, -1))]);
   const { strings, flags } = buildFlags(spans);
   scene.add(strings, flags);
@@ -312,6 +311,10 @@ function ridgeLayer({ y, z, amp, colour, snow = false, seed = 1, wide = 40 }) {
   return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, fog: true }));
 }
 
+// Fade by where a point lands on screen: -1 is the left edge of the view, 1 the right.
+// Gone over the left third (the words), fully there from the middle onwards.
+const SCREEN_FADE = 'vFade = smoothstep(-0.42, 0.02, gl_Position.x / gl_Position.w);';
+
 // Strings of small flags hung between the pole tops, sagging gently. One instanced mesh.
 function buildFlags(spans) {
   const pts = [];
@@ -330,7 +333,26 @@ function buildFlags(spans) {
       if (k > 0 && k < count) flagsAt.push(p);
     }
   }
-  const strings = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: C.string, transparent: true, opacity: 0.7, fog: true }));
+  // The strings and flags fade away towards the left of the view, where the project's words
+  // sit, so they never run through the text (SCREEN_FADE, worked out on the graphics chip).
+  const strings = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color(C.string) } },
+    vertexShader: /* glsl */`
+      varying float vFade;
+      void main() {
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        ${SCREEN_FADE}
+      }`,
+    fragmentShader: /* glsl */`
+      uniform vec3 uColor;
+      varying float vFade;
+      void main() {
+        gl_FragColor = vec4(uColor, 0.7 * vFade);
+        #include <colorspace_fragment>
+      }`,
+    transparent: true,
+    depthWrite: false,
+  }));
   // Each flag hangs from the string: its top edge stays put, its bottom edge sways.
   const geo = new THREE.PlaneGeometry(0.2, 0.26, 1, 3);
   geo.translate(0, -0.13, 0);
@@ -341,7 +363,7 @@ function buildFlags(spans) {
       attribute float phase;
       uniform float uTime;
       varying vec3 vTint;
-      varying float vDepth;
+      varying float vDepth, vFade;
       void main() {
         vTint = tint;
         vec3 p = position;
@@ -351,18 +373,21 @@ function buildFlags(spans) {
         vec4 mv = modelViewMatrix * instanceMatrix * vec4(p, 1.0);
         vDepth = -mv.z;
         gl_Position = projectionMatrix * mv;
+        ${SCREEN_FADE}
       }`,
     fragmentShader: /* glsl */`
       uniform vec3 fogColor;
       uniform float fogNear, fogFar;
       varying vec3 vTint;
-      varying float vDepth;
+      varying float vDepth, vFade;
       void main() {
         vec3 c = mix(vTint, fogColor, smoothstep(fogNear, fogFar, vDepth) * 0.9 + 0.12);
-        gl_FragColor = vec4(c, 1.0);
+        if (vFade < 0.01) discard;
+        gl_FragColor = vec4(c, vFade);
         #include <colorspace_fragment>
       }`,
     side: THREE.DoubleSide,
+    transparent: true,
   });
   const flags = new THREE.InstancedMesh(geo, material, flagsAt.length);
   const tint = new Float32Array(flagsAt.length * 3), phase = new Float32Array(flagsAt.length);

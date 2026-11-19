@@ -550,7 +550,7 @@
 @keyframes marquee { to { transform: translateX(-50%); } }
 /* With 3D (desktop): the lanterns are drawn on the canvas; the list stays for screen readers. */
 .lanterns.is-3d .lanterns__stage { display: block; height: clamp(380px, 52vh, 560px); }
-.lanterns.is-3d .lanterns__front { display: block; position: relative; z-index: 2; text-align: center; color: var(--cream); min-height: 1.4em; margin-top: calc(-1 * var(--s-6)); }
+.lanterns.is-3d .lanterns__front { display: block; position: relative; z-index: 2; text-align: center; color: var(--cream); min-height: 1.4em; margin-top: var(--s-2); }
 .lanterns.is-3d .lanterns__marquee {
   position: absolute !important;
   width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0);
@@ -720,8 +720,10 @@
   }
   .about__text { padding: 0 var(--page-gutter); margin-top: calc(-1 * var(--s-8)); }
   .about__facts { grid-template-columns: repeat(2, auto); }
-  .contact__art { width: 100%; height: 62vh; inset: 0 0 auto 0; -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 48%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 48%, transparent 100%); }
-  .contact { align-items: start; padding-top: 40vh; }
+  /* Phones: the tent sits above the words, never behind them. */
+  .contact__art { width: 100%; height: min(58vh, 520px); inset: 0 0 auto 0; -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 68%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 68%, transparent 100%); }
+  .contact__art img { object-position: 82% 70%; }
+  .contact { align-items: start; padding-top: min(50vh, 450px); }
   .contact__glow { width: 180px; height: 180px; }
   .footer__grid { grid-template-columns: 1fr 1fr; }
   .footer__brand { grid-column: 1 / -1; }
@@ -766,7 +768,8 @@
   width: auto;
   padding: calc(76px + var(--s-5)) var(--page-gutter) 0;
 }
-.mobile-site .hero__title { font-size: clamp(40px, 11.4vw, 60px); line-height: 1; }
+.mobile-site .hero__title { font-size: clamp(36px, 10.2vw, 60px); line-height: 1; }
+.mobile-site .hero__title .line { white-space: normal; }
 .mobile-site .hero__title .line > *, .mobile-site .hero__title .line { animation: rise-in 1.2s var(--ease-arrive) both; }
 .mobile-site .hero__title .line:nth-child(2) { animation-delay: 0.1s; }
 .mobile-site .hero__title .line:nth-child(3) { animation-delay: 0.2s; }
