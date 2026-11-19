@@ -10,14 +10,16 @@ const isFilm = !document.documentElement.classList.contains('mobile-site');
 // scrollTo() that uses the browser's own scrolling (js/mobile/mobile.js).
 export function initPages({ lenis }) {
   initNav({ lenis });
+  initMenu();
   initSlider();
+  initProcess();
   initShowreel();
   initAbout();
   initTestimonial();
   initCarousel();
   initContact({ lenis });
   initPlaceholders({ lenis });
-  if (isFilm) initReveal();
+  initReveal();
 }
 
 // ---------- The top bar ----------
@@ -59,6 +61,60 @@ function initNav({ lenis }) {
   sections.forEach((s) => s && io.observe(s));
 }
 
+// ---------- The phone menu: the button opens the links below the bar ----------
+// Escape, choosing a link, or tapping anywhere outside closes it again.
+function initMenu() {
+  const nav = document.getElementById('site-nav');
+  const button = nav.querySelector('.h-nav__menu');
+  const setOpen = (open) => {
+    nav.classList.toggle('is-open', open);
+    button.setAttribute('aria-expanded', String(open));
+    button.setAttribute('aria-label', open ? 'Close menu' : 'Menu');
+  };
+  button.addEventListener('click', () => setOpen(!nav.classList.contains('is-open')));
+  nav.querySelector('.h-nav__links').addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && nav.classList.contains('is-open')) { setOpen(false); button.focus(); }
+  });
+  document.addEventListener('pointerdown', (e) => { if (!nav.contains(e.target)) setOpen(false); });
+}
+
+// ---------- Process: a glowing dot on the ridge above each step ----------
+// The ridge's height (0..1 down the painting) at points across it (0..1), measured from
+// assets/redesign/bg-process.png. The painting is always shown at its own 3:2 shape, so these
+// hold at any width. For each step we find the middle of its column, read the ridge height
+// there, and put the dot on it; a dotted line joins the dots.
+const RIDGE = [[0, 0.678], [0.0625, 0.676], [0.125, 0.667], [0.1875, 0.669], [0.25, 0.659], [0.3125, 0.647], [0.375, 0.645], [0.4375, 0.622], [0.5, 0.618], [0.5625, 0.614], [0.625, 0.606], [0.6875, 0.591], [0.75, 0.563], [0.8125, 0.575], [0.875, 0.578], [0.9375, 0.6], [1, 0.612]];
+function ridgeAt(f) {
+  for (let i = 1; i < RIDGE.length; i++) {
+    const [x0, y0] = RIDGE[i - 1], [x1, y1] = RIDGE[i];
+    if (f <= x1) return y0 + ((y1 - y0) * (f - x0)) / (x1 - x0);
+  }
+  return RIDGE[RIDGE.length - 1][1];
+}
+function initProcess() {
+  const art = document.querySelector('.process__art');
+  const dots = [...art.querySelectorAll('.process__dot')];
+  const line = art.querySelector('.process__line polyline');
+  const steps = [...document.querySelectorAll('.process__steps .step')];
+  function place() {
+    const box = art.getBoundingClientRect();
+    if (!box.width) return;
+    // Phones show the steps as a 2 x 2 grid: there the dots take four equal places instead.
+    const twoRows = steps[2].offsetTop > steps[0].offsetTop + 10;
+    const points = steps.map((step, i) => {
+      const r = step.getBoundingClientRect();
+      const x = twoRows ? ((i + 0.5) / 4) * box.width : r.left + r.width / 2 - box.left;
+      const y = ridgeAt(x / box.width) * box.height;
+      dots[i].style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    });
+    line.setAttribute('points', points.join(' '));
+  }
+  new ResizeObserver(place).observe(art);
+  place();
+}
+
 // ---------- The work slider ----------
 // The track scrolls sideways by itself (a swipe, a trackpad, the keyboard). The arrows move it one
 // slide at a time; "01 / 03" and the progress line follow whichever slide is in the middle.
@@ -72,12 +128,14 @@ function initSlider() {
   const next = root.querySelector('[data-next]');
   let index = 0;
 
-  // Which slide's middle is closest to the track's middle.
+  // Slides line up with the page's left edge (the track's left padding, css/home.css), so
+  // "showing slide i" means scrolling to its left edge minus that padding.
+  const startOf = (s) => s.offsetLeft - track.offsetLeft - parseFloat(getComputedStyle(track).paddingLeft);
+  // Which slide is closest to that resting place right now.
   function nearest() {
-    const mid = track.scrollLeft + track.clientWidth / 2;
     let best = 0, dist = Infinity;
     slides.forEach((s, i) => {
-      const d = Math.abs(s.offsetLeft + s.offsetWidth / 2 - mid);
+      const d = Math.abs(startOf(s) - track.scrollLeft);
       if (d < dist) { dist = d; best = i; }
     });
     return best;
@@ -92,7 +150,7 @@ function initSlider() {
   }
   function go(i) {
     const s = slides[Math.max(0, Math.min(slides.length - 1, i))];
-    track.scrollTo({ left: s.offsetLeft - (track.clientWidth - s.offsetWidth) / 2, behavior: reduceMotion ? 'auto' : 'smooth' });
+    track.scrollTo({ left: startOf(s), behavior: reduceMotion ? 'auto' : 'smooth' });
   }
   prev.addEventListener('click', () => go(index - 1));
   next.addEventListener('click', () => go(index + 1));
@@ -111,7 +169,7 @@ function initSlider() {
   // Back from a case study on the phone page (?return=dermae): open the slider on that project.
   const back = new URLSearchParams(location.search).get('return');
   const at = slides.findIndex((s) => s.dataset.slug === back);
-  if (at > 0 && !isFilm) requestAnimationFrame(() => { track.scrollLeft = slides[at].offsetLeft - (track.clientWidth - slides[at].offsetWidth) / 2; show(at); });
+  if (at > 0 && !isFilm) requestAnimationFrame(() => { track.scrollLeft = startOf(slides[at]); show(at); });
 }
 
 // ---------- The showreel ----------
@@ -172,21 +230,32 @@ function initCarousel() {
   c.addEventListener('touchend', () => { resume = setTimeout(() => c.classList.remove('is-paused'), 1500); });
 }
 
-// ---------- Sections rise in gently as they arrive (film only: the phone page stays still) ----------
+// ---------- Every section's heading, text and cards fade up gently as they arrive, once ----------
+// (16 px, 600 ms, ease-out: css/home.css. Things in the same section follow each other by 80 ms.)
 function initReveal() {
   if (reduceMotion) return;
-  const items = document.querySelectorAll('.h-head, .card, .slider, .step, .about__main, .about__stats, .carousel, .contact__inner, .h-footer__grid');
+  const items = document.querySelectorAll('.h-eyebrow, .h-title, .h-lead, .card, .slider, .step, .about__story, .about__chips, [data-about-more], .stat, .tools__note, .carousel, .contact__lead, .contact__actions, .h-form, .h-footer__brand, .h-footer__col');
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (!e.isIntersecting) continue;
-      e.target.classList.add('is-in');
-      io.unobserve(e.target);
+      const el = e.target;
+      el.classList.add('is-in');
+      io.unobserve(el);
+      // Once it has arrived, hand the element back to its own styles (so a card's hover lift
+      // isn't slowed by the arrival's delay).
+      el.addEventListener('transitionend', () => {
+        el.classList.remove('reveal', 'is-in');
+        el.style.transitionDelay = '';
+      }, { once: true });
     }
   }, { rootMargin: '0px 0px -12% 0px' });
-  items.forEach((el, i) => {
+  const count = new Map();
+  items.forEach((el) => {
+    const section = el.closest('section, footer');
+    const n = count.get(section) || 0;
+    count.set(section, n + 1);
     el.classList.add('reveal');
-    // Cards in one row arrive one after another.
-    if (el.matches('.card, .step')) el.style.transitionDelay = `${(i % 4) * 0.08}s`;
+    el.style.transitionDelay = `${Math.min(n, 6) * 0.08}s`;
     io.observe(el);
   });
 }

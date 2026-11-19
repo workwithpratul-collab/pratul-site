@@ -250,7 +250,7 @@
               <span class="hero__play" aria-hidden="true"><svg class="i"><use href="#i-play"/></svg></span>
               Watch showreel <span class="hero__len" data-reel-length>0:26</span>
             </button>
-            <a class="h-link m-only" href="#about">About me</a>
+            <a class="h-btn h-btn--ghost m-only" href="#about">About me</a>
           </div>
         </div>
         <p class="hero__place" aria-hidden="true"><span>The summit</span><span>Alt. 4,410 m</span></p>
@@ -298,12 +298,15 @@
        On phones it's always there: just the name and "Book a call". -->
   <header class="h-nav" id="site-nav">
     <a class="h-nav__name" href="#top" data-to-top>Pratul</a>
-    <nav class="h-nav__links" aria-label="Sections">
+    <nav class="h-nav__links" id="nav-links" aria-label="Sections">
       <a href="#work">Work</a>
       <a href="#about">About</a>
       <a href="#process">Process</a>
+      <a class="m-only" href="#contact">Contact</a>
     </nav>
     <a class="h-btn h-btn--amber h-btn--small" href="#contact">Book a call</a>
+    <!-- On phones the links fold into a small menu that this button opens (js/pages/pages.js). -->
+    <button class="h-nav__menu" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Menu"><span></span><span></span></button>
   </header>
 
   <main id="content" class="h-page">
@@ -356,8 +359,9 @@
       <div class="slider" data-slider>
         <div class="slider__track" tabindex="0" role="region" aria-label="Projects (scroll sideways, or use the arrows below)">
           <article class="slide" data-slug="dermae" aria-label="Project 1 of 3: DERMAÉ">
-            <a class="slide__media" href="case-studies/dermae.html" tabindex="-1" aria-hidden="true">
-              <img src="assets/work/dermae-1-800.jpg" srcset="assets/work/dermae-1-800.jpg 800w, assets/work/dermae-1.jpg 1600w" sizes="(min-width: 900px) 46vw, 88vw" width="1600" height="770" loading="lazy" decoding="async" alt="">
+            <a class="browser" href="case-studies/dermae.html" tabindex="-1" aria-hidden="true">
+              <span class="browser__bar"><i></i><i></i><i></i></span>
+              <img class="browser__shot" src="assets/work/frames/dermae-720.webp" srcset="assets/work/frames/dermae-720.webp 720w, assets/work/frames/dermae-1200.webp 1200w" sizes="(min-width: 900px) 640px, 84vw" width="1200" height="750" loading="lazy" decoding="async" alt="">
             </a>
             <div class="slide__body">
               <p class="slide__kind">Dermatology clinic <span class="slide__honest">Concept</span></p>
@@ -368,8 +372,9 @@
             </div>
           </article>
           <article class="slide" data-slug="kings-garden" aria-label="Project 2 of 3: The King's Garden">
-            <a class="slide__media" href="case-studies/kings-garden.html" tabindex="-1" aria-hidden="true">
-              <img src="assets/work/kings-garden-1-800.jpg" srcset="assets/work/kings-garden-1-800.jpg 800w, assets/work/kings-garden-1.jpg 1600w" sizes="(min-width: 900px) 46vw, 88vw" width="1600" height="770" loading="lazy" decoding="async" alt="">
+            <a class="browser" href="case-studies/kings-garden.html" tabindex="-1" aria-hidden="true">
+              <span class="browser__bar"><i></i><i></i><i></i></span>
+              <img class="browser__shot" src="assets/work/frames/kings-garden-720.webp" srcset="assets/work/frames/kings-garden-720.webp 720w, assets/work/frames/kings-garden-1200.webp 1200w" sizes="(min-width: 900px) 640px, 84vw" width="1200" height="750" loading="lazy" decoding="async" alt="">
             </a>
             <div class="slide__body">
               <p class="slide__kind">Plant nursery <span class="slide__honest">Pitch demo</span></p>
@@ -380,8 +385,9 @@
             </div>
           </article>
           <article class="slide" data-slug="trinetra" aria-label="Project 3 of 3: Trinetra">
-            <a class="slide__media" href="case-studies/trinetra.html" tabindex="-1" aria-hidden="true">
-              <img src="assets/work/trinetra-3-800.jpg" srcset="assets/work/trinetra-3-800.jpg 800w, assets/work/trinetra-3.jpg 1600w" sizes="(min-width: 900px) 46vw, 88vw" width="1600" height="770" loading="lazy" decoding="async" alt="">
+            <a class="browser" href="case-studies/trinetra.html" tabindex="-1" aria-hidden="true">
+              <span class="browser__bar"><i></i><i></i><i></i></span>
+              <img class="browser__shot" src="assets/work/frames/trinetra-720.webp" srcset="assets/work/frames/trinetra-720.webp 720w, assets/work/frames/trinetra-1200.webp 1200w" sizes="(min-width: 900px) 640px, 84vw" width="1200" height="750" loading="lazy" decoding="async" alt="">
             </a>
             <div class="slide__body">
               <p class="slide__kind">Signage &amp; branding <span class="slide__honest">Concept</span></p>
@@ -404,17 +410,15 @@
     </section>
 
     <!-- ========== PROCESS ========== -->
-    <!-- The four steps sit along the ridge in the painting, rising to the right: Launch is at the
-         top. Each dot's place on the ridge (--x, --y) was measured from the painting itself, so the
-         painting is always shown at its own shape (3:2) and the dots stay on the ridge.
-         On phones the steps sit in four equal columns, so the dots use --mx / --my instead. -->
+    <!-- The four steps sit in one row on a calm dark band below the ridge. A glowing dot on the
+         ridge line sits right above each step, joined by a dotted amber line: js/pages/pages.js
+         places them, using the ridge's height measured from the painting (always shown at its own
+         3:2 shape, so the measurements hold). Launch is at the top of the ridge. -->
     <section class="h-section process" id="process" aria-labelledby="process-title">
       <div class="process__art" aria-hidden="true">
         <img class="process__img" src="assets/redesign/bg-process.webp" srcset="assets/redesign/bg-process-800.webp 800w, assets/redesign/bg-process.webp 1536w" sizes="100vw" width="1536" height="1024" loading="lazy" decoding="async" alt="">
-        <span class="process__dot" style="--x: 13%; --y: 66.8%; --mx: 12.5%; --my: 66.9%"></span>
-        <span class="process__dot" style="--x: 37.5%; --y: 64%; --mx: 37.5%; --my: 64%"></span>
-        <span class="process__dot" style="--x: 58%; --y: 61.8%; --mx: 62.5%; --my: 60.6%"></span>
-        <span class="process__dot process__dot--top" style="--x: 77%; --y: 56%; --mx: 87.5%; --my: 57.2%"></span>
+        <svg class="process__line" aria-hidden="true"><polyline/></svg>
+        <span class="process__dot"></span><span class="process__dot"></span><span class="process__dot"></span><span class="process__dot process__dot--top"></span>
       </div>
       <div class="h-wrap process__head">
         <header class="h-head h-head--split">
@@ -426,25 +430,25 @@
         </header>
       </div>
       <ol class="process__steps">
-        <li class="step" style="--x: 13%; --y: 66.8%">
+        <li class="step">
           <svg class="i step__icon" aria-hidden="true"><use href="#i-search"/></svg>
           <p class="step__num">01</p>
           <h3 class="step__title">Discover</h3>
           <p class="step__text">Understand your business, users and goals.</p>
         </li>
-        <li class="step" style="--x: 37.5%; --y: 64%">
+        <li class="step">
           <svg class="i step__icon" aria-hidden="true"><use href="#i-layers"/></svg>
           <p class="step__num">02</p>
           <h3 class="step__title">Design</h3>
           <p class="step__text">Turn what we learn into a clean design that guides visitors to act.</p>
         </li>
-        <li class="step" style="--x: 58%; --y: 61.8%">
+        <li class="step">
           <svg class="i step__icon" aria-hidden="true"><use href="#i-code"/></svg>
           <p class="step__num">03</p>
           <h3 class="step__title">Build</h3>
           <p class="step__text">Bring the design to life with clean, fast code.</p>
         </li>
-        <li class="step step--top" style="--x: 77%; --y: 56%">
+        <li class="step">
           <svg class="i step__icon" aria-hidden="true"><use href="#i-rocket"/></svg>
           <p class="step__num">04</p>
           <h3 class="step__title">Launch</h3>

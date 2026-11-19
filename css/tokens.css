@@ -175,17 +175,23 @@
   --h-bg-plum: #221d36;                     /* plum: alternate sections, the footer */
   --h-bg-deep: #17152b;                     /* the darkest value: never black */
   --h-cream: #f3ece2;                       /* main text */
-  --h-lavender: #b4aac8;                    /* secondary text */
-  --h-lavender-soft: rgba(180, 170, 200, 0.7);
+  --h-lavender: #b9b0cc;                    /* secondary text */
+  --h-lavender-soft: rgba(185, 176, 204, 0.8);
   --h-amber: #f6a04d;                       /* buttons, highlights, "move" */
   --h-amber-hover: #ffb46b;
   --h-amber-ink: #1f1426;                   /* text on an amber button */
   --h-amber-glow: rgba(246, 160, 77, 0.55); /* the glowing dots on the process ridge */
   --h-line: rgba(243, 236, 226, 0.12);      /* hairlines and card borders */
   --h-line-strong: rgba(243, 236, 226, 0.3);
-  --h-card: rgba(243, 236, 226, 0.04);      /* the faint lift of a card */
-  --h-card-hover: rgba(243, 236, 226, 0.07);
-  --h-glass: rgba(28, 26, 51, 0.72);        /* the top bar once you've scrolled past the hero */
+  --h-card: rgba(255, 255, 255, 0.03);      /* the faint lift of a card */
+  --h-card-hover: rgba(255, 255, 255, 0.05);
+  --h-card-line: rgba(255, 255, 255, 0.08); /* a card's border */
+  --h-amber-line: rgba(246, 160, 77, 0.3);  /* a hovered card's border */
+  --h-amber-halo: rgba(246, 160, 77, 0.1);  /* a hovered card's soft glow */
+  --h-nav-line: rgba(255, 255, 255, 0.06);  /* the faint line under the top bar */
+  --h-reflect: rgba(255, 255, 255, 0.14);   /* the tools' reflection (only its alpha matters) */
+  --h-band: rgba(28, 26, 51, 0.92);         /* the calm dark band under the process ridge */
+  --h-glass: rgba(28, 26, 51, 0.7);        /* the top bar once you've scrolled past the hero */
   --h-scrim: rgba(28, 26, 51, 0.82);        /* behind the showreel player */
   --h-shade: rgba(23, 21, 43, 0.65);        /* the soft shade that keeps hero text readable */
   --h-white: #ffffff;                       /* the Next.js logo's mark */
