@@ -39,11 +39,12 @@ Benchmark: my King's Garden site. This must be clearly better: sharper, smoother
     (sky.js, terrain.js, forest.js, mist.js, camp.js, trekker.js, cameraPath.js)
   - also in `js/world/`: journey.js (the film's script: places, stops, light), ridge.js, grass.js,
     meadow.js and summit.js (one per zone), palette.js (colours), glsl.js (shader helpers)
-  - Phase 7 (mobile): js/device.js picks the version before the page draws (film / mobile / calm);
-    main.js then loads js/film.js (the film) or js/mobile/ (mobile.js, hero.js, scenes.js, work.js, gear.js).
-    Mobile styles live in css/mobile.css (every rule scoped to .mobile-site); stills and small gear
-    paintings in assets/mobile/, phone-sized videos in recordings/mobile/. Add ?mode=film|mobile|calm to
-    the address to force a version while testing.
+  - Redesign: js/device.js picks the version before the page draws (film / mobile / calm);
+    main.js then loads js/film.js (the film, which ends by cross-fading into the summit hero) or
+    js/mobile/mobile.js (phones and portrait tablets: no film, no 3D). Both share js/pages/pages.js and
+    css/home.css (the hero and every section below it). Images in assets/redesign/, tool logos in
+    assets/tools/, the showreel in recordings/showreel.mp4. css/pages.css and css/mobile.css now only
+    serve the case study pages and 404. Add ?mode=film|mobile|calm to the address to force a version.
 - Desktop first. The mobile version comes later (Phase 7), so don't over-optimise for phones yet.
 
 ## Folders

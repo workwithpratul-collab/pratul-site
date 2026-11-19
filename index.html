@@ -8,7 +8,7 @@
   <script src="js/device.js"></script>
   <title>Pratul · Web designer and developer · The Ascent</title>
   <meta name="description" content="I'm Pratul, a web designer and developer. I build websites that stand out, for businesses that refuse to blend in: cinematic scroll films, interactive 3D, and design that guides visitors to book or buy.">
-  <meta name="theme-color" content="#070b1a">
+  <meta name="theme-color" content="#1c1a33">
 
   <!-- Sharing previews (WhatsApp, LinkedIn, X...). TODO(Pratul): replace SITE_URL with your domain. -->
   <link rel="canonical" href="https://SITE_URL/">
@@ -45,17 +45,15 @@
        a mono for small labels. To be self-hosted later. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&family=Manrope:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/pages.css">
-  <!-- The mobile page (phones and portrait tablets). Every rule in it applies only when
-       js/device.js chose the mobile or calm version, so the film never sees it. -->
-  <link rel="stylesheet" href="css/mobile.css">
+  <!-- The summit hero and every section below it, on the film and on phones. -->
+  <link rel="stylesheet" href="css/home.css">
 
   <!--
     The import map tells the browser where to find each library when our code says
@@ -94,6 +92,8 @@
     // report, it creeps gently towards 15% while the code downloads. The number and the trail
     // ease towards the target, so they never jump.
     (function () {
+      // (The phone page has no film, so no loading screen either.)
+      if (document.documentElement.classList.contains('mobile-site')) return;
       var curtain = document.getElementById('curtain');
       var count = document.getElementById('loader-count');
       var trail = document.getElementById('loader-trail');
@@ -203,12 +203,12 @@
         <nav class="gear-ui" id="gear-ui" aria-labelledby="gear-title" hidden>
           <p class="gear-ui__title" id="gear-title">Gear check <span>Every item is a skill</span></p>
           <ul class="gear-ui__list">
-            <li><a class="gear-ui__item" data-item="camera" href="#services-films"><span class="gear-ui__label"><span class="gear-ui__name">Camera</span><span class="gear-ui__tip">Cinematic scroll films that make a brand feel big.</span></span></a></li>
-            <li><a class="gear-ui__item" data-item="lantern" href="#services-3d"><span class="gear-ui__label"><span class="gear-ui__name">Lantern</span><span class="gear-ui__tip">3D and lighting effects visitors can play with.</span></span></a></li>
-            <li><a class="gear-ui__item" data-item="compass" href="#services-design"><span class="gear-ui__label"><span class="gear-ui__name">Compass</span><span class="gear-ui__tip">Clear design that guides visitors to book or buy.</span></span></a></li>
-            <li><a class="gear-ui__item" data-item="map" href="#services-seo"><span class="gear-ui__label"><span class="gear-ui__name">Map</span><span class="gear-ui__tip">SEO, so customers can find you on Google.</span></span></a></li>
-            <li><a class="gear-ui__item" data-item="rope" href="#services-booking"><span class="gear-ui__label"><span class="gear-ui__name">Rope</span><span class="gear-ui__tip">Forms, booking and WhatsApp flows that hold together.</span></span></a></li>
-            <li><a class="gear-ui__item" data-item="watch" href="#services-speed"><span class="gear-ui__label"><span class="gear-ui__name">Watch</span><span class="gear-ui__tip">Fast loading, so nobody waits.</span></span></a></li>
+            <li><a class="gear-ui__item" data-item="camera" href="#services"><span class="gear-ui__label"><span class="gear-ui__name">Camera</span><span class="gear-ui__tip">Cinematic scroll films that make a brand feel big.</span></span></a></li>
+            <li><a class="gear-ui__item" data-item="lantern" href="#services"><span class="gear-ui__label"><span class="gear-ui__name">Lantern</span><span class="gear-ui__tip">3D and lighting effects visitors can play with.</span></span></a></li>
+            <li><a class="gear-ui__item" data-item="compass" href="#services"><span class="gear-ui__label"><span class="gear-ui__name">Compass</span><span class="gear-ui__tip">Clear design that guides visitors to book or buy.</span></span></a></li>
+            <li><a class="gear-ui__item" data-item="map" href="#services"><span class="gear-ui__label"><span class="gear-ui__name">Map</span><span class="gear-ui__tip">SEO, so customers can find you on Google.</span></span></a></li>
+            <li><a class="gear-ui__item" data-item="rope" href="#services"><span class="gear-ui__label"><span class="gear-ui__name">Rope</span><span class="gear-ui__tip">Forms, booking and WhatsApp flows that hold together.</span></span></a></li>
+            <li><a class="gear-ui__item" data-item="watch" href="#services"><span class="gear-ui__label"><span class="gear-ui__name">Watch</span><span class="gear-ui__tip">Fast loading, so nobody waits.</span></span></a></li>
           </ul>
         </nav>
 
@@ -230,476 +230,399 @@
         <div class="altitude" id="altitude" aria-hidden="true"></div>
         <div class="fps" id="fps" hidden>-- fps</div>
       </div>
+
+      <!-- ===================== THE SUMMIT HERO ===================== -->
+      <!-- Where the film ends. On the film, it cross-fades in over the summit during the last
+           screen of scrolling (js/film.js sets --hero, 0..1). On phones there is no film: this is
+           simply the first screen, on its own painting (css/home.css). -->
+      <div class="hero" id="hero">
+        <div class="hero__bg" aria-hidden="true">
+          <span class="hero__cloud"></span>
+          <span class="hero__cloud hero__cloud--far"></span>
+        </div>
+        <div class="hero__inner">
+          <p class="h-label hero__label"><span class="h-label__alt">4,410 m</span><span class="h-label__rule"></span>Web designer &amp; developer</p>
+          <h1 class="hero__title">I build websites<br> that <em>move</em><br> business forward.</h1>
+          <p class="hero__sub">Thoughtful design, careful engineering, and memorable digital experiences for ambitious businesses.</p>
+          <div class="hero__actions">
+            <a class="h-btn h-btn--amber" href="#work">Explore my work<svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+            <button class="hero__reel f-only" type="button" data-showreel>
+              <span class="hero__play" aria-hidden="true"><svg class="i"><use href="#i-play"/></svg></span>
+              Watch showreel <span class="hero__len" data-reel-length>0:26</span>
+            </button>
+            <a class="h-link m-only" href="#about">About me</a>
+          </div>
+        </div>
+        <p class="hero__place" aria-hidden="true"><span>The summit</span><span>Alt. 4,410 m</span></p>
+        <a class="hero__scroll" href="#services">Scroll<svg class="i" aria-hidden="true"><use href="#i-down"/></svg></a>
+      </div>
     </div>
     <div id="film-end" class="film__end"></div>
   </section>
 
-  <!-- ===================== BELOW THE FILM ===================== -->
-  <!-- After the summit the page walks back down the mountain: each section's altitude counts down.
-       Its scripts (js/pages/) only load once the visitor nears the end of the film. -->
 
-  <!-- The top navigation: hidden during the film, it settles in once the film has scrolled away. -->
-  <header class="site-nav" id="site-nav" aria-label="Site">
-    <a class="site-nav__name" href="#film">Pratul</a>
-    <!-- On phones (and any window narrower than 640 px) the links fold into a small menu that this
-         button opens and closes (js/ui/menu.js). On wider screens the button is hidden. -->
-    <button class="site-nav__menu" id="menu-button" type="button" aria-expanded="false" aria-controls="site-links">
-      <span class="site-nav__menu-label">Menu</span>
-      <span class="site-nav__menu-icon" aria-hidden="true"><i></i><i></i></span>
-    </button>
-    <nav class="site-nav__links" id="site-links" aria-label="Sections">
+  <!-- ===================== ICONS ===================== -->
+  <!-- Every line icon on the page, drawn once. Each <svg><use href="#i-..."></svg> below reuses one,
+       so the page stays small. They draw in currentColor, so they take the colour of their text. -->
+  <svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-ne" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v16M6 14l6 6 6-6"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="M20 12H4M10 6l-6 6 6 6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M9 7v10l8-5z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><rect x="4" y="13" width="3" height="7" rx=".5"/><rect x="10.5" y="9" width="3" height="11" rx=".5"/><rect x="17" y="4" width="3" height="16" rx=".5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3.5 20.5 8 12 12.5 3.5 8z"/><path d="M3.5 12 12 16.5 20.5 12M3.5 16 12 20.5 20.5 16"/></symbol>
+    <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M10 15.5 8.5 14c1.5-5 5.5-9.5 12-10.5-1 6.5-5.5 10.5-10.5 12z"/><circle cx="15" cy="9" r="1.6"/><path d="M8.5 14 5 13.5l2.5-3.5 3 .5M10 15.5l.5 3.5 3.5-2.5-.5-3M6.5 17.5 4 20"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l1-4.5L16 4.5l3.5 3.5L8.5 19z"/><path d="M13.5 7l3.5 3.5"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7 12 13l8.5-6"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M9 3.5v4M15 3.5v4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17"/></symbol>
+    <symbol id="i-quote" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M4 18v-5.5C4 8.4 6 6 9.5 5.5l.5 1.6C8 7.8 7.2 9 7 11h3v7zm9.5 0v-5.5c0-4.1 2-6.5 5.5-7l.5 1.6c-2 .7-2.8 1.9-3 3.9h3v7z"/></symbol>
+    <symbol id="b-linkedin" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></symbol>
+    <symbol id="b-github" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
+    <symbol id="b-whatsapp" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol>
+    <symbol id="b-instagram" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></symbol>
+    <symbol id="b-x" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></symbol>
+  </svg>
+
+  <!-- ===================== THE TOP BAR ===================== -->
+  <!-- On the film it stays hidden until the summit hero fades in; over the hero it's see-through,
+       and once you scroll past the hero it becomes a soft glass bar (js/pages/pages.js).
+       On phones it's always there: just the name and "Book a call". -->
+  <header class="h-nav" id="site-nav">
+    <a class="h-nav__name" href="#top" data-to-top>Pratul</a>
+    <nav class="h-nav__links" aria-label="Sections">
       <a href="#work">Work</a>
       <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-      <a class="btn btn--primary btn--small" href="#contact">Book a call</a>
+      <a href="#process">Process</a>
     </nav>
+    <a class="h-btn h-btn--amber h-btn--small" href="#contact">Book a call</a>
   </header>
 
-  <!-- ===================== THE MOBILE OPENING ===================== -->
-  <!-- Phones and portrait tablets only (the m-only class hides it from the film). Base camp at
-       night: on most phones a small live 3D scene (js/mobile/hero.js) fades in over the night
-       sky; on the calm version it's a painted still of the same scene, with mist drifting across
-       it and the tent's glow breathing softly (pure CSS). The text and the button are plain HTML,
-       so they show at once, before any 3D has loaded. -->
-  <section class="m-hero m-only" id="top" aria-labelledby="m-hero-title">
-    <div class="m-hero__art" aria-hidden="true">
-      <!-- The painting: always shaped like the still (1:2) and covering the screen, so the drifting
-           mist and the tent's glow sit exactly over the painted forest and tent on any phone. -->
-      <div class="m-hero__paint">
-        <img class="m-hero__still" src="assets/mobile/basecamp-720.webp" srcset="assets/mobile/basecamp-720.webp 720w, assets/mobile/basecamp-1080.webp 1080w, assets/mobile/basecamp-1440.webp 1440w" sizes="(min-aspect-ratio: 1/2) 100vw, 50vh" width="1440" height="2880" loading="lazy" fetchpriority="high" alt="">
-        <span class="m-hero__mist"></span>
-        <span class="m-hero__glow"></span>
-      </div>
-      <canvas class="m-hero__canvas" id="hero-canvas"></canvas>
-    </div>
-    <div class="m-hero__text">
-      <h1 class="m-hero__title" id="m-hero-title">
-        <span class="m-hero__hello">Hi, I'm Pratul.</span>
-        <span class="m-hero__statement">I build websites that stand out, for businesses that refuse to blend in.</span>
-      </h1>
-    </div>
-    <div class="m-hero__actions">
-      <a class="btn btn--primary btn--large" href="#contact">Book a call<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-      <a class="m-hero__hint" href="#m-ridge">Scroll to begin the climb</a>
-    </div>
-  </section>
+  <main id="content" class="h-page">
 
-  <main id="content" class="content">
-    <div class="descent" aria-hidden="true">
-      <svg viewBox="0 0 1600 300" preserveAspectRatio="none">
-        <path class="descent__far" d="M0 210 L160 150 L300 190 L470 120 L640 185 L820 135 L1000 190 L1180 140 L1380 195 L1600 150 V300 H0Z"/>
-        <path class="descent__mid" d="M0 245 L210 200 L400 235 L610 190 L830 240 L1050 205 L1270 245 L1450 215 L1600 235 V300 H0Z"/>
-        <path class="descent__near" d="M0 280 Q400 250 800 272 T1600 262 V300 H0Z"/>
-      </svg>
-    </div>
-
-    <!-- ========== WHAT I CAN BUILD ========== -->
-    <section class="page-section" id="services" aria-labelledby="services-title">
-      <header class="section-heading">
-        <p class="section-heading__eyebrow" data-m-eyebrow="4,020 m|What I can build">4,410 m <span>What I can build</span></p>
-        <h2 class="section-heading__title" id="services-title">Websites that make a business feel as good as it is.</h2>
-        <p class="section-heading__lead">Five things I build. Each card has a small live demo: try them.</p>
-      </header>
-
-      <div class="services">
-        <article class="service" id="services-films" aria-labelledby="sv-films">
-          <div class="service__demo demo-films" data-demo="films" aria-hidden="true">
-            <div class="demo-films__sky"></div>
-            <div class="demo-films__sun"></div>
-            <div class="demo-films__layer" data-depth="0.15"><svg viewBox="0 0 400 200" preserveAspectRatio="none"><path d="M0 120 L40 80 L80 100 L130 50 L180 95 L230 60 L290 105 L340 70 L400 95 V200 H0Z"/></svg></div>
-            <div class="demo-films__layer" data-depth="0.35"><svg viewBox="0 0 400 200" preserveAspectRatio="none"><path d="M0 145 L60 115 L110 135 L170 100 L230 130 L300 105 L360 130 L400 118 V200 H0Z"/></svg></div>
-            <div class="demo-films__mist"></div>
-            <div class="demo-films__layer" data-depth="0.6"><svg viewBox="0 0 400 200" preserveAspectRatio="none"><path d="M0 170 Q60 150 120 165 T240 160 T400 165 V200 H0Z"/></svg></div>
-            <div class="demo-films__walker"></div>
-            <div class="demo-films__layer" data-depth="1"><svg viewBox="0 0 400 200" preserveAspectRatio="none"><path d="M0 188 Q100 176 200 186 T400 182 V200 H0Z"/></svg></div>
+    <!-- ========== SERVICES ========== -->
+    <section class="h-section services" id="services" aria-labelledby="services-title">
+      <div class="h-wrap">
+        <header class="h-head h-head--split">
+          <div>
+            <p class="h-eyebrow">What I can do for you</p>
+            <h2 class="h-title" id="services-title">Web experiences<br> for modern businesses.</h2>
           </div>
-          <div class="service__body">
-            <p class="service__item">The camera</p>
-            <h3 class="service__title" id="sv-films">Cinematic websites</h3>
-            <p class="service__text">Scroll films and motion that make a brand feel big. As visitors scroll, the story moves: layers glide past each other at their own pace, like this little scene does as you scroll the page.</p>
-          </div>
-        </article>
-
-        <article class="service" id="services-3d" aria-labelledby="sv-3d">
-          <div class="service__demo demo-3d" data-demo="three">
-            <canvas class="demo-3d__canvas" aria-label="A trekking lantern in 3D. Drag to spin it, or use the arrow keys." role="img" tabindex="0"></canvas>
-            <p class="demo-3d__hint" aria-hidden="true">Drag to spin</p>
-          </div>
-          <div class="service__body">
-            <p class="service__item">The lantern</p>
-            <h3 class="service__title" id="sv-3d">Interactive experiences</h3>
-            <p class="service__text">3D product views, sliders and effects visitors can play with. People remember what they touched: turn this lantern round with your mouse or finger.</p>
-          </div>
-        </article>
-
-        <article class="service" id="services-design" aria-labelledby="sv-design">
-          <div class="service__demo demo-slider" data-demo="slider">
-            <div class="demo-slider__pane demo-slider__pane--before" aria-hidden="true">
-              <div class="mock mock--plain">
-                <span class="mock__bar"></span><span class="mock__title">Welcome to our website</span>
-                <span class="mock__line"></span><span class="mock__line mock__line--short"></span>
-                <span class="mock__grid"><i></i><i></i><i></i></span><span class="mock__link">Click here</span>
-              </div>
-            </div>
-            <div class="demo-slider__pane demo-slider__pane--after" aria-hidden="true">
-              <div class="mock mock--polished">
-                <span class="mock__eyebrow">Skin clinic</span>
-                <span class="mock__title">Skin care, carefully considered.</span>
-                <span class="mock__line"></span>
-                <span class="mock__cta">Book a consultation</span>
-                <span class="mock__proof">Mon–Sat · Same-week visits</span>
-              </div>
-            </div>
-            <div class="demo-slider__handle" aria-hidden="true"><span></span></div>
-            <label class="visually-hidden" for="slider-range">Compare a plain layout with a polished one</label>
-            <input class="demo-slider__range" id="slider-range" type="range" min="0" max="100" value="50">
-            <p class="demo-slider__labels" aria-hidden="true"><span>Before</span><span>After</span></p>
-          </div>
-          <div class="service__body">
-            <p class="service__item">The compass</p>
-            <h3 class="service__title" id="sv-design">Design that converts</h3>
-            <p class="service__text">Layouts that guide visitors to book, buy or call. One clear message, one clear next step. Drag the line to compare a plain page with a guided one.</p>
-          </div>
-        </article>
-
-        <article class="service" id="services-booking" aria-labelledby="sv-booking">
-          <div class="service__demo demo-booking" data-demo="booking">
-            <ol class="demo-booking__steps" aria-hidden="true"><li class="is-on">Service</li><li>Time</li><li>Confirm</li></ol>
-            <div class="demo-booking__step" data-step="0">
-              <p class="demo-booking__q" id="bk-q0">What would you like?</p>
-              <div class="demo-booking__choices" role="group" aria-labelledby="bk-q0">
-                <button type="button" data-pick="Consultation">Consultation</button>
-                <button type="button" data-pick="Plant delivery">Plant delivery</button>
-                <button type="button" data-pick="Site visit">Site visit</button>
-              </div>
-            </div>
-            <div class="demo-booking__step" data-step="1" hidden>
-              <p class="demo-booking__q" id="bk-q1">Pick a time</p>
-              <div class="demo-booking__choices" role="group" aria-labelledby="bk-q1">
-                <button type="button" data-pick="Tue 10:00">Tue 10:00</button>
-                <button type="button" data-pick="Wed 15:30">Wed 15:30</button>
-                <button type="button" data-pick="Fri 11:00">Fri 11:00</button>
-              </div>
-            </div>
-            <div class="demo-booking__step" data-step="2" hidden>
-              <p class="demo-booking__q" id="bk-summary">Ready to book</p>
-              <div class="demo-booking__choices">
-                <button type="button" class="is-primary" data-confirm>Confirm</button>
-                <button type="button" data-restart>Start again</button>
-              </div>
-            </div>
-            <div class="demo-booking__step" data-step="3" hidden>
-              <p class="demo-booking__done" role="status">Booked. A confirmation is on its way on WhatsApp. <span>(Just a demo: nothing was sent.)</span></p>
-              <div class="demo-booking__choices"><button type="button" data-restart>Try again</button></div>
-            </div>
-          </div>
-          <div class="service__body">
-            <p class="service__item">The rope</p>
-            <h3 class="service__title" id="sv-booking">Online stores and booking</h3>
-            <p class="service__text">Ordering, enquiry and WhatsApp flows that hold together. Three calm steps, no dead ends. Try booking something.</p>
-          </div>
-        </article>
-
-        <article class="service service--wide" aria-labelledby="sv-found">
-          <div class="service__demo demo-score" data-demo="score" aria-hidden="true">
-            <div class="demo-score__ring" id="services-speed" data-score="98"><svg viewBox="0 0 120 120"><circle class="demo-score__track" cx="60" cy="60" r="52"/><circle class="demo-score__fill" cx="60" cy="60" r="52"/></svg><span class="demo-score__num">0</span><span class="demo-score__label">Speed</span></div>
-            <div class="demo-score__ring" id="services-seo" data-score="100"><svg viewBox="0 0 120 120"><circle class="demo-score__track" cx="60" cy="60" r="52"/><circle class="demo-score__fill" cx="60" cy="60" r="52"/></svg><span class="demo-score__num">0</span><span class="demo-score__label">SEO</span></div>
-          </div>
-          <div class="service__body">
-            <p class="service__item">The map and the watch</p>
-            <h3 class="service__title" id="sv-found">Found and fast</h3>
-            <p class="service__text">SEO and speed, so customers find you and stay. Clean structure search engines understand, and pages that load before anyone thinks of leaving. <span class="service__note">(The rings show example scores, the kind a well-built page aims for.)</span></p>
-          </div>
-        </article>
-      </div>
-
-      <!-- TODO(Pratul): add any other tools you use day to day. -->
-      <p class="tools"><span class="tools__label">Tools</span> HTML · CSS · JavaScript · Three.js · GSAP · Lenis · VRoid · Mixamo</p>
-    </section>
-
-    <!-- ========== WORK ========== -->
-    <section class="page-section" id="work" aria-labelledby="work-title">
-      <header class="section-heading">
-        <p class="section-heading__eyebrow" data-m-eyebrow="3,180 m|The ridge">3,980 m <span>Work</span></p>
-        <h2 class="section-heading__title" id="work-title">Selected work</h2>
-        <p class="section-heading__lead"><span class="f-only">Three projects, labelled honestly: two concepts and one pitch demo.</span><span class="m-only">Three projects, each pitched at its own camp along the ridge: two concepts and one pitch demo. Tap one to open it.</span></p>
-      </header>
-      <div class="work">
-        <article class="work-card" data-video="recordings/web/dermae.mp4">
-          <!-- (mobile) the still mountain lake from the film, with the video placed in its frame (js/mobile/work.js) -->
-          <a class="work-card__scene m-only" href="case-studies/dermae.html" tabindex="-1" aria-hidden="true" data-mobile-video="recordings/mobile/dermae.mp4" data-surface="water" data-quad="0.2195,0.5091,0.7805,0.5091,0.8241,0.6391,0.1759,0.6390">
-            <img src="assets/mobile/landmark-dermae-720.webp" srcset="assets/mobile/landmark-dermae-720.webp 720w, assets/mobile/landmark-dermae-1080.webp 1080w" sizes="(min-width: 700px) 600px, 100vw" width="1080" height="1350" loading="lazy" decoding="async" alt="">
-          </a>
-          <a class="work-card__media" href="case-studies/dermae.html" tabindex="-1" aria-hidden="true">
-            <img src="assets/work/dermae-1-800.jpg" srcset="assets/work/dermae-1-800.jpg 800w, assets/work/dermae-1.jpg 1600w" sizes="(min-width: 900px) 60vw, 100vw" width="1600" height="770" loading="lazy" alt="">
-          </a>
-          <div class="work-card__body">
-            <p class="project-label"><span class="project-label__name">DERMAÉ</span><span class="project-label__type">Derma clinic</span><span class="project-label__tag">Concept</span></p>
-            <h3 class="work-card__title">A premium dermatology clinic that needed to feel luxurious and trustworthy.</h3>
-            <p class="work-card__text">A soft colour palette and a smooth scroll film that feels like a luxury advert.</p>
-            <a class="btn btn--secondary" href="case-studies/dermae.html"><span class="f-only">View case study</span><span class="m-only">View project</span><span class="visually-hidden">: DERMAÉ</span><svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-          </div>
-        </article>
-        <article class="work-card" data-video="recordings/web/kings-garden.mp4">
-          <!-- (mobile) the stone hut's window from the film, with the video placed in its frame (js/mobile/work.js) -->
-          <a class="work-card__scene m-only" href="case-studies/kings-garden.html" tabindex="-1" aria-hidden="true" data-mobile-video="recordings/mobile/kings-garden.mp4" data-quad="0.2174,0.5231,0.7760,0.5214,0.7745,0.7328,0.2190,0.7397">
-            <img src="assets/mobile/landmark-kings-garden-720.webp" srcset="assets/mobile/landmark-kings-garden-720.webp 720w, assets/mobile/landmark-kings-garden-1080.webp 1080w" sizes="(min-width: 700px) 600px, 100vw" width="1080" height="1350" loading="lazy" decoding="async" alt="">
-          </a>
-          <a class="work-card__media" href="case-studies/kings-garden.html" tabindex="-1" aria-hidden="true">
-            <img src="assets/work/kings-garden-1-800.jpg" srcset="assets/work/kings-garden-1-800.jpg 800w, assets/work/kings-garden-1.jpg 1600w" sizes="(min-width: 900px) 60vw, 100vw" width="1600" height="770" loading="lazy" alt="">
-          </a>
-          <div class="work-card__body">
-            <p class="project-label"><span class="project-label__name">The King's Garden</span><span class="project-label__type">Plant nursery</span><span class="project-label__tag">Pitch demo</span></p>
-            <h3 class="work-card__title">A plant nursery that needed buyers to trust ordering plants online.</h3>
-            <p class="work-card__text">A cinematic film of the nursery's work and 360° plants you can explore.</p>
-            <a class="btn btn--secondary" href="case-studies/kings-garden.html"><span class="f-only">View case study</span><span class="m-only">View project</span><span class="visually-hidden">: The King's Garden</span><svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-          </div>
-        </article>
-        <article class="work-card" data-video="recordings/web/trinetra.mp4">
-          <!-- (mobile) the trail signboard from the film, with the video placed in its frame (js/mobile/work.js) -->
-          <a class="work-card__scene m-only" href="case-studies/trinetra.html" tabindex="-1" aria-hidden="true" data-mobile-video="recordings/mobile/trinetra.mp4" data-quad="0.2085,0.5099,0.7916,0.5099,0.7918,0.7344,0.2083,0.7344">
-            <img src="assets/mobile/landmark-trinetra-720.webp" srcset="assets/mobile/landmark-trinetra-720.webp 720w, assets/mobile/landmark-trinetra-1080.webp 1080w" sizes="(min-width: 700px) 600px, 100vw" width="1080" height="1350" loading="lazy" decoding="async" alt="">
-          </a>
-          <a class="work-card__media" href="case-studies/trinetra.html" tabindex="-1" aria-hidden="true">
-            <img src="assets/work/trinetra-3-800.jpg" srcset="assets/work/trinetra-3-800.jpg 800w, assets/work/trinetra-3.jpg 1600w" sizes="(min-width: 900px) 60vw, 100vw" width="1600" height="770" loading="lazy" alt="">
-          </a>
-          <div class="work-card__body">
-            <p class="project-label"><span class="project-label__name">Trinetra</span><span class="project-label__type">Signage &amp; branding</span><span class="project-label__tag">Concept</span></p>
-            <h3 class="work-card__title">A branding and signage agency that needed to show how a project goes from idea to finished hoarding.</h3>
-            <p class="work-card__text">A scroll film that walks through a real client job, step by step.</p>
-            <a class="btn btn--secondary" href="case-studies/trinetra.html"><span class="f-only">View case study</span><span class="m-only">View project</span><span class="visually-hidden">: Trinetra</span><svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-          </div>
-        </article>
+          <p class="h-lead">From idea to launch, I design and build websites that look great, work smoothly, and help your business grow.</p>
+        </header>
+        <ul class="services__grid">
+          <li class="card">
+            <svg class="i card__icon" aria-hidden="true"><use href="#i-monitor"/></svg>
+            <h3 class="card__title">Website Design</h3>
+            <p class="card__text">Clean, modern and brand-focused designs that feel premium.</p>
+          </li>
+          <li class="card">
+            <svg class="i card__icon" aria-hidden="true"><use href="#i-code"/></svg>
+            <h3 class="card__title">Development</h3>
+            <p class="card__text">Fast, responsive and reliable websites built with modern tools.</p>
+          </li>
+          <li class="card">
+            <svg class="i card__icon" aria-hidden="true"><use href="#i-bag"/></svg>
+            <h3 class="card__title">E-commerce &amp; Booking</h3>
+            <p class="card__text">Smooth, conversion-ready stores and booking flows that grow your business.</p>
+          </li>
+          <li class="card">
+            <svg class="i card__icon" aria-hidden="true"><use href="#i-chart"/></svg>
+            <h3 class="card__title">Performance &amp; SEO</h3>
+            <p class="card__text">Optimised, fast and search-friendly websites that get you found.</p>
+          </li>
+        </ul>
       </div>
     </section>
 
-    <!-- ========== HOW I WORK ========== -->
-    <section class="page-section" id="how-i-work" aria-labelledby="how-title">
-      <header class="section-heading">
-        <p class="section-heading__eyebrow" data-m-eyebrow="4,230 m|How I work">3,600 m <span>How I work</span></p>
-        <h2 class="section-heading__title" id="how-title">Four waypoints, from first chat to launch.</h2>
-      </header>
-      <ol class="steps">
-        <li class="step"><span class="step__dot" aria-hidden="true"></span><p class="step__num">01</p><h3 class="step__title">Understand</h3><p class="step__text">I learn your business, your customers, and what makes you different.</p></li>
-        <li class="step"><span class="step__dot" aria-hidden="true"></span><p class="step__num">02</p><h3 class="step__title">Design the experience</h3><p class="step__text">I plan how your visitors should feel and what they should do, including the interactions you want.</p></li>
-        <li class="step"><span class="step__dot" aria-hidden="true"></span><p class="step__num">03</p><h3 class="step__title">Build</h3><p class="step__text">I bring it to life, sharing progress so you can give feedback along the way.</p></li>
-        <li class="step"><span class="step__dot" aria-hidden="true"></span><p class="step__num">04</p><h3 class="step__title">Launch and refine</h3><p class="step__text">We go live, test on real devices, and polish.</p></li>
-      </ol>
-      <p class="steps__note">I work with businesses worldwide, communicate clearly across time zones, and share progress along the way.</p>
-    </section>
-
-    <!-- ========== ABOUT ========== -->
-    <section class="page-section" id="about" aria-labelledby="about-title">
-      <header class="section-heading">
-        <p class="section-heading__eyebrow" data-m-eyebrow="3,840 m|About me">3,180 m <span>About</span></p>
-        <h2 class="section-heading__title" id="about-title">I'm Pratul, a web designer and developer.</h2>
-      </header>
-      <div class="about">
-        <figure class="about__portrait">
-          <img src="assets/about/trekker.jpg" width="900" height="1125" loading="lazy" alt="Pratul's illustrated trekker character in a red jacket, standing on an alpine meadow at first light.">
-          <figcaption>The trekker from the film above: that's me.</figcaption>
-        </figure>
-        <div class="about__story">
-          <p>I fell in love with code because of what it can show. A few lines can become a view that stops you, like reaching the top of a trail and seeing the whole valley open up below.</p>
-          <p>That's how I see websites too. The climb is the hard part: understanding a business, its people, and what makes it different. The view at the top is what its customers get to feel.</p>
-          <p>I work with businesses worldwide, from India to anywhere.</p>
-          <p class="about__interests">When I'm not building, I'm on a trail, in the gym, on a football pitch, or lost in a book.</p>
+    <!-- ========== SELECTED WORK: a slider ========== -->
+    <!-- The track is a row of slides that scrolls sideways (a finger swipes it; the arrows move it
+         one slide at a time). js/pages/pages.js keeps "01 / 03" and the progress line in step. -->
+    <section class="h-section work" id="work" aria-labelledby="work-title">
+      <div class="h-wrap">
+        <header class="h-head">
+          <p class="h-eyebrow">Selected work</p>
+          <h2 class="h-title" id="work-title">Work that speaks<br> for itself.</h2>
+        </header>
+      </div>
+      <div class="slider" data-slider>
+        <div class="slider__track" tabindex="0" role="region" aria-label="Projects (scroll sideways, or use the arrows below)">
+          <article class="slide" data-slug="dermae" aria-label="Project 1 of 3: DERMAÉ">
+            <a class="slide__media" href="case-studies/dermae.html" tabindex="-1" aria-hidden="true">
+              <img src="assets/work/dermae-1-800.jpg" srcset="assets/work/dermae-1-800.jpg 800w, assets/work/dermae-1.jpg 1600w" sizes="(min-width: 900px) 46vw, 88vw" width="1600" height="770" loading="lazy" decoding="async" alt="">
+            </a>
+            <div class="slide__body">
+              <p class="slide__kind">Dermatology clinic <span class="slide__honest">Concept</span></p>
+              <h3 class="slide__name">DERMAÉ</h3>
+              <ul class="slide__tags"><li>Healthcare</li><li>Website</li><li>Booking</li></ul>
+              <p class="slide__text">A premium clinic that needed to feel luxurious and trustworthy: a soft colour palette and a smooth scroll film that feels like a luxury advert.</p>
+              <a class="h-arrow-link" href="case-studies/dermae.html">View case study<span class="visually-hidden">: DERMAÉ</span><svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+            </div>
+          </article>
+          <article class="slide" data-slug="kings-garden" aria-label="Project 2 of 3: The King's Garden">
+            <a class="slide__media" href="case-studies/kings-garden.html" tabindex="-1" aria-hidden="true">
+              <img src="assets/work/kings-garden-1-800.jpg" srcset="assets/work/kings-garden-1-800.jpg 800w, assets/work/kings-garden-1.jpg 1600w" sizes="(min-width: 900px) 46vw, 88vw" width="1600" height="770" loading="lazy" decoding="async" alt="">
+            </a>
+            <div class="slide__body">
+              <p class="slide__kind">Plant nursery <span class="slide__honest">Pitch demo</span></p>
+              <h3 class="slide__name">The King's Garden</h3>
+              <ul class="slide__tags"><li>E-commerce</li><li>Website</li><li>3D</li></ul>
+              <p class="slide__text">A nursery that needed buyers to trust ordering plants online: a cinematic film of its work and 360° plants you can explore.</p>
+              <a class="h-arrow-link" href="case-studies/kings-garden.html">View case study<span class="visually-hidden">: The King's Garden</span><svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+            </div>
+          </article>
+          <article class="slide" data-slug="trinetra" aria-label="Project 3 of 3: Trinetra">
+            <a class="slide__media" href="case-studies/trinetra.html" tabindex="-1" aria-hidden="true">
+              <img src="assets/work/trinetra-3-800.jpg" srcset="assets/work/trinetra-3-800.jpg 800w, assets/work/trinetra-3.jpg 1600w" sizes="(min-width: 900px) 46vw, 88vw" width="1600" height="770" loading="lazy" decoding="async" alt="">
+            </a>
+            <div class="slide__body">
+              <p class="slide__kind">Signage &amp; branding <span class="slide__honest">Concept</span></p>
+              <h3 class="slide__name">Trinetra</h3>
+              <ul class="slide__tags"><li>Branding</li><li>Website</li><li>Scroll film</li></ul>
+              <p class="slide__text">An agency that needed to show how a project goes from idea to finished hoarding: a scroll film that walks through a real client job, step by step.</p>
+              <a class="h-arrow-link" href="case-studies/trinetra.html">View case study<span class="visually-hidden">: Trinetra</span><svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+            </div>
+          </article>
+        </div>
+        <div class="h-wrap slider__bar">
+          <p class="slider__count" aria-live="polite"><span data-current>01</span> / 03</p>
+          <span class="slider__progress" aria-hidden="true"><span data-progress></span></span>
+          <div class="slider__arrows">
+            <button class="round-btn" type="button" data-prev aria-label="Previous project"><svg class="i" aria-hidden="true"><use href="#i-left"/></svg></button>
+            <button class="round-btn" type="button" data-next aria-label="Next project"><svg class="i" aria-hidden="true"><use href="#i-right"/></svg></button>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- ========== CONTACT ========== -->
-    <section class="page-section" id="contact" aria-labelledby="contact-title">
-      <header class="section-heading">
-        <p class="section-heading__eyebrow" data-m-eyebrow="4,410 m|Book a call">2,850 m <span>Contact</span></p>
-        <h2 class="section-heading__title" id="contact-title">Websites people remember. <em>Let's build yours.</em></h2>
-        <p class="section-heading__lead">Tell me a little about your business and what you'd like your website to do.</p>
-      </header>
-      <div class="contact">
-        <!-- TODO(Pratul): replace FORMSPREE_ENDPOINT with your Formspree form ID. -->
-        <form class="form" id="contact-form" action="https://formspree.io/f/FORMSPREE_ENDPOINT" method="POST" novalidate>
-          <div class="field">
-            <label for="f-name">Your name</label>
-            <input id="f-name" name="name" type="text" autocomplete="name" required aria-describedby="f-name-err">
-            <p class="field__error" id="f-name-err"></p>
-          </div>
-          <div class="field">
-            <label for="f-email">Email</label>
-            <input id="f-email" name="email" type="email" autocomplete="email" required aria-describedby="f-email-err">
-            <p class="field__error" id="f-email-err"></p>
-          </div>
-          <div class="field field--wide">
-            <label for="f-business">Business or website <span class="field__optional">(optional)</span></label>
-            <input id="f-business" name="business" type="text" autocomplete="organization" placeholder="e.g. a clinic in Pune, or yourbusiness.com">
-          </div>
-          <fieldset class="field field--wide field--choices" aria-describedby="f-need-err">
-            <legend>What do you need?</legend>
-            <label class="chip"><input type="checkbox" name="need" value="New website"><span>New website</span></label>
-            <label class="chip"><input type="checkbox" name="need" value="Redesign"><span>Redesign</span></label>
-            <label class="chip"><input type="checkbox" name="need" value="Scroll film or 3D"><span>Scroll film or 3D</span></label>
-            <label class="chip"><input type="checkbox" name="need" value="Online store or booking"><span>Online store or booking</span></label>
-            <label class="chip"><input type="checkbox" name="need" value="SEO and speed"><span>SEO and speed</span></label>
-            <p class="field__error" id="f-need-err"></p>
-          </fieldset>
-          <div class="field field--wide">
-            <label for="f-budget">Budget range <span class="field__optional">(optional)</span></label>
-            <!-- TODO(Pratul): check these ranges and currency suit you. -->
-            <select id="f-budget" name="budget">
-              <option value="">Not sure yet</option>
-              <option>Under ₹50,000 / $600</option>
-              <option>₹50,000–1,50,000 / $600–1,800</option>
-              <option>₹1,50,000–4,00,000 / $1,800–5,000</option>
-              <option>Over ₹4,00,000 / $5,000</option>
-            </select>
-          </div>
-          <div class="field field--wide">
-            <label for="f-message">Message</label>
-            <textarea id="f-message" name="message" rows="5" required aria-describedby="f-message-err" placeholder="What are you hoping your website will do?"></textarea>
-            <p class="field__error" id="f-message-err"></p>
-          </div>
-          <div class="form__actions">
-            <button class="btn btn--primary" type="submit">Send message<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            <p class="form__status" id="form-status" role="status" aria-live="polite"></p>
-          </div>
-        </form>
-        <aside class="contact__aside" aria-label="Other ways to reach me">
-          <p class="contact__label">Prefer to talk?</p>
-          <!-- TODO(Pratul): replace BOOKING_LINK, YOUR_EMAIL and WHATSAPP_NUMBER (digits only, with country code). -->
-          <a class="btn btn--primary" href="BOOKING_LINK" data-placeholder="BOOKING_LINK">Book a call<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-          <a class="contact__link" href="mailto:YOUR_EMAIL" data-placeholder="YOUR_EMAIL"><span>Email</span>YOUR_EMAIL</a>
-          <a class="contact__link" href="https://wa.me/WHATSAPP_NUMBER" data-placeholder="WHATSAPP_NUMBER"><span>WhatsApp</span>Message me on WhatsApp</a>
-          <p class="contact__note">Based in India, working with businesses anywhere.</p>
-        </aside>
+    <!-- ========== PROCESS ========== -->
+    <!-- The four steps sit along the ridge in the painting, rising to the right: Launch is at the
+         top. Each dot's place on the ridge (--x, --y) was measured from the painting itself, so the
+         painting is always shown at its own shape (3:2) and the dots stay on the ridge.
+         On phones the steps sit in four equal columns, so the dots use --mx / --my instead. -->
+    <section class="h-section process" id="process" aria-labelledby="process-title">
+      <div class="process__art" aria-hidden="true">
+        <img class="process__img" src="assets/redesign/bg-process.webp" srcset="assets/redesign/bg-process-800.webp 800w, assets/redesign/bg-process.webp 1536w" sizes="100vw" width="1536" height="1024" loading="lazy" decoding="async" alt="">
+        <span class="process__dot" style="--x: 13%; --y: 66.8%; --mx: 12.5%; --my: 66.9%"></span>
+        <span class="process__dot" style="--x: 37.5%; --y: 64%; --mx: 37.5%; --my: 64%"></span>
+        <span class="process__dot" style="--x: 58%; --y: 61.8%; --mx: 62.5%; --my: 60.6%"></span>
+        <span class="process__dot process__dot--top" style="--x: 77%; --y: 56%; --mx: 87.5%; --my: 57.2%"></span>
       </div>
+      <div class="h-wrap process__head">
+        <header class="h-head h-head--split">
+          <div>
+            <p class="h-eyebrow">My process</p>
+            <h2 class="h-title" id="process-title">A clear path<br> from idea to launch.</h2>
+          </div>
+          <p class="h-lead">A focused, collaborative process that keeps things simple, transparent and moving forward.</p>
+        </header>
+      </div>
+      <ol class="process__steps">
+        <li class="step" style="--x: 13%; --y: 66.8%">
+          <svg class="i step__icon" aria-hidden="true"><use href="#i-search"/></svg>
+          <p class="step__num">01</p>
+          <h3 class="step__title">Discover</h3>
+          <p class="step__text">Understand your business, users and goals.</p>
+        </li>
+        <li class="step" style="--x: 37.5%; --y: 64%">
+          <svg class="i step__icon" aria-hidden="true"><use href="#i-layers"/></svg>
+          <p class="step__num">02</p>
+          <h3 class="step__title">Design</h3>
+          <p class="step__text">Turn what we learn into a clean design that guides visitors to act.</p>
+        </li>
+        <li class="step" style="--x: 58%; --y: 61.8%">
+          <svg class="i step__icon" aria-hidden="true"><use href="#i-code"/></svg>
+          <p class="step__num">03</p>
+          <h3 class="step__title">Build</h3>
+          <p class="step__text">Bring the design to life with clean, fast code.</p>
+        </li>
+        <li class="step step--top" style="--x: 77%; --y: 56%">
+          <svg class="i step__icon" aria-hidden="true"><use href="#i-rocket"/></svg>
+          <p class="step__num">04</p>
+          <h3 class="step__title">Launch</h3>
+          <p class="step__text">Go live, test on real devices, and refine.</p>
+        </li>
+      </ol>
     </section>
 
-    <!-- ===================== MOBILE-ONLY PARTS ===================== -->
-    <!-- The painted scenes, the gear check and the summit of the mobile page. They wait here, at the
-         end, so the desktop page's sections stay side by side (its painted ridge dividers rely on
-         that). On the mobile page the small script at the bottom of this file moves each one into
-         its place in the climb before the page is first drawn. -->
-    <!-- ========== (mobile) THE RIDGE, PRE-DAWN ========== -->
-    <!-- A painted still from the film (rendered from the real 3D world), drifting gently as you
-         scroll, with the climb line from the film in its open sky. -->
-    <div class="m-chapter m-chapter--ridge m-only" id="m-ridge">
-      <div class="m-chapter__art" aria-hidden="true">
-        <img class="m-chapter__img" src="assets/mobile/ridge-720.webp" srcset="assets/mobile/ridge-720.webp 720w, assets/mobile/ridge-1080.webp 1080w" sizes="100vw" width="1080" height="1440" loading="lazy" decoding="async" alt="">
-        <span class="m-chapter__mist"></span>
+    <!-- ========== ABOUT ========== -->
+    <section class="h-section about" id="about" aria-labelledby="about-title">
+      <div class="about__photo">
+        <img src="assets/redesign/about-photo-760.webp" srcset="assets/redesign/about-photo-520.webp 520w, assets/redesign/about-photo-760.webp 760w" sizes="(min-width: 900px) 36vw, 100vw" width="1086" height="1448" loading="lazy" decoding="async" alt="Pratul's illustrated character in a red jacket, looking up at snowy mountains.">
       </div>
-      <div class="m-chapter__text">
-        <p class="m-chapter__quote">The climb is the hard part: understanding a business, its people, and what makes it different.</p>
-        <p class="m-chapter__note">The view at the top is what its customers get to feel.</p>
+      <div class="about__main">
+        <p class="h-eyebrow">About me</p>
+        <h2 class="h-title h-title--md" id="about-title">I'm Pratul, a web<br> designer and developer.</h2>
+        <div class="about__story">
+          <p>I fell in love with code because of what it can show. A few lines can become a view that stops you, like reaching the top of a trail and seeing the whole valley open up below.</p>
+          <div class="about__more" id="about-more" hidden>
+            <p>That's how I see websites too. The climb is the hard part: understanding a business, its people, and what makes it different. The view at the top is what its customers get to feel.</p>
+            <p>When I'm not building, I'm on a trail, in the gym, on a football pitch, or lost in a book.</p>
+            <p>I work with businesses worldwide, from India to anywhere.</p>
+          </div>
+        </div>
+        <ul class="about__chips">
+          <li><svg class="i" aria-hidden="true"><use href="#i-pen"/></svg>Design + Development</li>
+          <li><svg class="i" aria-hidden="true"><use href="#i-bolt"/></svg>Performance focused</li>
+          <li><svg class="i" aria-hidden="true"><use href="#i-target"/></svg>Business-minded</li>
+        </ul>
+        <button class="h-btn h-btn--amber" type="button" data-about-more aria-expanded="false" aria-controls="about-more"><span data-label>More about me</span><svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></button>
       </div>
-    </div>
+      <dl class="about__stats">
+        <div class="stat"><svg class="i stat__icon m-only" aria-hidden="true"><use href="#i-layers"/></svg><dt class="visually-hidden">Websites built</dt><dd class="stat__num">6</dd><dd class="stat__label">Websites built</dd></div>
+        <div class="stat"><svg class="i stat__icon m-only" aria-hidden="true"><use href="#i-bolt"/></svg><dt class="visually-hidden">Experience</dt><dd class="stat__num">1+ year</dd><dd class="stat__label">Building and learning</dd></div>
+        <div class="stat"><svg class="i stat__icon m-only" aria-hidden="true"><use href="#i-globe"/></svg><dt class="visually-hidden">Where</dt><dd class="stat__num">Global</dd><dd class="stat__label">Based in India, working worldwide</dd></div>
+      </dl>
+    </section>
 
-    <!-- ========== (mobile) THE MEADOW, FIRST LIGHT ========== -->
-    <div class="m-chapter m-chapter--meadow m-only" id="m-meadow">
-      <div class="m-chapter__art" aria-hidden="true">
-        <img class="m-chapter__img" src="assets/mobile/meadow-720.webp" srcset="assets/mobile/meadow-720.webp 720w, assets/mobile/meadow-1080.webp 1080w" sizes="100vw" width="1080" height="1440" loading="lazy" decoding="async" alt="">
-        <span class="m-chapter__mist"></span>
-      </div>
-      <div class="m-chapter__text">
-        <p class="m-chapter__place">The meadow</p>
-        <p class="m-chapter__title">First light.</p>
-      </div>
-    </div>
+    <!-- ========== TESTIMONIAL (hidden for now) ========== -->
+    <!-- TODO(Pratul): write a real client's words in the blockquote and their name/business in the
+         figcaption. The section stays hidden while the quote is empty, and shows itself as soon as
+         it's filled in (js/pages/pages.js). Never put an invented quote here. -->
+    <section class="h-section quote" id="testimonial" aria-label="What a client said" hidden>
+      <figure class="quote__fig">
+        <svg class="i quote__mark" aria-hidden="true"><use href="#i-quote"/></svg>
+        <blockquote class="quote__text" data-quote></blockquote>
+        <figcaption class="quote__name" data-quote-name></figcaption>
+      </figure>
+    </section>
 
-    <!-- ========== (mobile) THE GEAR CHECK ========== -->
-    <!-- The kit laid out on the canvas mat, painted (the same paintings as the film's gear check).
-         Tap an item: it lifts a little and its skill appears below; tap it again, or "See how",
-         to go to that skill in "What I can build" (js/mobile/gear.js). -->
-    <section class="page-section m-only m-gear" id="gear" aria-labelledby="gear-check-title">
-      <header class="section-heading">
-        <p class="section-heading__eyebrow">3,860 m <span>Gear check</span></p>
-        <h2 class="section-heading__title" id="gear-check-title">Every item is a skill.</h2>
-        <p class="section-heading__lead">The kit laid out before the last climb. Tap an item to see what it stands for.</p>
-      </header>
-      <div class="flatlay">
-        <img class="flatlay__mat" src="assets/mobile/gear/mat.webp" width="540" height="1080" loading="lazy" decoding="async" alt="">
-        <ul class="flatlay__items" aria-label="Gear on the mat">
-            <li class="flatlay__spot flatlay__spot--camera"><button class="flatlay__item" type="button" data-item="camera" data-href="#services-films" data-line="Cinematic scroll films that make a brand feel big." aria-describedby="flatlay-readout"><img src="assets/mobile/gear/camera.webp" width="360" height="360" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Camera</span></button></li>
-            <li class="flatlay__spot flatlay__spot--map"><button class="flatlay__item" type="button" data-item="map" data-href="#services-seo" data-line="SEO, so customers can find you on Google." aria-describedby="flatlay-readout"><img src="assets/mobile/gear/map.webp" width="360" height="360" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Map</span></button></li>
-            <li class="flatlay__spot flatlay__spot--lantern"><button class="flatlay__item" type="button" data-item="lantern" data-href="#services-3d" data-line="3D and lighting effects visitors can play with." aria-describedby="flatlay-readout"><img src="assets/mobile/gear/lantern.webp" width="360" height="360" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Lantern</span></button></li>
-            <li class="flatlay__spot flatlay__spot--compass"><button class="flatlay__item" type="button" data-item="compass" data-href="#services-design" data-line="Clear design that guides visitors to book or buy." aria-describedby="flatlay-readout"><img src="assets/mobile/gear/compass.webp" width="360" height="360" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Compass</span></button></li>
-            <li class="flatlay__spot flatlay__spot--rope"><button class="flatlay__item" type="button" data-item="rope" data-href="#services-booking" data-line="Forms, booking and WhatsApp flows that hold together." aria-describedby="flatlay-readout"><img src="assets/mobile/gear/rope.webp" width="360" height="360" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Rope</span></button></li>
-            <li class="flatlay__spot flatlay__spot--watch"><button class="flatlay__item" type="button" data-item="watch" data-href="#services-speed" data-line="Fast loading, so nobody waits." aria-describedby="flatlay-readout"><img src="assets/mobile/gear/watch.webp" width="360" height="360" loading="lazy" decoding="async" alt=""><span class="visually-hidden">Watch</span></button></li>
+    <!-- ========== TOOLS ========== -->
+    <!-- A slowly turning ring of tool tiles, made with CSS 3D (no WebGL, no library). It pauses
+         while hovered or touched, and stands still as a simple row with "reduce motion". -->
+    <section class="h-section tools" id="tools" aria-labelledby="tools-title">
+      <div class="h-wrap">
+        <header class="h-head h-head--split h-head--tight">
+          <div>
+            <p class="h-eyebrow">Tools I use</p>
+            <h2 class="h-title h-title--md" id="tools-title">A modern, reliable stack.</h2>
+          </div>
+          <p class="tools__note">Always evolving</p>
+        </header>
+      </div>
+      <div class="carousel" data-carousel>
+        <ul class="carousel__ring" style="--n: 7">
+          <li class="tool" style="--i: 0"><img src="assets/tools/html.svg" width="40" height="40" alt=""><span>HTML</span></li>
+          <li class="tool" style="--i: 1"><img src="assets/tools/css.svg" width="40" height="40" alt=""><span>CSS</span></li>
+          <li class="tool" style="--i: 2"><img src="assets/tools/javascript.svg" width="40" height="40" alt=""><span>JavaScript</span></li>
+          <li class="tool" style="--i: 3"><img src="assets/tools/react.svg" width="40" height="40" alt=""><span>React</span></li>
+          <li class="tool" style="--i: 4"><img src="assets/tools/nextjs.svg" width="40" height="40" alt=""><span>Next.js</span></li>
+          <li class="tool" style="--i: 5"><img class="tool__wide" src="assets/tools/gsap.svg" width="60" height="24" alt=""><span>GSAP</span></li>
+          <li class="tool" style="--i: 6"><img src="assets/tools/tailwind.svg" width="40" height="40" alt=""><span>Tailwind</span></li>
         </ul>
       </div>
-      <div class="flatlay__readout" id="flatlay-readout" aria-live="polite">
-        <p class="flatlay__name">Six items on the mat</p>
-        <p class="flatlay__line">Tap one to see the skill it stands for.</p>
-        <a class="flatlay__more" href="#services" hidden>See how<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-      </div>
     </section>
 
-    <!-- ========== (mobile) THE SUMMIT, SUNRISE ========== -->
-    <!-- The film's last shot as a painted still: the sun breaking over the sea of clouds, the
-         trekker waving beside the flag. The closing words sit in the open sky above him. -->
-    <section class="m-summit m-only" id="m-summit" aria-labelledby="m-summit-title">
-      <div class="m-summit__art" aria-hidden="true">
-        <img class="m-summit__img" src="assets/mobile/summit-720.webp" srcset="assets/mobile/summit-720.webp 720w, assets/mobile/summit-1080.webp 1080w" sizes="100vw" width="1080" height="2340" loading="lazy" decoding="async" alt="">
-      </div>
-      <div class="m-summit__text is-day">
-        <p class="section-heading__eyebrow">4,410 m <span>The summit</span></p>
-        <h2 class="m-summit__line" id="m-summit-title">Websites people remember. <em>Let's build yours.</em></h2>
-        <a class="btn btn--primary btn--large" href="#contact">Book a call<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <!-- ========== CONTACT ========== -->
+    <!-- On the film (desktop): two buttons; "Send a message" opens the form in place.
+         On phones: the full form straight away. -->
+    <section class="h-section contact" id="contact" aria-labelledby="contact-title">
+      <div class="h-wrap contact__inner">
+        <p class="h-eyebrow">Let's build together</p>
+        <h2 class="h-title" id="contact-title">Have a project in mind?</h2>
+        <p class="contact__lead">Tell me about your business and what you'd like your website to do. I'll get back to you within 24 hours.</p>
+        <div class="contact__actions f-only">
+          <!-- TODO(Pratul): replace BOOKING_LINK (here and in the form below) with your booking page. -->
+          <a class="h-btn h-btn--amber" href="BOOKING_LINK" data-placeholder="BOOKING_LINK">Book a call<svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+          <button class="h-btn h-btn--ghost" type="button" data-open-form aria-expanded="false" aria-controls="contact-form"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg>Send a message</button>
+        </div>
+        <!-- TODO(Pratul): replace FORMSPREE_ENDPOINT with your Formspree form ID. -->
+        <form class="h-form" id="contact-form" action="https://formspree.io/f/FORMSPREE_ENDPOINT" method="POST" novalidate>
+          <div class="h-form__row">
+            <div class="field">
+              <label class="visually-hidden" for="f-name">Your name</label>
+              <input id="f-name" name="name" type="text" autocomplete="name" placeholder="Your name" required aria-describedby="f-name-err">
+              <p class="field__error" id="f-name-err"></p>
+            </div>
+            <div class="field">
+              <label class="visually-hidden" for="f-email">Email</label>
+              <input id="f-email" name="email" type="email" autocomplete="email" placeholder="Email" required aria-describedby="f-email-err">
+              <p class="field__error" id="f-email-err"></p>
+            </div>
+          </div>
+          <div class="field">
+            <label class="visually-hidden" for="f-business">Business or website (optional)</label>
+            <input id="f-business" name="business" type="text" autocomplete="organization" placeholder="Business or website (optional)">
+          </div>
+          <fieldset class="field h-form__needs">
+            <legend>What do you need?</legend>
+            <label class="h-chip"><input type="checkbox" name="need" value="New website"><span>New website</span></label>
+            <label class="h-chip"><input type="checkbox" name="need" value="Redesign"><span>Redesign</span></label>
+            <label class="h-chip"><input type="checkbox" name="need" value="Online store"><span>Online store</span></label>
+            <label class="h-chip"><input type="checkbox" name="need" value="SEO / Performance"><span>SEO / Performance</span></label>
+            <label class="h-chip"><input type="checkbox" name="need" value="Other"><span>Other</span></label>
+          </fieldset>
+          <div class="field">
+            <label class="visually-hidden" for="f-message">Your project</label>
+            <textarea id="f-message" name="message" rows="4" placeholder="Tell me about your project…" required aria-describedby="f-message-err"></textarea>
+            <p class="field__error" id="f-message-err"></p>
+          </div>
+          <div class="h-form__actions">
+            <button class="h-btn h-btn--amber" type="submit">Send message<svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></button>
+            <a class="h-form__book" href="BOOKING_LINK" data-placeholder="BOOKING_LINK"><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg>Or <span>book a call</span></a>
+          </div>
+          <p class="h-form__status" id="form-status" role="status" aria-live="polite"></p>
+        </form>
       </div>
     </section>
-
   </main>
 
   <!-- ========== FOOTER ========== -->
-  <footer class="footer" aria-labelledby="footer-title">
-    <!-- Back where we started: base camp at night, a tent glowing under the ridges. -->
-    <div class="footer__scene" aria-hidden="true">
-      <svg viewBox="0 0 1600 220" preserveAspectRatio="none">
-        <path class="fs-far" d="M0 140 L180 70 L330 120 L520 40 L700 115 L880 60 L1060 125 L1250 55 L1420 110 L1600 80 V220 H0Z"/>
-        <path class="fs-mid" d="M0 175 L220 130 L430 165 L640 120 L860 170 L1080 135 L1300 172 L1600 140 V220 H0Z"/>
-        <path class="fs-near" d="M0 205 Q400 182 800 200 T1600 196 V220 H0Z"/>
-      </svg>
-      <span class="footer__tent"></span>
+  <!-- TODO(Pratul): replace YOUR_EMAIL, LINKEDIN_URL, WHATSAPP_NUMBER (digits only, with country
+       code), INSTAGRAM_URL and X_URL. Until then those links lead to the contact form instead. -->
+  <footer class="h-footer" aria-labelledby="footer-title">
+    <div class="h-wrap h-footer__grid">
+      <div class="h-footer__brand">
+        <p class="h-footer__name" id="footer-title">Pratul</p>
+        <p class="h-footer__line">Web designer &amp; developer building thoughtful websites for ambitious businesses.</p>
+      </div>
+      <nav class="h-footer__col" aria-label="Footer">
+        <p class="h-footer__title"><span class="f-only">Explore</span><span class="m-only">Navigate</span></p>
+        <ul>
+          <li><a href="#work">Work</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#process">Process</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="h-footer__col">
+        <p class="h-footer__title">Connect</p>
+        <ul class="h-footer__social">
+          <li><a href="mailto:YOUR_EMAIL" data-placeholder="YOUR_EMAIL"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg>Email</a></li>
+          <li><a href="LINKEDIN_URL" data-placeholder="LINKEDIN_URL" rel="me noopener" target="_blank"><svg class="i" aria-hidden="true"><use href="#b-linkedin"/></svg>LinkedIn</a></li>
+          <li><a href="https://github.com/workwithpratul-collab" rel="me noopener" target="_blank"><svg class="i" aria-hidden="true"><use href="#b-github"/></svg>GitHub</a></li>
+          <li><a href="https://wa.me/WHATSAPP_NUMBER" data-placeholder="WHATSAPP_NUMBER" rel="noopener" target="_blank"><svg class="i" aria-hidden="true"><use href="#b-whatsapp"/></svg>WhatsApp</a></li>
+          <li><a href="INSTAGRAM_URL" data-placeholder="INSTAGRAM_URL" rel="me noopener" target="_blank"><svg class="i" aria-hidden="true"><use href="#b-instagram"/></svg>Instagram</a></li>
+          <li><a href="X_URL" data-placeholder="X_URL" rel="me noopener" target="_blank"><svg class="i" aria-hidden="true"><use href="#b-x"/></svg>X</a></li>
+        </ul>
+      </div>
     </div>
-    <div class="footer__brand">
-      <p class="footer__name" id="footer-title">Pratul</p>
-      <p class="footer__line">I build websites that stand out, for businesses that refuse to blend in.</p>
+    <svg class="h-footer__peaks" viewBox="0 0 360 80" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
+      <path d="M0 78 L70 52 L104 64 L168 22 L196 40 L228 14 L262 46 L300 34 L360 60"/>
+      <path class="soft" d="M0 79 C80 70 140 74 210 66 S320 62 360 70"/>
+    </svg>
+    <div class="h-wrap h-footer__base">
+      <p>© 2026 Pratul. All rights reserved.</p>
     </div>
-    <nav class="footer__links" aria-label="Footer">
-      <a href="#services">What I can build</a>
-      <a href="#work">Work</a>
-      <a href="#how-i-work">How I work</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-      <a href="https://github.com/workwithpratul-collab" rel="me noopener" target="_blank">GitHub</a>
-    </nav>
-    <a class="skip-link footer__top" href="#film">Back to base camp<svg class="skip-link__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 10.5v-8M2.5 5.5 6 2l3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-    <p class="footer__film-note m-only">The full film is best on a laptop or desktop.</p>
-    <p class="footer__small">© 2026 Pratul. Built by hand: plain HTML, CSS and JavaScript.</p>
   </footer>
 
-  <!-- The mobile page tells the climb in order (night to sunrise), so a few sections sit in a
-       different order from the desktop page, and their altitudes count up instead of down.
-       This runs before the page is first drawn, so nothing jumps. -->
-  <script>
-    (function () {
-      if (!document.documentElement.classList.contains('mobile-site')) return;
-      // The top bar is always there, with its links folded into the small menu (js/ui/menu.js).
-      document.getElementById('site-nav').classList.add('has-menu', 'is-shown');
-      // The order of the climb: the ridge and the work, the meadow, my story and the gear check,
-      // what I can build and how I work, then the summit and the contact form.
-      var main = document.getElementById('content');
-      ['m-ridge', 'work', 'm-meadow', 'about', 'gear', 'services', 'how-i-work', 'm-summit', 'contact'].forEach(function (id) {
-        main.appendChild(document.getElementById(id));
-      });
-      // Altitudes for the way up ("3,180 m|The ridge").
-      [].forEach.call(document.querySelectorAll('[data-m-eyebrow]'), function (p) {
-        var parts = p.getAttribute('data-m-eyebrow').split('|');
-        p.firstChild.nodeValue = parts[0] + ' ';
-        p.querySelector('span').textContent = parts[1];
-      });
-      // Links back to the start point at the mobile opening (the film isn't on this page).
-      [].forEach.call(document.querySelectorAll('a[href="#film"]'), function (a) { a.setAttribute('href', '#top'); });
-    })();
-  </script>
+  <!-- ========== THE SHOWREEL ========== -->
+  <!-- A clean player in a lightbox. The video only downloads when it's opened. -->
+  <dialog class="reel" id="showreel" aria-label="Showreel">
+    <button class="reel__close round-btn" type="button" data-close-reel aria-label="Close the showreel"><svg class="i" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <video class="reel__video" controls playsinline muted preload="none" poster="assets/redesign/showreel-poster.webp" width="1280" height="616">
+      <source src="recordings/showreel.mp4" type="video/mp4">
+    </video>
+  </dialog>
+
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

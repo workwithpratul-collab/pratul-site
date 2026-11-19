@@ -4,7 +4,7 @@
 // and written it on <html data-mode="...">. Here we load only that version's code, so a phone
 // never downloads the full film's world, and a desktop never downloads the mobile page's code.
 //   film           → film.js         (the full 3D film, unchanged)
-//   mobile / calm  → mobile/mobile.js (the live base camp hero, or its painted still, and the page)
+//   mobile / calm  → mobile/mobile.js (the light phone page: no film, no 3D, no animation library)
 
 const mode = document.documentElement.dataset.mode || 'film';
 

@@ -165,3 +165,34 @@
   --ink-faint: var(--ink-day-faint);
   --text-scrim: var(--text-scrim-day);
 }
+
+/* ---------- The redesign: the summit hero and the sections below it ----------
+   From the mockups (references/mockups/): deep indigo and plum backgrounds, cream text, muted
+   lavender for secondary text, and one amber-orange accent for buttons, highlights and the
+   italic "move". Only css/home.css uses these. */
+:root {
+  --h-bg: #1c1a33;                          /* deep indigo: the main page colour */
+  --h-bg-plum: #221d36;                     /* plum: alternate sections, the footer */
+  --h-bg-deep: #17152b;                     /* the darkest value: never black */
+  --h-cream: #f3ece2;                       /* main text */
+  --h-lavender: #b4aac8;                    /* secondary text */
+  --h-lavender-soft: rgba(180, 170, 200, 0.7);
+  --h-amber: #f6a04d;                       /* buttons, highlights, "move" */
+  --h-amber-hover: #ffb46b;
+  --h-amber-ink: #1f1426;                   /* text on an amber button */
+  --h-amber-glow: rgba(246, 160, 77, 0.55); /* the glowing dots on the process ridge */
+  --h-line: rgba(243, 236, 226, 0.12);      /* hairlines and card borders */
+  --h-line-strong: rgba(243, 236, 226, 0.3);
+  --h-card: rgba(243, 236, 226, 0.04);      /* the faint lift of a card */
+  --h-card-hover: rgba(243, 236, 226, 0.07);
+  --h-glass: rgba(28, 26, 51, 0.72);        /* the top bar once you've scrolled past the hero */
+  --h-scrim: rgba(28, 26, 51, 0.82);        /* behind the showreel player */
+  --h-shade: rgba(23, 21, 43, 0.65);        /* the soft shade that keeps hero text readable */
+  --h-white: #ffffff;                       /* the Next.js logo's mark */
+  --h-amber-soft: rgba(246, 160, 77, 0.12); /* a chosen chip's fill */
+  --h-cloud: rgba(243, 236, 226, 0.16);     /* the soft cloud drifting over the phone hero */
+  --h-tile: #29243f;                        /* a tool tile in the carousel */
+  --h-error: #f2a6a0;                       /* form errors: a soft rose */
+  /* The mockups' headings: a light, open serif (Newsreader 300), with Manrope and Plex Mono. */
+  --h-font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+}

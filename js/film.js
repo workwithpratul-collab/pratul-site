@@ -126,7 +126,12 @@ summit.update(0, 0);
 // continues with the sections (placeholders for now).
 const film = document.getElementById('film');
 const stage = document.getElementById('stage');
-film.style.height = `${(FILM_SCREENS + 1) * 100}vh`;
+// After the film, one more screen of scrolling: the summit hero cross-fades in over the last shot
+// (HERO_SCREENS), then holds, fully shown, before the page carries on below.
+const HERO_SCREENS = 1;
+// The fade takes the first 70% of that screen; the rest is a calm hold on the finished hero.
+const HERO_FADE = 0.7;
+film.style.height = `${(FILM_SCREENS + 1 + HERO_SCREENS) * 100}vh`;
 // Lenis smooths the wheel/trackpad so scrolling glides instead of jumping in steps. Links to
 // places on the page (#contact, #work...) glide there too. With "reduce motion" it's plain scrolling.
 const lenis = new Lenis({
@@ -156,7 +161,9 @@ const scroll = { target: 0, progress: 0 };
 ScrollTrigger.create({
   trigger: '#film',
   start: 'top top',
-  end: 'bottom bottom',
+  // The film itself ends one screen before the section does (that last screen is the hero's).
+  end: () => `+=${FILM_SCREENS * window.innerHeight}`,
+  invalidateOnRefresh: true,
   onUpdate: (self) => { scroll.target = self.progress; },
 });
 
@@ -306,13 +313,17 @@ const gearUI = createGearUI({ gear, camera, lenis, reduceMotion, onHover: (id) =
 // The page glides down to the end of the film while the world dissolves into mist; the mist
 // clears on the summit and the camera drifts gently into the final shot. No fast-forward rush.
 let gliding = false;
-const filmEndScroll = () => film.offsetTop + film.offsetHeight - window.innerHeight;
+// Where the film's last shot is reached, and where the hero has fully faded in (the end of the section).
+const filmEndScroll = () => film.offsetTop + FILM_SCREENS * window.innerHeight;
+const heroEndScroll = () => film.offsetTop + film.offsetHeight - window.innerHeight;
 async function glideToEnd({ moveScroll = true } = {}) {
   if (gliding) return;
   gliding = true;
-  if (moveScroll && !reduceMotion) lenis.scrollTo(filmEndScroll(), { duration: 2.2, easing: (t) => 1 - Math.pow(1 - t, 3) });
+  if (moveScroll && !reduceMotion) lenis.scrollTo(heroEndScroll(), { duration: 2.2, easing: (t) => 1 - Math.pow(1 - t, 3) });
   await veil(true, { duration: reduceMotion ? 600 : 1000 });
-  jumpTo(1, { moveScroll });
+  // Under the mist: the film jumps to its last shot and the page to the finished hero.
+  jumpTo(1, { moveScroll: false });
+  if (moveScroll) lenis.scrollTo(heroEndScroll(), { immediate: true, force: true });
   if (!reduceMotion) {
     // Start a little back down the ridge from the final shot, then settle into it.
     const shot = cameraPath.stops[cameraPath.stops.length - 1].shot;
@@ -352,6 +363,24 @@ async function mistSkip() {
   await veil(false, { duration: reduceMotion ? 500 : 650 });
 }
 
+// ---------- The summit hero: cross-fading from the film's last shot ----------
+// 0 = only the film, 1 = only the hero. The hero's text rises in gently with it (css/home.css reads
+// --hero), and the film's own text fades out underneath. While the hero is mostly hidden it can't
+// be clicked or reached with Tab (inert), and the top bar only shows once it's mostly in.
+const heroEl = document.getElementById('hero');
+const overlayEl = document.getElementById('overlay');
+let heroAt = -1;
+function setHero(v) {
+  if (Math.abs(v - heroAt) < 0.001) return heroAt;
+  heroAt = v;
+  heroEl.style.setProperty('--hero', v.toFixed(3));
+  overlayEl.style.opacity = String(1 - v);
+  heroEl.inert = v < 0.5;
+  document.documentElement.classList.toggle('hero-in', v > 0.5);
+  return v;
+}
+setHero(0);
+
 // ---------- The loop: update, then draw, every frame ----------
 // Timer measures how much time passed since the last frame ("delta time").
 const timer = new THREE.Timer();
@@ -365,10 +394,15 @@ function tick(timestamp) {
 
   // The visitor is heading (or already is) below the film while the trekker is still far behind:
   // finish the film quietly in the background, so it's at the summit if they scroll back up.
-  if (lenis.targetScroll > filmEndScroll() + 20 && scroll.progress < 0.999) jumpTo(1, { moveScroll: false });
+  // (Only once the hero covers the film, so the jump is never seen.)
+  if (lenis.targetScroll > filmEndScroll() + HERO_FADE * window.innerHeight && scroll.progress < 0.999) jumpTo(1, { moveScroll: false });
+  // The summit hero: how far it has faded in, from where the page is.
+  const heroShown = setHero(smoothstep(0, 1, (lenis.scroll - filmEndScroll()) / (HERO_FADE * window.innerHeight)));
   // Once the film has scrolled off the top of the screen (reading the sections below), stop
   // drawing it: nobody can see it, and it saves the battery.
   if (film.getBoundingClientRect().bottom < -50) return;
+  // Once the hero has fully faded in, the film is hidden behind it: stop drawing it, too.
+  if (heroShown >= 1) return;
 
   // A second, gentle smoothing on top of Lenis, so the film never lurches.
   if (snapNextFrame) scroll.progress = scroll.target;
@@ -490,7 +524,7 @@ renderer.setAnimationLoop(tick);
 
 // Jump straight to a point in the film (0..1): the page scroll, the film and the camera.
 function jumpTo(p, { moveScroll = true } = {}) {
-  if (moveScroll) lenis.scrollTo(film.offsetTop + p * (film.offsetHeight - window.innerHeight), { immediate: true, force: true });
+  if (moveScroll) lenis.scrollTo(film.offsetTop + p * FILM_SCREENS * window.innerHeight, { immediate: true, force: true });
   scroll.target = p;
   scroll.progress = p;
   snapNextFrame = true;

@@ -4,9 +4,10 @@
 // painted. That way the right version shows from the very first frame: no flash, no layout jump.
 //
 //   film    the full 3D film: desktops, laptops, and big landscape tablets with a strong GPU
-//   mobile  phones and portrait tablets: a live 3D base camp, then a normal scrolling page
-//   calm    devices too weak for 3D, or with "reduce motion" switched on: the same page as
-//           mobile, but the opening is a painted still with gentle CSS motion
+//   mobile  phones and portrait tablets: no film and no 3D at all. A light, fast page that opens
+//           on the summit hero (a painting with a slow drifting cloud layer in CSS)
+//   calm    the same page as mobile, for "reduce motion" or a browser with no WebGL: the
+//           clouds stand still
 //
 // The choice is written on <html> as data-mode="film|mobile|calm" (CSS and main.js read it).
 // For testing, add ?mode=film, ?mode=mobile or ?mode=calm to the address to force one.
@@ -23,13 +24,15 @@
   link.href = (document.currentScript.getAttribute('src') || '').replace('device.js', mode === 'film' ? 'film.js' : 'mobile/mobile.js');
   if (document.currentScript.dataset.preload !== 'false') {
     document.head.appendChild(link);
-    // The mobile page opens on a painted still of base camp: fetch it straight away, first in line.
+    // The phone page opens on the summit painting: fetch it straight away, first in line, so the
+    // first screen paints fast (css/home.css shows it as the hero's background).
     if (mode !== 'film') {
       var still = document.createElement('link');
       still.rel = 'preload';
       still.as = 'image';
-      still.setAttribute('imagesrcset', 'assets/mobile/basecamp-720.webp 720w, assets/mobile/basecamp-1080.webp 1080w, assets/mobile/basecamp-1440.webp 1440w');
-      still.setAttribute('imagesizes', '(min-aspect-ratio: 1/2) 100vw, 50vh');
+      // (The same choice as css/home.css makes: the larger painting on sharp or wider screens.)
+      var big = (window.devicePixelRatio || 1) >= 1.5 || window.innerWidth >= 500;
+      still.href = 'assets/redesign/summit-phone-' + (big ? '1058' : '720') + '.webp';
       still.setAttribute('fetchpriority', 'high');
       document.head.appendChild(still);
     }
@@ -47,14 +50,13 @@
     // version for "reduce motion".) Only a browser with no WebGL at all can't run it.
     if (!touch) return window.WebGLRenderingContext ? 'film' : 'calm';
 
-    var gpu = probeGPU();
-    if (!gpu) return 'calm';                                   // no 3D at all
+    // Phones and portrait tablets never get the film, and we don't even ask for 3D (no WebGL
+    // context is created): the page is light and fast.
+    if (!wide) return reduce ? 'calm' : 'mobile';
     // Big landscape tablets: the film, if their graphics are strong enough.
-    if (wide && strong(gpu)) return 'film';
-    // Everything else with a touch screen gets the mobile page; weak ones and "reduce motion"
-    // get its calm opening (a painted still instead of live 3D).
-    if (reduce || weak(gpu)) return 'calm';
-    return 'mobile';
+    var gpu = probeGPU();
+    if (gpu && strong(gpu) && !weak(gpu)) return 'film';
+    return reduce ? 'calm' : 'mobile';
   }
 
   // Ask the browser for a WebGL context (and the graphics chip's name, where it tells us), then
