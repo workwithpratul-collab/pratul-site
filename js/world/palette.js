@@ -247,8 +247,6 @@ export const MATERIALS = {
     pole: '#3a3152',
     lantern: '#ffbf78',
   },
-  // The tools section's lanterns at the summit (js/carousels/lanterns.js).
-  lanterns: { paper: '#fbead2', paperEdge: '#f2cfa4', glow: '#ffb468', orbit: '#5d5384' },
 };
 
 // =====================================================================

@@ -581,47 +581,74 @@
 .quote__text { font-family: var(--font-display); font-size: var(--t-line); line-height: 1.2; max-width: 30ch; }
 .quote__name { margin-top: var(--s-5); color: var(--lavender); }
 
-/* ---------- Tools: lanterns at the summit ---------- */
-.tools__head {
+/* ---------- Tools: the lanterns I carry (js/pages/tools.js) ---------- */
+/* One screen: the words on the left, the loop of tools on the right. */
+.tools { overflow-x: clip; display: grid; align-items: center; min-height: 100vh; min-height: 100svh; padding-block: calc(76px + var(--s-6)) var(--s-7); }
+.tools__layout { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: center; gap: var(--s-7); }
+.tools__head .lead { margin-top: var(--s-5); }
+.loop { position: relative; height: clamp(340px, 56vh, 540px); }
+/* The light at the front of the oval: where the tool in focus stands (a lantern: warm is allowed). */
+.loop__glow {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 360px;
+  height: 260px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--loop-glow), transparent);
+  pointer-events: none;
+}
+.loop__list { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; }
+/* Every tool stands on the same spot; the script moves each one round the oval. */
+.loop__item {
+  position: absolute;
+  left: 50%;
+  top: 44%;
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-  align-items: end;
-  gap: var(--s-7);
+  justify-items: center;
+  width: 320px;
+  margin: -78px 0 0 -160px;
+  text-align: center;
+  will-change: transform, opacity;
 }
-.tools__head .lead { justify-self: end; }
-.lanterns { position: relative; margin-top: var(--s-6); }
-.lanterns__stage { display: none; }
-.lanterns__front { display: none; }
-/* Without 3D: a gentle marquee of the logos (phones). */
-.lanterns__marquee {
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-          mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-}
-.lanterns__list { display: flex; width: max-content; gap: var(--s-4); padding: var(--s-4) 0; animation: marquee 48s linear infinite; }
-.lanterns__marquee:hover .lanterns__list, .lanterns.is-paused .lanterns__list { animation-play-state: paused; }
-.lanterns__list li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  height: 64px;
-  padding: 0 22px 0 18px;
+.loop__tile {
+  display: grid;
+  place-items: center;
+  width: 150px;
+  height: 150px;
   border: 1px solid var(--hair);
-  border-radius: 999px;
-  background: rgba(42, 36, 66, 0.55);
-  font-size: 15px;
-  white-space: nowrap;
+  border-radius: 32px;
+  background: var(--h-tile);
+  box-shadow: 0 24px 50px -26px var(--loop-shadow);
+  transition: border-color var(--t-base) var(--ease-arrive), box-shadow var(--t-base) var(--ease-arrive);
 }
-.lanterns__list img { width: 28px; height: 28px; object-fit: contain; }
-.lanterns__list img[width="60"] { width: 48px; }
-@keyframes marquee { to { transform: translateX(-50%); } }
-/* With 3D (desktop): the lanterns are drawn on the canvas; the list stays for screen readers. */
-.lanterns.is-3d .lanterns__stage { display: block; height: clamp(380px, 52vh, 560px); }
-.lanterns.is-3d .lanterns__front { display: block; position: relative; z-index: 2; text-align: center; color: var(--cream); min-height: 1.4em; margin-top: var(--s-2); }
-.lanterns.is-3d .lanterns__marquee {
-  position: absolute !important;
-  width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0);
+.loop__tile img { width: 68px; height: 68px; object-fit: contain; }
+.loop__item[data-tool="gsap"] .loop__tile img { width: 96px; }
+.loop__item.is-front .loop__tile { border-color: var(--amber-line, rgba(246, 160, 77, 0.45)); box-shadow: 0 0 0 1px rgba(246, 160, 77, 0.18), 0 28px 60px -24px var(--loop-shadow); }
+/* Only the tool in the light is named: its name and one plain line rise in beneath it. */
+.loop__name, .loop__note { opacity: 0; transform: translateY(8px); transition: opacity var(--t-base) var(--ease-arrive), transform var(--t-base) var(--ease-arrive); }
+.loop__name { margin-top: var(--s-5); font-family: var(--font-display); font-size: var(--t-line); line-height: 1.1; color: var(--cream); }
+.loop__note { margin-top: var(--s-2); font-size: 16px; line-height: 1.45; color: var(--lavender-light); }
+.loop__item.is-front .loop__name, .loop__item.is-front .loop__note { opacity: 1; transform: none; }
+.loop__item.is-front .loop__note { transition-delay: 0.12s; }
+/* Phones: the words first, the loop beneath them. */
+@media (max-width: 900px) {
+  .tools__layout { grid-template-columns: minmax(0, 1fr); gap: var(--s-5); }
+  .loop { height: min(400px, 52svh); }
+  .loop__tile { width: 120px; height: 120px; border-radius: 26px; }
+  .loop__tile img { width: 54px; height: 54px; }
+  .loop__item { width: min(300px, 80vw); margin-left: calc(min(300px, 80vw) / -2); }
 }
+/* Reduce motion (or no script): a still row of every tool, each named. */
+.loop.is-still { height: auto; }
+.loop.is-still .loop__glow { display: none; }
+.loop.is-still .loop__list { position: static; display: flex; flex-wrap: wrap; gap: var(--s-5); }
+.loop.is-still .loop__item { position: static; width: auto; margin: 0; }
+.loop.is-still .loop__tile { width: 84px; height: 84px; border-radius: 20px; }
+.loop.is-still .loop__tile img { width: 40px; height: 40px; }
+.loop.is-still .loop__name { opacity: 1; transform: none; margin-top: var(--s-2); font-family: var(--font-body); font-size: 15px; }
+.loop.is-still .loop__note { display: none; }
 
 /* ---------- Contact: back at camp ---------- */
 .contact { min-height: 92vh; display: grid; align-items: center; overflow: clip; }
@@ -870,7 +897,6 @@
 .mobile-site .services, .mobile-site .work, .mobile-site .about, .mobile-site .tools { padding-block: var(--s-8); }
 
 @media (prefers-reduced-motion: reduce) {
-  .lanterns__list { animation: none; flex-wrap: wrap; width: auto; }
   .mobile-site .hero__poster::after { animation: none; }
   .mobile-site .hero__title .line, .mobile-site .hero__sub, .mobile-site .hero__actions { animation: none; }
   .reveal { transition-duration: 0.3s; transform: none; }

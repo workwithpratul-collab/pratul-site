@@ -6,6 +6,7 @@
 // scrolling. On desktop, the two 3D carousels are fetched only when their section comes near.
 
 import { initProcess } from './process.js';
+import { initTools } from './tools.js';
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isFilm = !document.documentElement.classList.contains('mobile-site');
@@ -22,7 +23,7 @@ export async function initPages({ lenis, desktop = false }) {
   initProcess();
   initAbout();
   initTestimonial();
-  initTools({ core });
+  initTools();
   initContact({ lenis });
   initPlaceholders({ lenis });
   initShowreel();
@@ -211,39 +212,6 @@ function initAbout() {
 function initTestimonial() {
   const section = document.getElementById('testimonial');
   section.hidden = section.querySelector('[data-quote]').textContent.trim() === '';
-}
-
-// ---------- Tools: lanterns (desktop 3D) or the marquee (phones) ----------
-function initTools({ core }) {
-  const root = document.querySelector('[data-lanterns]');
-  const list = root.querySelector('.lanterns__list');
-  if (core && !document.documentElement.classList.contains('no-film')) {
-    whenNear(root, async () => {
-      try {
-        const { createLanterns } = await import('../carousels/lanterns.js');
-        await createLanterns({ root, core });
-      } catch (err) {
-        console.error('[lanterns] staying with the marquee', err);
-        makeMarquee();
-      }
-    }, '150% 0px');
-    return;
-  }
-  makeMarquee();
-  function makeMarquee() {
-    // A seamless loop: the same logos twice in a row; the copies are hidden from screen readers.
-    if (list.dataset.looped) return;
-    list.dataset.looped = '1';
-    for (const li of [...list.children]) {
-      const copy = li.cloneNode(true);
-      copy.setAttribute('aria-hidden', 'true');
-      list.appendChild(copy);
-    }
-    // A touch pauses it (a mouse pauses it with CSS :hover); it carries on a moment later.
-    let resume;
-    root.addEventListener('touchstart', () => { clearTimeout(resume); root.classList.add('is-paused'); }, { passive: true });
-    root.addEventListener('touchend', () => { resume = setTimeout(() => root.classList.remove('is-paused'), 1800); });
-  }
 }
 
 // ---------- Contact ----------

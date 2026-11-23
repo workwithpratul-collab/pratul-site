@@ -288,7 +288,10 @@
   --trail-ridge-mid: #2e2749;
   --trail-ridge-near: #1d1832;
   --trail-snow: #8c7fae;
-  --trail-mist: rgba(157, 147, 194, 0.18);   /* the page's first colour (the top of --page-arc): the summit darkens into it */
+  --trail-mist: rgba(157, 147, 194, 0.18);
+  /* The tools loop: the lantern light behind the tool in focus, and the tiles' soft shadow (indigo, never black). */
+  --loop-glow: rgba(246, 160, 77, 0.2);
+  --loop-shadow: rgba(14, 11, 30, 0.75);   /* the page's first colour (the top of --page-arc): the summit darkens into it */
 
   /* The page is one continuous gradient: the rest of the day on the mountain (DESIGN.md §1).
      Morning lilac under the hero, dusk plum at the work, night indigo by the tent. */

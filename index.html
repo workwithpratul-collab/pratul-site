@@ -424,26 +424,56 @@
       </figure>
     </section>
 
-    <!-- ========== TOOLS: lanterns at the summit ========== -->
-    <!-- Desktop: the tools glow as lanterns on a slow tilted orbit (3D, js/carousels/lanterns.js).
-         Phones: a gentle marquee of the same logos. The list itself is always there for screen readers. -->
+    <!-- ========== TOOLS: the lanterns I carry ========== -->
+    <!-- One tool at a time in the light: the logos stand on a slow, tilted oval; the loop holds one
+         at the front (large, bright, named), then glides to the next while the others recede into the
+         haze. Logos only ever move and scale, never turn, so they always face you, never mirrored.
+         It pauses on hover or focus and rests off screen (js/pages/tools.js). Plain HTML and CSS, so
+         phones get the same loop; under "reduce motion" it is a still row. -->
     <section class="tools" id="tools" aria-labelledby="tools-title">
-      <div class="wrap tools__head">
-        <h2 class="heading heading--sm" id="tools-title">The lanterns<br> I <em>carry.</em></h2>
-        <p class="lead">The tools I build with, chosen for speed, polish, and sites that stay easy to look after.</p>
-      </div>
-      <div class="lanterns" data-lanterns>
-        <div class="lanterns__stage" aria-hidden="true"></div>
-        <p class="lanterns__front measure" aria-hidden="true" data-front></p>
-        <div class="lanterns__marquee">
-          <ul class="lanterns__list" role="list" aria-label="Tools I use">
-            <li><img src="assets/tools/html.svg" width="40" height="40" alt="" loading="lazy"><span>HTML</span></li>
-            <li><img src="assets/tools/css.svg" width="40" height="40" alt="" loading="lazy"><span>CSS</span></li>
-            <li><img src="assets/tools/javascript.svg" width="40" height="40" alt="" loading="lazy"><span>JavaScript</span></li>
-            <li><img src="assets/tools/react.svg" width="40" height="40" alt="" loading="lazy"><span>React</span></li>
-            <li><img src="assets/tools/nextjs.svg" width="40" height="40" alt="" loading="lazy"><span>Next.js</span></li>
-            <li><img src="assets/tools/gsap.svg" width="60" height="24" alt="" loading="lazy"><span>GSAP</span></li>
-            <li><img src="assets/tools/tailwind.svg" width="40" height="40" alt="" loading="lazy"><span>Tailwind</span></li>
+      <div class="wrap tools__layout">
+        <div class="tools__head">
+          <h2 class="heading" id="tools-title">The lanterns<br> I <em>carry.</em></h2>
+          <p class="lead">The tools I build with, chosen for speed, polish, and sites that stay easy to look after.</p>
+        </div>
+        <div class="loop" data-loop>
+          <span class="loop__glow" aria-hidden="true"></span>
+          <ul class="loop__list" role="list" aria-label="Tools I use">
+            <li class="loop__item" data-tool="html">
+              <span class="loop__tile"><img src="assets/tools/html.svg" width="40" height="40" alt="" loading="lazy" decoding="async"></span>
+              <span class="loop__name">HTML</span>
+              <span class="loop__note">The structure every page stands on.</span>
+            </li>
+            <li class="loop__item" data-tool="css">
+              <span class="loop__tile"><img src="assets/tools/css.svg" width="40" height="40" alt="" loading="lazy" decoding="async"></span>
+              <span class="loop__name">CSS</span>
+              <span class="loop__note">Layout, type and motion, set by hand.</span>
+            </li>
+            <li class="loop__item" data-tool="javascript">
+              <span class="loop__tile"><img src="assets/tools/javascript.svg" width="40" height="40" alt="" loading="lazy" decoding="async"></span>
+              <span class="loop__name">JavaScript</span>
+              <span class="loop__note">Interactions, scroll films and 3D.</span>
+            </li>
+            <li class="loop__item" data-tool="react">
+              <span class="loop__tile"><img src="assets/tools/react.svg" width="40" height="40" alt="" loading="lazy" decoding="async"></span>
+              <span class="loop__name">React</span>
+              <span class="loop__note">Interfaces with many moving parts.</span>
+            </li>
+            <li class="loop__item" data-tool="nextjs">
+              <span class="loop__tile"><img src="assets/tools/nextjs.svg" width="40" height="40" alt="" loading="lazy" decoding="async"></span>
+              <span class="loop__name">Next.js</span>
+              <span class="loop__note">Fast sites that search engines read well.</span>
+            </li>
+            <li class="loop__item" data-tool="gsap">
+              <span class="loop__tile"><img src="assets/tools/gsap.svg" width="60" height="24" alt="" loading="lazy" decoding="async"></span>
+              <span class="loop__name">GSAP</span>
+              <span class="loop__note">Smooth, carefully timed animation.</span>
+            </li>
+            <li class="loop__item" data-tool="tailwind">
+              <span class="loop__tile"><img src="assets/tools/tailwind.svg" width="40" height="40" alt="" loading="lazy" decoding="async"></span>
+              <span class="loop__name">Tailwind</span>
+              <span class="loop__note">Consistent styling, built quickly.</span>
+            </li>
           </ul>
         </div>
       </div>
