@@ -22,6 +22,7 @@ export async function initPages({ lenis, desktop = false }) {
   initWork({ core });
   initProcess();
   initAbout();
+  initFooter();
   initTestimonial();
   initTools();
   initContact({ lenis });
@@ -56,10 +57,12 @@ function initNav() {
   if (!isFilm) {
     const hero = document.getElementById('hero');
     new IntersectionObserver(([e]) => nav.classList.toggle('is-solid', !e.isIntersecting), { rootMargin: '-80px 0px 0px' }).observe(hero);
-    nav.querySelector('[data-to-top]').addEventListener('click', (e) => {
-      e.preventDefault();
-      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
-    });
+    for (const a of document.querySelectorAll('[data-to-top]')) {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+      });
+    }
   }
   const links = [...nav.querySelectorAll('.nav__links a')];
   const sections = links.map((a) => document.querySelector(a.getAttribute('href')));
@@ -206,6 +209,13 @@ function initWork({ core }) {
 // ---------- About: the portrait's mask opens as the section arrives ----------
 function initAbout() {
   markIn(document.getElementById('about'), { margin: '0px 0px -25% 0px' });
+}
+
+// ---------- The footer: its mountains rise softly as it arrives ----------
+function initFooter() {
+  const footer = document.querySelector('.footer');
+  if (reduceMotion) footer.classList.add('is-in');
+  else markIn(footer, { margin: '0px 0px -10% 0px' });
 }
 
 // ---------- The testimonial: shown only once a real quote has been written in ----------

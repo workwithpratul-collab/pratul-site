@@ -203,6 +203,7 @@
   <svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
     <symbol id="i-ne" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></symbol>
     <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v16M6 14l6 6 6-6"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 20V4M6 10l6-6 6 6"/></symbol>
     <symbol id="i-left" viewBox="0 0 24 24"><path d="M20 12H4M10 6l-6 6 6 6"/></symbol>
     <symbol id="i-right" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M9 7v10l8-5z"/></symbol>
@@ -535,34 +536,57 @@
     </section>
   </main>
 
-  <!-- ========== FOOTER ========== -->
-  <!-- TODO(Pratul): replace YOUR_EMAIL, LINKEDIN_URL, WHATSAPP_NUMBER (digits only, with country
+  <!-- ========== FOOTER: base camp under the stars ========== -->
+  <!-- Calm and quiet: the name and one line, three short columns of links, and the mountains rising
+       softly out of the night at the bottom (they fade up as the footer arrives). No newsletter.
+       TODO(Pratul): replace YOUR_EMAIL, LINKEDIN_URL, WHATSAPP_NUMBER (digits only, with country
        code) and INSTAGRAM_URL. Until then those links lead to the contact form instead. -->
   <footer class="footer" aria-labelledby="footer-title">
-    <div class="wrap footer__grid">
+    <div class="wrap footer__top">
       <div class="footer__brand">
         <p class="footer__name" id="footer-title">Pratul</p>
         <p class="footer__line">Web designer and developer, building websites that move business forward. Based in India, working worldwide.</p>
       </div>
-      <nav class="footer__col" aria-label="Footer">
-        <ul role="list">
-          <li><a href="#work">Work</a></li>
-          <li><a href="#process">Process</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
+      <nav class="footer__cols" aria-label="Footer">
+        <div class="footer__col">
+          <h2 class="footer__label">Explore</h2>
+          <ul role="list">
+            <li><a href="#work">Work</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#process">Process</a></li>
+            <li><a href="#about">About</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h2 class="footer__label">Elsewhere</h2>
+          <ul role="list">
+            <li><a href="LINKEDIN_URL" data-placeholder="LINKEDIN_URL" rel="me noopener" target="_blank">LinkedIn</a></li>
+            <li><a href="https://github.com/workwithpratul-collab" rel="me noopener" target="_blank">GitHub</a></li>
+            <li><a href="INSTAGRAM_URL" data-placeholder="INSTAGRAM_URL" rel="me noopener" target="_blank">Instagram</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h2 class="footer__label">Say hello</h2>
+          <ul role="list">
+            <li><a href="mailto:YOUR_EMAIL" data-placeholder="YOUR_EMAIL">Email</a></li>
+            <li><a href="https://wa.me/WHATSAPP_NUMBER" data-placeholder="WHATSAPP_NUMBER" rel="noopener" target="_blank">WhatsApp</a></li>
+            <li><a href="#contact">Book a call</a></li>
+          </ul>
+        </div>
       </nav>
-      <ul class="footer__col footer__social" role="list" aria-label="Elsewhere">
-        <li><a href="mailto:YOUR_EMAIL" data-placeholder="YOUR_EMAIL">Email</a></li>
-        <li><a href="LINKEDIN_URL" data-placeholder="LINKEDIN_URL" rel="me noopener" target="_blank">LinkedIn</a></li>
-        <li><a href="https://github.com/workwithpratul-collab" rel="me noopener" target="_blank">GitHub</a></li>
-        <li><a href="https://wa.me/WHATSAPP_NUMBER" data-placeholder="WHATSAPP_NUMBER" rel="noopener" target="_blank">WhatsApp</a></li>
-        <li><a href="INSTAGRAM_URL" data-placeholder="INSTAGRAM_URL" rel="me noopener" target="_blank">Instagram</a></li>
-      </ul>
     </div>
-    <div class="wrap footer__base">
-      <p>© 2026 Pratul</p>
-      <p class="measure">Base camp · <span class="alt">2,850 m</span></p>
+    <!-- The range at the bottom: three ridges, the furthest palest (distance is paler), fading up. -->
+    <div class="footer__range" aria-hidden="true">
+      <svg viewBox="0 0 1600 260" preserveAspectRatio="none">
+        <path class="range-far" d="M0 150 L140 110 L230 128 L360 70 L470 104 L590 52 L700 96 L820 60 L930 92 L1060 40 L1170 84 L1290 58 L1400 96 L1500 72 L1600 100 L1600 260 L0 260 Z"/>
+        <path class="range-mid" d="M0 190 L120 160 L260 182 L380 138 L520 170 L640 128 L770 166 L900 132 L1030 168 L1160 124 L1300 162 L1430 140 L1600 170 L1600 260 L0 260 Z"/>
+        <path class="range-near" d="M0 228 C180 206 330 232 500 214 S820 236 980 222 S1300 206 1450 224 S1560 230 1600 226 L1600 260 L0 260 Z"/>
+      </svg>
+      <div class="wrap footer__base">
+        <p>© 2026 Pratul</p>
+        <p class="measure">Base camp · <span class="alt">2,850 m</span></p>
+        <a class="footer__top-link" href="#hero" data-to-top>Back to the summit<svg class="i" aria-hidden="true"><use href="#i-up"/></svg></a>
+      </div>
     </div>
   </footer>
 

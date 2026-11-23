@@ -64,6 +64,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Feedback 5: Selected work comes straight after the hero (then services, process, about, tools, contact); heading "Work that speaks for itself." with the honest labels kept.
 - [x] Feedback 6: Process rebuilt as a pinned night trail with depth (Understand, Explore, Build, Launch, Refine), the same on phones.
 - [x] Feedback 7: tools rebuilt as a one-in-focus loop (logos always upright, never mirrored, pauses on hover), plain HTML/CSS instead of WebGL; the same on phones.
+- [x] Feedback 8: footer redesigned: calm and spaced, three labelled link columns, a mountain range fading in at the bottom, no newsletter.
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.

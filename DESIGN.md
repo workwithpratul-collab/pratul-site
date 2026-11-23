@@ -123,7 +123,7 @@ that simply shows the end state (or a 300ms fade).
 | About | A magazine spread: the portrait dissolves into the page through a soft mask that opens as you arrive. | CSS mask, one image |
 | Tools | **One tool in the light** (after King's Garden's 3D loop): seven tool logos stand on a slow tilted oval; the loop holds one at the front (large, lit, named, one plain line) for 2.4 s, then glides 1.2 s to the next while the rest recede. Logos only move and scale, never turn: always facing you, never mirrored. Pauses on hover, focus and touch. | plain HTML/CSS, transform and opacity only, runs only on screen (no WebGL); reduced motion: a still row |
 | Contact | The tent's lantern brightens as the section arrives: back at camp. | one opacity transition |
-| Footer | Calm. Faint stars. | static |
+| Footer | **Base camp under the stars**: the name large, one line, three short labelled columns (Explore, Elsewhere, Say hello), no newsletter; a range of three ridges (distance paler) rises softly out of the night as it arrives, the last line on the nearest ridge, and "Back to the summit". | inline SVG, one transform/opacity transition, once |
 
 Only one 3D moment runs at a time, each pauses off-screen, and each has a reduced-motion and a phone
 version (phones never load three.js).

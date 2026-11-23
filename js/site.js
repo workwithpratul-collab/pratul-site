@@ -136,10 +136,13 @@ function updateNav(y) {
   nav.classList.toggle('is-solid', below);
 }
 // "Pratul" goes back to the summit hero.
-nav.querySelector('[data-to-top]').addEventListener('click', (e) => {
-  e.preventDefault();
-  lenis.scrollTo(heroScroll(), { duration: reduceMotion ? 0 : 1.6 });
-});
+// ("Pratul" in the top bar, "Back to the summit" in the footer.)
+for (const a of document.querySelectorAll('[data-to-top]')) {
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    lenis.scrollTo(heroScroll(), { duration: reduceMotion ? 0 : 2.2 });
+  });
+}
 // Links to the work (the hero's "Explore my work", the top bar) land where the work has fully formed,
 // not at the top of its section (where it is still forming over the summit).
 document.addEventListener('click', (e) => {
