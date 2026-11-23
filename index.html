@@ -221,6 +221,7 @@
     <symbol id="s-tent" viewBox="0 0 200 60"><path fill="var(--m-plum)" d="M0 60 L50 44 L90 50 L140 40 L200 48 L200 60Z"/><path fill="var(--m-peach)" d="M104 58 L132 26 L160 58Z"/><path fill="var(--m-cream)" opacity=".85" d="M126 58 L132 40 L138 58Z"/><path stroke="var(--m-navy)" stroke-width="1.2" fill="none" d="M132 26 L132 58M118 58 L132 26"/></symbol>
     <symbol id="i-left" viewBox="0 0 24 24"><path d="M20 12H4M10 6l-6 6 6 6"/></symbol>
     <symbol id="i-right" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 7v10M15 7v10"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M9 7v10l8-5z"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
     <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7 12 13l8.5-6"/></symbol>
@@ -568,58 +569,80 @@
     </section>
 
     <!-- ========== TOOLS: the lanterns I carry ========== -->
-    <!-- One tool at a time in the light: the logos stand on a slow, tilted oval; the loop holds one
-         at the front (large, bright, named), then glides to the next while the others recede into the
-         haze. Logos only ever move and scale, never turn, so they always face you, never mirrored.
-         It pauses on hover or focus and rests off screen (js/pages/tools.js). Plain HTML and CSS, so
-         phones get the same loop; under "reduce motion" it is a still row. -->
+    <!-- references/round2/Tools.dc.html. A ribbon of tall cards on the inside of a gentle curve (the
+         cards at the edges nearer, larger and turned towards you), drifting slowly and endlessly, with
+         the edges fading out. The technique is the King's Garden photo carousel's (F:/Kings-Garden/
+         js/strip3d.js), seen from inside the curve (js/pages/tools.js). It pauses on hover and with
+         its pause button, rests off screen, and under "reduce motion" is a still row. The visual
+         ribbon is hidden from screen readers, which read the plain list of tools instead. -->
     <section class="tools" id="tools" aria-labelledby="tools-title">
-      <div class="wrap tools__layout">
-        <div class="tools__head">
-          <h2 class="heading" id="tools-title">The lanterns<br> I <em>carry.</em></h2>
-          <p class="lead">The tools I build with, chosen for speed, polish, and sites that stay easy to look after.</p>
-        </div>
-        <div class="loop" data-loop>
-          <span class="loop__glow" aria-hidden="true"></span>
-          <ul class="loop__list" role="list" aria-label="Tools I use">
-            <li class="loop__item" data-tool="html">
-              <span class="loop__tile"><img src="assets/tools/html.svg" width="40" height="40" alt="" loading="lazy" decoding="async"></span>
-              <span class="loop__name">HTML</span>
-              <span class="loop__note">The structure every page stands on.</span>
+      <div class="wrap tools__head">
+        <h2 class="heading" id="tools-title">The lanterns I <em>carry.</em></h2>
+        <p class="lead">The tools I build with, chosen for speed, polish, and sites that stay easy to look after.</p>
+      </div>
+      <ul class="visually-hidden" aria-label="Tools I use">
+        <li>HTML: Clean, accessible structure.</li>
+        <li>CSS: Layouts that hold up everywhere.</li>
+        <li>JavaScript: Interactions that feel alive.</li>
+        <li>GSAP: Smooth, carefully timed motion.</li>
+        <li>React: Interfaces from reusable parts.</li>
+        <li>Next.js: Fast, search-friendly sites.</li>
+        <li>Tailwind: Consistent styling at speed.</li>
+      </ul>
+      <div class="ribbon" data-ribbon aria-hidden="true">
+        <div class="ribbon__stage">
+          <ul class="ribbon__track" role="presentation">
+            <li class="ribbon__card" data-tool="html">
+              <span class="ribbon__glow"></span>
+              <span class="ribbon__num">01</span>
+              <img class="ribbon__logo" src="assets/tools/html.svg" width="64" height="64" alt="" loading="lazy" decoding="async">
+              <span class="ribbon__words"><span class="ribbon__name">HTML</span><span class="ribbon__desc">Clean, accessible structure.</span></span>
             </li>
-            <li class="loop__item" data-tool="css">
-              <span class="loop__tile"><img src="assets/tools/css.svg" width="40" height="40" alt="" loading="lazy" decoding="async"></span>
-              <span class="loop__name">CSS</span>
-              <span class="loop__note">Layout, type and motion, set by hand.</span>
+            <li class="ribbon__card" data-tool="css">
+              <span class="ribbon__glow"></span>
+              <span class="ribbon__num">02</span>
+              <img class="ribbon__logo" src="assets/tools/css.svg" width="64" height="64" alt="" loading="lazy" decoding="async">
+              <span class="ribbon__words"><span class="ribbon__name">CSS</span><span class="ribbon__desc">Layouts that hold up everywhere.</span></span>
             </li>
-            <li class="loop__item" data-tool="javascript">
-              <span class="loop__tile"><img src="assets/tools/javascript.svg" width="40" height="40" alt="" loading="lazy" decoding="async"></span>
-              <span class="loop__name">JavaScript</span>
-              <span class="loop__note">Interactions, scroll films and 3D.</span>
+            <li class="ribbon__card" data-tool="javascript">
+              <span class="ribbon__glow"></span>
+              <span class="ribbon__num">03</span>
+              <img class="ribbon__logo" src="assets/tools/javascript.svg" width="64" height="64" alt="" loading="lazy" decoding="async">
+              <span class="ribbon__words"><span class="ribbon__name">JavaScript</span><span class="ribbon__desc">Interactions that feel alive.</span></span>
             </li>
-            <li class="loop__item" data-tool="react">
-              <span class="loop__tile"><img src="assets/tools/react.svg" width="40" height="40" alt="" loading="lazy" decoding="async"></span>
-              <span class="loop__name">React</span>
-              <span class="loop__note">Interfaces with many moving parts.</span>
+            <li class="ribbon__card" data-tool="gsap">
+              <span class="ribbon__glow"></span>
+              <span class="ribbon__num">04</span>
+              <img class="ribbon__logo" src="assets/tools/gsap.svg" width="64" height="64" alt="" loading="lazy" decoding="async">
+              <span class="ribbon__words"><span class="ribbon__name">GSAP</span><span class="ribbon__desc">Smooth, carefully timed motion.</span></span>
             </li>
-            <li class="loop__item" data-tool="nextjs">
-              <span class="loop__tile"><img src="assets/tools/nextjs.svg" width="40" height="40" alt="" loading="lazy" decoding="async"></span>
-              <span class="loop__name">Next.js</span>
-              <span class="loop__note">Fast sites that search engines read well.</span>
+            <li class="ribbon__card" data-tool="react">
+              <span class="ribbon__glow"></span>
+              <span class="ribbon__num">05</span>
+              <img class="ribbon__logo" src="assets/tools/react.svg" width="64" height="64" alt="" loading="lazy" decoding="async">
+              <span class="ribbon__words"><span class="ribbon__name">React</span><span class="ribbon__desc">Interfaces from reusable parts.</span></span>
             </li>
-            <li class="loop__item" data-tool="gsap">
-              <span class="loop__tile"><img src="assets/tools/gsap.svg" width="60" height="24" alt="" loading="lazy" decoding="async"></span>
-              <span class="loop__name">GSAP</span>
-              <span class="loop__note">Smooth, carefully timed animation.</span>
+            <li class="ribbon__card" data-tool="nextjs">
+              <span class="ribbon__glow"></span>
+              <span class="ribbon__num">06</span>
+              <img class="ribbon__logo" src="assets/tools/nextjs.svg" width="64" height="64" alt="" loading="lazy" decoding="async">
+              <span class="ribbon__words"><span class="ribbon__name">Next.js</span><span class="ribbon__desc">Fast, search-friendly sites.</span></span>
             </li>
-            <li class="loop__item" data-tool="tailwind">
-              <span class="loop__tile"><img src="assets/tools/tailwind.svg" width="40" height="40" alt="" loading="lazy" decoding="async"></span>
-              <span class="loop__name">Tailwind</span>
-              <span class="loop__note">Consistent styling, built quickly.</span>
+            <li class="ribbon__card" data-tool="tailwind">
+              <span class="ribbon__glow"></span>
+              <span class="ribbon__num">07</span>
+              <img class="ribbon__logo" src="assets/tools/tailwind.svg" width="64" height="64" alt="" loading="lazy" decoding="async">
+              <span class="ribbon__words"><span class="ribbon__name">Tailwind</span><span class="ribbon__desc">Consistent styling at speed.</span></span>
             </li>
           </ul>
         </div>
       </div>
+      <p class="ribbon__hint">
+        <button class="ribbon__pause" type="button" aria-pressed="false" data-ribbon-pause>
+          <svg class="i" aria-hidden="true"><use href="#i-pause"/></svg><span class="ribbon__pause-label">Pause the tools</span>
+        </button>
+        <span class="ribbon__hover" aria-hidden="true">Hover to pause</span>
+      </p>
     </section>
 
     <!-- ========== CONTACT: back at camp ========== -->

@@ -308,6 +308,19 @@
   --meter-tick: rgba(243, 236, 226, 0.6);
   --meter-quiet: rgba(243, 236, 226, 0.74);
   --meter-alt: #f6c38f;
+  /* Tools (references/round2/Tools.dc.html): the plum glow behind the ribbon, the cards' face, edge
+     and shadow (indigo, never black), and each tool's own colour for the soft glow on its card. */
+  --tools-glow: radial-gradient(80% 60% at 50% 62%, #33264a 0%, #201a34 55%, #17142b 100%);
+  --card-face: linear-gradient(165deg, #3a2e52 0%, #231c38 70%);
+  --card-line: rgba(201, 190, 221, 0.16);
+  --card-shadow: rgba(14, 11, 30, 0.6);
+  --tool-html: #e86a3a;
+  --tool-css: #4c8fe0;
+  --tool-js: #e8c93a;
+  --tool-gsap: #7be36b;
+  --tool-react: #5ed3f3;
+  --tool-next: #f3ece2;
+  --tool-tailwind: #38bdf8;
   /* Contact (references/round2/Contact.dc.html): the shade over the tent painting (deepest behind the
      words on the left), the frosted form panel, its fields and hints, and the cream "Send message". */
   --contact-shade: linear-gradient(90deg, rgba(23, 20, 43, 0.96) 0%, rgba(23, 20, 43, 0.78) 45%, rgba(23, 20, 43, 0.35) 100%);

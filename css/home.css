@@ -673,74 +673,98 @@
 .quote__text { font-family: var(--font-display); font-size: var(--t-line); line-height: 1.2; max-width: 30ch; }
 .quote__name { margin-top: var(--s-5); color: var(--lavender); }
 
-/* ---------- Tools: the lanterns I carry (js/pages/tools.js) ---------- */
-/* One screen: the words on the left, the loop of tools on the right. */
-.tools { overflow-x: clip; display: grid; align-items: center; min-height: 100vh; min-height: 100svh; padding-block: calc(76px + var(--s-6)) var(--s-7); }
-.tools__layout { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: center; gap: var(--s-7); }
-.tools__head .lead { margin-top: var(--s-5); }
-.loop { position: relative; height: clamp(340px, 56vh, 540px); }
-/* The light at the front of the oval: where the tool in focus stands (a lantern: warm is allowed). */
-.loop__glow {
+/* ---------- Tools: the lanterns I carry (js/pages/tools.js, references/round2/Tools.dc.html) ---------- */
+/* One screen: the heading centred at the top, the ribbon of cards below it, and a quiet pause line at
+   the foot. The cards' size follows the window's height as well as its width, so it fits at 720 px. */
+.tools {
+  --card-w: clamp(150px, min(14.6vw, 23.5vh), 210px);
+  --card-h: calc(var(--card-w) * 1.524);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-block: calc(76px + clamp(12px, 3vh, 40px)) clamp(16px, 3vh, 30px);
+  overflow-x: clip;
+  background: var(--tools-glow);
+}
+.tools__head { text-align: center; }
+.tools__head .heading { font-size: clamp(40px, min(5vw, 8.6vh), 72px); }
+.tools__head .lead { max-width: 560px; margin: clamp(10px, 1.8vh, 16px) auto 0; font-size: clamp(16px, min(1.25vw, 2.3vh), 18px); line-height: 1.6; }
+/* The ribbon: the cards' parent gives the depth (perspective); the edges fade into the page. */
+.ribbon {
+  position: relative;
+  align-self: center;
+  height: calc(var(--card-h) * 1.42);
+  margin-top: clamp(8px, 2vh, 24px);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+}
+.ribbon__stage, .ribbon__track { position: absolute; inset: 0; }
+.ribbon__track { margin: 0; padding: 0; list-style: none; perspective: var(--perspective, 1400px); perspective-origin: 50% 50%; }
+/* One card: number, logo, name and one line, over a soft glow in the tool's own colour. */
+.ribbon__card {
   position: absolute;
   left: 50%;
-  top: 46%;
-  width: 360px;
-  height: 260px;
-  translate: -50% -50%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, var(--loop-glow), transparent);
-  pointer-events: none;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: var(--card-w);
+  height: var(--card-h);
+  margin: calc(var(--card-h) / -2) 0 0 calc(var(--card-w) / -2);
+  padding: clamp(18px, 2.6vh, 26px) clamp(16px, 1.7vw, 24px);
+  overflow: hidden;
+  border: 1px solid var(--card-line);
+  border-radius: 20px;
+  background: var(--card-face);
+  box-shadow: 0 30px 60px -10px var(--card-shadow);
+  backface-visibility: hidden;
+  will-change: transform;
 }
-.loop__list { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; }
-/* Every tool stands on the same spot; the script moves each one round the oval. */
-.loop__item {
-  position: absolute;
-  left: 50%;
-  top: 44%;
-  display: grid;
-  justify-items: center;
-  width: 320px;
-  margin: -78px 0 0 -160px;
-  text-align: center;
-  will-change: transform, opacity;
-}
-.loop__tile {
-  display: grid;
+.ribbon__card.is-away { visibility: hidden; }
+.ribbon__glow { position: absolute; inset: 0; background: radial-gradient(90% 60% at 50% 40%, color-mix(in srgb, var(--tool) 22%, transparent), transparent 70%); pointer-events: none; }
+.ribbon__num, .ribbon__logo, .ribbon__words { position: relative; }
+.ribbon__num { font-family: var(--font-altitude); font-size: 12px; letter-spacing: 0.16em; color: var(--meter-quiet); }
+.ribbon__logo { align-self: center; width: clamp(44px, 6.4vh, 60px); height: clamp(44px, 6.4vh, 60px); object-fit: contain; }
+.ribbon__words { display: grid; gap: 6px; }
+.ribbon__name { font-family: var(--font-display); font-size: clamp(24px, min(2.1vw, 3.5vh), 30px); line-height: 1.1; color: var(--cream); }
+.ribbon__desc { font-size: 14px; line-height: 1.45; color: var(--lavender); text-wrap: pretty; }
+/* Each tool's colour (tokens.css). */
+.ribbon__card[data-tool="html"] { --tool: var(--tool-html); }
+.ribbon__card[data-tool="css"] { --tool: var(--tool-css); }
+.ribbon__card[data-tool="javascript"] { --tool: var(--tool-js); }
+.ribbon__card[data-tool="gsap"] { --tool: var(--tool-gsap); }
+.ribbon__card[data-tool="react"] { --tool: var(--tool-react); }
+.ribbon__card[data-tool="nextjs"] { --tool: var(--tool-next); }
+.ribbon__card[data-tool="tailwind"] { --tool: var(--tool-tailwind); }
+/* The foot: a pause button (keyboard and touch) and the quiet hover hint. */
+.ribbon__hint { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: clamp(4px, 1.4vh, 16px); font-family: var(--font-altitude); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--lavender-quiet); }
+.ribbon__pause {
+  display: inline-grid;
   place-items: center;
-  width: 150px;
-  height: 150px;
-  border: 1px solid var(--hair);
-  border-radius: 32px;
-  background: var(--h-tile);
-  box-shadow: 0 24px 50px -26px var(--loop-shadow);
-  transition: border-color var(--t-base) var(--ease-arrive), box-shadow var(--t-base) var(--ease-arrive);
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--hair-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--cream);
+  transition: border-color var(--t-fast) var(--ease-arrive), color var(--t-fast) var(--ease-arrive);
 }
-.loop__tile img { width: 68px; height: 68px; object-fit: contain; }
-.loop__item[data-tool="gsap"] .loop__tile img { width: 96px; }
-.loop__item.is-front .loop__tile { border-color: var(--amber-line, rgba(246, 160, 77, 0.45)); box-shadow: 0 0 0 1px rgba(246, 160, 77, 0.18), 0 28px 60px -24px var(--loop-shadow); }
-/* Only the tool in the light is named: its name and one plain line rise in beneath it. */
-.loop__name, .loop__note { opacity: 0; transform: translateY(8px); transition: opacity var(--t-base) var(--ease-arrive), transform var(--t-base) var(--ease-arrive); }
-.loop__name { margin-top: var(--s-5); font-family: var(--font-display); font-size: var(--t-line); line-height: 1.1; color: var(--cream); }
-.loop__note { margin-top: var(--s-2); font-size: 16px; line-height: 1.45; color: var(--lavender-light); }
-.loop__item.is-front .loop__name, .loop__item.is-front .loop__note { opacity: 1; transform: none; }
-.loop__item.is-front .loop__note { transition-delay: 0.12s; }
-/* Phones: the words first, the loop beneath them. */
-@media (max-width: 900px) {
-  .tools__layout { grid-template-columns: minmax(0, 1fr); gap: var(--s-5); }
-  .loop { height: min(400px, 52svh); }
-  .loop__tile { width: 120px; height: 120px; border-radius: 26px; }
-  .loop__tile img { width: 54px; height: 54px; }
-  .loop__item { width: min(300px, 80vw); margin-left: calc(min(300px, 80vw) / -2); }
-}
-/* Reduce motion (or no script): a still row of every tool, each named. */
-.loop.is-still { height: auto; }
-.loop.is-still .loop__glow { display: none; }
-.loop.is-still .loop__list { position: static; display: flex; flex-wrap: wrap; gap: var(--s-5); }
-.loop.is-still .loop__item { position: static; width: auto; margin: 0; }
-.loop.is-still .loop__tile { width: 84px; height: 84px; border-radius: 20px; }
-.loop.is-still .loop__tile img { width: 40px; height: 40px; }
-.loop.is-still .loop__name { opacity: 1; transform: none; margin-top: var(--s-2); font-family: var(--font-body); font-size: 15px; }
-.loop.is-still .loop__note { display: none; }
+.ribbon__pause:hover { border-color: var(--amber); color: var(--amber); }
+.ribbon__pause .i { width: 16px; height: 16px; }
+.ribbon__pause-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.ribbon__hint[hidden] { display: none; }   /* (nothing to pause under "reduce motion") */
+@media (hover: none) { .ribbon__hover { display: none; } }
+/* Reduce motion: a still, flat row of every tool (it wraps on narrow screens). */
+.ribbon.is-still { height: auto; -webkit-mask-image: none; mask-image: none; }
+.ribbon.is-still .ribbon__stage, .ribbon.is-still .ribbon__track { position: static; }
+.ribbon.is-still .ribbon__track { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; perspective: none; }
+.ribbon.is-still .ribbon__card { position: relative; left: auto; top: auto; margin: 0; --card-w: clamp(140px, 12vw, 170px); }
+/* Phones: the heading on the left like every other section, the ribbon below it. */
+.mobile-site .tools { --card-w: clamp(140px, 40vw, 170px); min-height: 0; padding-block: var(--s-8); }
+.mobile-site .tools__head { text-align: left; }
+.mobile-site .tools__head .lead { margin-left: 0; font-size: 17px; }
+.mobile-site .tools__head .heading { font-size: var(--t-heading); }
 
 /* ---------- Contact: back at camp (references/round2/Contact.dc.html) ---------- */
 .contact { min-height: 92vh; display: grid; align-items: center; overflow: clip; }

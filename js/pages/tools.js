@@ -1,92 +1,116 @@
-// tools.js: the Tools section, "the lanterns I carry": one tool at a time in the light.
+// tools.js: the Tools section, "the lanterns I carry" (references/round2/Tools.dc.html).
 //
-// The tool logos stand on a wide, tilted oval (an ellipse seen from slightly above). Every few
-// seconds the loop glides one step, so the next tool comes round to the front: large, bright, and
-// named, while the rest recede, smaller and dimmer, towards the back of the oval.
-//
-// Each logo is only ever moved and scaled (never turned), so it always faces you and is never
-// mirrored. Only transform and opacity change, which the browser can do without repainting.
-// It runs only while the section is on screen, pauses while the pointer or keyboard focus is on it,
-// and under "reduce motion" the logos simply sit in a row.
+// A ribbon of tall cards drifting slowly and endlessly along the inside of a gentle curve.
+// The technique is the King's Garden photo carousel's (F:/Kings-Garden/js/strip3d.js):
+//   - the cards stand on a real cylinder in CSS 3D: each is turned by its angle (rotateY) and pushed
+//     out by the radius (translateZ). King's Garden looks at its cylinder from outside, so its front
+//     photo is nearest; here we stand inside it, so the cards at the edges are nearer, larger and
+//     turned towards you, and the middle one sits back at its natural size;
+//   - the speed is set in pixels per second at the front, so it feels the same on any screen, and a
+//     long frame (a hitch) is clamped so the ribbon never jumps;
+//   - the speed eases softly towards its target, so hovering glides it to a stop and leaving lets it
+//     drift on again, instead of snapping;
+//   - it rests while off screen (IntersectionObserver) and while the tab is hidden, and rebuilds only
+//     when the window's width changes (a phone's address bar changes just the height).
+// Two sets of the seven tools make one loop; each card wraps round once it is far out of sight.
+// Only transforms change each frame, so the browser just moves layers it has already painted.
+// Logos are only ever turned a little (well under 90 degrees), so they always face you, upright and
+// never mirrored. Under "reduce motion" it is a still, flat row.
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-const HOLD = 2.4;   // seconds a tool rests in the light
-const GLIDE = 1.2;  // seconds to glide to the next one
+const SPEED = 38;   // px per second at the front of the curve: a calm drift
 
 export function initTools() {
-  const root = document.querySelector('[data-loop]');
+  const root = document.querySelector('[data-ribbon]');
   if (!root) return;
-  const items = [...root.querySelectorAll('.loop__item')];
-  const n = items.length;
-  if (reduceMotion || n < 3) { root.classList.add('is-still'); return; }
-  root.classList.add('is-live');
+  const track = root.querySelector('.ribbon__track');
+  const pauseBtn = document.querySelector('[data-ribbon-pause]');
+  const originals = [...track.children];
+  if (reduceMotion) {
+    root.classList.add('is-still');
+    pauseBtn.closest('.ribbon__hint').hidden = true;
+    return;
+  }
+  // The second set: copies, for the loop.
+  for (const li of originals) track.appendChild(li.cloneNode(true));
+  const cards = [...track.children];
+  const n = cards.length;
 
-  // The oval's size follows the box it sits in (measured once, and again on resize).
-  let rx = 0, ry = 0;
-  const measure = () => {
-    const w = root.clientWidth, h = root.clientHeight;
-    rx = w * 0.42;   // half its width
-    ry = h * 0.17;   // how far the back of the oval rises (the tilt)
-  };
-  measure();
-  window.addEventListener('resize', () => { measure(); draw(); });
+  let radius = 1000, step = 0, limit = 0, angle = 0;
+  function build() {
+    const w = root.clientWidth;
+    const card = cards[0].offsetWidth;
+    const gap = Math.max(14, card * 0.12);
+    // A wide, gentle curve: the radius follows the window, so the edge cards turn about 34 degrees
+    // where they meet the faded edges, as in the mockup.
+    radius = Math.max(w * 0.7, card * 3);
+    // (the eye sits just inside the curve: close enough that the edge cards come clearly nearer)
+    root.style.setProperty('--perspective', `${Math.round(radius * 0.9)}px`);
+    step = (card + gap) / radius;                       // the angle between two cards (radians)
+    limit = Math.min(Math.PI * 0.3, (n * step) / 2);    // past this angle a card is far off screen
+    render();
+  }
 
-  // A smooth glide (slow start, slow finish), like a camera dolly.
-  const glide = (t) => 0.5 - 0.5 * Math.cos(Math.PI * t);
-
-  let clock = 0;       // seconds of loop time (it stops while paused)
-  let phase = 0;       // which tool is at the front, with a fraction while gliding
-  let front = -1;
-  function draw() {
-    items.forEach((item, i) => {
-      const a = ((i - phase) / n) * Math.PI * 2;
-      const depth = (Math.cos(a) + 1) / 2;          // 1 at the front, 0 at the back
-      const x = Math.sin(a) * rx;
-      const y = -(1 - depth) * ry * 2 + ry * 0.4;   // the back of the oval sits higher
-      const scale = 0.42 + 0.58 * Math.pow(depth, 1.6);
-      item.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
-      item.style.opacity = (0.26 + 0.74 * Math.pow(depth, 2)).toFixed(3);
-      item.style.zIndex = String(Math.round(depth * 100));
-    });
-    const now = ((Math.round(phase) % n) + n) % n;
-    if (now !== front) {
-      front = now;
-      items.forEach((item, i) => item.classList.toggle('is-front', i === front));
+  const shown = new Array(n).fill(null);
+  function render() {
+    const span = n * step;
+    for (let i = 0; i < n; i++) {
+      // Each card's angle round the curve, wrapped into one loop centred on the front.
+      let a = (i * step + angle) % span;
+      if (a < 0) a += span;
+      if (a > span / 2) a -= span;
+      const visible = Math.abs(a) < limit;
+      if (visible !== shown[i]) { shown[i] = visible; cards[i].classList.toggle('is-away', !visible); }
+      if (!visible) continue;
+      // Turned to its place on the curve, then pushed out to the curve (we stand inside it).
+      cards[i].style.transform = `translateZ(${radius.toFixed(0)}px) rotateY(${(-a * 180 / Math.PI).toFixed(3)}deg) translateZ(${(-radius).toFixed(0)}px)`;
     }
   }
 
-  let running = false, last = 0, paused = false, onScreen = false;
+  // The drift: one step per frame, the speed easing towards 0 (paused) or 1 (drifting).
+  let running = false, last = 0, speed = 1, want = 1, raf = 0;
   function tick(t) {
+    raf = 0;
     if (!running) return;
     const dt = Math.min((t - last) / 1000, 0.05);
     last = t;
-    if (!paused) {
-      clock += dt;
-      const step = Math.floor(clock / (HOLD + GLIDE));
-      const into = clock - step * (HOLD + GLIDE);
-      phase = step + (into < HOLD ? 0 : glide((into - HOLD) / GLIDE));
-      draw();
+    speed += (want - speed) * (1 - Math.exp(-dt / 0.35));
+    if (want === 0 && speed < 0.02) speed = 0;   // (the ease only nears zero: settle to a true stop)
+    if (speed > 0.001) {
+      angle -= (SPEED / radius) * speed * dt;   // right to left
+      if (angle < -n * step) angle += n * step;
+      render();
     }
-    requestAnimationFrame(tick);
+    raf = requestAnimationFrame(tick);
   }
+  let onScreen = false;
   const setRunning = () => {
-    const want = onScreen && !document.hidden;
-    if (want && !running) { running = true; last = performance.now(); requestAnimationFrame(tick); }
-    else if (!want) running = false;
+    const go = onScreen && !document.hidden;
+    if (go && !running) { running = true; last = performance.now(); raf = requestAnimationFrame(tick); }
+    else if (!go) { running = false; cancelAnimationFrame(raf); raf = 0; }
   };
   new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; setRunning(); }, { rootMargin: '10% 0px' }).observe(root);
   document.addEventListener('visibilitychange', setRunning);
 
-  // Pause while someone is looking closely (pointer over it, or keyboard focus inside it).
-  const hold = (on) => { paused = on; root.classList.toggle('is-paused', on); };
-  root.addEventListener('pointerenter', () => hold(true));
-  root.addEventListener('pointerleave', () => hold(false));
-  root.addEventListener('focusin', () => hold(true));
-  root.addEventListener('focusout', () => hold(false));
-  // A touch pauses it for a moment, then it carries on.
-  let resume = 0;
-  root.addEventListener('touchstart', () => { clearTimeout(resume); hold(true); resume = setTimeout(() => hold(false), 2600); }, { passive: true });
+  // Pausing: while the pointer is over it, or with the button (which keyboard and touch can use too).
+  let hovering = false, held = false;
+  const update = () => { want = hovering || held ? 0 : 1; };
+  root.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { hovering = true; update(); } });
+  root.addEventListener('pointerleave', () => { hovering = false; update(); });
+  pauseBtn.addEventListener('click', () => {
+    held = !held;
+    pauseBtn.setAttribute('aria-pressed', String(held));
+    pauseBtn.querySelector('use').setAttribute('href', held ? '#i-play' : '#i-pause');
+    pauseBtn.querySelector('.ribbon__pause-label').textContent = held ? 'Play the tools' : 'Pause the tools';
+    update();
+  });
 
-  draw();
+  root.classList.add('is-live');
+  let lastW = window.innerWidth;
+  window.addEventListener('resize', () => {
+    if (window.innerWidth === lastW) return;
+    lastW = window.innerWidth;
+    build();
+  });
+  build();
 }
