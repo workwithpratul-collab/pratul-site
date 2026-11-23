@@ -308,6 +308,15 @@
   --meter-tick: rgba(243, 236, 226, 0.6);
   --meter-quiet: rgba(243, 236, 226, 0.74);
   --meter-alt: #f6c38f;
+  /* Contact (references/round2/Contact.dc.html): the shade over the tent painting (deepest behind the
+     words on the left), the frosted form panel, its fields and hints, and the cream "Send message". */
+  --contact-shade: linear-gradient(90deg, rgba(23, 20, 43, 0.96) 0%, rgba(23, 20, 43, 0.78) 45%, rgba(23, 20, 43, 0.35) 100%);
+  --form-panel: rgba(29, 25, 50, 0.72);
+  --form-panel-line: rgba(201, 190, 221, 0.16);
+  --form-field: #17142b;
+  --form-field-line: rgba(201, 190, 221, 0.25);
+  --form-hint: #8e83a8;
+  --white-warm: #fff8ef;
   /* About (references/round2/About.dc.html): a plum glow behind the portrait, settling to indigo. */
   --about-glow: radial-gradient(120% 90% at 20% 30%, #3a2747 0%, #221b36 45%, #1a1630 100%);
   /* The tools loop: the lantern light behind the tool in focus, and the tiles' soft shadow (indigo, never black). */

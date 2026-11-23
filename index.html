@@ -623,22 +623,23 @@
     </section>
 
     <!-- ========== CONTACT: back at camp ========== -->
-    <!-- Desktop: two choices; "Send a message" opens the form in place. Phones: the full form. -->
+    <!-- references/round2/Contact.dc.html. Desktop: the words and one "Book a 20-min call" on the left,
+         the form in a frosted panel over the tent scene on the right. Phones: the full form. -->
     <section class="contact" id="contact" aria-labelledby="contact-title">
       <div class="contact__art" aria-hidden="true">
         <img src="assets/redesign/bg-contact-800.webp" srcset="assets/redesign/bg-contact-800.webp 800w, assets/redesign/bg-contact.webp 1536w" sizes="100vw" width="1536" height="1024" loading="lazy" decoding="async" alt="">
-        <span class="contact__glow"></span>
       </div>
       <div class="wrap contact__inner">
         <p class="eyebrow m-only">Let's build together</p>
         <h2 class="heading m-only" id="contact-title-m">Have a project in mind?</h2>
         <p class="lead m-only">Tell me about your business and what you'd like your website to do. I'll get back with a clear plan.</p>
-        <h2 class="heading heading--display f-only" id="contact-title">Websites people remember.<br> Let's build <em>yours.</em></h2>
-        <p class="lead f-only">Tell me about your business and what you'd like your website to do. I'll reply within 24 hours.</p>
-        <div class="contact__actions f-only">
-          <!-- TODO(Pratul): replace BOOKING_LINK (here and in the form below) with your booking page. -->
-          <a class="btn btn--primary" href="BOOKING_LINK" data-placeholder="BOOKING_LINK">Book a call<svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
-          <button class="btn-link" type="button" data-open-form aria-expanded="false" aria-controls="contact-form">Send a message<svg class="i" aria-hidden="true"><use href="#i-mail"/></svg></button>
+        <div class="contact__words f-only">
+          <h2 class="heading heading--display f-only" id="contact-title">Websites people remember.<br> Let's build <em>yours.</em></h2>
+          <p class="lead f-only">Tell me about your business and what you'd like your website to do. I'll reply within 24 hours.</p>
+          <div class="contact__actions f-only">
+            <!-- TODO(Pratul): replace BOOKING_LINK (here and in the form below) with your booking page. -->
+            <a class="btn btn--primary" href="BOOKING_LINK" data-placeholder="BOOKING_LINK">Book a 20-min call<svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+          </div>
         </div>
         <!-- TODO(Pratul): replace FORMSPREE_ENDPOINT with your Formspree form ID. -->
         <form class="form" id="contact-form" action="https://formspree.io/f/FORMSPREE_ENDPOINT" method="POST" novalidate>
@@ -646,19 +647,15 @@
             <div class="field">
               <label for="f-name">Your name</label>
               <svg class="field__icon m-only" aria-hidden="true"><use href="#i-user"/></svg>
-              <input id="f-name" name="name" type="text" autocomplete="name" required aria-describedby="f-name-err">
+              <input id="f-name" name="name" type="text" autocomplete="name" placeholder="Jane Doe" required aria-describedby="f-name-err">
               <p class="field__error" id="f-name-err"></p>
             </div>
             <div class="field">
               <label for="f-email">Email</label>
               <svg class="field__icon m-only" aria-hidden="true"><use href="#i-mail"/></svg>
-              <input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" spellcheck="false" required aria-describedby="f-email-err">
+              <input id="f-email" name="email" type="email" autocomplete="email" placeholder="you@business.com" inputmode="email" spellcheck="false" required aria-describedby="f-email-err">
               <p class="field__error" id="f-email-err"></p>
             </div>
-          </div>
-          <div class="field f-only">
-            <label for="f-business">Business or website <span>(optional)</span></label>
-            <input id="f-business" name="business" type="text" autocomplete="organization">
           </div>
           <!-- Phones: one menu instead of the chips (js/pages/pages.js switches off whichever isn't shown). -->
           <div class="field m-only">
@@ -679,18 +676,17 @@
             <label class="chip"><input type="checkbox" name="need" value="New website"><span>New website</span></label>
             <label class="chip"><input type="checkbox" name="need" value="Redesign"><span>Redesign</span></label>
             <label class="chip"><input type="checkbox" name="need" value="Online store"><span>Online store</span></label>
-            <label class="chip"><input type="checkbox" name="need" value="SEO / Performance"><span>SEO / Performance</span></label>
+            <label class="chip"><input type="checkbox" name="need" value="SEO / Performance"><span>SEO / speed</span></label>
             <label class="chip"><input type="checkbox" name="need" value="Other"><span>Other</span></label>
           </fieldset>
           <div class="field">
             <label for="f-message">Your project</label>
             <svg class="field__icon field__icon--top m-only" aria-hidden="true"><use href="#i-note"/></svg>
-            <textarea id="f-message" name="message" rows="4" required aria-describedby="f-message-err"></textarea>
+            <textarea id="f-message" name="message" rows="4" placeholder="A few lines about your business and goals" required aria-describedby="f-message-err"></textarea>
             <p class="field__error" id="f-message-err"></p>
           </div>
           <div class="form__actions">
-            <button class="btn btn--primary" type="submit">Send message<svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></button>
-            <a class="btn-link f-only" href="BOOKING_LINK" data-placeholder="BOOKING_LINK">Or book a call<svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg></a>
+            <button class="btn btn--primary form__send" type="submit">Send message<svg class="i" aria-hidden="true"><use href="#i-right"/></svg></button>
           </div>
           <p class="form__status" id="form-status" role="status" aria-live="polite"></p>
         </form>

@@ -283,7 +283,6 @@ function initContact({ lenis }) {
   if (isFilm) menu.disabled = true;
   else {
     form.querySelector('.form__needs').disabled = true;
-    document.getElementById('f-business').disabled = true;
     // Phones: the label sits inside each field, as a placeholder (the real label is still there,
     // hidden, for screen readers).
     const hints = { 'f-name': 'Your name', 'f-email': 'Your email', 'f-message': 'Your message' };
