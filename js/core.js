@@ -48,5 +48,6 @@ export function lineReveal(el, { delay = 0, stagger = 0.09, duration = TIME.slow
   const split = SplitText.create(el, { type: 'lines', mask: 'lines', linesClass: 'split-line', aria: 'auto' });
   return gsap.timeline({ paused: true, delay })
     .set(el, { opacity: 1 })
-    .fromTo(split.lines, { yPercent: 105 }, { yPercent: 0, duration, ease: EASE.arrive, stagger });
+    // (125%, not 100%: the mask has extra room below for descenders, so the line starts lower)
+    .fromTo(split.lines, { yPercent: 125 }, { yPercent: 0, duration, ease: EASE.arrive, stagger });
 }

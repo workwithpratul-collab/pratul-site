@@ -89,8 +89,16 @@ html:not(.mobile-site) .m-only { display: none !important; }
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
 }
-/* SplitText wraps each line of a revealed heading in a mask (js/core.js). */
+/* SplitText wraps each line of a revealed heading in a mask (js/core.js, class "split-line-mask").
+   The mask clips, so it gets room: below for descenders (y, g, p), above for accents (É), and at
+   the sides for italic overhangs ("carry."). The negative margins give that room back, so nothing
+   on the page moves. */
+:root { --mask-top: 0.1em; --mask-bottom: 0.2em; --mask-side: 0.12em; --mask-room: var(--mask-top) var(--mask-side) var(--mask-bottom); }
 .split-line { display: block; }
+.split-line-mask {
+  padding: var(--mask-room);
+  margin: calc(-1 * var(--mask-top)) calc(-1 * var(--mask-side)) calc(-1 * var(--mask-bottom));
+}
 
 /* ---------- The one canvas (js/gl.js) ---------- */
 /* Fixed behind the page; every 3D view draws into its own box on it. */
@@ -174,8 +182,10 @@ html:not(.mobile-site) .m-only { display: none !important; }
   display: block;
   white-space: nowrap;
   overflow: clip;
-  padding-bottom: 0.1em;
-  margin-bottom: -0.1em;
+  /* Room inside the mask for descenders (y, g, p) and italic overhangs, taken back with equal
+     negative margins so the layout doesn't move. Without it the mask cuts the letters. */
+  padding: var(--mask-room);
+  margin: calc(-1 * var(--mask-top)) calc(-1 * var(--mask-side)) calc(-1 * var(--mask-bottom));
 }
 .opening__title .line > span { display: block; }
 .opening__title .line:nth-child(2) > span { animation-delay: 0.26s; }

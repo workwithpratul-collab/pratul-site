@@ -716,7 +716,7 @@
   font-family: var(--font-display);
   font-weight: var(--weight-regular);
   font-size: clamp(48px, 7vw, 104px);
-  line-height: 1;
+  line-height: 1.05;
   letter-spacing: var(--tracking-display);
 }
 .case-hero__meta { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -791,7 +791,7 @@
 }
 @keyframes drift { from { transform: translateX(-6%); } to { transform: translateX(6%); } }
 .lost__text { position: relative; z-index: 2; display: grid; justify-items: center; gap: var(--space-5); text-align: center; padding: var(--space-6); text-shadow: var(--text-scrim); }
-.lost__text h1 { margin: 0; font-family: var(--font-display); font-weight: var(--weight-regular); font-size: var(--text-display); line-height: 1; }
+.lost__text h1 { margin: 0; font-family: var(--font-display); font-weight: var(--weight-regular); font-size: var(--text-display); line-height: 1.05; }
 .lost__text p { font-size: var(--text-lg); color: var(--ink-muted); max-width: 42ch; }
 @media (prefers-reduced-motion: reduce) { .lost__mist { animation: none; } }
 

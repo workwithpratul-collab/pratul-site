@@ -92,7 +92,7 @@
   --weight-semibold: 600;   /* the heaviest we use: nothing bold or black */
 
   /* ---------- Line heights ---------- */
-  --leading-display: 1.04;  /* big serif lines sit close together, like a film title */
+  --leading-display: 1.05;  /* big serif lines sit close together, like a film title */
   --leading-heading: 1.1;
   --leading-body: 1.6;      /* relaxed reading */
   --leading-label: 1.35;
@@ -295,8 +295,8 @@
   --t-body: clamp(17px, 1.15vw, 18px);
   --t-ui: 16px;
   --t-label: 14px;          /* the floor: nothing smaller anywhere */
-  --lh-display: 0.98;
-  --lh-heading: 1.02;
+  --lh-display: 1.05;   /* never tighter: descenders (y, g, p) need the room */
+  --lh-heading: 1.08;
   --lh-body: 1.6;
   --track-display: -0.025em;
   --track-heading: -0.018em;

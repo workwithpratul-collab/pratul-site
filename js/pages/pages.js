@@ -405,11 +405,16 @@ function initShowreel() {
 function initReveal({ core }) {
   if (reduceMotion) return;
   if (core) {
-    for (const h of document.querySelectorAll('.page .heading')) {
-      h.style.opacity = '0';
-      const tl = core.lineReveal(h, { stagger: 0.1 });
-      core.ScrollTrigger.create({ trigger: h, start: 'top 82%', once: true, onEnter: () => tl.play() });
-    }
+    const headings = [...document.querySelectorAll('.page .heading')];
+    headings.forEach((h) => { h.style.opacity = '0'; });
+    // Split into lines only once the real fonts have arrived: lines measured in the fallback font
+    // break in the wrong places (and a too-small mask cuts the letters).
+    document.fonts.ready.then(() => {
+      for (const h of headings) {
+        const tl = core.lineReveal(h, { stagger: 0.1 });
+        core.ScrollTrigger.create({ trigger: h, start: 'top 82%', once: true, onEnter: () => tl.play() });
+      }
+    });
   }
   const items = document.querySelectorAll('.page .lead, .svc li, .stage, .about__standfirst, .about__story, .about__chips, .about__facts, .contact__actions, .footer__brand, .footer__col, .ridge__controls' + (core ? '' : ', .page .heading'));
   const io = new IntersectionObserver((entries) => {
