@@ -185,11 +185,17 @@ html:not(.mobile-site) .m-only { display: none !important; }
   font-size: var(--t-lead);
   line-height: 1.5;
   color: var(--lavender);
-  animation: rise-in var(--t-slow) var(--ease-arrive) 0.45s both;
+  animation: rise var(--t-slow) var(--ease-arrive) 0.2s both;
 }
 .opening__title .line > span { animation: line-in var(--t-slow) var(--ease-arrive) 0.1s both; }
+/* The opening is on screen from the very first frame (it is the first thing anyone reads, and
+   what the browser times as the page's main content): it only moves, it never starts invisible. */
 @keyframes line-in {
-  from { transform: translateY(105%); }
+  from { transform: translateY(42%); }
+  to   { transform: none; }
+}
+@keyframes rise {
+  from { transform: translateY(16px); }
   to   { transform: none; }
 }
 @keyframes rise-in {

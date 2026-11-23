@@ -58,6 +58,7 @@ const yieldToBrowser = () => new Promise((resolve) => {
   else setTimeout(resolve, 0);
 });
 const buildTimes = {};
+const warmTimes = [];   // (for measuring: how long each warm-up piece took)
 async function step(name, build) {
   await yieldToBrowser();
   const t = performance.now();
@@ -86,10 +87,15 @@ const forest = await step('forest', () => createForest(scene, {
   routeDistance: cameraPath.routeDistance,
   legacyRouteDistance: cameraPath.legacyRouteDistance,
   sky,
+  pause: yieldToBrowser,
 }));
 const baseCamp = await step('baseCamp', () => createBaseCamp(scene));
 const mist = await step('mist', () => createMist(scene));
-const trekker = await step('trekker', () => createTrekker(scene, renderer, camera, { onProgress: (f) => reportProgress(0.3 + f * 0.68) }));
+// His eleven animations come ready-made in one small file (assets/animations/clips.json, baked
+// from the Mixamo FBX files and already fitted to this character), instead of eleven FBX files the
+// browser had to download and decode (about 2 MB and half a second of work).
+const CLIPS = ['idle', 'walk', 'jog', 'wave', 'sit', 'sitToStand', 'point', 'look', 'stretch', 'turnLeft', 'turnRight'];
+const trekker = await step('trekker', () => createTrekker(scene, renderer, camera, { onProgress: (f) => reportProgress(0.3 + f * 0.68), clips: CLIPS, clipFile: 'assets/animations/clips.json' }));
 
 // Scene 2: the ridge (grass, stones, trees, valley mist) and the three project landmarks along
 // the trail: a still lake, a stone hut and a trail signboard (journey.js, landmarks.js).
@@ -113,7 +119,7 @@ reportProgress(0.3);   // the world is built
 // (The sea of clouds and the far peaks start hidden, so show them for this one moment.)
 // compileAsync lets the graphics driver compile in the background where the browser supports it.
 summit.update(0, 1);
-await renderer.compileAsync(scene, camera);
+{ const t0 = performance.now(); await renderer.compileAsync(scene, camera); buildTimes.compile = Math.round(performance.now() - t0); }
 summit.update(0, 0);
 
 // The first frame also has to send every texture and mesh to the graphics card, which used to take
@@ -128,7 +134,9 @@ async function warmUp() {
   });
   for (const t of textures) {
     if (t.isVideoTexture || !t.image) continue;
+    const t0 = performance.now();
     renderer.initTexture(t);
+    warmTimes.push(['tex ' + (t.image.width || '?') + 'x' + (t.image.height || '?'), Math.round(performance.now() - t0)]);
     await yieldToBrowser();
   }
   // Then draw the opening shot one part at a time (each draw uploads only that part's shapes).
@@ -141,12 +149,13 @@ async function warmUp() {
   renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
   for (const c of parts) {
     c.visible = true;
+    const t0 = performance.now();
     renderer.render(scene, camera);
+    warmTimes.push(['draw ' + (c.name || c.type), Math.round(performance.now() - t0)]);
     await yieldToBrowser();
   }
   renderer.clear();
 }
-await warmUp();
 
 // ---------- 4. Scrolling → progress (0 at the top of the film, 1 at its end) ----------
 // The film section is FILM_SCREENS screen-heights of scrolling (site.js sets its height). After the
@@ -443,7 +452,7 @@ window.__ascent = {
   ready: false,
   get fps() { return fps; },
   get progress() { return scroll.progress; },
-  info: () => ({ trees: forest.counts, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, textures: renderer.info.memory.textures, geometries: renderer.info.memory.geometries, build: buildTimes }),
+  info: () => ({ trees: forest.counts, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, textures: renderer.info.memory.textures, geometries: renderer.info.memory.geometries, build: buildTimes, warm: warmTimes.filter((w) => w[1] > 8) }),
   jump: jumpTo,
   glideToEnd,
   lenis,
@@ -458,6 +467,11 @@ window.__ascent = {
 
 // ---------- 5. Handing over from the poster to the live scene ----------
 await trekker.ready.catch((e) => console.error('[trekker] failed to load', e));
+// The character arrives after the world's shaders were built: build its own (the cel-shaded
+// MToon materials) in the background too, so its first frame doesn't freeze the page.
+const trekkerRoot = scene.getObjectByName('trekker');
+if (trekkerRoot) await renderer.compileAsync(trekkerRoot, camera, scene);
+await warmUp();
 reportProgress(1);
 if (returning) comeBack();
 else jumpTo(STILL ?? scroll.target, { moveScroll: STILL !== null });

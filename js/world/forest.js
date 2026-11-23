@@ -58,7 +58,9 @@ const shared = {
   uMistColor: { value: mood.mist.treeFeet },
 };
 
-export function createForest(scene, { routeDistance, legacyRouteDistance, sky } = {}) {
+// pause: an optional async function, called every few thousand trees. film.js passes one that
+// hands the browser a moment back, so planting ~22,000 candidates never freezes the page.
+export async function createForest(scene, { routeDistance, legacyRouteDistance, sky, pause = null } = {}) {
   // Share the sky's live key light direction (moon at night, sun later), so trees shade with it.
   if (sky) shared.uMoonDir.value = sky.keyDir;
 
@@ -77,6 +79,7 @@ export function createForest(scene, { routeDistance, legacyRouteDistance, sky } 
 
   const candidates = 22000;
   for (let i = 0; i < candidates; i++) {
+    if (pause && i % 3000 === 2999) await pause();
     const x = (rand() - 0.5) * 320;
     const z = 60 - rand() * 340;
     // Keep the trail and the clearings free.
@@ -119,6 +122,7 @@ export function createForest(scene, { routeDistance, legacyRouteDistance, sky } 
   //  - standing on the new ridge land (the ground rose there): mostly removed, so the ridge
   //    is open grass with only a few scattered trees,
   //  - a flat card tree that the camera now passes close to: turned into a soft 3D tree.
+  if (pause) await pause();
   const legacyEnd = legacy.trailCurve.getLength() - 1;   // metres of trail that are Phase 1's
   const keep = (t) => {
     const y = groundHeight(t.x, t.z);
@@ -154,9 +158,11 @@ export function createForest(scene, { routeDistance, legacyRouteDistance, sky } 
   }
 
   // ---------- 2. Build the meshes ----------
+  if (pause) await pause();
   const nearMat = makePaintedMaterial({ colors: mood.trees });
   const pineMesh = makeNearInstanced(buildSoftPine(), near.pine, nearMat, 'near-pines');
   const oakMesh = makeNearInstanced(buildSoftOak(), near.oak, nearMat, 'near-oaks');
+  if (pause) await pause();
   const cardMesh = makeCards(cards);
   scene.add(pineMesh, oakMesh, cardMesh);
 

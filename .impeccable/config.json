@@ -107,6 +107,33 @@
         ],
         "createdAt": "2026-11-18T12:35:10.643Z",
         "reason": "Claude: the amber halo on the primary Book a call button is the lantern light CLAUDE.md rule 3 (warm means light) reserves for it"
+      },
+      {
+        "rule": "italic-serif-display",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-19T11:42:05.316Z",
+        "reason": "Brief (Part 4) requires 'move' in amber italic; DESIGN.md §3 makes one italic amber accent word per heading the system"
+      },
+      {
+        "rule": "buried-raster",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-19T11:42:05.434Z",
+        "reason": "Services gear images start hidden and are revealed per active row (DESIGN.md §6 signature); intentional"
+      },
+      {
+        "rule": "marquee",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-19T11:42:05.600Z",
+        "reason": "Brief (Tools, phone) explicitly asks for a gentle auto-scrolling logo marquee that pauses on touch"
       }
     ]
   }
