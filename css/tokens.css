@@ -268,12 +268,14 @@
    css/home.css and css/style.css use these. Every text colour here meets WCAG AA on --night. */
 :root {
   /* Palette */
-  --night: #1c1a33;          /* page base: deep indigo */
-  --plum: #221d36;           /* deeper plum moments (work, footer) */
-  --dusk: #2a2442;           /* raised surfaces: form fields, frames */
+  /* The colour scheme (references/round2/Palette.dc.html, DESIGN.md section 2): seven tones, night to sunrise. */
+  --night: #17142b;          /* Midnight: the base */
+  --plum: #3e2a4c;           /* Plum: glow and depth */
+  --rose: #a8687a;           /* Dusty rose: the horizon (the dawn at the foot of the page) */
+  --dusk: #241d3a;           /* Indigo: surfaces (frames, cards, fields) */
   --deep: #15132a;           /* the darkest value anywhere (never black) */
   --cream: #f3ece2;          /* primary text: 14.4:1 on --night */
-  --lavender: #b8aed6;       /* secondary text: 8.1:1 */
+  --lavender: #c9bedd;       /* Lavender: body text */
   --lavender-quiet: #9d93c2; /* labels and measurements only: 5.9:1 */
   --lavender-light: #ddd5ee; /* secondary text over the live sky (hero): 11:1 on --night */
   --amber: #f6a04d;          /* emphasis only: accent word, primary button, flag, focus: 8.1:1 */
@@ -283,7 +285,7 @@
   --hair: rgba(243, 236, 226, 0.14);       /* hairlines */
   --hair-strong: rgba(243, 236, 226, 0.32);
   --veil-night: rgba(21, 19, 42, 0.86);    /* the calm band behind text over paintings */
-  --handover: #2b2546;
+  --handover: #17142b;       /* the summit sinks into the Work tone */
   /* The Process trail at evening (references/round2/Main.dc.html): the sky warming to a plum horizon,
      the far ridge and its snow, the near slope, the dashed path ahead and the checkpoints' states. */
   --trail-sky-top: #17142b;
@@ -299,7 +301,7 @@
   --trail-ring: rgba(183, 169, 214, 0.45);
   --trail-icon: #b7a9d6;
   --trail-halo: rgba(246, 160, 77, 0.18);          /* the ring of light round the current step */
-  --section-process: #221c38;                      /* the page's colour at Process (Palette.dc.html strip) */
+  --section-process: #1c1832;                      /* the page colour Process rises out of (the Services tone) */
   /* The film's altitude meter (references/round2/Meter.dc.html): a soft indigo glow from the corner
      behind the words (deeper once the sky is bright), the line, its quiet labels and the amber altitude. */
   --meter-scrim: rgba(23, 20, 43, 0.6);
@@ -310,7 +312,7 @@
   --meter-alt: #f6c38f;
   /* Footer (references/round2/Footer.dc.html): night warming to dawn, the glow on the horizon (the
      sun about to rise: a light source), the giant name, the two ridges in front of it, and hairlines. */
-  --footer-dawn: linear-gradient(180deg, #17142b 0%, #1f1834 50%, #3a2440 78%, #5a3446 100%);
+  --footer-dawn: linear-gradient(180deg, #1f1834 0%, #1f1834 40%, #3a2440 76%, #5a3446 100%);
   --footer-glow: rgba(246, 160, 77, 0.45);
   --footer-word: rgba(243, 236, 226, 0.92);
   --footer-ridge-back: #2a2140;
@@ -319,7 +321,7 @@
   --footer-line-strong: rgba(201, 190, 221, 0.35);
   /* Tools (references/round2/Tools.dc.html): the plum glow behind the ribbon, the cards' face, edge
      and shadow (indigo, never black), and each tool's own colour for the soft glow on its card. */
-  --tools-glow: radial-gradient(80% 60% at 50% 62%, #33264a 0%, #201a34 55%, #17142b 100%);
+  --tools-glow: radial-gradient(80% 60% at 50% 62%, #3a2a4e 0%, #2a2140 55%, #241d3a 100%);
   --card-face: linear-gradient(165deg, #3a2e52 0%, #231c38 70%);
   --card-line: rgba(201, 190, 221, 0.16);
   --card-shadow: rgba(14, 11, 30, 0.6);
@@ -351,19 +353,20 @@
   --star: rgba(243, 236, 226, 0.55);
   /* The phone page's palette (references/mockups/5-phone-v2.png, read from its swatches): deep navy,
      plum, mauve, the peach of its buttons and accents (a lantern's light), and its cream. */
-  --m-navy: #29243a;
-  --m-plum: #513851;
-  --m-mauve: #9c636d;
-  --m-peach: #fdb47b;
-  --m-peach-line: rgba(253, 180, 123, 0.5);
-  --m-peach-glow: rgba(253, 180, 123, 0.28);
-  --m-cream: #f3dfcd;
-  --m-card: linear-gradient(160deg, rgba(81, 56, 81, 0.34), rgba(41, 36, 58, 0.62));
+  --m-navy: #17142b;
+  --m-plum: #3e2a4c;
+  --m-mauve: #a8687a;
+  --m-peach: #f6a04d;   /* (now the one Amber, as on desktop) */
+  --m-peach-line: rgba(246, 160, 77, 0.5);
+  --m-peach-glow: rgba(246, 160, 77, 0.28);
+  --m-cream: #f3ece2;
+  --m-card: linear-gradient(160deg, rgba(62, 42, 76, 0.42), rgba(36, 29, 58, 0.7));
   --m-card-line: rgba(243, 223, 205, 0.14);
   /* The phone hero (references/round2/Phone.dc.html): the shade over the summit (dark at the top
      where the words sit, clear over the trekker), the see-through "Watch showreel" pill, and snow. */
-  --m-hero-shade: linear-gradient(180deg, rgba(23, 20, 43, 0.82) 0%, rgba(23, 20, 43, 0.45) 40%, rgba(23, 20, 43, 0) 60%, rgba(23, 20, 43, 0.35) 100%);
-  --m-ghost: rgba(23, 20, 43, 0.25);
+  --m-hero-shade: linear-gradient(180deg, rgba(23, 20, 43, 0.84) 0, rgba(23, 20, 43, 0.62) 280px, rgba(23, 20, 43, 0.5) 450px, rgba(23, 20, 43, 0) 590px, rgba(23, 20, 43, 0) max(590px, 72%), rgba(23, 20, 43, 0.55) 100%);   /* (anchored to the words: dark to below the buttons on every phone) */
+  --m-hero-shade-short: linear-gradient(180deg, rgba(23, 20, 43, 0.88) 0, rgba(23, 20, 43, 0.74) 300px, rgba(23, 20, 43, 0.64) 470px, rgba(23, 20, 43, 0.5) 100%);   /* (phones under 700 px tall: the words cover most of the picture) */
+  --m-ghost: rgba(23, 20, 43, 0.5);   /* (dark enough for AA where it crosses the bright horizon on short phones) */
   --m-ghost-line: rgba(243, 236, 226, 0.45);
   --m-ghost-press: rgba(243, 236, 226, 0.1);
   --m-snow: rgba(255, 248, 240, 0.7);
@@ -372,13 +375,19 @@
      with a ridge along the bottom. */
   --m-menu-bg: linear-gradient(180deg, #17142b 0%, #241d3a 60%, #3e2a4c 85%, #a8687a 100%);
   --m-menu-ridge: #2a2140;
-  --m-panel: rgba(26, 23, 37, 0.97);   /* the page's first colour (the top of --page-arc): the summit darkens into it */
+  --m-panel: rgba(23, 20, 43, 0.97);   /* Midnight, nearly solid */
 
   /* The page is one continuous gradient: the rest of the day on the mountain (DESIGN.md §1).
      Morning lilac under the hero, dusk plum at the work, night indigo by the tent. */
-  --page-arc: linear-gradient(180deg,
-    #2b2546 0%, #26213f 9%, #221d36 22%, #241e3a 34%, #2a2241 46%,
-    #221d38 58%, #1c1a33 70%, #18162d 84%, #15132a 100%);
+  /* Each section's tone, top to bottom (the Palette strip): the page gets slowly warmer from Work
+     down to the dawn-lit footer, with a soft blend at each section's top instead of an edge. */
+  --tone-work: #17142b;
+  --tone-services: #1c1832;
+  --tone-process: #221c38;
+  --tone-about-top: #221d38;   /* (the Process slope it rises from) */
+  --tone-about-bottom: #1a1630;   /* (where the About glow settles: Tools rises out of it) */
+  --tone-tools: #241d3a;
+  --tone-contact: linear-gradient(180deg, #241d3a 0%, #3e2a4c 62%, #1f1834 100%);
 
   /* Type scale (DESIGN.md §3) */
   /* Instrument Serif is a narrow face, so its sizes sit a step above a book serif's. */

@@ -28,22 +28,45 @@ is never a straight edge between sections. Paintings dissolve into it with soft 
 ## 2. Palette
 
 Interface colours live only in `css/tokens.css`; world colours only in `js/world/palette.js`.
+The scheme is the seven tones of references/round2/Palette.dc.html (feedback round 2, Nov 2026), used on
+desktop and phone alike (the phone's old peach is now the same Amber).
 
-| Token | Value | Use | Contrast on `--night` |
-|---|---|---|---|
-| `--night` | `#1C1A33` | page base, deep indigo | |
-| `--plum` | `#221D36` | deeper plum moments (work, footer) | |
-| `--dusk` | `#2A2442` | raised surfaces (form fields, frames) | |
-| `--cream` | `#F3ECE2` | primary text | 14.4 : 1 |
-| `--lavender` | `#B8AED6` | secondary text (body copy under headings, captions) | 8.1 : 1 |
-| `--lavender-quiet` | `#9D93C2` | labels and measurements only (never long text) | 5.9 : 1 |
-| `--amber` | `#F6A04D` | emphasis only: the italic accent word, the primary button, the summit flag, focus | 8.1 : 1 |
-| `--amber-ink` | `#1C1A33` | text on amber | 8.1 : 1 |
-| `--line` | cream at 14 % | hairlines | |
+| Tone | Token | Value | Use | On Midnight / Indigo / Plum |
+|---|---|---|---|---|
+| Midnight | `--night` | `#17142B` | the base | |
+| Indigo | `--dusk` | `#241D3A` | surfaces: cards, fields, frames | |
+| Plum | `--plum` | `#3E2A4C` | glow and depth (About, Tools, Contact) | |
+| Dusty rose | `--rose` | `#A8687A` | the horizon: the dawn at the foot of the page and of the phone menu | |
+| Amber | `--amber` | `#F6A04D` | CTAs and emphasis only: the main button, the italic accent word, the current step, the flag | 8.6 / 7.7 / 6.1 : 1 |
+| Lavender | `--lavender` | `#C9BEDD` | body text | 10.2 / 9.1 / 7.3 : 1 |
+| Cream | `--cream` | `#F3ECE2` | headings and primary text | 15.3 / 13.7 / 10.9 : 1 |
+
+Supporting values: `--lavender-light` `#DDD5EE` (text over paintings: 12.7 / 11.3 / 9.0), `--lavender-quiet`
+`#9D93C2` (small capital labels only: 6.3 / 5.6 / 4.5), `--amber-ink` `#1C1A33` (text on amber: 8.1 : 1),
+`--deep` `#15132A` (the darkest value anywhere: never black).
+
+**The page, top to bottom** (the Palette strip): the page gets slowly warmer as you scroll, like the sky
+before dawn, with a soft blend at the top of each section instead of identical flat blocks.
+
+| Section | Tone |
+|---|---|
+| Hero | the live summit at sunrise (phones: the summit painting) |
+| Work | Midnight `#17142B` (the summit sinks into it during the hand-over); the ridge's dusk melts into the next tone |
+| Services | `#1C1832`, the page colour behind it (Services' own rules are untouched) |
+| Process | `#221C38`: the evening sky warms to a plum horizon behind the range |
+| About | a plum glow (`#3A2747`) behind the portrait, settling to indigo |
+| Tools | Indigo with a plum glow under the ribbon |
+| Contact | Indigo to Plum, behind the tent painting and its shade |
+| Footer | dawn: `#1F1834` warming through `#3A2440` to `#5A3446`, with an amber glow on the horizon |
 
 Rules: amber is light (Rule 3), so it appears once or twice per screen at most. No grey anywhere: shade
 is a cooler, deeper indigo. Text never sits on a painting without the painting being calmed under it
-(a soft mask or a calm band), and every text/background pair meets WCAG AA.
+(a soft mask, a shade only where the words sit, or a calm band). **WCAG AA is measured on the rendered
+page**, not only from token pairs: a script takes each visible line's real colour and the actual pixels
+behind it (a screenshot with the text made invisible) and reports the worst contrast in its box. Round 2
+result: every section at 1440x900 and 1366x768, and the phone page from 360x640 to 440x956, all at AA.
+Phones under 700 px tall get a deeper hero shade (`--m-hero-shade-short`), because the words cover most
+of the picture there.
 
 ## 3. Type
 

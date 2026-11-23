@@ -5,7 +5,10 @@
 /* ---------- Shared pieces ---------- */
 .page {
   position: relative;
-  background: var(--page-arc);   /* the rest of the day on the mountain, top to bottom */
+  /* The page behind the sections without their own background: the Work tone at the top, settling
+     into the Services tone (Work must stay see-through: its 3D ridge is drawn on the canvas behind
+     it; Services keeps its own rules untouched). */
+  background: linear-gradient(180deg, var(--tone-work) 0, var(--tone-work) 150vh, var(--tone-services) 260vh);
 }
 .wrap {
   width: min(100% - 2 * var(--page-gutter), var(--content));
@@ -274,6 +277,11 @@
   min-height: 0;
   padding-block: calc(76px + clamp(16px, 4vh, 48px)) clamp(20px, 5vh, 56px);
 }
+/* Each section's tone (references/round2/Palette.dc.html): slowly warmer from Work down to the
+   dawn-lit footer. Every section blends in from the one above it, so there is no hard edge. */
+.about { background: linear-gradient(180deg, var(--tone-about-top) 0, transparent 16vh), var(--about-glow); }
+.tools { background: linear-gradient(180deg, var(--tone-about-bottom) 0, transparent 14vh), var(--tools-glow); }
+.contact { background: var(--tone-contact); }
 /* Anything that must sit above the shared 3D canvas. */
 .page .wrap, .footer .wrap, .about__photo, .about__text, .contact__art { position: relative; z-index: 2; }
 
@@ -436,6 +444,8 @@
   padding: calc(76px + clamp(12px, 3vh, 32px)) 0 0;
 }
 .work.is-pinned .ridge.is-3d { height: auto; min-height: 0; }
+/* The ridge's dusk melts into the page colour below it (over the canvas, under the words). */
+.work.is-pinned::after { content: ""; position: absolute; inset: auto 0 0; height: 16vh; background: linear-gradient(180deg, transparent, var(--tone-services)); pointer-events: none; }
 
 /* ---------- Process: the evening trail (js/pages/process.js, references/round2/Main.dc.html) ---------- */
 /* The section is tall; its one screen sticks while you scroll through it, so the trail is walked by
@@ -616,7 +626,6 @@
   align-items: center;
   gap: var(--s-5);
   padding-right: var(--page-gutter);
-  background: var(--about-glow);
 }
 .about__photo { align-self: stretch; min-height: 640px; }
 [data-mode="film"] .about { padding-block: 0; align-items: stretch; }
@@ -685,7 +694,6 @@
   min-height: 100svh;
   padding-block: calc(76px + clamp(12px, 3vh, 40px)) clamp(16px, 3vh, 30px);
   overflow-x: clip;
-  background: var(--tools-glow);
 }
 .tools__head { text-align: center; }
 .tools__head .heading { font-size: clamp(40px, min(5vw, 8.6vh), 72px); }
@@ -1060,6 +1068,7 @@
 }
 @keyframes dawn-breathe { from { opacity: 0.2; } to { opacity: 1; } }
 .mobile-site .hero__shade { background: var(--m-hero-shade); }
+@media (max-height: 700px) { .mobile-site .hero__shade { background: var(--m-hero-shade-short); } }
 .mobile-site .hero__inner {
   position: relative;
   left: auto;
