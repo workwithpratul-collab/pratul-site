@@ -156,3 +156,69 @@ version (phones never load three.js).
 - Images: WebP/AVIF with `srcset`/`sizes`, explicit width/height, lazy below the fold; only the poster
   is preloaded.
 - Never animate layout properties; no scroll handlers that read and write layout in the same frame.
+
+## 9. The phone version (references/mockups/5-phone-v2.png)
+
+Phones and portrait tablets get no film and no 3D (js/device.js). Their page is built to the mockup
+`5-phone-v2.png`, with two deliberate differences: About shows the real facts (6 websites built,
+1+ year building and learning, worldwide from India) instead of "3+ Years, 10+ Projects", and the
+work heading is "Work that speaks for itself." with each project's honest label (Concept / Pitch demo).
+"Insights" is not in the menu (there is no blog). Process and Tools keep their desktop moments,
+recomposed for a tall screen.
+
+### Palette (phone)
+Read from the mockup's swatches; tokens in `css/tokens.css` (`--m-*`).
+
+| Token | Value | Role |
+|---|---|---|
+| `--m-navy` | `#29243A` | deepest ground, text on peach |
+| `--m-plum` | `#513851` | card washes, painted ridges |
+| `--m-mauve` | `#9C636D` | lit flanks of the painted ridges |
+| `--m-peach` | `#FDB47B` | the one accent: buttons, eyebrows, "move", stats, icons (a lantern's light) |
+| `--m-cream` | `#F3DFCD` | the arrow discs on work cards, snow |
+
+Body text stays cream (`--cream`) and secondary text lavender (`--lavender`, `--lavender-light`).
+
+### Type (phone)
+Instrument Serif for headings (hero 36-60 px, sections `--t-heading`, card titles 27 px) and Manrope
+for everything else (body 15-17 px, menu links 24 px). The **eyebrow** (13 px Manrope 600, 0.22em
+capitals, peach) appears on phones only, above the hero and each section heading, as the mockup has
+it; desktop keeps the no-eyebrow rule.
+
+### Layout (phone)
+One column, 16 px side gutter, sections separated by `--s-8`. Order: hero, work, services, process,
+about, tools, contact, footer.
+
+- **Top bar:** the peaks mark and "Pratul" left, a three-line menu button right (44 px). No button in
+  the bar: "Book a call" lives in the menu.
+- **Menu (open):** a full-height panel (`--m-panel`, blurred): Work, About, Process at 24 px, then
+  the peach "Book a call" pill, over a range of peaks at the foot. Links rise in 60 ms apart.
+- **Hero:** eyebrow, headline, line, then two stacked 272 px pills (peach "Explore my work", outlined
+  "About me"); the summit painting below them (set 9 % of the screen low so the trekker and flag
+  stand under the buttons); "The summit / Alt. 4,410 m" bottom left and a round down button bottom right.
+- **Work:** eyebrow, heading, filter chips (All, Websites, Stores, Experiences; 44 px; the pressed one
+  peach), then one card per project: screenshot (16:10), a cream arrow disc, name, kind with the
+  honest label, one line.
+- **Services:** eyebrow "What I can build", "Digital experiences for modern businesses.", three cards
+  (Business Websites, Online Stores & Booking, Scroll Films & 3D): line icon, title, one line, a round
+  arrow, and a small painted scene in the corner. Tapping one opens the form with that need chosen.
+- **About:** eyebrow, "I'm Pratul, a web designer and developer.", the portrait as a rounded card,
+  one paragraph, a hairline, three facts in a row split by hairlines (peach serif figures).
+- **Contact:** eyebrow "Let's build together", "Have a project in mind?", one line, then the form:
+  name, email, "What do you need?" menu, message, each with its icon inside the field (the real
+  labels stay for screen readers), a full-width peach "Send message", and a painted range below.
+
+### Components (phone)
+- **Cards:** 18 px radius, 1 px cream-at-14 % border, a plum-to-navy wash. They lift 2 px and glow
+  peach on tap (and hover).
+- **Fields:** 52 px tall, 12 px radius, the icon 16 px in, text from 48 px.
+- **Buttons:** peach pill with navy text; outlined pill (peach line) for the second action.
+
+### Motion (phone)
+Section blocks fade up once as they arrive; the hero painting drifts slower than the page (parallax);
+a thin peach progress line runs along the top edge; cards lift on tap. No library: CSS transitions
+and one scroll read per frame (js/mobile/mobile.js). Everything rests under "reduce motion".
+
+### Checks
+No sideways scroll at 320, 360, 390 and 430 px; no clipped text at 390x844; every tap target 44 px.
+

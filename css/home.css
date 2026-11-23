@@ -943,7 +943,7 @@
 }
 @keyframes dawn-breathe { from { opacity: 0.2; } to { opacity: 1; } }
 .mobile-site .hero__shade {
-  background: linear-gradient(180deg, rgba(21, 19, 42, 0.92) 0%, rgba(21, 19, 42, 0.75) 26%, rgba(21, 19, 42, 0.2) 46%, rgba(21, 19, 42, 0) 56%);
+  background: linear-gradient(180deg, rgba(21, 19, 42, 0.92) 0%, rgba(21, 19, 42, 0.78) 30%, rgba(21, 19, 42, 0.42) 50%, rgba(21, 19, 42, 0) 64%);
 }
 .mobile-site .hero__inner {
   position: relative;
@@ -995,10 +995,196 @@
   transition: opacity var(--t-fast) var(--ease-arrive), transform var(--t-fast) var(--ease-arrive), visibility var(--t-fast);
 }
 .mobile-site .nav.is-open .nav__links { opacity: 1; visibility: visible; transform: none; }
-.mobile-site .nav__links a { padding: 14px 0; font-size: 20px; font-family: var(--font-display); border-bottom: 1px solid var(--hair); }
 .mobile-site .nav__links a::after { content: none; }
 .mobile-site .ridge__track { grid-auto-columns: 86vw; }
 .mobile-site .services, .mobile-site .work, .mobile-site .about, .mobile-site .tools { padding-block: var(--s-8); }
+
+/* ======================================================================
+   The phone page, as references/mockups/5-phone-v2.png (DESIGN.md §9)
+   ====================================================================== */
+/* The small spaced label above a heading: phones only (the mockup's one exception to the rule). */
+.eyebrow {
+  margin-bottom: var(--s-3);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.mobile-site .eyebrow { color: var(--m-peach); }
+/* The mark beside the name (both versions). */
+.nav__name { display: inline-flex; align-items: center; gap: 10px; }
+.nav__mark { width: 34px; height: 20px; fill: none; stroke: var(--amber); stroke-width: 1.5; stroke-linejoin: round; }
+.mobile-site .nav__mark { stroke: var(--m-peach); }
+
+/* Accent and buttons in the mockup's peach. */
+.mobile-site .heading em, .mobile-site .hero__title em { color: var(--m-peach); }
+.mobile-site .btn--primary { background: var(--m-peach); color: var(--m-navy); }
+.mobile-site .btn--primary:hover, .mobile-site .btn--primary:active { background: var(--m-cream); box-shadow: 0 10px 30px -12px var(--m-peach-glow); }
+.btn--ghost { border: 1px solid var(--m-peach-line); background: rgba(41, 36, 58, 0.55); color: var(--cream); }
+.btn--ghost:active { background: rgba(253, 180, 123, 0.1); }
+
+/* ---- The top bar and the open menu ---- */
+.mobile-site .nav > .btn { display: none; }   /* the action lives in the menu on phones */
+.mobile-site .nav__menu { border: 0; width: 44px; height: 44px; gap: 6px; margin-right: -10px; z-index: 2; }
+.mobile-site .nav__menu span { width: 22px; height: 1.5px; }
+.mobile-site .nav.is-open .nav__menu span:first-child { transform: translateY(7.5px) rotate(45deg); }
+.mobile-site .nav.is-open .nav__menu span:nth-child(2) { opacity: 0; }
+.mobile-site .nav.is-open .nav__menu span:last-child { transform: translateY(-7.5px) rotate(-45deg); }
+.mobile-site .nav__menu span:nth-child(2) { transition: opacity var(--t-fast) var(--ease-arrive); }
+.mobile-site .nav__name { position: relative; z-index: 2; }
+/* A full-height panel: the links large and close together, the action, and a range of peaks. */
+.mobile-site .nav__links {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: calc(84px + env(safe-area-inset-top)) var(--page-gutter) 0;
+  background: var(--m-panel);
+  backdrop-filter: blur(18px);
+  box-shadow: none;
+  transform: none;
+  transition: opacity var(--t-fast) var(--ease-arrive), visibility var(--t-fast);
+}
+.mobile-site .nav__links a:not(.btn) {
+  padding: 8px 0;
+  border: 0;
+  font-family: var(--font-body);
+  font-size: 24px;
+  color: var(--cream);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.4s var(--ease-arrive), transform 0.5s var(--ease-arrive);
+}
+/* The mockup's order: Work, About, Process. */
+.mobile-site .nav__links a[href="#work"] { order: 1; }
+.mobile-site .nav__links a[href="#about"] { order: 2; }
+.mobile-site .nav__links a[href="#process"] { order: 3; }
+.mobile-site .nav__book { order: 4; margin-top: var(--s-5); padding-inline: 28px; opacity: 0; transform: translateY(16px); transition: opacity 0.4s var(--ease-arrive), transform 0.5s var(--ease-arrive); }
+.mobile-site .nav__range { position: absolute; inset: auto 0 0; width: 100%; height: 26vh; pointer-events: none; }
+.mobile-site .nav.is-open .nav__links a:not(.btn), .mobile-site .nav.is-open .nav__book { opacity: 1; transform: none; }
+.mobile-site .nav.is-open .nav__links a[href="#about"] { transition-delay: 0.06s; }
+.mobile-site .nav.is-open .nav__links a[href="#process"] { transition-delay: 0.12s; }
+.mobile-site .nav.is-open .nav__book { transition-delay: 0.18s; }
+.mobile-site .nav.is-open { background: transparent; }
+
+/* ---- The hero ---- */
+.mobile-site .hero__inner .eyebrow { animation: rise-in 1.2s var(--ease-arrive) both; }
+.mobile-site .hero { overflow: clip; }
+/* The painting sits a little lower than the screen, so the trekker and the flag stand below the buttons. */
+.mobile-site .hero__poster { inset: 9svh 0 -9svh; }   /* (the painting drifts with the scroll: keep it inside the hero) */
+.mobile-site .hero__actions { flex-direction: column; align-items: stretch; width: min(272px, 100%); gap: var(--s-3); }
+.mobile-site .hero__actions .btn { width: 100%; }
+.mobile-site .hero__down { position: absolute; right: var(--page-gutter); bottom: max(var(--s-5), env(safe-area-inset-bottom)); width: 48px; height: 48px; border-color: var(--m-peach-line); background: rgba(41, 36, 58, 0.25); }
+.mobile-site .hero__down .i { width: 18px; height: 18px; }
+
+/* ---- Cards (services and work): they lift and glow when tapped ---- */
+.scard, .wcard__link {
+  transition: transform var(--t-fast) var(--ease-arrive), box-shadow var(--t-fast) var(--ease-arrive), border-color var(--t-fast) var(--ease-arrive);
+}
+.scard:active, .scard:hover, .wcard__link:active, .wcard__link:hover {
+  transform: translateY(-2px);
+  border-color: var(--m-peach-line);
+  box-shadow: 0 14px 34px -16px var(--m-peach-glow);
+}
+
+/* ---- Services: three cards ---- */
+.scards .heading { margin-bottom: var(--s-6); }
+.scards__list { display: grid; gap: 14px; }
+.scard {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  min-height: 176px;
+  padding: 20px 20px 34px;
+  overflow: hidden;
+  border: 1px solid var(--m-card-line);
+  border-radius: 18px;
+  background: var(--m-card);
+  color: var(--cream);
+  text-decoration: none;
+}
+.scard__icon { width: 28px; height: 28px; margin-bottom: 6px; fill: none; stroke: var(--m-peach); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.scard__name { font-family: var(--font-display); font-size: 27px; line-height: 1.1; }
+.scard__text { position: relative; z-index: 1; max-width: 26ch; font-size: 15px; line-height: 1.45; color: var(--lavender-light); }
+.scard__go { position: absolute; top: 18px; right: 18px; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--m-peach-line); border-radius: 50%; color: var(--m-peach); }
+.scard__go .i { width: 16px; height: 16px; }
+.scard__scene { position: absolute; right: 0; bottom: 0; width: 62%; height: 58px; opacity: 0.9; }
+
+/* ---- Work: chips and cards ---- */
+.mobile-site .work__head .lead { display: none; }
+.wchips { display: flex; gap: 8px; margin: var(--s-5) calc(-1 * var(--page-gutter)) var(--s-5); padding-inline: var(--page-gutter); overflow-x: auto; scrollbar-width: none; }
+.wchips::-webkit-scrollbar { display: none; }
+.wchip {
+  flex: none;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--hair-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cream);
+  font-size: 14px;
+  transition: background var(--t-fast) var(--ease-arrive), color var(--t-fast) var(--ease-arrive), border-color var(--t-fast) var(--ease-arrive);
+}
+.wchip[aria-pressed="true"] { border-color: var(--m-peach); background: var(--m-peach); color: var(--m-navy); }
+.wcards__list { display: grid; gap: 16px; }
+.wcard[hidden] { display: none; }
+.wcard__link { display: block; overflow: hidden; border: 1px solid var(--m-card-line); border-radius: 18px; background: rgba(41, 36, 58, 0.85); color: var(--cream); text-decoration: none; }
+.wcard__media { position: relative; display: block; aspect-ratio: 16 / 10; background: var(--deep); }
+.wcard__media img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+.wcard__go { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: rgba(243, 223, 205, 0.92); color: var(--m-navy); }
+.wcard__go .i { width: 16px; height: 16px; }
+.wcard__body { display: grid; gap: 6px; padding: 16px 18px 20px; }
+.wcard__name { font-family: var(--font-display); font-size: 27px; line-height: 1.1; }
+.wcard__kind { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 14px; color: var(--lavender); }
+.wcard__text { font-size: 15px; line-height: 1.45; color: var(--lavender-light); }
+
+/* ---- About: heading, the portrait as a card, one paragraph, the facts in a row ---- */
+.mobile-site .about { display: block; padding: var(--s-8) var(--page-gutter); }
+.mobile-site .about__head { margin-bottom: var(--s-5); }
+.mobile-site .about__photo { height: auto; max-height: none; min-height: 0; aspect-ratio: 16 / 10.5; overflow: hidden; border-radius: 18px; }
+.mobile-site .about__photo img { -webkit-mask-image: none; mask-image: none; object-position: 50% 24%; }
+.mobile-site .about__text { margin-top: var(--s-5); padding: 0; }
+.about__short { font-size: 17px; line-height: 1.65; color: var(--cream); text-wrap: pretty; }
+.mobile-site .about__facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: var(--s-6); padding-top: var(--s-5); }
+.mobile-site .about__facts div { align-items: center; text-align: center; padding-inline: 6px; }
+.mobile-site .about__facts div + div { border-left: 1px solid var(--hair); }
+.mobile-site .about__facts dd { font-size: 27px; color: var(--m-peach); }
+.mobile-site .about__facts dt { font-size: 14px; }
+
+/* ---- Contact: the form with icons, and a range of peaks below ---- */
+.mobile-site .contact { display: block; min-height: 0; padding: var(--s-8) 0 0; }
+.mobile-site .contact__art { display: none; }
+.mobile-site .contact__inner .heading { max-width: none; }
+.mobile-site .contact__inner .lead { margin-top: var(--s-4); }
+.mobile-site .form { margin-top: var(--s-6); gap: 14px; }
+.mobile-site .form__row { gap: 14px; }
+.mobile-site .field { position: relative; }
+.mobile-site .field > label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.field__icon { position: absolute; left: 16px; top: 16px; width: 20px; height: 20px; fill: none; stroke: var(--lavender); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.mobile-site .field input, .mobile-site .field textarea, .mobile-site .field select { padding-left: 48px; border-radius: 12px; font-size: 16px; }
+.field select {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 44px 12px 16px;
+  border: 1px solid var(--hair-strong);
+  background: rgba(21, 19, 42, 0.55);
+  color: var(--cream);
+  font: inherit;
+  appearance: none;
+}
+.field select:focus-visible { outline: none; border-color: var(--m-peach); }
+.field__chevron { position: absolute; right: 16px; top: 16px; width: 20px; height: 20px; fill: none; stroke: var(--lavender); stroke-width: 1.6; pointer-events: none; }
+.mobile-site .field textarea { min-height: 112px; }
+.mobile-site .form__actions .btn { width: 100%; }
+.mobile-site .field input::placeholder, .mobile-site .field textarea::placeholder { color: var(--lavender); opacity: 1; }
+.contact__range { display: block; width: 100%; height: 110px; margin-top: var(--s-7); }
+
+/* The thin progress line at the very top while scrolling (js/mobile/mobile.js). */
+.m-progress { position: fixed; inset: 0 0 auto; z-index: 40; height: 2px; background: var(--m-peach); transform: scaleX(var(--p, 0)); transform-origin: left; pointer-events: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .mobile-site .hero__poster::after { animation: none; }

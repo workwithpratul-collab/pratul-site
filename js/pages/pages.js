@@ -19,7 +19,9 @@ export async function initPages({ lenis, desktop = false }) {
   initNav();
   initMenu();
   initServices({ lenis });
+  initServiceCards({ lenis });
   initWork({ core });
+  initWorkFilter();
   initProcess();
   initAbout();
   initFooter();
@@ -132,6 +134,34 @@ function initServices({ lenis }) {
     }, '150% 0px');
   }
   show();
+}
+
+// ---------- Phones: the three service cards ----------
+// Tapping one opens the contact form with that need already chosen in the "What do you need?" menu.
+function initServiceCards({ lenis }) {
+  for (const card of document.querySelectorAll('.scard')) {
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      const menu = document.getElementById('f-need');
+      if (menu && !menu.disabled) menu.value = card.dataset.need;
+      lenis.scrollTo('#contact', { duration: reduceMotion ? 0 : 1.2 });
+    });
+  }
+}
+
+// ---------- Phones: the work filter chips ----------
+// Each chip shows only the projects with that tag (data-tags); "All" shows them all. The pressed
+// chip says so to screen readers (aria-pressed).
+function initWorkFilter() {
+  const chips = [...document.querySelectorAll('.wchip')];
+  const cards = [...document.querySelectorAll('.wcard')];
+  for (const chip of chips) {
+    chip.addEventListener('click', () => {
+      const want = chip.dataset.filter;
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      cards.forEach((card) => { card.hidden = want !== 'all' && !card.dataset.tags.split(' ').includes(want); });
+    });
+  }
 }
 
 // ---------- Work: the 3D ridge (desktop) or the swipe slider ----------
@@ -247,6 +277,18 @@ function openForm(focus = true) {
 function initContact({ lenis }) {
   markIn(document.getElementById('contact'), { margin: '0px 0px -30% 0px' });
   const form = document.getElementById('contact-form');
+  // Each version shows its own way of choosing a need (desktop: chips; phones: one menu, and no
+  // "business" field). Whatever isn't shown is switched off, so it's never sent with the form.
+  const menu = document.getElementById('f-need');
+  if (isFilm) menu.disabled = true;
+  else {
+    form.querySelector('.form__needs').disabled = true;
+    document.getElementById('f-business').disabled = true;
+    // Phones: the label sits inside each field, as a placeholder (the real label is still there,
+    // hidden, for screen readers).
+    const hints = { 'f-name': 'Your name', 'f-email': 'Your email', 'f-message': 'Your message' };
+    for (const [id, text] of Object.entries(hints)) document.getElementById(id).placeholder = text;
+  }
   const status = document.getElementById('form-status');
   const button = form.querySelector('button[type="submit"]');
   document.querySelector('[data-open-form]')?.addEventListener('click', () => {
@@ -369,7 +411,7 @@ function initReveal({ core }) {
       }
     });
   }
-  const items = document.querySelectorAll('.page section:not(.work) .lead, .svc li, .about__standfirst, .about__story, .about__chips, .about__facts, .contact__actions, .footer__brand, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
+  const items = document.querySelectorAll('.page section:not(.work) .lead, .svc li, .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__chips, .about__facts, .contact__actions, .footer__brand, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (!e.isIntersecting) continue;

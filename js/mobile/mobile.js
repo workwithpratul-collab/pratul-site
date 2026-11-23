@@ -21,6 +21,27 @@ const nativeScroll = {
 
 initPages({ lenis: nativeScroll });
 
+// A thin progress line along the top edge while scrolling (the mockup's "scroll progress"), and a
+// gentle parallax on the hero's painting (it drifts slower than the page). One read and two writes
+// per frame, only while scrolling; nothing under "reduce motion".
+if (!reduceMotion) {
+  const bar = document.createElement('div');
+  bar.className = 'm-progress';
+  bar.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(bar);
+  const poster = document.querySelector('.hero__poster');
+  let raf = 0;
+  const update = () => {
+    raf = 0;
+    const y = window.scrollY;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.setProperty('--p', max > 0 ? (y / max).toFixed(4) : '0');
+    if (y < window.innerHeight * 1.2) poster.style.transform = `translate3d(0, ${(y * 0.28).toFixed(1)}px, 0)`;
+  };
+  window.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
+  update();
+}
+
 // Back from a case study ("Back to the trail", ?return=dermae): open at the work slider.
 if (new URLSearchParams(location.search).get('return')) {
   requestAnimationFrame(() => {

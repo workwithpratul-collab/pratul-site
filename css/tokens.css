@@ -296,7 +296,19 @@
   --range-far: #2a2444;
   --range-mid: #201b37;
   --range-near: #15132a;   /* the footer's own colour (--deep): the nearest ridge melts into it */
-  --star: rgba(243, 236, 226, 0.55);   /* the page's first colour (the top of --page-arc): the summit darkens into it */
+  --star: rgba(243, 236, 226, 0.55);
+  /* The phone page's palette (references/mockups/5-phone-v2.png, read from its swatches): deep navy,
+     plum, mauve, the peach of its buttons and accents (a lantern's light), and its cream. */
+  --m-navy: #29243a;
+  --m-plum: #513851;
+  --m-mauve: #9c636d;
+  --m-peach: #fdb47b;
+  --m-peach-line: rgba(253, 180, 123, 0.5);
+  --m-peach-glow: rgba(253, 180, 123, 0.28);
+  --m-cream: #f3dfcd;
+  --m-card: linear-gradient(160deg, rgba(81, 56, 81, 0.34), rgba(41, 36, 58, 0.62));
+  --m-card-line: rgba(243, 223, 205, 0.14);
+  --m-panel: rgba(26, 23, 37, 0.97);   /* the page's first colour (the top of --page-arc): the summit darkens into it */
 
   /* The page is one continuous gradient: the rest of the day on the mountain (DESIGN.md §1).
      Morning lilac under the hero, dusk plum at the work, night indigo by the tent. */
