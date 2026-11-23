@@ -79,6 +79,7 @@ whenIdle(() => import('./pages/pages.js').then((m) => m.initPages({ lenis, deskt
 // ---------- 3. "Skip the film" ----------
 document.getElementById('skip').addEventListener('click', (e) => {
   e.preventDefault();
+  e.stopPropagation();   // (the same reason as the "Pratul" links below)
   if (api) { api.glideToEnd(); return; }
   // Not ready yet: go straight to the hero, shown on its poster until the live scene arrives
   // (film.js then starts at the summit, because the page is already there).
@@ -135,12 +136,16 @@ function updateNav(y) {
   nav.classList.toggle('is-shown', heroIn || y > filmEnd());
   nav.classList.toggle('is-solid', below);
 }
-// "Pratul" goes back to the summit hero.
-// ("Pratul" in the top bar, "Back to the summit" in the footer.)
+// "Pratul" goes back to the summit hero: the live last shot of the film, settled, with its words.
+// ("Pratul" in the top bar, "Back to the summit" in the footer.) stopPropagation matters: Lenis
+// has its own handler for # links on the window, and would otherwise replace this scroll with one to
+// the #hero element, which sits inside the pinned stage and resolves to the end of the hand-over,
+// where "Work that speaks for itself" has formed over the summit.
 for (const a of document.querySelectorAll('[data-to-top]')) {
   a.addEventListener('click', (e) => {
     e.preventDefault();
-    lenis.scrollTo(heroScroll(), { duration: reduceMotion ? 0 : 2.2 });
+    e.stopPropagation();
+    lenis.scrollTo(heroScroll(), { duration: reduceMotion ? 0 : 2.2, force: true });
   });
 }
 // Links to the work (the hero's "Explore my work", the top bar) land where the work has fully formed,
