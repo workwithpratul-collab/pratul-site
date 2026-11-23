@@ -11,23 +11,23 @@
    The "fallback" faces are ordinary system fonts stretched to the real fonts' exact widths and
    heights (size-adjust and the overrides), so the swap moves nothing on the page. */
 @font-face {
-  font-family: "Zodiak";
-  src: url("../assets/fonts/zodiak-regular.woff2") format("woff2");
+  font-family: "Instrument Serif";
+  src: url("../assets/fonts/instrument-serif-regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Zodiak";
-  src: url("../assets/fonts/zodiak-italic.woff2") format("woff2");
+  font-family: "Instrument Serif";
+  src: url("../assets/fonts/instrument-serif-italic.woff2") format("woff2");
   font-weight: 400;
-  font-style: italic;
+  font-style: italic;   /* the amber accent word ("move", "climb.") */
   font-display: swap;
 }
 @font-face {
-  font-family: "Switzer";
-  src: url("../assets/fonts/switzer-variable.woff2") format("woff2");
-  font-weight: 400 500;   /* one variable file covers both weights we use */
+  font-family: "Manrope";
+  src: url("../assets/fonts/manrope-variable.woff2") format("woff2");
+  font-weight: 400 600;   /* one variable file covers the three weights we use (400, 500, 600) */
   font-style: normal;
   font-display: swap;
 }
@@ -38,21 +38,22 @@
   font-style: normal;
   font-display: swap;
 }
+/* (Measured in the browser against the real fonts: the same text width, ascent and descent.) */
 @font-face {
-  font-family: "Zodiak fallback";
+  font-family: "Instrument Serif fallback";
   src: local("Georgia");
-  size-adjust: 112.9%; ascent-override: 87.69%; descent-override: 23.03%; line-gap-override: 7.97%;
+  size-adjust: 75.34%; ascent-override: 131.41%; descent-override: 41.15%; line-gap-override: 0%;
 }
 @font-face {
-  font-family: "Zodiak fallback";
+  font-family: "Instrument Serif fallback";
   src: local("Georgia Italic"), local("Georgia-Italic");
   font-style: italic;
-  size-adjust: 113.77%; ascent-override: 87.02%; descent-override: 24.61%; line-gap-override: 7.91%;
+  size-adjust: 77.16%; ascent-override: 128.3%; descent-override: 40.17%; line-gap-override: 0%;
 }
 @font-face {
-  font-family: "Switzer fallback";
+  font-family: "Manrope fallback";
   src: local("Arial");
-  size-adjust: 101.01%; ascent-override: 97.02%; descent-override: 24.75%; line-gap-override: 8.91%;
+  size-adjust: 101.97%; ascent-override: 104.94%; descent-override: 29.42%; line-gap-override: 0%;
 }
 @font-face {
   font-family: "JetBrains Mono fallback";
@@ -62,13 +63,16 @@
 
 :root {
   /* ---------- Fonts ----------
-     Display: Zodiak, a serif with sharp wedge serifs: carved, alpine headlines; its italic
+     Display: Instrument Serif, a slim, high-contrast serif: quiet, editorial headlines; its italic
               carries the one amber accent word.
-     Body:    Switzer, a quiet, precise sans that stays readable at 17px on dark.
-     Mono:    JetBrains Mono, only for real measurements (altitude, counts, time). */
-  --font-display: "Zodiak", "Zodiak fallback", Georgia, serif;
-  --font-body: "Switzer", "Switzer fallback", Arial, sans-serif;
-  --font-mono: "JetBrains Mono", "JetBrains Mono fallback", Consolas, monospace;
+     Body:    Manrope, an open, rounded grotesk that stays readable at 17px on dark (body and UI).
+     Mono:    JetBrains Mono, only for altitude numbers. */
+  --font-display: "Instrument Serif", "Instrument Serif fallback", Georgia, serif;
+  --font-body: "Manrope", "Manrope fallback", Arial, sans-serif;
+  /* Small spaced capitals (labels, counts, the showreel time) are set in Manrope now; the mono
+     face is kept for one job only: altitude numbers (the meter, the summit, base camp). */
+  --font-mono: var(--font-body);
+  --font-altitude: "JetBrains Mono", "JetBrains Mono fallback", Consolas, monospace;
 
   /* ---------- Type scale (px steps, the same ladder everywhere) ---------- */
   --text-2xs: 11px;    /* the smallest text allowed: tiny caps labels and tags (never below 11px) */
@@ -287,10 +291,11 @@
     #221d38 58%, #1c1a33 70%, #18162d 84%, #15132a 100%);
 
   /* Type scale (DESIGN.md §3) */
-  --t-display: clamp(52px, 7.4vw, 112px);
-  --t-heading: clamp(40px, 5vw, 76px);
-  --t-heading-sm: clamp(34px, 3.6vw, 56px);
-  --t-line: clamp(28px, 3vw, 44px);
+  /* Instrument Serif is a narrow face, so its sizes sit a step above a book serif's. */
+  --t-display: clamp(56px, 7.8vw, 120px);
+  --t-heading: clamp(44px, 5.4vw, 84px);
+  --t-heading-sm: clamp(38px, 4vw, 62px);
+  --t-line: clamp(30px, 3.3vw, 48px);
   --t-lead: clamp(19px, 1.5vw, 22px);
   --t-body: clamp(17px, 1.15vw, 18px);
   --t-ui: 16px;
@@ -298,8 +303,8 @@
   --lh-display: 1.05;   /* never tighter: descenders (y, g, p) need the room */
   --lh-heading: 1.08;
   --lh-body: 1.6;
-  --track-display: -0.025em;
-  --track-heading: -0.018em;
+  --track-display: -0.005em;   /* Instrument Serif is already narrow: barely any tightening */
+  --track-heading: 0em;
   --track-measure: 0.12em;  /* mono measurements in capitals */
   --measure: 62ch;          /* longest comfortable line of body text */
 

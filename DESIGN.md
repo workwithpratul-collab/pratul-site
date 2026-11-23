@@ -49,25 +49,32 @@ is a cooler, deeper indigo. Text never sits on a painting without the painting b
 
 | Role | Face | Size (desktop → phone) | Line height | Notes |
 |---|---|---|---|---|
-| Display | Zodiak 400 | `clamp(52px, 7.4vw, 112px)` | 0.98 | hero and film title lines; `-0.025em` |
-| Display italic | Zodiak 400 italic | same | | one accent word per heading, in amber |
-| Heading | Zodiak 400 | `clamp(40px, 5vw, 76px)` | 1.02 | section headings (varies by section on purpose) |
-| Line | Zodiak 400 | `clamp(28px, 3vw, 44px)` | 1.1 | service names, pull lines, film story lines |
-| Body | Switzer 400 | `clamp(17px, 1.15vw, 18px)` | 1.6 | measure 60-68ch |
-| Lead | Switzer 400 | `clamp(19px, 1.5vw, 22px)` | 1.5 | one per section at most |
-| UI | Switzer 500 | 16px | 1 | buttons, nav |
-| Label | Switzer 500 | 14px | 1.35 | chips, small captions (14px is the floor) |
-| Measure | JetBrains Mono 400 | 14px, `0.12em` caps | 1.3 | only real measurements: altitude, time, counts |
+| Display | Instrument Serif 400 | `clamp(56px, 7.8vw, 120px)` | 1.05 | hero and film title lines; `-0.005em` |
+| Display italic | Instrument Serif 400 italic | same | | one accent word per heading, in amber ("move") |
+| Heading | Instrument Serif 400 | `clamp(44px, 5.4vw, 84px)` | 1.08 | section headings |
+| Line | Instrument Serif 400 | `clamp(30px, 3.3vw, 48px)` | 1.1 | service names, pull lines, film story lines |
+| Body | Manrope 400 | `clamp(17px, 1.15vw, 18px)` | 1.6 | measure 60-68ch |
+| Lead | Manrope 400 | `clamp(19px, 1.5vw, 22px)` | 1.5 | one per section at most |
+| UI | Manrope 500 | 16px | 1 | buttons, nav |
+| Label | Manrope 500 | 14px, `0.12em` caps (`.measure`) | 1.35 | chips, counts, the showreel time (14px is the floor) |
+| Altitude | JetBrains Mono 400 | 14px, `0.12em` caps (`.alt`) | 1.3 | **only** altitude numbers: the meter, "Alt. 4,410 m", "2,850 m" |
 
-Four woff2 files, self-hosted in `assets/fonts/`, subset to Latin + typographic punctuation (65 KB in
-all). `font-display: swap`; only Zodiak regular is preloaded; fallbacks are metric-matched
-(`size-adjust` and overrides on Georgia, Arial and Consolas) so nothing shifts when the fonts land.
-Headings use `text-wrap: balance`, body `text-wrap: pretty`.
+**Line heights never go below 1.05** (descenders in y, g, p, j, q need the room), and every clipping
+reveal mask (`.split-line-mask`, the opening's `.line`) has room inside it: 0.15em above, 0.2em below,
+0.12em at the sides, with equal negative margins so nothing moves. Headings are split into lines only
+after the fonts load.
 
-**Why these:** Zodiak has sharp wedge serifs and ink traps, so the big lines feel carved and alpine
-rather than bookish, and its italic gives the one amber word real character. Switzer is a quiet,
-precise grotesk that stays readable at 17px on dark. Mono is kept for numbers that are measurements
-(the altitude meter speaks like an instrument), never as costume.
+Four woff2 files, self-hosted in `assets/fonts/`, Latin subset, only the weights used (86 KB in all):
+Instrument Serif regular and italic, Manrope variable (400-600, one file), JetBrains Mono 400.
+`font-display: swap`; Instrument Serif regular and Manrope are preloaded; fallbacks are metric-matched
+(`size-adjust` and ascent/descent overrides on Georgia, Arial and Consolas, measured in the browser) so
+nothing shifts when the fonts land. Headings use `text-wrap: balance`, body `text-wrap: pretty`.
+
+**Why these:** Instrument Serif is slim and high-contrast: big lines read as quiet, editorial titles,
+and its italic gives the one amber word grace without shouting. Because it is narrow, sizes sit a step
+above a book serif and tracking stays near zero. Manrope is open and slightly rounded: friendly and
+very legible at 15-18px on the dark indigo, and its 500 carries buttons and nav. Mono is kept for one
+job, altitude, so the mountain's numbers read like an instrument.
 
 ## 4. Space
 

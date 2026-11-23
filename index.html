@@ -42,7 +42,8 @@
   </script>
 
   <!-- Self-hosted fonts (css/tokens.css). Only the headline face is fetched early. -->
-  <link rel="preload" href="assets/fonts/zodiak-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/instrument-serif-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/manrope-variable.woff2" as="font" type="font/woff2" crossorigin>
 
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 
@@ -185,7 +186,7 @@
             </button>
           </div>
         </div>
-        <p class="hero__place measure" aria-hidden="true"><span>The summit</span><span>Alt. 4,410 m</span></p>
+        <p class="hero__place measure" aria-hidden="true"><span>The summit</span><span class="alt">Alt. 4,410 m</span></p>
         <a class="hero__scroll" href="#services">Scroll<svg class="i" aria-hidden="true"><use href="#i-down"/></svg></a>
       </div>
       <!-- At the hero, the bottom of the shot melts into the page below, so there is no hard edge. -->
@@ -508,7 +509,7 @@
     </div>
     <div class="wrap footer__base">
       <p>© 2026 Pratul</p>
-      <p class="measure">Base camp · 2,850 m</p>
+      <p class="measure">Base camp · <span class="alt">2,850 m</span></p>
     </div>
   </footer>
 

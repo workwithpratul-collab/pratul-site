@@ -54,10 +54,11 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Trekker stands idle behind the gear mat (use Sitting.fbx if it exists).
 - [x] Pages below the film are calm but plain; bring more of the painted world into them.
 - [x] 404.html uses root paths (/css/...), so it only styles correctly from the domain root.
-- [ ] Fonts load from Google Fonts; self-host them.
+- [x] Fonts load from Google Fonts; self-host them.
 - [ ] The painted gear images are more detailed and more realistic than the painted world around them, with warmer, saturated reds (rope, camera leather) than rule 3 allows outside light sources.
 - [ ] 404.html: relative paths work at the site root or in a subfolder, but not for a missing address several folders deep (the host may need to point at 404.html).
 - [x] Feedback 1: descenders (y, g, p, j, q) cut by the SplitText line masks; masks now have room below, above and at the sides, display line heights 1.05 or more (checked by a script at 1440x900, 1366x768, 390x844: 0 cut).
+- [x] Feedback 2: Instrument Serif (headings, italic accent) and Manrope (body, UI), self-hosted woff2, only the weights used, metric-matched fallbacks; JetBrains Mono kept for altitude numbers only. DESIGN.md updated.
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.

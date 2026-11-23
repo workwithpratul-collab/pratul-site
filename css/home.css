@@ -1,5 +1,5 @@
 /* home.css: the summit hero and every section below the film, on desktop and on phones.
-   DESIGN.md is the source for every choice here: one continuous page gradient, Zodiak headings with
+   DESIGN.md is the source for every choice here: one continuous page gradient, Instrument Serif headings with
    one amber italic word, one signature moment per section, no eyebrow labels, no card grids. */
 
 /* ---------- Shared pieces ---------- */
@@ -193,7 +193,7 @@
 .hero__title {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(56px, 6.1vw, 104px);
+  font-size: clamp(60px, 6.6vw, 112px);
   line-height: var(--lh-display);
   letter-spacing: var(--track-display);
 }
@@ -661,6 +661,8 @@
 .footer a:hover { background-size: 100% 1px; }
 .footer__base { display: flex; justify-content: space-between; gap: var(--s-5); margin-top: var(--s-8); padding-top: var(--s-5); border-top: 1px solid var(--hair); color: var(--lavender); font-size: 15px; }
 .footer__base .measure { color: var(--lavender-quiet); }
+/* Altitude numbers are the only text in the mono face. */
+.alt { font-family: var(--font-altitude); }
 
 /* ---------- The showreel ---------- */
 .reel {
