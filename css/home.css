@@ -999,7 +999,7 @@
   flex-direction: column;
 }
 /* The phone hero's painting: the summit at sunrise, the trekker and flag low in the frame. */
-.mobile-site .hero__poster { background-image: url("../assets/redesign/summit-phone-720.webp"); background-position: 50% 100%; }
+.mobile-site .hero__poster { background-image: url("../assets/redesign/summit-phone-720.webp"); background-position: 60% 50%; }
 @media (min-resolution: 1.5dppx), (min-width: 500px) {
   .mobile-site .hero__poster { background-image: url("../assets/redesign/summit-phone-1058.webp"); }
 }
@@ -1012,9 +1012,7 @@
   animation: dawn-breathe 9s var(--ease-flow) infinite alternate;
 }
 @keyframes dawn-breathe { from { opacity: 0.2; } to { opacity: 1; } }
-.mobile-site .hero__shade {
-  background: linear-gradient(180deg, rgba(21, 19, 42, 0.92) 0%, rgba(21, 19, 42, 0.78) 30%, rgba(21, 19, 42, 0.42) 50%, rgba(21, 19, 42, 0) 64%);
-}
+.mobile-site .hero__shade { background: var(--m-hero-shade); }
 .mobile-site .hero__inner {
   position: relative;
   left: auto;
@@ -1023,14 +1021,15 @@
   width: auto;
   padding: calc(76px + var(--s-5)) var(--page-gutter) 0;
 }
-.mobile-site .hero__title { font-size: clamp(36px, 10.2vw, 60px); line-height: 1.05; }
-.mobile-site .hero__title .line { white-space: normal; }
+/* The headline flows as one sentence and is sized from the width, so it always fits (44 px at 390). */
+.mobile-site .hero__title { font-size: clamp(34px, 11.3vw, 54px); line-height: 1.06; text-wrap: pretty; }
+.mobile-site .hero__title .line { display: inline; white-space: normal; }
+.mobile-site .hero__title .line:first-child { display: block; }   /* "I build websites" on its own line, as in the mockup */
 .mobile-site .hero__title .line > *, .mobile-site .hero__title .line { animation: rise-in 1.2s var(--ease-arrive) both; }
 .mobile-site .hero__title .line:nth-child(2) { animation-delay: 0.1s; }
 .mobile-site .hero__title .line:nth-child(3) { animation-delay: 0.2s; }
-.mobile-site .hero__sub { margin-top: var(--s-4); font-size: 17px; color: var(--lavender-light); animation: rise-in 1.2s var(--ease-arrive) 0.35s both; }
-.mobile-site .hero__actions { margin-top: var(--s-5); gap: var(--s-3) var(--s-5); animation: rise-in 1.2s var(--ease-arrive) 0.45s both; }
-.mobile-site .hero__reel { display: none; }
+.mobile-site .hero__sub { margin-top: var(--s-4); max-width: 300px; font-size: 16px; line-height: 1.55; color: var(--lavender-light); animation: rise-in 1.2s var(--ease-arrive) 0.35s both; }
+.mobile-site .hero__actions { margin-top: var(--s-5); animation: rise-in 1.2s var(--ease-arrive) 0.45s both; }
 .mobile-site .hero__place, .mobile-site .hero__scroll { bottom: max(var(--s-5), env(safe-area-inset-bottom)); }
 .mobile-site .hero__scroll { display: none; }
 .mobile-site .hero__place { text-shadow: 0 1px 10px rgba(21, 19, 42, 0.8); }
@@ -1142,14 +1141,92 @@
 .mobile-site .nav.is-open { background: transparent; }
 
 /* ---- The hero ---- */
-.mobile-site .hero__inner .eyebrow { animation: rise-in 1.2s var(--ease-arrive) both; }
 .mobile-site .hero { overflow: clip; }
 /* The painting sits a little lower than the screen, so the trekker and the flag stand below the buttons. */
-.mobile-site .hero__poster { inset: 9svh 0 -9svh; }   /* (the painting drifts with the scroll: keep it inside the hero) */
-.mobile-site .hero__actions { flex-direction: column; align-items: stretch; width: min(272px, 100%); gap: var(--s-3); }
-.mobile-site .hero__actions .btn { width: 100%; }
-.mobile-site .hero__down { position: absolute; right: var(--page-gutter); bottom: max(var(--s-5), env(safe-area-inset-bottom)); width: 48px; height: 48px; border-color: var(--m-peach-line); background: rgba(41, 36, 58, 0.25); }
+.mobile-site .hero__poster { inset: 0 0 -12svh; }   /* (the painting drifts with the scroll: room below so it never shows an edge) */
+.mobile-site .hero__actions { flex-direction: column; align-items: stretch; width: min(224px, 100%); gap: 12px; }
+.mobile-site .hero__actions .btn, .mobile-site .hero__reel { width: 100%; }
+.mobile-site .hero__down { position: absolute; right: var(--page-gutter); bottom: max(var(--s-5), env(safe-area-inset-bottom)); width: 48px; height: 48px; border-color: var(--m-ghost-line); background: transparent; }
 .mobile-site .hero__down .i { width: 18px; height: 18px; }
+/* ---- The phone hero (references/round2/Phone.dc.html) ---- */
+/* "Watch showreel": the second pill, see-through, under "Explore my work". */
+.mobile-site .hero__reel {
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  border: 1px solid var(--m-ghost-line);
+  border-radius: 999px;
+  background: var(--m-ghost);
+  font-size: 16px;
+}
+.mobile-site .hero__reel::before, .mobile-site .hero__reel::after, .mobile-site .hero__reel .measure { display: none; }
+.mobile-site .hero__play { width: 18px; height: 18px; border: 0; overflow: visible; }
+.mobile-site .hero__play .i { width: 30px; height: 30px; max-width: none; margin: 0; }   /* (centred and larger than its box: the triangle fills only the middle third of the icon) */
+.mobile-site .hero__reel:active { background: var(--m-ghost-press); }
+/* Where we are: a thin amber line and two short lines of small mono capitals. */
+.mobile-site .hero__place { gap: 2px; padding-left: 12px; font-family: var(--font-altitude); font-size: 12px; letter-spacing: 0.16em; line-height: 1.7; }
+.mobile-site .hero__place .alt { font-size: inherit; letter-spacing: inherit; }
+/* The menu icon: two full lines and a shorter third, aligned right. */
+.mobile-site .nav__menu span:nth-child(3) { width: 14px; justify-self: end; }
+.mobile-site .nav.is-open .nav__menu span:nth-child(3) { width: 22px; }
+
+/* Snow: two layers of soft flakes (dots drawn with gradients, tiled), each falling at its own pace by
+   moving a tall tile down exactly one tile height, so the loop never shows a seam. Transform only,
+   so it costs the phone almost nothing; it sits under the words and stops under "reduce motion". */
+.hero__snow { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.hero__snow::before, .hero__snow::after {
+  content: "";
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  top: calc(-1 * var(--tile));
+  height: calc(100% + var(--tile));
+  background-size: 100% var(--tile);
+  will-change: transform;
+  animation: snow-fall var(--fall) linear infinite;
+}
+/* the near layer: fewer, larger, faster flakes */
+.hero__snow::before {
+  --tile: 300px;
+  --fall: 14s;
+  background-image:
+    radial-gradient(2px 2px at 15% 84%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(2.5px 2.5px at 36% 6%, var(--m-snow-soft) 60%, transparent 100%),
+    radial-gradient(2px 2px at 53% 66%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(2.5px 2.5px at 71% 20%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(2px 2px at 88% 72%, var(--m-snow-soft) 60%, transparent 100%),
+    radial-gradient(2.5px 2.5px at 8% 12%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(2px 2px at 27% 58%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(3px 3px at 44% 30%, var(--m-snow-soft) 60%, transparent 100%),
+    radial-gradient(2px 2px at 63% 81%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(2.5px 2.5px at 79% 44%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(2px 2px at 93% 6%, var(--m-snow-soft) 60%, transparent 100%);
+}
+/* the far layer: many small, slow, fainter flakes */
+.hero__snow::after {
+  --tile: 220px;
+  --fall: 22s;
+  opacity: 0.8;
+  background-image:
+    radial-gradient(1.5px 1.5px at 11% 40%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(1px 1px at 24% 95%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 41% 48%, var(--m-snow-soft) 60%, transparent 100%),
+    radial-gradient(1px 1px at 66% 14%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 80% 92%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 5% 70%, var(--m-snow-soft) 60%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 17% 22%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(1px 1px at 33% 88%, var(--m-snow-soft) 60%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 51% 9%, var(--m-snow-soft) 60%, transparent 100%),
+    radial-gradient(1px 1px at 58% 52%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 72% 64%, var(--m-snow-soft) 60%, transparent 100%),
+    radial-gradient(1px 1px at 86% 33%, var(--m-snow) 60%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 96% 80%, var(--m-snow-soft) 60%, transparent 100%);
+}
+@keyframes snow-fall {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, var(--tile), 0); }
+}
+
 
 /* ---- Cards (services and work): they lift and glow when tapped ---- */
 .scard, .wcard__link {
@@ -1265,7 +1342,7 @@
 .field select option { background: var(--m-navy); color: var(--cream); }
 
 @media (prefers-reduced-motion: reduce) {
-  .mobile-site .hero__poster::after { animation: none; }
+  .mobile-site .hero__poster::after, .hero__snow::before, .hero__snow::after { animation: none; }
   .process__mist { animation: none; }
   .step__mark, .step__label { transition-duration: 0.3s; }
   .mobile-site .hero__title .line, .mobile-site .hero__sub, .mobile-site .hero__actions { animation: none; }

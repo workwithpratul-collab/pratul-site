@@ -329,6 +329,14 @@
   --m-cream: #f3dfcd;
   --m-card: linear-gradient(160deg, rgba(81, 56, 81, 0.34), rgba(41, 36, 58, 0.62));
   --m-card-line: rgba(243, 223, 205, 0.14);
+  /* The phone hero (references/round2/Phone.dc.html): the shade over the summit (dark at the top
+     where the words sit, clear over the trekker), the see-through "Watch showreel" pill, and snow. */
+  --m-hero-shade: linear-gradient(180deg, rgba(23, 20, 43, 0.82) 0%, rgba(23, 20, 43, 0.45) 40%, rgba(23, 20, 43, 0) 60%, rgba(23, 20, 43, 0.35) 100%);
+  --m-ghost: rgba(23, 20, 43, 0.25);
+  --m-ghost-line: rgba(243, 236, 226, 0.45);
+  --m-ghost-press: rgba(243, 236, 226, 0.1);
+  --m-snow: rgba(255, 248, 240, 0.7);
+  --m-snow-soft: rgba(255, 248, 240, 0.42);
   --m-panel: rgba(26, 23, 37, 0.97);   /* the page's first colour (the top of --page-arc): the summit darkens into it */
 
   /* The page is one continuous gradient: the rest of the day on the mountain (DESIGN.md §1).
