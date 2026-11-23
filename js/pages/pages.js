@@ -22,7 +22,7 @@ export async function initPages({ lenis, desktop = false }) {
   initServiceCards({ lenis });
   initWork({ core });
   initWorkFilter();
-  initProcess();
+  initProcess({ core });
   initAbout();
   initFooter();
   initTestimonial();

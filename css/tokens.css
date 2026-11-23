@@ -284,11 +284,22 @@
   --hair-strong: rgba(243, 236, 226, 0.32);
   --veil-night: rgba(21, 19, 42, 0.86);    /* the calm band behind text over paintings */
   --handover: #2b2546;
-  /* The Process trail's painted ridge at dusk (the same layers as the work ridge, palette.js ridge). */
-  --trail-ridge-mid: #2e2749;
-  --trail-ridge-near: #1d1832;
-  --trail-snow: #8c7fae;
-  --trail-mist: rgba(157, 147, 194, 0.18);
+  /* The Process trail at evening (references/round2/Main.dc.html): the sky warming to a plum horizon,
+     the far ridge and its snow, the near slope, the dashed path ahead and the checkpoints' states. */
+  --trail-sky-top: #17142b;
+  --trail-sky-mid: #2a1f42;
+  --trail-sky-low: #4a2e4e;
+  --trail-ridge-far: #2b2444;
+  --trail-ridge-near: #221d38;
+  --trail-snow: #b7a9d6;
+  --trail-mist: rgba(183, 169, 214, 0.14);
+  --trail-dash: rgba(183, 169, 214, 0.35);        /* the path still ahead */
+  --trail-mark: #221d38;                           /* a checkpoint not reached yet */
+  --trail-mark-done: #2a2140;                      /* a checkpoint passed */
+  --trail-ring: rgba(183, 169, 214, 0.45);
+  --trail-icon: #b7a9d6;
+  --trail-halo: rgba(246, 160, 77, 0.18);          /* the ring of light round the current step */
+  --section-process: #221c38;                      /* the page's colour at Process (Palette.dc.html strip) */
   /* The tools loop: the lantern light behind the tool in focus, and the tiles' soft shadow (indigo, never black). */
   --loop-glow: rgba(246, 160, 77, 0.2);
   --loop-shadow: rgba(14, 11, 30, 0.75);
