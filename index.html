@@ -330,40 +330,61 @@
       </div>
     </section>
 
-    <!-- ========== PROCESS: the trail ========== -->
-    <!-- A glowing trail line draws itself across the section as you scroll; each stage lights up as
-         the line reaches it. The words sit on the calm band below the mountains. -->
+    <!-- ========== PROCESS: the night trail ========== -->
+    <!-- One screen that holds while you scroll (css position: sticky, so phones get it too). Scrolling
+         walks a glowing trail up a painted ridge made of separate layers (far painting, middle
+         ridge, near slope), each moving at its own pace; each stage lights as the trail's lantern
+         reaches its waypoint, and its words set themselves in the reading column (js/pages/process.js).
+         Everything is driven by the scroll, so scrolling back plays it in reverse. -->
     <section class="process" id="process" aria-labelledby="process-title">
-      <div class="process__art" aria-hidden="true">
-        <img src="assets/redesign/bg-process-800.webp" srcset="assets/redesign/bg-process-800.webp 800w, assets/redesign/bg-process.webp 1536w" sizes="100vw" width="1536" height="1024" loading="lazy" decoding="async" alt="">
-      </div>
-      <div class="wrap process__head">
-        <h2 class="heading" id="process-title">From first call<br> to <em>launch day.</em></h2>
-        <p class="lead">A simple, open way of working: you always know where we are on the trail, and what comes next.</p>
-      </div>
-      <div class="wrap trail">
-        <svg class="trail__line" viewBox="0 0 1200 220" preserveAspectRatio="none" aria-hidden="true">
-          <path class="trail__base" d="M0 196 C120 190 170 168 260 160 S420 150 500 122 S660 112 760 92 S920 62 1010 50 S1140 30 1200 22"/>
-          <path class="trail__glow" pathLength="1" d="M0 196 C120 190 170 168 260 160 S420 150 500 122 S660 112 760 92 S920 62 1010 50 S1140 30 1200 22"/>
-        </svg>
-        <ol class="trail__stages">
-          <li class="stage" style="--at: 0.1">
-            <h3 class="stage__name">Understand</h3>
-            <p class="stage__text">I learn your business, your customers, and what makes you different.</p>
-          </li>
-          <li class="stage" style="--at: 0.37">
-            <h3 class="stage__name">Design the experience</h3>
-            <p class="stage__text">How your visitors should feel and what they should do, including the interactions you want.</p>
-          </li>
-          <li class="stage" style="--at: 0.63">
-            <h3 class="stage__name">Build</h3>
-            <p class="stage__text">I bring it to life and share progress as I go, so you can give feedback along the way.</p>
-          </li>
-          <li class="stage" style="--at: 0.9">
-            <h3 class="stage__name">Launch and refine</h3>
-            <p class="stage__text">We go live, test on real devices, and polish until it feels right.</p>
-          </li>
-        </ol>
+      <div class="process__pin">
+        <div class="process__scene" aria-hidden="true">
+          <div class="process__layer process__layer--far" data-depth="0.25">
+            <img src="assets/redesign/bg-process-800.webp" srcset="assets/redesign/bg-process-800.webp 800w, assets/redesign/bg-process.webp 1536w" sizes="100vw" width="1536" height="1024" loading="lazy" decoding="async" alt="">
+          </div>
+          <svg class="process__layer process__layer--mid" data-depth="0.55" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+            <path class="ridge-mid" d="M0 560 L120 520 L210 540 L330 470 L430 500 L560 410 L650 440 L760 360 L860 395 L980 300 L1080 340 L1190 250 L1290 290 L1400 220 L1500 260 L1600 230 L1600 900 L0 900 Z"/>
+            <path class="ridge-snow" d="M980 300 L1030 322 L1012 330 L1060 336 L1080 340 L1040 326 Z M1190 250 L1240 272 L1220 282 L1270 284 L1290 290 L1250 274 Z M1400 220 L1440 238 L1425 246 L1470 250 L1500 260 L1450 242 Z"/>
+            <!-- The trail: switchbacks from the valley floor up to the high pass (to the right of the words). -->
+            <g class="trail" transform="translate(130 0)">
+            <path class="trail-base" d="M520 860 C600 820 700 800 760 770 S700 700 640 690 S560 640 640 610 S860 600 900 560 S840 500 800 480 S820 420 920 410 S1120 400 1160 360 S1120 300 1150 285 S1260 272 1300 252"/>
+            <path class="trail-glow" pathLength="1" d="M520 860 C600 820 700 800 760 770 S700 700 640 690 S560 640 640 610 S860 600 900 560 S840 500 800 480 S820 420 920 410 S1120 400 1160 360 S1120 300 1150 285 S1260 272 1300 252"/>
+            <g class="trail-points"></g>
+            <g class="trail-lantern"><circle class="trail-lantern__halo" r="34"/><circle class="trail-lantern__flame" r="6"/></g>
+            </g>
+          </svg>
+          <div class="process__mist"></div>
+          <svg class="process__layer process__layer--near" data-depth="1" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+            <path class="ridge-near" d="M0 760 C180 730 320 770 470 745 S760 790 900 800 S1200 770 1360 800 S1540 790 1600 780 L1600 900 L0 900 Z"/>
+          </svg>
+        </div>
+
+        <div class="wrap process__inner">
+          <h2 class="heading" id="process-title">From first call<br> to <em>launch day.</em></h2>
+          <p class="lead">A simple, open way of working: you always know where we are on the trail, and what comes next.</p>
+          <ol class="process__stages">
+            <li class="process__stage is-current">
+              <h3 class="process__name">Understand</h3>
+              <p class="process__text">I learn your business, your customers, and what makes you different.</p>
+            </li>
+            <li class="process__stage">
+              <h3 class="process__name">Explore</h3>
+              <p class="process__text">I plan how your visitors should feel and what they should do, including the interactions you want.</p>
+            </li>
+            <li class="process__stage">
+              <h3 class="process__name">Build</h3>
+              <p class="process__text">I bring it to life and share progress as I go, so you can give feedback along the way.</p>
+            </li>
+            <li class="process__stage">
+              <h3 class="process__name">Launch</h3>
+              <p class="process__text">We go live, and I test it on real phones and laptops before anyone else sees it.</p>
+            </li>
+            <li class="process__stage">
+              <h3 class="process__name">Refine</h3>
+              <p class="process__text">We look at how it's working and polish the details until it feels right.</p>
+            </li>
+          </ol>
+        </div>
       </div>
     </section>
 

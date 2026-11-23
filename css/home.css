@@ -262,6 +262,7 @@
 
 /* ---------- Sections: shared rhythm ---------- */
 .services, .work, .process, .about, .tools, .contact { position: relative; padding-block: var(--s-9); }
+.process { padding-block: 0; }
 /* Anything that must sit above the shared 3D canvas. */
 .page .wrap, .footer .wrap, .about__photo, .about__text, .contact__art { position: relative; z-index: 2; }
 
@@ -425,60 +426,120 @@
 }
 .work.is-pinned .ridge.is-3d { height: auto; min-height: 0; }
 
-/* ---------- Process: the trail ---------- */
-.process__head {
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-  align-items: end;
-  gap: var(--s-7);
+/* ---------- Process: the night trail (js/pages/process.js) ---------- */
+/* The section is tall; its one screen sticks while you scroll through it, so the trail is walked
+   by the scroll. Five stages, about two thirds of a screen each, plus the screen itself. */
+.process { padding: 0; height: calc(100vh * 4.2); height: calc(100svh * 4.2); }
+.process__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: clip;
 }
-.process__head .lead { justify-self: end; }
-/* The painted ridge: a band between the heading and the trail, its edges dissolved into the page,
-   so no text ever sits on the busy part of the picture. */
-.process__art {
-  position: relative;
-  height: clamp(220px, 28vw, 420px);
-  margin-top: calc(-1 * var(--s-6));
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 34%, #000 62%, transparent 100%);
-          mask-image: linear-gradient(180deg, transparent 0%, #000 34%, #000 62%, transparent 100%);
-  pointer-events: none;
+/* The painted scene: separate layers, each drifting at its own pace (depth). The far painting
+   fades into the page at the top, so there is no edge. */
+.process__scene { position: absolute; inset: 0; }
+.process__layer { position: absolute; inset: -6% 0; width: 100%; height: 112%; will-change: transform; }
+.process__layer--far img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 70%; }
+.process__layer--far {
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 70%, transparent 96%);
+          mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 70%, transparent 96%);
+  opacity: 0.85;
 }
-.process__art img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 62%; }
-.process > .process__art { order: 2; }
-.process { display: flex; flex-direction: column; }
-.process__head { order: 1; }
-.trail { order: 3; position: relative; margin-top: calc(-1 * clamp(110px, 12vw, 180px)); }
-.trail__line { display: block; width: 100%; height: clamp(110px, 12vw, 180px); overflow: visible; }
-.trail__base { fill: none; stroke: var(--hair-strong); stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-dasharray: 2 6; }
-.trail__glow {
+.ridge-mid { fill: var(--trail-ridge-mid); }
+.ridge-snow { fill: var(--trail-snow); opacity: 0.55; }
+.ridge-near { fill: var(--trail-ridge-near); }
+.trail-base {
+  fill: none;
+  stroke: var(--hair-strong);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 7;
+  vector-effect: non-scaling-stroke;
+}
+.trail-glow {
   fill: none;
   stroke: var(--amber);
-  stroke-width: 2;
-  vector-effect: non-scaling-stroke;
+  stroke-width: 2.5;
   stroke-linecap: round;
   stroke-dasharray: 1;
-  stroke-dashoffset: calc(1 - var(--drawn, 0));   /* drawn by scrolling (js/pages/pages.js) */
+  stroke-dashoffset: 1;   /* drawn by the scroll (no non-scaling-stroke here: with pathLength it
+                             breaks the dash in Chrome) */
   filter: drop-shadow(0 0 6px var(--amber-glow));
 }
-.trail__stages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-6); margin-top: var(--s-6); }
-/* Each stage hangs from its point on the line: a dot, then its words on the calm page below. */
-.stage { position: relative; padding-top: var(--s-6); }
-.stage::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  border: 1.5px solid var(--hair-strong);
-  background: var(--night);
-  transition: border-color var(--t-base) var(--ease-arrive), background var(--t-base) var(--ease-arrive), box-shadow var(--t-base) var(--ease-arrive);
+/* The waypoints: a quiet ring on the trail, lit warm when the lantern has passed it. */
+.trail-point {
+  fill: var(--trail-ridge-mid);
+  stroke: var(--hair-strong);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  transition: fill var(--t-base) var(--ease-arrive), stroke var(--t-base) var(--ease-arrive);
 }
-.stage.is-lit::before { border-color: var(--amber); background: var(--amber); box-shadow: 0 0 0 6px rgba(246, 160, 77, 0.14); }
-.stage__name { font-family: var(--font-display); font-weight: 400; font-size: clamp(24px, 2.1vw, 32px); line-height: 1.1; letter-spacing: var(--track-heading); transition: color var(--t-base) var(--ease-arrive); }
-.stage__text { margin-top: var(--s-3); max-width: 30ch; color: var(--lavender); text-wrap: pretty; }
-.stage:not(.is-lit) .stage__name { color: var(--lavender); }
+.trail-point.is-lit { fill: var(--amber); stroke: var(--amber-hi); }
+/* The lantern at the head of the trail (a light source: warm is allowed). Its halo breathes. */
+.trail-lantern__halo { fill: var(--amber); opacity: 0.16; animation: lantern-breathe 3.6s var(--ease-flow) infinite alternate; transform-box: fill-box; transform-origin: center; }
+.trail-lantern__flame { fill: var(--amber-hi); }
+@keyframes lantern-breathe { from { opacity: 0.1; transform: scale(0.85); } to { opacity: 0.22; transform: scale(1.1); } }
+/* A slow band of evening mist between the middle ridge and the near slope. */
+.process__mist {
+  position: absolute;
+  inset: auto -10% 14% -10%;
+  height: 26%;
+  background: radial-gradient(50% 50% at 50% 50%, var(--trail-mist), transparent 70%);
+  animation: mist-drift 22s var(--ease-flow) infinite alternate;
+  pointer-events: none;
+}
+@keyframes mist-drift { from { transform: translateX(-4%); } to { transform: translateX(4%); } }
+
+/* The words: the heading at the top left over calm sky, the current stage at the bottom left over
+   the dark near slope, so they always read. */
+.process__inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100%;
+  padding-block: calc(76px + clamp(16px, 4vh, 40px)) clamp(28px, 6vh, 64px);
+}
+.process__inner .lead { margin-top: var(--s-4); max-width: 34ch; }
+.process__stages { grid-row: 3; display: grid; max-width: min(440px, 34vw); }
+.process__stage {
+  grid-area: 1 / 1;
+  align-self: end;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px);
+  transition: opacity 0.45s var(--ease-arrive), transform 0.45s var(--ease-arrive), visibility 0.45s;
+}
+.process__stage.is-past { transform: translateY(-12px); }
+.process__stage.is-current {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-duration: var(--t-base), 0.9s, var(--t-base);
+  transition-delay: 0.12s;
+}
+.process__name {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--t-heading-sm);
+  line-height: 1.08;
+  color: var(--cream);
+}
+.process__text { margin-top: var(--s-3); color: var(--lavender-light); text-wrap: pretty; }
+/* Phones: the words above and below the trail, full width. */
+@media (max-width: 900px) {
+  .process__inner { padding-block: calc(68px + var(--s-4)) max(var(--s-6), env(safe-area-inset-bottom)); }
+  .process__stages { max-width: none; }
+  /* the trail sits between the heading and the stage words; the near slope covers its foot */
+  .process__layer--mid { inset: 14% 0 auto; height: 56%; -webkit-mask-image: linear-gradient(180deg, #000 82%, transparent); mask-image: linear-gradient(180deg, #000 82%, transparent); }
+}
+/* Reduce motion: one ordinary screen with every stage listed. */
+.process.is-still { height: auto; }
+.process.is-still .process__pin { position: relative; height: auto; min-height: 100svh; }
+.process.is-still .process__stages { gap: var(--s-5); max-width: 520px; }
+.process.is-still .process__stage { grid-area: auto; opacity: 1; visibility: visible; transform: none; }
+.process.is-still .process__name { font-size: var(--t-line); }
 
 /* ---------- About: a magazine spread ---------- */
 @property --open { syntax: "<number>"; inherits: false; initial-value: 0; }
@@ -698,28 +759,13 @@
    Phones and narrow screens
    ====================================================================== */
 @media (max-width: 900px) {
-  .services__head, .work__head, .process__head, .tools__head { grid-template-columns: 1fr; gap: var(--s-5); }
-  .services__head .lead, .work__head .lead, .process__head .lead, .tools__head .lead { justify-self: start; }
+  .services__head, .work__head, .tools__head { grid-template-columns: 1fr; gap: var(--s-5); }
+  .services__head .lead, .work__head .lead, .tools__head .lead { justify-self: start; }
   .services__body { grid-template-columns: 1fr; margin-top: var(--s-7); }
   .svc__gear { display: none; }
   .svc__row { grid-template-columns: 1fr; gap: 6px; padding: 22px 0; }
   .svc__row.is-active .svc__name { transform: none; }
   .slide { grid-template-columns: 1fr; align-items: start; }
-  .trail { margin-top: var(--s-6); }
-  .trail__line { display: none; }
-  /* The trail runs down the page on phones: a line on the left, each stage hanging from it. */
-  .trail__stages { grid-template-columns: 1fr; gap: var(--s-6); margin-top: 0; padding-left: 28px; position: relative; }
-  .trail__stages::before {
-    content: "";
-    position: absolute;
-    left: 5px;
-    top: 6px;
-    bottom: 6px;
-    width: 1px;
-    background: linear-gradient(var(--amber), var(--amber)) top / 1px calc(var(--drawn, 0) * 100%) no-repeat, var(--hair);
-  }
-  .stage { padding-top: 0; }
-  .stage::before { left: -28px; top: 7px; }
   .about { grid-template-columns: 1fr; padding-right: 0; gap: 0; }
   .about__photo { min-height: 0; height: 110vw; max-height: 620px; }
   .about__photo img {
@@ -821,7 +867,7 @@
 .mobile-site .nav__links a { padding: 14px 0; font-size: 20px; font-family: var(--font-display); border-bottom: 1px solid var(--hair); }
 .mobile-site .nav__links a::after { content: none; }
 .mobile-site .ridge__track { grid-auto-columns: 86vw; }
-.mobile-site .services, .mobile-site .work, .mobile-site .process, .mobile-site .about, .mobile-site .tools { padding-block: var(--s-8); }
+.mobile-site .services, .mobile-site .work, .mobile-site .about, .mobile-site .tools { padding-block: var(--s-8); }
 
 @media (prefers-reduced-motion: reduce) {
   .lanterns__list { animation: none; flex-wrap: wrap; width: auto; }

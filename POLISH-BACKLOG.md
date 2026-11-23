@@ -62,6 +62,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Feedback 3: film text composed per shot (top right, top left, sky centre, low left; never the trekker, landmarks, moon or sun) with no panels behind it; the scene darkens softly behind the words instead (js/world/shade.js, colours in palette.js textShade).
 - [x] Feedback 4: hero on a three-row grid (no overlap between the buttons and the altitude, checked at 1280x720 to 1536x864); film-to-site hand-over: the summit holds, blurs and dims while the work forms in place.
 - [x] Feedback 5: Selected work comes straight after the hero (then services, process, about, tools, contact); heading "Work that speaks for itself." with the honest labels kept.
+- [x] Feedback 6: Process rebuilt as a pinned night trail with depth (Understand, Explore, Build, Launch, Refine), the same on phones.
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.

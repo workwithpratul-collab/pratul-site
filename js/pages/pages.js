@@ -5,6 +5,8 @@
 // library and no 3D: everything here works with plain CSS transitions and the browser's own
 // scrolling. On desktop, the two 3D carousels are fetched only when their section comes near.
 
+import { initProcess } from './process.js';
+
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isFilm = !document.documentElement.classList.contains('mobile-site');
 
@@ -17,7 +19,7 @@ export async function initPages({ lenis, desktop = false }) {
   initMenu();
   initServices({ lenis });
   initWork({ core });
-  initProcess({ core });
+  initProcess();
   initAbout();
   initTestimonial();
   initTools({ core });
@@ -200,44 +202,6 @@ function initWork({ core }) {
   }
 }
 
-// ---------- Process: the trail draws itself as you scroll ----------
-// --drawn (0..1) on the trail sets how much of the glowing line is drawn (css/home.css); each stage
-// lights up once the line has reached it.
-function initProcess({ core }) {
-  const trail = document.querySelector('.trail');
-  const stages = [...trail.querySelectorAll('.stage')];
-  const ats = stages.map((s) => parseFloat(s.style.getPropertyValue('--at')) || 0);
-  let shown = -1;
-  const set = (v) => {
-    v = Math.round(v * 500) / 500;
-    if (v === shown) return;
-    shown = v;
-    trail.style.setProperty('--drawn', v);
-    stages.forEach((s, i) => s.classList.toggle('is-lit', v >= ats[i] - 0.02));
-  };
-  if (reduceMotion) { set(1); return; }
-  if (core) {
-    // Desktop: the line follows the scroll exactly, from the trail entering to its middle.
-    core.ScrollTrigger.create({
-      trigger: trail,
-      start: 'top 85%',
-      end: 'bottom 55%',
-      onUpdate: (st) => set(st.progress),
-    });
-    return;
-  }
-  // Phones: the same, measured once per frame while the trail is on screen.
-  let raf = 0, on = false;
-  const measure = () => {
-    raf = 0;
-    const r = trail.getBoundingClientRect();
-    const h = window.innerHeight;
-    set(Math.min(Math.max((h * 0.85 - r.top) / (r.height + h * 0.3), 0), 1));
-  };
-  new IntersectionObserver(([e]) => { on = e.isIntersecting; if (on) measure(); }).observe(trail);
-  window.addEventListener('scroll', () => { if (on && !raf) raf = requestAnimationFrame(measure); }, { passive: true });
-}
-
 // ---------- About: the portrait's mask opens as the section arrives ----------
 function initAbout() {
   markIn(document.getElementById('about'), { margin: '0px 0px -25% 0px' });
@@ -417,7 +381,7 @@ function initReveal({ core }) {
       }
     });
   }
-  const items = document.querySelectorAll('.page section:not(.work) .lead, .svc li, .stage, .about__standfirst, .about__story, .about__chips, .about__facts, .contact__actions, .footer__brand, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
+  const items = document.querySelectorAll('.page section:not(.work) .lead, .svc li, .about__standfirst, .about__story, .about__chips, .about__facts, .contact__actions, .footer__brand, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (!e.isIntersecting) continue;
