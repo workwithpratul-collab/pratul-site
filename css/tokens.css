@@ -300,6 +300,14 @@
   --trail-icon: #b7a9d6;
   --trail-halo: rgba(246, 160, 77, 0.18);          /* the ring of light round the current step */
   --section-process: #221c38;                      /* the page's colour at Process (Palette.dc.html strip) */
+  /* The film's altitude meter (references/round2/Meter.dc.html): a soft indigo glow from the corner
+     behind the words (deeper once the sky is bright), the line, its quiet labels and the amber altitude. */
+  --meter-scrim: rgba(23, 20, 43, 0.6);
+  --meter-scrim-day: rgba(23, 20, 43, 0.78);
+  --meter-rail: rgba(243, 236, 226, 0.25);
+  --meter-tick: rgba(243, 236, 226, 0.6);
+  --meter-quiet: rgba(243, 236, 226, 0.74);
+  --meter-alt: #f6c38f;
   /* About (references/round2/About.dc.html): a plum glow behind the portrait, settling to indigo. */
   --about-glow: radial-gradient(120% 90% at 20% 30%, #3a2747 0%, #221b36 45%, #1a1630 100%);
   /* The tools loop: the lantern light behind the tool in focus, and the tiles' soft shadow (indigo, never black). */

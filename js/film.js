@@ -206,11 +206,10 @@ function limitWalk(from, to, dt, gap) {
 }
 
 // ---------- The interface on the film ----------
-// The altitude meter: a tick at each place, and the live altitude worked out from how high the
-// trekker is on the trail.
-const stopOf = (id) => cameraPath.stops.find((st) => st.at === id);
+// The altitude meter: one stacked label (the place we're in, the live altitude worked out from how
+// high the trekker is on the trail, and how far is left to the summit) beside the progress line.
 const altitude = createAltitudeMeter(document.getElementById('altitude'), {
-  stations: ['start', 'dermae', 'meadow', 'summit'].map((id) => ({ progress: id === 'start' ? 0 : stopOf(id).arrive })),
+  stations: ZONES.map((z, i) => ({ progress: z.from, name: z.name, metres: i === ZONES.length - 1 ? ALTITUDE.summit : 0 })),
 });
 // The trail's height, smoothed so it only ever rises: the meter never counts down on a dip.
 const ALT_STEPS = 500;

@@ -1,27 +1,39 @@
-// altitude.js: the small altitude meter in the bottom-left corner.
-// It shows how high the trekker is ("ALT 3,620 m") and a thin rail that fills as you scroll,
-// so it doubles as the film's progress bar. Each of the four places has a tick on the rail.
+// altitude.js: the altitude meter in the bottom-left corner of the film
+// (references/round2/Meter.dc.html).
+//
+// One stacked label beside a thin progress line:
+//   NOW
+//   The ridge                       (the place name, cross-fading as you climb into the next place)
+//   ALT. 3,240 M                    (the trekker's altitude, in amber)
+//   SUMMIT 4,410 M · 1,170 M TO GO  (the goal, quietly underneath)
+// The line fills as you scroll, so it doubles as the film's progress bar, with a small amber mark
+// at its tip and a tick at the top for the summit.
 
 // el: the .altitude element.
-// stations: [{ progress, name }], the four places and where they are in the scroll (0..1).
+// stations: [{ progress, name, metres }], the four places and where they are in the scroll (0..1).
 export function createAltitudeMeter(el, { stations }) {
+  const summit = stations[stations.length - 1].metres;
+  const format = new Intl.NumberFormat('en-US');
   el.innerHTML = `
     <div class="altitude__rail">
       <div class="altitude__fill"></div>
-      ${stations.map((s) => `<span class="altitude__tick" style="bottom:${(s.progress * 100).toFixed(1)}%"></span>`).join('')}
+      <span class="altitude__tip"></span>
+      <span class="altitude__top"></span>
     </div>
     <div class="altitude__readout">
-      <span class="altitude__place"></span>
-      <span class="altitude__line"><span class="altitude__label">Alt</span><span class="altitude__value">0 m</span></span>
+      <span class="altitude__now">Now</span>
+      <span class="altitude__places">${stations.map((s) => `<span class="altitude__place">${s.name}</span>`).join('')}</span>
+      <span class="altitude__alt">Alt. <span class="altitude__value">0 m</span></span>
+      <span class="altitude__goal">Summit ${format.format(summit)} m · <span class="altitude__togo"></span></span>
     </div>`;
   const value = el.querySelector('.altitude__value');
-  const place = el.querySelector('.altitude__place');
-  const ticks = [...el.querySelectorAll('.altitude__tick')];
-  const format = new Intl.NumberFormat('en-US');
+  const togo = el.querySelector('.altitude__togo');
+  const places = [...el.querySelectorAll('.altitude__place')];
+  const names = stations.map((s) => s.name);
   let shownMetres = -1;
-  let shownPlace = '';
+  let shownPlace = -1;
 
-  // progress: 0..1 down the page. metres: the trekker's altitude. name: the zone we're in.
+  // progress: 0..1 through the film. metres: the trekker's altitude. name: the place we're in.
   // Only touches the page when something visibly changes, so it costs almost nothing per frame.
   function update(progress, metres, name) {
     el.style.setProperty('--progress', progress.toFixed(4));
@@ -30,18 +42,21 @@ export function createAltitudeMeter(el, { stations }) {
     if (rounded !== shownMetres) {
       shownMetres = rounded;
       value.textContent = `${format.format(rounded)} m`;
+      const left = Math.max(0, summit - rounded);
+      togo.textContent = left > 0 ? `${format.format(left)} m to go` : 'reached';
     }
-    if (name !== shownPlace) {
-      shownPlace = name;
-      place.textContent = name;
+    // The place names are stacked in one spot; the current one fades in as the last fades out.
+    const at = Math.max(0, names.indexOf(name));
+    if (at !== shownPlace) {
+      shownPlace = at;
+      places.forEach((p, i) => p.classList.toggle('is-current', i === at));
     }
-    stations.forEach((s, i) => ticks[i].classList.toggle('is-passed', progress >= s.progress - 1e-4));
   }
   return { update };
 }
 
-// The four places with their (rounded) altitudes, for the style guide. The film itself works
-// out the live altitude from the trekker's height on the trail (see main.js).
+// The four places with their (rounded) altitudes. The film works out the live altitude from the
+// trekker's height on the trail (film.js); the summit's figure is the meter's goal.
 export const STATIONS = [
   { key: 'night', progress: 0, metres: 2850, name: 'Base camp' },
   { key: 'predawn', progress: 0.215, metres: 3180, name: 'The ridge' },

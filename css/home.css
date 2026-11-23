@@ -238,6 +238,8 @@
   color: var(--cream);
 }
 [data-mode="film"] .hero__sub, [data-mode="film"] .hero__actions, [data-mode="film"] .hero__place { opacity: 0; }
+/* The hand-over fades the altitude label away through --lift (js/site.js), on top of its own reveal. */
+[data-mode="film"] .hero__place { filter: opacity(calc(1 - var(--lift, 0))); }
 
 /* ---------- The hand-over from the film to the page (js/site.js) ---------- */
 /* Two layers over the summit, both faded by the scroll: the blurred snapshot (a little larger, so

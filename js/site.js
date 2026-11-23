@@ -179,7 +179,10 @@ function buildHandover() {
   const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
   // The hero's words lift and go first; the altitude label with them.
   tl.fromTo(heroEl.querySelector('.hero__inner'), { y: 0, autoAlpha: 1 }, { y: reduceMotion ? 0 : -40, autoAlpha: 0, duration: D * 0.55, ease: 'power1.in', immediateRender: false }, 0);
-  tl.fromTo(heroEl.querySelector('.hero__place'), { autoAlpha: 1 }, { autoAlpha: 0, duration: D * 0.3, immediateRender: false }, 0);
+  // (The altitude label fades through a CSS variable, not its own opacity: the hero's reveal owns its
+  // opacity, and a scrubbed fromTo would write "visible" onto it from the very start of the film,
+  // where it sat on top of the film's altitude meter.)
+  tl.fromTo(heroEl, { '--lift': 0 }, { '--lift': 1, duration: D * 0.3, immediateRender: false }, 0);
   // The summit softens (the blurred picture fades in) and dims towards the page colour.
   if (!reduceMotion) tl.fromTo(blur, { autoAlpha: 0 }, { autoAlpha: 1, duration: D * 0.9, ease: 'power2.out' }, 0);
   tl.fromTo(dim, { autoAlpha: 0 }, { autoAlpha: 0.55, duration: D, ease: 'power1.inOut' }, 0);
