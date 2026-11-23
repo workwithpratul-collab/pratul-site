@@ -68,6 +68,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Feedback 9: every section fits one screen at 1440x900, 1366x768 and 1536x864 (and 1280x720), measured by a script, including the contact form when open.
 - [x] Feedback 10: phone version built to the 5-phone-v2 mockup (hero, service cards, work cards with filters, about, contact form with icons, open menu, progress line, parallax, peach palette), real About facts, "Work that speaks for itself.", no Insights; rules recorded in DESIGN.md section 9.
 - [x] Feedback 2.1: Process trail rebuilt to round2/Main.dc.html: each step's words beside its own checkpoint, Phosphor icon markers (self-hosted), done / current / ahead states, no overlaps with the trail, each other or the heading (script: 10 sizes x 5 steps); phones get a reading column and the steps spread around the current one.
+- [x] Feedback 2.2: About rebuilt to round2/About.dc.html: the "6 websites built" and "1+ year" numbers and the chips are gone; three value lines (Design and code, Built to be found, Worldwide) and the "Off the clock" line; the portrait fades out across its right side. Phones: values stacked, the off-the-clock label on its own line.
 - [ ] Process trail: on desktop the trail sits a little left of the mockup's position so Refine's full description fits before the right edge at 1280-1440 px. Pratul to judge whether that reads right.
 
 ## MOBILE (Phase 7)

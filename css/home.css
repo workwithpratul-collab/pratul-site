@@ -605,52 +605,66 @@
 /* (Reduce motion: the trail is still walked by your own scroll, but nothing drifts or animates on
    its own: see the reduced-motion block at the end of this file.) */
 
-/* ---------- About: a magazine spread ---------- */
+/* ---------- About: a view worth the climb (references/round2/About.dc.html) ---------- */
 @property --open { syntax: "<number>"; inherits: false; initial-value: 0; }
+/* The portrait on the left (the mockup's 640 of 1440), the words on the right, over a plum glow. */
 .about {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
   align-items: center;
-  gap: var(--s-7);
+  gap: var(--s-5);
   padding-right: var(--page-gutter);
+  background: var(--about-glow);
 }
-/* The portrait dissolves into the page; its soft mask opens as the section arrives. */
 .about__photo { align-self: stretch; min-height: 640px; }
-[data-mode="film"] .about { padding-block: 0; }
-[data-mode="film"] .about__photo { min-height: 0; height: calc(100% - 76px); margin-top: 76px; }
-[data-mode="film"] .about { align-items: stretch; }
-[data-mode="film"] .about__text { align-self: center; }
-/* Short laptop screens (768 px and similar): the story set a touch tighter, so the spread fits. */
-@media (max-height: 800px) and (min-width: 901px) {
-  [data-mode="film"] .about__story p { font-size: 16px; line-height: 1.5; }
-  [data-mode="film"] .about__chips li { padding-block: 6px; }
-  [data-mode="film"] .about__facts { margin-top: 14px; padding-top: 12px; }
-}
-[data-mode="film"] .about__text { padding-block: calc(76px + clamp(12px, 3vh, 40px)) clamp(16px, 4vh, 48px); }
-[data-mode="film"] .about__text .heading { font-size: clamp(40px, min(5vw, 8.6vh), 84px); }
+[data-mode="film"] .about { padding-block: 0; align-items: stretch; }
+[data-mode="film"] .about__photo { min-height: 0; height: 100%; }
+[data-mode="film"] .about__text { align-self: center; padding-block: calc(76px + clamp(12px, 3vh, 40px)) clamp(16px, 4vh, 48px); }
+[data-mode="film"] .about__text .heading { font-size: clamp(44px, min(5.3vw, 8.6vh), 84px); }
+/* The portrait blends softly into the page across its right side (solid to 60%, gone by the edge),
+   with a whisper of fade top and bottom so the section has no hard edges. The mask opens from a
+   narrower start as the section arrives. */
 .about__photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: 50% 30%;
-  -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--open) * 58%), transparent calc(var(--open) * 58% + 38%)), linear-gradient(0deg, transparent 0%, #000 22%, #000 84%, transparent 100%);
-          mask-image: linear-gradient(90deg, #000 calc(var(--open) * 58%), transparent calc(var(--open) * 58% + 38%)), linear-gradient(0deg, transparent 0%, #000 22%, #000 84%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--open) * 60%), transparent calc(var(--open) * 60% + 40%)), linear-gradient(0deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+          mask-image: linear-gradient(90deg, #000 calc(var(--open) * 60%), transparent calc(var(--open) * 60% + 40%)), linear-gradient(0deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
   -webkit-mask-composite: source-in;
           mask-composite: intersect;
-  --open: 0.35;
+  --open: 0.4;
   transition: --open 1.8s var(--ease-arrive);
 }
 .about.is-in .about__photo img { --open: 1; }
-.about__text { max-width: 640px; }
-.about__standfirst { margin-top: clamp(14px, 3vh, 40px); font-size: clamp(17px, min(1.5vw, 2.6vh), 22px); line-height: 1.5; color: var(--cream); text-wrap: pretty; }
-.about__story { margin-top: clamp(10px, 2.2vh, 24px); display: grid; gap: clamp(8px, 1.6vh, 16px); color: var(--lavender); max-width: var(--measure); }
+.about__text { max-width: 700px; }
+.about__standfirst { margin-top: clamp(14px, 2.6vh, 24px); max-width: 620px; font-size: clamp(17px, min(1.32vw, 2.4vh), 21px); line-height: 1.6; color: var(--cream); text-wrap: pretty; }
+.about__story { margin-top: clamp(10px, 2vh, 22px); max-width: 620px; color: var(--lavender); font-size: clamp(15px, min(1.12vw, 2vh), 17px); line-height: 1.65; }
 .about__story p { text-wrap: pretty; }
-.about__chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: clamp(14px, 3vh, 40px); }
-.about__chips li { padding: 8px 16px; border: 1px solid var(--hair-strong); border-radius: 999px; font-size: 15px; color: var(--cream); }
-.about__facts { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: var(--s-6) var(--s-7); margin-top: clamp(16px, 3.6vh, 64px); padding-top: clamp(14px, 2.8vh, 40px); border-top: 1px solid var(--hair); }
-.about__facts div { display: flex; flex-direction: column-reverse; gap: 6px; }
-.about__facts dd { font-family: var(--font-display); font-size: clamp(28px, min(3vw, 5vh), 44px); line-height: 1.05; color: var(--cream); }
-.about__facts dt { font-size: 15px; color: var(--lavender); }
+/* Three short value lines under a hairline. */
+.about__values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 2.2vw, 32px);
+  max-width: 680px;
+  margin: clamp(20px, 3.6vh, 36px) 0 0;
+  padding: clamp(18px, 3.2vh, 26px) 0 0;
+  border-top: 1px solid var(--hair-strong);
+  list-style: none;
+}
+.about__value { font-family: var(--font-display); font-weight: 400; font-size: clamp(22px, min(1.8vw, 3.2vh), 26px); line-height: 1.15; color: var(--cream); }
+.about__value em { font-style: italic; color: var(--amber); }
+.about__values p { margin-top: 8px; font-size: 14px; line-height: 1.5; color: var(--lavender); text-wrap: pretty; }
+/* What fills the rest of the week: small, quiet, spaced capitals. */
+.about__off {
+  margin-top: clamp(16px, 3vh, 30px);
+  font-family: var(--font-altitude);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  line-height: 1.8;
+  text-transform: uppercase;
+  color: var(--lavender);
+}
 
 /* ---------- Testimonial (hidden until a real quote exists) ---------- */
 .quote { padding-block: var(--s-8); }
@@ -958,7 +972,6 @@
             mask-image: linear-gradient(180deg, #000 calc(var(--open) * 55%), transparent calc(var(--open) * 55% + 40%));
   }
   .about__text { padding: 0 var(--page-gutter); margin-top: calc(-1 * var(--s-8)); }
-  .about__facts { grid-template-columns: repeat(2, auto); }
   /* Phones: the tent sits above the words, never behind them. */
   .contact__art { width: 100%; height: min(58vh, 520px); inset: 0 0 auto 0; -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 68%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 68%, transparent 100%); }
   .contact__art img { object-position: 82% 70%; }
@@ -969,7 +982,7 @@
 }
 @media (max-width: 560px) {
   .form__row { grid-template-columns: 1fr; }
-  .about__facts { grid-template-columns: 1fr 1fr; }
+  .about__values { grid-template-columns: 1fr; gap: 18px; }
   .footer__base { position: relative; bottom: auto; padding: var(--s-4) 0 max(var(--s-6), env(safe-area-inset-bottom)); flex-direction: column; align-items: flex-start; }
   .footer__range svg { height: 120px; }
 }
@@ -1204,11 +1217,15 @@
 .mobile-site .about__photo img { -webkit-mask-image: none; mask-image: none; object-position: 50% 24%; }
 .mobile-site .about__text { margin-top: var(--s-5); padding: 0; }
 .about__short { font-size: 17px; line-height: 1.65; color: var(--cream); text-wrap: pretty; }
-.mobile-site .about__facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: var(--s-6); padding-top: var(--s-5); }
-.mobile-site .about__facts div { align-items: center; text-align: center; padding-inline: 6px; }
-.mobile-site .about__facts div + div { border-left: 1px solid var(--hair); }
-.mobile-site .about__facts dd { font-size: 27px; color: var(--m-peach); }
-.mobile-site .about__facts dt { font-size: 14px; }
+/* The three value lines, stacked, each with its short line; then the off-the-clock line. */
+.mobile-site .about__values { grid-template-columns: 1fr; gap: 18px; margin-top: var(--s-6); padding-top: var(--s-5); }
+.mobile-site .about__value { font-size: 26px; }
+.mobile-site .about__value em { color: var(--m-peach); }
+.mobile-site .about__values p { margin-top: 4px; font-size: 15px; }
+.mobile-site .about__off { margin-top: var(--s-5); }
+/* (phones: the label on its own line, so the list never wraps with a stray dot) */
+.mobile-site .about__off-label { display: block; }
+.mobile-site .about__off-sep { display: none; }
 
 /* ---- Contact: the form with icons, and a range of peaks below ---- */
 .mobile-site .contact { display: block; min-height: 0; padding: var(--s-8) 0 0; }
