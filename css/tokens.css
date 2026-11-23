@@ -337,6 +337,10 @@
   --m-ghost-press: rgba(243, 236, 226, 0.1);
   --m-snow: rgba(255, 248, 240, 0.7);
   --m-snow-soft: rgba(255, 248, 240, 0.42);
+  /* The open phone menu (references/round2/PhoneMenu.dc.html): night at the top to a dusky rose foot,
+     with a ridge along the bottom. */
+  --m-menu-bg: linear-gradient(180deg, #17142b 0%, #241d3a 60%, #3e2a4c 85%, #a8687a 100%);
+  --m-menu-ridge: #2a2140;
   --m-panel: rgba(26, 23, 37, 0.97);   /* the page's first colour (the top of --page-arc): the summit darkens into it */
 
   /* The page is one continuous gradient: the rest of the day on the mountain (DESIGN.md §1).

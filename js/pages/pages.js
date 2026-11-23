@@ -66,7 +66,7 @@ function initNav() {
       });
     }
   }
-  const links = [...nav.querySelectorAll('.nav__links a')];
+  const links = [...nav.querySelectorAll('.nav__links > a[href^="#"]:not(.btn)')];   // (in-page links only)
   const sections = links.map((a) => document.querySelector(a.getAttribute('href')));
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {

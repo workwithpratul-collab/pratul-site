@@ -1103,42 +1103,66 @@
 .mobile-site .nav.is-open .nav__menu span:last-child { transform: translateY(-7.5px) rotate(-45deg); }
 .mobile-site .nav__menu span:nth-child(2) { transition: opacity var(--t-fast) var(--ease-arrive); }
 .mobile-site .nav__name { position: relative; z-index: 2; }
-/* A full-height panel: the links large and close together, the action, and a range of peaks. */
+/* The open menu (references/round2/PhoneMenu.dc.html): a full-height panel that darkens from night at
+   the top to a dusky rose glow at the foot, five large serif links, the amber "Book a call", the
+   social links, and a quiet ridge along the bottom. Sizes follow the screen's height as well as its
+   width, so a short phone gets the same menu, a little tighter. */
 .mobile-site .nav__links {
   position: fixed;
   inset: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: calc(84px + env(safe-area-inset-top)) var(--page-gutter) 0;
-  background: var(--m-panel);
-  backdrop-filter: blur(18px);
+  align-items: stretch;
+  gap: 0;
+  padding: calc(clamp(88px, 17.8svh, 150px) + env(safe-area-inset-top)) 28px 0;
+  background: var(--m-menu-bg);
   box-shadow: none;
   transform: none;
   transition: opacity var(--t-fast) var(--ease-arrive), visibility var(--t-fast);
 }
-.mobile-site .nav__links a:not(.btn) {
-  padding: 8px 0;
+.mobile-site .nav__links > a:not(.btn) {
+  align-self: flex-start;
+  padding: 0;
   border: 0;
-  font-family: var(--font-body);
-  font-size: 24px;
+  font-family: var(--font-display);
+  font-size: clamp(34px, min(12.3vw, 6.2svh), 52px);
+  line-height: 1.25;
   color: var(--cream);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.4s var(--ease-arrive), transform 0.5s var(--ease-arrive), color var(--t-fast) var(--ease-arrive);
+}
+.mobile-site .nav__links > a[aria-current]:not(.btn) { color: var(--amber); }
+.mobile-site .nav__book {
+  min-height: 56px;
+  margin-top: clamp(24px, 6.5svh, 64px);
+  font-weight: 600;
   opacity: 0;
   transform: translateY(16px);
   transition: opacity 0.4s var(--ease-arrive), transform 0.5s var(--ease-arrive);
 }
-/* The mockup's order: Work, About, Process. */
-.mobile-site .nav__links a[href="#work"] { order: 1; }
-.mobile-site .nav__links a[href="#about"] { order: 2; }
-.mobile-site .nav__links a[href="#process"] { order: 3; }
-.mobile-site .nav__book { order: 4; margin-top: var(--s-5); padding-inline: 28px; opacity: 0; transform: translateY(16px); transition: opacity 0.4s var(--ease-arrive), transform 0.5s var(--ease-arrive); }
-.mobile-site .nav__range { position: absolute; inset: auto 0 0; width: 100%; height: 26vh; pointer-events: none; }
-.mobile-site .nav.is-open .nav__links a:not(.btn), .mobile-site .nav.is-open .nav__book { opacity: 1; transform: none; }
-.mobile-site .nav.is-open .nav__links a[href="#about"] { transition-delay: 0.06s; }
-.mobile-site .nav.is-open .nav__links a[href="#process"] { transition-delay: 0.12s; }
-.mobile-site .nav.is-open .nav__book { transition-delay: 0.18s; }
-.mobile-site .nav.is-open { background: transparent; }
+.mobile-site .nav__social {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin-top: clamp(18px, 3.6svh, 34px);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-arrive);
+}
+.mobile-site .nav__social a { min-height: 44px; display: inline-flex; align-items: center; font-size: 15px; color: var(--lavender); text-decoration: underline; text-decoration-color: var(--hair-strong); text-underline-offset: 4px; }
+.mobile-site .nav__range { position: absolute; inset: auto 0 0; width: 100%; height: min(120px, 15svh); fill: var(--m-menu-ridge); pointer-events: none; }
+.mobile-site .nav.is-open .nav__links > a:not(.btn), .mobile-site .nav.is-open .nav__book { opacity: 1; transform: none; }
+.mobile-site .nav.is-open .nav__social { opacity: 1; }
+/* each line arrives a beat after the one above */
+.mobile-site .nav.is-open .nav__links > a[href="#services"] { transition-delay: 0.04s; }
+.mobile-site .nav.is-open .nav__links > a[href="#process"] { transition-delay: 0.08s; }
+.mobile-site .nav.is-open .nav__links > a[href="#about"] { transition-delay: 0.12s; }
+.mobile-site .nav.is-open .nav__links > a[href="#contact"]:not(.btn) { transition-delay: 0.16s; }
+.mobile-site .nav.is-open .nav__book { transition-delay: 0.2s; }
+.mobile-site .nav.is-open .nav__social { transition-delay: 0.26s; }
+.mobile-site .nav.is-open { background: transparent; backdrop-filter: none; box-shadow: none; }
 
 /* ---- The hero ---- */
 .mobile-site .hero { overflow: clip; }
