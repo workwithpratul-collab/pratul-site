@@ -608,6 +608,8 @@
    sets the box and the column). */
 .trail.is-tall { left: 0; top: var(--trail-top, 50%); width: 100%; height: var(--trail-h, 50%); aspect-ratio: auto; translate: none; container-type: normal; --u: 1px; }
 .trail.is-tall .step__mark { --size: 40px; }
+/* (phones: the steps glide apart on the compositor, js/pages/process.js) */
+.trail.is-tall .step { will-change: transform; transition: transform 650ms cubic-bezier(0.165, 0.84, 0.44, 1); }
 .trail.is-tall .step .step__label { left: var(--col-x); right: auto; top: 0; bottom: auto; width: var(--col-w); text-align: left; translate: 0 -50%; }
 .trail.is-tall .step__name { font-size: 22px; }
 .trail.is-tall .step.is-done .step__name { font-size: 22px; }

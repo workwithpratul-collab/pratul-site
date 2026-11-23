@@ -81,3 +81,33 @@ Measured the same way on both versions (local gzip server, Chrome 157 with the r
 New costs, all small: the film's text shade is one see-through quad, drawn only while words show; the
 hand-over's blur is one quarter-size snapshot taken once; the film stops drawing once the page covers
 it. The Process trail and the Tools loop are plain HTML/CSS transforms that run only on screen.
+
+## Feedback round 2 (Nov 23): before and after
+
+Measured the same way on both versions: "before" is commit `7411a46` (the end of round 1), served from
+an exported copy next to the current site on the same local gzip server, Chrome with the real
+graphics card. Desktop at 1440 x 900 (one scroll step per frame, two runs each, alternating). Phone at
+390 x 844, 3x pixel density, processor slowed 4x.
+
+| What | Before | After |
+|---|---|---|
+| Boot to the live film | 5.7-6.5 s, 1030-1135 ms blocking | 4.3-5.5 s, 976-1128 ms blocking |
+| Film frame time, median / p95 | 7.1-7.2 ms / 11.6-12.4 ms | 7.2-7.5 ms / 12.1-13.2 ms (run-to-run noise) |
+| Sections below the film, median / p95 | 6.9 ms / 8.3-8.8 ms | 6.9-7.0 ms / 8.7-9.1 ms |
+| JS on desktop / everything loaded at boot | 612 KB / 4,172 KB | 615 KB / 4,189 KB |
+| Tools ribbon while drifting | (the old loop) | 7.0 ms median frame, transforms only, rests off screen |
+| Phone: first paint | 1.02-1.04 s | 0.21-0.26 s |
+| Phone: JS / fonts / images / total | 16 / 67 / 134 / 243 KB | 20 / 85 / 143 / 279 KB |
+| Phone scroll, median / p95 / frames over 25 ms | 10.2-10.4 ms / 17.8-18.2 ms / 13 | 11.0-11.8 ms / 20.2-20.5 ms / 8-10 |
+
+What changed, and why the numbers are where they are:
+- **Process** no longer downloads a painted background (the range is SVG), so its arrival is lighter.
+  A first version of the phone trail moved its checkpoints by changing their position every frame
+  (layout and repaint on each frame: 60 slow frames). They now glide with a CSS transform on the
+  compositor, the trail is measured once per glide, and the desktop trail is sampled once per layout.
+- **Phones load one more font file** (JetBrains Mono, 18 KB): the approved designs use it for the
+  small capital labels (the summit label, "Off the clock", the step count, the footer labels).
+- **The phone's typical frame is about 1 ms longer**, from the two things that now move on their own:
+  the snow (two transform-only layers) and the Tools ribbon (transforms only, only while on screen).
+  Both stop under "reduce motion". Slow frames are fewer than before.
+- The 3D Work ridge is unchanged; the Work section stays see-through so the canvas shows through it.

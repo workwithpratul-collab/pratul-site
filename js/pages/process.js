@@ -46,6 +46,7 @@ export function initProcess({ core = null } = {}) {
   let tall = false;
   let w = 0, h = 0, tallX = [];
   let ys = null;       // the checkpoints' heights on a tall screen (they glide when the step changes)
+  let trailPoints = [];
 
   // ---------- Layout: the box, and where the checkpoints go ----------
   function layout() {
@@ -97,13 +98,16 @@ export function initProcess({ core = null } = {}) {
     return out;
   }
 
-  // Put the checkpoints at these points, draw the trail through them, and measure where each one
-  // falls along it.
-  function place(pts) {
-    steps.forEach((s, i) => {
-      s.el.style.setProperty('--x', (pts[i][0] / w).toFixed(4));
-      s.el.style.setProperty('--y', (pts[i][1] / h).toFixed(4));
-    });
+  // Put the checkpoints at these points, draw the trail through them, and (unless measure is false,
+  // as on the frames of a phone's glide, whose end points were measured once at its start) measure
+  // where each one falls along it.
+  function place(pts, measure = true) {
+    if (measure) {
+      steps.forEach((s, i) => {
+        s.el.style.setProperty('--x', (pts[i][0] / w).toFixed(4));
+        s.el.style.setProperty('--y', (pts[i][1] / h).toFixed(4));
+      });
+    }
     // The trail rises into the first checkpoint from below, then passes smoothly through every one
     // (a Catmull-Rom curve, turned into the cubic curves SVG draws).
     const first = pts[0];
@@ -111,6 +115,7 @@ export function initProcess({ core = null } = {}) {
     const d = smoothPath(all);
     base.setAttribute('d', d);
     glow.setAttribute('d', d);
+    if (!measure) { draw(); return; }
     const total = glow.getTotalLength();
     const probe = document.createElementNS(SVG, 'path');
     svg.appendChild(probe);
@@ -119,6 +124,12 @@ export function initProcess({ core = null } = {}) {
       return probe.getTotalLength() / total;
     });
     probe.remove();
+    // Points along the trail, for keeping the labels clear of it (measured once per layout, not on
+    // every step change: sampling a path is slow enough to cost a frame).
+    if (!tall) {
+      trailPoints = [];
+      for (let k = 0; k <= 160; k++) { const q = glow.getPointAtLength((total * k) / 160); trailPoints.push([q.x, q.y]); }
+    }
     draw();
     if (!tall) nudge();
   }
@@ -129,9 +140,7 @@ export function initProcess({ core = null } = {}) {
   // up. Then, from the top down, a label that would touch the one above it moves down.
   const CLEAR = 14;
   function nudge() {
-    const L = glow.getTotalLength();
-    const trail = [];
-    for (let k = 0; k <= 240; k++) { const q = glow.getPointAtLength((L * k) / 240); trail.push([q.x, q.y]); }
+    const trail = trailPoints;
     // Where a label's visible words sit in the box, from layout positions (offsetLeft/Top ignore
     // transforms, so a slide still in progress can't fool the measurement). The hidden-from-sight
     // lines are 1 px boxes and are skipped.
@@ -182,11 +191,20 @@ export function initProcess({ core = null } = {}) {
       cancelAnimationFrame(glide);
       if (reduceMotion) { ys = to; place(steps.map((s, k) => [tallX[k], ys[k]])); }
       else {
+        // The checkpoints and their words go to their new places at once, then a transform carries
+        // them there from where they were (CSS, on the compositor: nothing is laid out or repainted
+        // per frame). The trail was measured once, as it will be at the end; each frame only
+        // redraws the thin line, on the same ease-out curve as the CSS.
+        place(steps.map((s, n) => [tallX[n], to[n]]));
+        steps.forEach((s, n) => { s.el.style.transition = 'none'; s.el.style.transform = `translate3d(0, ${(from[n] - to[n]).toFixed(1)}px, 0)`; });
+        void box.offsetWidth;   // (apply the starting offset before the transition begins)
+        steps.forEach((s) => { s.el.style.transition = ''; s.el.style.transform = ''; });
+        place(steps.map((s, n) => [tallX[n], from[n]]), false);
         const t0 = performance.now(), dur = 650;
         const step = (now) => {
-          const k = Math.min((now - t0) / dur, 1), e = 1 - Math.pow(1 - k, 4);   // ease out
+          const k = Math.min((now - t0) / dur, 1), e = 1 - Math.pow(1 - k, 4);   // ease out (quartic)
           ys = from.map((y, n) => y + (to[n] - y) * e);
-          place(steps.map((s, n) => [tallX[n], ys[n]]));
+          place(steps.map((s, n) => [tallX[n], ys[n]]), false);
           if (k < 1) glide = requestAnimationFrame(step);
         };
         glide = requestAnimationFrame(step);
