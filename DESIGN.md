@@ -92,6 +92,12 @@ One fluid scale, 8px based. Sections breathe; groups inside them are tight.
 
 Content width: 1320px max. Body text column: 62ch max.
 
+**One section, one screen (desktop).** Every section fills exactly the window under the top bar
+() at 1440x900, 1366x768 and 1536x864, and down to 1280x720: headings, line sizes and
+gaps follow the window height as well as its width ( clamps), with a short-screen rule
+below 800 px tall. Work and Process are pinned screens; the open contact form takes a column beside
+the heading.
+
 ## 5. Motion
 
 One family: **expo-style ease-out for arrivals, sine in-out for anything continuous.**

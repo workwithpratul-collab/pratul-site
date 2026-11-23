@@ -65,6 +65,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Feedback 6: Process rebuilt as a pinned night trail with depth (Understand, Explore, Build, Launch, Refine), the same on phones.
 - [x] Feedback 7: tools rebuilt as a one-in-focus loop (logos always upright, never mirrored, pauses on hover), plain HTML/CSS instead of WebGL; the same on phones.
 - [x] Feedback 8: footer redesigned: calm and spaced, three labelled link columns, a mountain range fading in at the bottom, no newsletter.
+- [x] Feedback 9: every section fits one screen at 1440x900, 1366x768 and 1536x864 (and 1280x720), measured by a script, including the contact form when open.
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.

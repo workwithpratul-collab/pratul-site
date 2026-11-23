@@ -307,7 +307,7 @@
   /* Type scale (DESIGN.md §3) */
   /* Instrument Serif is a narrow face, so its sizes sit a step above a book serif's. */
   --t-display: clamp(56px, 7.8vw, 120px);
-  --t-heading: clamp(44px, 5.4vw, 84px);
+  --t-heading: clamp(44px, min(5.4vw, 9.4vh), 84px);   /* follows the height too: one screen per section */
   --t-heading-sm: clamp(38px, 4vw, 62px);
   --t-line: clamp(30px, 3.3vw, 48px);
   --t-lead: clamp(19px, 1.5vw, 22px);

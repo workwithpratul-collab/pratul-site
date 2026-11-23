@@ -263,11 +263,20 @@
 /* ---------- Sections: shared rhythm ---------- */
 .services, .work, .process, .about, .tools, .contact { position: relative; padding-block: var(--s-9); }
 .process { padding-block: 0; }
+/* One section, one screen (desktop): each fills exactly the window, under the top bar, and its
+   spacing and line sizes follow the window's height as well as its width, so a 768 px laptop gets a
+   tighter version of the same layout instead of a section you'd have to scroll through. */
+[data-mode="film"] .services, [data-mode="film"] .about, [data-mode="film"] .contact {
+  height: 100vh;
+  height: 100svh;
+  min-height: 0;
+  padding-block: calc(76px + clamp(16px, 4vh, 48px)) clamp(20px, 5vh, 56px);
+}
 /* Anything that must sit above the shared 3D canvas. */
 .page .wrap, .footer .wrap, .about__photo, .about__text, .contact__art { position: relative; z-index: 2; }
 
 /* ---------- Services: an editorial list ---------- */
-.services { padding-top: var(--s-8); }
+[data-mode="film"] .services { display: grid; grid-template-rows: auto minmax(0, 1fr); align-content: start; }
 .services__head {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
@@ -279,15 +288,15 @@
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
   gap: var(--s-7);
-  margin-top: var(--s-8);
+  margin-top: clamp(16px, 3.4vh, 64px);
 }
-.svc { border-bottom: 1px solid var(--hair); }
+.svc { border-bottom: 1px solid var(--hair); align-self: start; }
 .svc__row {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
   align-items: baseline;
   gap: var(--s-6);
-  padding: clamp(22px, 2.6vw, 34px) 0;
+  padding: clamp(10px, 1.9vh, 28px) 0;
   border-top: 1px solid var(--hair);
   color: var(--cream);
   text-decoration: none;
@@ -296,12 +305,12 @@
 }
 .svc__name {
   font-family: var(--font-display);
-  font-size: var(--t-line);
+  font-size: clamp(28px, min(3vw, 5vh), 46px);
   line-height: 1.08;
   letter-spacing: var(--track-heading);
   transition: transform var(--t-base) var(--ease-arrive), color var(--t-base) var(--ease-arrive);
 }
-.svc__text { font-size: var(--t-body); line-height: 1.5; color: var(--lavender); transition: color var(--t-base) var(--ease-arrive); }
+.svc__text { font-size: var(--t-body); line-height: 1.4; color: var(--lavender); transition: color var(--t-base) var(--ease-arrive); }
 /* The amber line that draws along the active row. */
 .svc__row::after {
   content: "";
@@ -318,15 +327,15 @@
 .svc__row.is-active::after { transform: scaleX(1); }
 .svc__row.is-active .svc__name { transform: translateX(14px); }
 .svc__row.is-active .svc__text { color: var(--cream); }
+/* Very short laptop windows (720 px): rows a little closer, so all five fit. */
+@media (max-height: 740px) and (min-width: 901px) { [data-mode="film"] .svc__row { padding-block: 8px; } }
 .svc__row:focus-visible { outline: 2px solid var(--amber); outline-offset: 6px; }
 /* The gear: one picture at a time, unmasked from below as its row becomes active. */
 .svc__gear {
-  position: sticky;
-  top: 18vh;
-  align-self: start;
+  position: relative;
+  align-self: center;
   aspect-ratio: 1;
-  width: 100%;
-  max-width: 440px;
+  width: min(100%, 440px, 47vh);
   justify-self: end;
 }
 .svc__gear img {
@@ -552,6 +561,18 @@
 }
 /* The portrait dissolves into the page; its soft mask opens as the section arrives. */
 .about__photo { align-self: stretch; min-height: 640px; }
+[data-mode="film"] .about { padding-block: 0; }
+[data-mode="film"] .about__photo { min-height: 0; height: calc(100% - 76px); margin-top: 76px; }
+[data-mode="film"] .about { align-items: stretch; }
+[data-mode="film"] .about__text { align-self: center; }
+/* Short laptop screens (768 px and similar): the story set a touch tighter, so the spread fits. */
+@media (max-height: 800px) and (min-width: 901px) {
+  [data-mode="film"] .about__story p { font-size: 16px; line-height: 1.5; }
+  [data-mode="film"] .about__chips li { padding-block: 6px; }
+  [data-mode="film"] .about__facts { margin-top: 14px; padding-top: 12px; }
+}
+[data-mode="film"] .about__text { padding-block: calc(76px + clamp(12px, 3vh, 40px)) clamp(16px, 4vh, 48px); }
+[data-mode="film"] .about__text .heading { font-size: clamp(40px, min(5vw, 8.6vh), 84px); }
 .about__photo img {
   width: 100%;
   height: 100%;
@@ -566,14 +587,14 @@
 }
 .about.is-in .about__photo img { --open: 1; }
 .about__text { max-width: 640px; }
-.about__standfirst { margin-top: var(--s-6); font-size: var(--t-lead); line-height: 1.5; color: var(--cream); text-wrap: pretty; }
-.about__story { margin-top: var(--s-5); display: grid; gap: var(--s-4); color: var(--lavender); max-width: var(--measure); }
+.about__standfirst { margin-top: clamp(14px, 3vh, 40px); font-size: clamp(17px, min(1.5vw, 2.6vh), 22px); line-height: 1.5; color: var(--cream); text-wrap: pretty; }
+.about__story { margin-top: clamp(10px, 2.2vh, 24px); display: grid; gap: clamp(8px, 1.6vh, 16px); color: var(--lavender); max-width: var(--measure); }
 .about__story p { text-wrap: pretty; }
-.about__chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: var(--s-6); }
+.about__chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: clamp(14px, 3vh, 40px); }
 .about__chips li { padding: 8px 16px; border: 1px solid var(--hair-strong); border-radius: 999px; font-size: 15px; color: var(--cream); }
-.about__facts { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: var(--s-6) var(--s-7); margin-top: var(--s-7); padding-top: var(--s-6); border-top: 1px solid var(--hair); }
+.about__facts { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: var(--s-6) var(--s-7); margin-top: clamp(16px, 3.6vh, 64px); padding-top: clamp(14px, 2.8vh, 40px); border-top: 1px solid var(--hair); }
 .about__facts div { display: flex; flex-direction: column-reverse; gap: 6px; }
-.about__facts dd { font-family: var(--font-display); font-size: clamp(32px, 3vw, 44px); line-height: 1.05; color: var(--cream); }
+.about__facts dd { font-family: var(--font-display); font-size: clamp(28px, min(3vw, 5vh), 44px); line-height: 1.05; color: var(--cream); }
 .about__facts dt { font-size: 15px; color: var(--lavender); }
 
 /* ---------- Testimonial (hidden until a real quote exists) ---------- */
@@ -652,6 +673,21 @@
 
 /* ---------- Contact: back at camp ---------- */
 .contact { min-height: 92vh; display: grid; align-items: center; overflow: clip; }
+[data-mode="film"] .contact .heading--display { font-size: clamp(44px, min(6.2vw, 10vh), 100px); }
+/* Desktop: "Send a message" opens the form in a column beside the heading, so it still fits the
+   screen; the tent painting steps back behind it. */
+[data-mode="film"] .contact.has-form .contact__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 560px);
+  grid-template-rows: auto auto 1fr;
+  column-gap: var(--s-8);
+  align-items: start;
+}
+[data-mode="film"] .contact.has-form .contact__inner > :not(.form) { grid-column: 1; }
+[data-mode="film"] .contact.has-form .form { grid-column: 2; grid-row: 1 / -1; margin-top: 0; gap: clamp(10px, 1.8vh, 20px); }
+[data-mode="film"] .contact.has-form .contact__art { opacity: 0.35; transition: opacity var(--t-slow) var(--ease-flow); }
+[data-mode="film"] .contact.has-form .field textarea { min-height: clamp(84px, 13vh, 130px); }
+[data-mode="film"] .contact.has-form .field input { min-height: 48px; padding-block: 10px; }
 /* The tent painting fills the right of the section and dissolves into the page on the left and
    top, so the words sit on calm night sky. */
 .contact__art {

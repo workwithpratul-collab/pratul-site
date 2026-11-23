@@ -195,10 +195,10 @@ function buildHandover() {
   tl.fromTo(ridgeParts, { autoAlpha: 0, y: reduceMotion ? 0 : 14 }, { autoAlpha: 1, y: 0, duration: D + F - STOP, ease: 'power2.out' }, STOP);
   tl.set({}, {}, D + F);
 
-  // On every step of the timeline (it glides a little behind the scroll, so this is checked as it
-  // moves, not only when the page scrolls):
+  // On every frame (cheap: two comparisons), from where the timeline actually is. Not in a callback:
+  // after a jump and a re-measure, GSAP can re-render the timeline without calling it.
   let snapped = false, covered = null;
-  tl.eventCallback('onUpdate', () => {
+  gsap.ticker.add(() => {
     const t = tl.time();
     // Take the blurred picture as the hand-over begins (the summit, as it looks right now).
     if (t > 0 && t < 0.25 && !snapped) { api?.snapshot(blur); snapped = true; }

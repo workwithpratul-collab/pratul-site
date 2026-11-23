@@ -191,9 +191,14 @@ function initWork({ core }) {
   const at = slides.findIndex((s) => s.dataset.slug === back);
   if (at > 0 && !isFilm) requestAnimationFrame(() => { go(at); show(at); });
 
-  // Desktop with 3D: load the ridge as the section nears.
+  // Desktop with 3D: load the ridge once the film is ready and the browser is idle (or sooner, if
+  // the section comes near). Its pinned walk adds scroll length to the page, so it must exist before
+  // anyone jumps further down (a nav link), or the jump would be measured on the old page length.
   if (core && !document.documentElement.classList.contains('no-film')) {
-    whenNear(root, async () => {
+    let started = false;
+    const load = async () => {
+      if (started) return;
+      started = true;
       try {
         const { createRidge } = await import('../carousels/ridge.js');
         ridge = await createRidge({ root, slides, core, onChange: show });
@@ -202,7 +207,11 @@ function initWork({ core }) {
       } catch (err) {
         console.error('[ridge] staying with the slider', err);
       }
-    }, '150% 0px');
+    };
+    whenNear(root, load, '150% 0px');
+    const soon = () => ('requestIdleCallback' in window ? requestIdleCallback(load, { timeout: 2500 }) : setTimeout(load, 800));
+    if (window.__ascent?.ready) soon();
+    else window.addEventListener('ascent:ready', soon, { once: true });
   }
 }
 
@@ -231,6 +240,7 @@ function initTestimonial() {
 function openForm(focus = true) {
   const form = document.getElementById('contact-form');
   form.classList.add('is-open');
+  document.getElementById('contact').classList.add('has-form');   // (desktop: the form takes the right column)
   document.querySelector('[data-open-form]')?.setAttribute('aria-expanded', 'true');
   if (focus) form.elements.name.focus({ preventScroll: true });
 }
