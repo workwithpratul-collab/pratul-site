@@ -14,8 +14,8 @@ little later in the light, until the contact section is back at a glowing tent u
 |---|---|---|
 | Film | the climb | night → pre-dawn → first light → sunrise |
 | Hero | the summit | sunrise: navy sky, peach horizon, lavender cloud sea |
-| Services | above the clouds | clear morning, cool lilac |
-| Work | the prayer-flag ridge | dusk, the one warm panel is lit by lanterns |
+| Work | the prayer-flag ridge | the summit darkens and blurs, and the ridge forms out of it: the work is the first thing after the hero (proof first). The one warm panel is lit by lanterns |
+| Services | above the clouds | cool lilac |
 | Process | the trail down | evening, the ridge line glows as it draws |
 | About | a rest on the way | late golden light on the portrait |
 | Tools | lanterns at the summit | night, lanterns are the only warm light |
