@@ -293,7 +293,9 @@ const gearUI = createGearUI({ gear, camera, lenis, reduceMotion, onHover: (id) =
 
 // ---------- Where the film ends and the hero holds ----------
 const filmEndScroll = () => film.offsetTop + FILM_SCREENS * window.innerHeight;
-const heroScroll = () => film.offsetTop + film.offsetHeight - window.innerHeight;
+// The hero holds for a stretch after the film (css/style.css --hold); "skip" lands in its middle.
+const HOLD = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hold')) || 0.6;
+const heroScroll = () => film.offsetTop + (FILM_SCREENS + HOLD * 0.5) * window.innerHeight;
 
 // ---------- "Skip film": glide to the summit hero through a soft mist ----------
 // The page glides down while the world dissolves into mist; under the mist the film jumps to its
@@ -440,7 +442,23 @@ function frame(dt, time, rect) {
   shade.set('opening', openingEl, openingEl.style.visibility === 'hidden' ? 0 : Number(openingEl.style.opacity || 1));
   shade.set('gear', gearTitle, settled > 0.92 ? 1 : 0);
   shade.render(renderer, rect);
+  // The hand-over asked for a picture of this frame: copy it now, while it's still in the canvas.
+  if (snapshotTo) { takeSnapshot(snapshotTo); snapshotTo = null; }
   countFps(performance.now());
+}
+
+// ---------- A blurred picture of the last frame, for the hand-over to the page (site.js) ----------
+// Drawn once into a small canvas (a quarter of the screen's size) with a blur, then shown scaled up:
+// it looks like a soft focus pull, and costs nothing while it's on screen (no live blur filter).
+let snapshotTo = null;
+function takeSnapshot(target) {
+  const w = Math.max(2, Math.round(window.innerWidth / 4));
+  const h = Math.max(2, Math.round(window.innerHeight / 4));
+  if (target.width !== w || target.height !== h) { target.width = w; target.height = h; }
+  const ctx = target.getContext('2d');
+  ctx.filter = 'blur(5px)';
+  // A little larger than the box, so the blur never pulls in see-through edges.
+  ctx.drawImage(renderer.domElement, -6, -6, w + 12, h + 12);
 }
 
 // The film becomes a view of the shared renderer: it draws into the pinned stage's box.
@@ -464,6 +482,10 @@ window.__ascent = {
   info: () => ({ trees: forest.counts, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, textures: renderer.info.memory.textures, geometries: renderer.info.memory.geometries, build: buildTimes, warm: warmTimes.filter((w) => w[1] > 8) }),
   jump: jumpTo,
   glideToEnd,
+  // The hand-over: copy the next frame (blurred) into a canvas, and stop or restart drawing the
+  // film once the page has covered it (no point drawing what nobody can see).
+  snapshot: (canvas) => { snapshotTo = canvas; },
+  pause: (on) => { if (view.paused !== on) { view.paused = on; wake(); } },
   lenis,
   scene,
   camera,

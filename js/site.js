@@ -10,7 +10,7 @@
 // The sections below the film get their scripts (pages.js) while the visitor is still up the
 // mountain, and the 3D carousels only when they come near.
 
-import { gsap, lenis, reduceMotion, lineReveal, EASE, TIME } from './core.js';
+import { gsap, ScrollTrigger, SplitText, lenis, reduceMotion, lineReveal, EASE, TIME } from './core.js';
 
 const root = document.documentElement;
 const film = document.getElementById('film');
@@ -19,13 +19,19 @@ const opening = document.getElementById('opening');
 const heroEl = document.getElementById('hero');
 const nav = document.getElementById('site-nav');
 
-// The film is FILM_SCREENS screens of scrolling (js/world/journey.js), then one screen holding
-// the summit hero. (css/style.css sets the section's height to match: 13 + 1 + 1 screens.)
-const FILM_SCREENS = 13;
+// How the scroll is shared out, in screen heights (set once, in css/style.css): the film, then the
+// hero holding, then the summit darkening, then the work forming over it (the hand-over, part 7).
+const cssNumber = (name) => parseFloat(getComputedStyle(root).getPropertyValue(name));
+const FILM_SCREENS = cssNumber('--film') || 13;
+const HOLD = cssNumber('--hold') || 0.6;
+const DARKEN = cssNumber('--darken') || 1;
+const FORM = cssNumber('--form') || 0.9;
 let vh = window.innerHeight;
 let filmTop = film.offsetTop;
-const filmEnd = () => filmTop + FILM_SCREENS * vh;               // the last shot is reached
-const heroScroll = () => filmTop + film.offsetHeight - vh;      // the hero fully settled
+const filmEnd = () => filmTop + FILM_SCREENS * vh;                     // the last shot is reached
+const heroScroll = () => filmTop + (FILM_SCREENS + HOLD * 0.5) * vh;   // the hero, settled
+const handoverStart = () => filmTop + (FILM_SCREENS + HOLD) * vh;      // the summit starts to darken
+const workFormed = () => handoverStart() + (DARKEN + FORM) * vh;       // the work is fully formed
 window.addEventListener('resize', () => { vh = window.innerHeight; filmTop = film.offsetTop; onScroll(); });
 
 // ---------- 1. Until the world is ready: the poster, and a quiet progress line ----------
@@ -45,6 +51,7 @@ window.addEventListener('ascent:ready', (e) => {
   root.classList.add('is-live');   // the posters fade away; the live scene shows through
   hint.textContent = 'Scroll to begin the climb';
   lenis.start();
+  document.fonts.ready.then(buildHandover);
   onScroll();
 }, { once: true });
 
@@ -59,6 +66,7 @@ function loadFilm() {
     root.classList.add('no-film');
     hint.textContent = 'Scroll down';
     lenis.start();
+    ScrollTrigger.refresh();   // (the page is no longer pulled up under the film: css .no-film)
   });
 }
 const whenIdle = (fn) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 1200 }) : setTimeout(fn, 200));
@@ -123,7 +131,7 @@ heroEl.inert = true;
 // Hidden during the film; it appears with the hero (see-through over it), and turns into a soft
 // blurred bar once the hero has scrolled away.
 function updateNav(y) {
-  const below = y > heroScroll() + vh * 0.55;
+  const below = y > handoverStart() + vh * 0.5;
   nav.classList.toggle('is-shown', heroIn || y > filmEnd());
   nav.classList.toggle('is-solid', below);
 }
@@ -132,11 +140,84 @@ nav.querySelector('[data-to-top]').addEventListener('click', (e) => {
   e.preventDefault();
   lenis.scrollTo(heroScroll(), { duration: reduceMotion ? 0 : 1.6 });
 });
-// The hero's own "Scroll" link: glide to the next section.
-heroEl.querySelector('.hero__scroll').addEventListener('click', (e) => {
+// Links to the work (the hero's "Explore my work", the top bar) land where the work has fully formed,
+// not at the top of its section (where it is still forming over the summit).
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[href="#work"]');
+  if (!a || !root.classList.contains('handover')) return;
   e.preventDefault();
-  lenis.scrollTo('#services', { duration: reduceMotion ? 0 : 1.6 });
-});
+  e.stopPropagation();
+  lenis.scrollTo(workFormed(), { duration: reduceMotion ? 0 : 1.8 });
+}, true);
+
+// ---------- 7. The hand-over: from the film to the page ----------
+// Like the last shot of a film: the screen holds while the summit softly blurs and darkens into the
+// page's colour, the hero's words lift away, and the work forms in its place, line by line. Nothing
+// scrolls in. Everything is scrubbed by the scroll, so scrolling back up plays it in reverse.
+//   0 → DARKEN          (the stage is pinned) words lift, the summit blurs and dims; meanwhile the
+//                       work section rises behind it, still empty (css: .page is pulled up)
+//   DARKEN → +FORM      (the work is pinned too: js/carousels/ridge.js) its heading forms over the
+//                       dimmed summit; the summit sinks fully into the page colour, the film stops
+//                       drawing, and the ridge fades in
+function buildHandover() {
+  const blur = document.querySelector('.handover__blur');
+  const dim = document.querySelector('.handover__dim');
+  const work = document.getElementById('work');
+  const head = work.querySelector('.work__head');
+  const title = head.querySelector('.heading');
+  const lead = head.querySelector('.lead');
+  const ridgeParts = [work.querySelector('.ridge__track'), work.querySelector('.ridge__controls')];
+  root.classList.add('handover');
+  // The heading's lines, each in its own mask, ready to rise (the same reveal as every heading).
+  const lines = reduceMotion ? [] : SplitText.create(title, { type: 'lines', mask: 'lines', linesClass: 'split-line', aria: 'auto' }).lines;
+
+  const D = DARKEN, F = FORM;
+  const STOP = D + F * 0.78;   // the summit is fully covered: the film can stop drawing
+  const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
+  // The hero's words lift and go first; the altitude label with them.
+  tl.fromTo(heroEl.querySelector('.hero__inner'), { y: 0, autoAlpha: 1 }, { y: reduceMotion ? 0 : -40, autoAlpha: 0, duration: D * 0.55, ease: 'power1.in', immediateRender: false }, 0);
+  tl.fromTo(heroEl.querySelector('.hero__place'), { autoAlpha: 1 }, { autoAlpha: 0, duration: D * 0.3, immediateRender: false }, 0);
+  // The summit softens (the blurred picture fades in) and dims towards the page colour.
+  if (!reduceMotion) tl.fromTo(blur, { autoAlpha: 0 }, { autoAlpha: 1, duration: D * 0.9, ease: 'power2.out' }, 0);
+  tl.fromTo(dim, { autoAlpha: 0 }, { autoAlpha: 0.55, duration: D, ease: 'power1.inOut' }, 0);
+  // The work forms: the head appears, its heading rises line by line, then the rest.
+  tl.fromTo(head, { opacity: 0 }, { opacity: 1, duration: 0.01 }, D);
+  if (lines.length) tl.fromTo(lines, { yPercent: 125 }, { yPercent: 0, duration: F * 0.45, ease: 'power3.out', stagger: F * 0.07 }, D);
+  else tl.fromTo(title, { autoAlpha: 0 }, { autoAlpha: 1, duration: F * 0.3 }, D);
+  tl.fromTo(lead, { autoAlpha: 0, y: reduceMotion ? 0 : 14 }, { autoAlpha: 1, y: 0, duration: F * 0.35, ease: 'power2.out' }, D + F * 0.22);
+  // The summit sinks fully into the page colour, then the colour lifts off the ridge behind it.
+  tl.to(dim, { autoAlpha: 1, duration: STOP - (D + F * 0.4), ease: 'power1.inOut' }, D + F * 0.4);
+  tl.to(dim, { autoAlpha: 0, duration: D + F - STOP, ease: 'power1.out' }, STOP);
+  tl.set(blur, { autoAlpha: 0 }, STOP);   // (hidden under the full colour by then)
+  tl.fromTo(ridgeParts, { autoAlpha: 0, y: reduceMotion ? 0 : 14 }, { autoAlpha: 1, y: 0, duration: D + F - STOP, ease: 'power2.out' }, STOP);
+  tl.set({}, {}, D + F);
+
+  // On every step of the timeline (it glides a little behind the scroll, so this is checked as it
+  // moves, not only when the page scrolls):
+  let snapped = false, covered = null;
+  tl.eventCallback('onUpdate', () => {
+    const t = tl.time();
+    // Take the blurred picture as the hand-over begins (the summit, as it looks right now).
+    if (t > 0 && t < 0.25 && !snapped) { api?.snapshot(blur); snapped = true; }
+    if (t === 0) snapped = false;
+    // Once the summit is covered, the film stops drawing and the ridge may start (ridge.js).
+    const now = t >= STOP;
+    if (now !== covered) {
+      covered = now;
+      api?.pause(now);
+      root.classList.toggle('work-ready', now);
+    }
+  });
+  ScrollTrigger.create({
+    start: () => handoverStart(),
+    end: () => handoverStart() + (DARKEN + FORM) * vh,
+    // A soft catch-up (as in King's Garden), so the hand-over glides rather than ticks.
+    scrub: reduceMotion ? true : 1,
+    animation: tl,
+  });
+  // The ridge's pin now starts with the forming stretch: measure everything again.
+  ScrollTrigger.refresh();
+}
 
 // ---------- One scroll listener for all of it ----------
 // It only reads numbers it already knows (the scroll position and cached sizes), so it never

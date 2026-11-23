@@ -405,7 +405,8 @@ function initShowreel() {
 function initReveal({ core }) {
   if (reduceMotion) return;
   if (core) {
-    const headings = [...document.querySelectorAll('.page .heading')];
+    // (The work's heading is formed by the film's hand-over instead: js/site.js.)
+    const headings = [...document.querySelectorAll('.page .heading')].filter((h) => !h.closest('.work'));
     headings.forEach((h) => { h.style.opacity = '0'; });
     // Split into lines only once the real fonts have arrived: lines measured in the fallback font
     // break in the wrong places (and a too-small mask cuts the letters).
@@ -416,7 +417,7 @@ function initReveal({ core }) {
       }
     });
   }
-  const items = document.querySelectorAll('.page .lead, .svc li, .stage, .about__standfirst, .about__story, .about__chips, .about__facts, .contact__actions, .footer__brand, .footer__col, .ridge__controls' + (core ? '' : ', .page .heading'));
+  const items = document.querySelectorAll('.page section:not(.work) .lead, .svc li, .stage, .about__standfirst, .about__story, .about__chips, .about__facts, .contact__actions, .footer__brand, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (!e.isIntersecting) continue;

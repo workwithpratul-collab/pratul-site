@@ -283,6 +283,7 @@
   --hair: rgba(243, 236, 226, 0.14);       /* hairlines */
   --hair-strong: rgba(243, 236, 226, 0.32);
   --veil-night: rgba(21, 19, 42, 0.86);    /* the calm band behind text over paintings */
+  --handover: #2b2546;   /* the page's first colour (the top of --page-arc): the summit darkens into it */
 
   /* The page is one continuous gradient: the rest of the day on the mountain (DESIGN.md §1).
      Morning lilac under the hero, dusk plum at the work, night indigo by the tent. */

@@ -159,10 +159,21 @@
 .hero {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 4;
   color: var(--cream);
   outline: none;
 }
+/* Desktop: a grid with three rows (room for the top bar, the words, the altitude), so nothing can
+   ever overlap, whatever the window's height. Sizes follow the height as well as the width, so a
+   short laptop screen gets a slightly smaller headline instead of a crowded one. */
+[data-mode="film"] .hero {
+  display: grid;
+  grid-template-rows: 76px minmax(0, 1fr) auto;
+  row-gap: clamp(20px, 3.5vh, 40px);
+  padding: 0 var(--page-gutter) clamp(24px, 4.5vh, 44px);
+}
+[data-mode="film"] .hero__inner { grid-row: 2; align-self: center; position: relative; width: min(820px, 60vw); }
+[data-mode="film"] .hero__place { grid-row: 3; position: relative; left: auto; bottom: auto; justify-self: start; }
 /* The summit picture. Phones: the hero's painting. Desktop: only shown if the visitor reaches the
    hero before the live scene is ready (skipping during loading). */
 .hero__poster { position: absolute; inset: 0; background: var(--night) center / cover no-repeat; }
@@ -183,31 +194,24 @@
   transition: opacity 1.4s var(--ease-flow);
 }
 .hero-in .hero__shade, .mobile-site .hero__shade { opacity: 1; }
-.hero__inner {
-  position: absolute;
-  left: var(--page-gutter);
-  top: calc(50% + 20px);
-  transform: translateY(-50%);
-  width: min(800px, 58vw);
-}
 .hero__title {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(60px, 6.6vw, 112px);
+  font-size: clamp(56px, min(6.6vw, 11.4vh), 112px);
   line-height: var(--lh-display);
   letter-spacing: var(--track-display);
 }
 .hero__title .line { display: block; white-space: nowrap; }
 [data-mode="film"] .hero__title { opacity: 0; }   /* revealed line by line (js/site.js) */
 .hero__sub {
-  margin-top: var(--s-6);
+  margin-top: clamp(16px, 3vh, 32px);
   max-width: 38ch;
   font-size: var(--t-lead);
   line-height: 1.5;
   color: var(--lavender-light);
   text-wrap: pretty;
 }
-.hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-4) var(--s-6); margin-top: var(--s-7); }
+.hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-4) var(--s-6); margin-top: clamp(24px, 5vh, 52px); }
 .hero__reel { gap: 14px; }
 .hero__reel::before, .hero__reel::after { left: 56px; }
 .hero__play {
@@ -233,37 +237,28 @@
   border-left: 1px solid var(--amber);
   color: var(--cream);
 }
-.hero__scroll {
-  position: absolute;
-  right: var(--page-gutter);
-  bottom: var(--s-6);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  color: var(--cream);
-  font-family: var(--font-mono);
-  font-size: var(--t-label);
-  letter-spacing: var(--track-measure);
-  text-transform: uppercase;
-  text-decoration: none;
-}
-.hero__scroll .i { width: 16px; height: 16px; transition: transform var(--t-fast) var(--ease-arrive); }
-.hero__scroll:hover .i { transform: translateY(3px); }
-[data-mode="film"] .hero__sub, [data-mode="film"] .hero__actions, [data-mode="film"] .hero__place, [data-mode="film"] .hero__scroll { opacity: 0; }
+[data-mode="film"] .hero__sub, [data-mode="film"] .hero__actions, [data-mode="film"] .hero__place { opacity: 0; }
 
-/* At the hero, the bottom of the shot melts into the page below: no hard edge. */
-.stage-fade {
+/* ---------- The hand-over from the film to the page (js/site.js) ---------- */
+/* Two layers over the summit, both faded by the scroll: the blurred snapshot (a little larger, so
+   its soft edges stay off screen) and the page's own colour. Opacity only: cheap to animate. */
+.handover__blur, .handover__dim {
   position: absolute;
-  inset: auto 0 0;
-  z-index: 2;
-  height: 30vh;
-  background: linear-gradient(180deg, rgba(43, 37, 70, 0) 0%, rgba(43, 37, 70, 0.55) 55%, #2b2546 100%);
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 1.4s var(--ease-flow);
 }
-.hero-in .stage-fade { opacity: 1; }
+.handover__blur { transform: scale(1.04); }
+.handover__dim { background: var(--handover); }
+/* The page is pulled up under the film's last screens, so the work section rises (still empty)
+   behind the darkening summit and is already in place when its words form. */
+[data-mode="film"]:not(.no-film) .page { margin-top: calc(-1 * (1 + var(--form)) * 100vh); }
+/* Until the hand-over has formed it, the work's words wait unseen (js/site.js reveals them). */
+.handover .work__head, .handover .ridge__track, .handover .ridge__controls { opacity: 0; }
 
 /* ---------- Sections: shared rhythm ---------- */
 .services, .work, .process, .about, .tools, .contact { position: relative; padding-block: var(--s-9); }
@@ -418,6 +413,17 @@
 .ridge.is-3d .frame { display: none; }
 .ridge.is-3d .slide__name { font-size: var(--t-heading-sm); }
 .ridge.is-3d .ridge__controls { grid-column: 1; grid-row: 2; margin: 0 0 var(--s-6); padding: 0; position: relative; z-index: 2; }
+/* With the 3D ridge the whole section is one pinned screen: the heading row under the top bar, and
+   the ridge filling the rest (js/carousels/ridge.js pins it). */
+.work.is-pinned {
+  z-index: 5;   /* above the film's pinned stage, which it forms over during the hand-over */
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100vh;
+  height: 100svh;
+  padding: calc(76px + clamp(12px, 3vh, 32px)) 0 0;
+}
+.work.is-pinned .ridge.is-3d { height: auto; min-height: 0; }
 
 /* ---------- Process: the trail ---------- */
 .process__head {

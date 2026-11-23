@@ -187,10 +187,12 @@
           </div>
         </div>
         <p class="hero__place measure" aria-hidden="true"><span>The summit</span><span class="alt">Alt. 4,410 m</span></p>
-        <a class="hero__scroll" href="#services">Scroll<svg class="i" aria-hidden="true"><use href="#i-down"/></svg></a>
       </div>
-      <!-- At the hero, the bottom of the shot melts into the page below, so there is no hard edge. -->
-      <div class="stage-fade f-only" aria-hidden="true"></div>
+      <!-- The hand-over from the film to the page (js/site.js), as in a film's last shot: the screen
+           holds while the summit softly blurs (a one-time, quarter-size snapshot of the last frame,
+           blurred once and faded in) and darkens into the page's colour, and the work forms over it. -->
+      <canvas class="handover__blur f-only" aria-hidden="true"></canvas>
+      <div class="handover__dim f-only" aria-hidden="true"></div>
     </div>
   </section>
 

@@ -115,9 +115,13 @@ html:not(.mobile-site) .m-only { display: none !important; }
 .mobile-site #gl { display: none; }
 
 /* ---------- The film: a tall scroll section with a pinned stage ---------- */
+/* How the film's scroll is shared out, in screen heights (js/site.js reads these too):
+   the film itself, the hero holding, the summit darkening, and the work forming over it. */
+:root { --film: 13; --hold: 0.6; --darken: 1; --form: 0.9; }
 .film {
   position: relative;
-  height: 1500vh;   /* 13 screens of film + 1 + 1 screen holding the hero (js/site.js) */
+  /* the film + the hero's stretch + the one screen the stage itself fills */
+  height: calc((var(--film) + var(--hold) + var(--darken) + var(--form) + 1) * 100vh);
 }
 .mobile-site .film { height: auto; }
 .film__stage {
