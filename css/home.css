@@ -870,95 +870,119 @@
 .form-done h3 { font-family: var(--font-display); font-weight: 400; font-size: var(--t-line); line-height: 1.1; }
 .form-done p { margin-top: var(--s-3); color: var(--lavender); }
 
-/* ---------- Footer: base camp under the stars ---------- */
+/* ---------- Footer: dawn at base camp (references/round2/Footer.dc.html) ---------- */
+/* One screen: the closing line and its two buttons, a band of links, then the giant name sinking
+   behind two ridges in the first dawn glow, and the last line on the nearest ridge. Every size
+   follows the window's height as well as its width, so it fits from 720 px tall. */
 .footer {
+  --dawn-h: clamp(200px, 38vh, 360px);
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-rows: 1fr auto;
-  min-height: min(100svh, 720px);
-  padding-top: var(--s-9);
-  background: var(--deep);
-  color: var(--cream);
+  grid-template-rows: auto auto minmax(calc(var(--dawn-h) - 104px), 1fr) auto;
+  height: 100vh;
+  height: 100svh;   /* (exactly one screen, so the last line always sits on the nearest ridge) */
+  padding-top: calc(76px + clamp(16px, 4vh, 40px));
   overflow: clip;
+  background: var(--footer-dawn);
+  color: var(--cream);
 }
-.footer::before {
-  /* The page's last light fades into the footer (no straight edge), with a few faint stars. */
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 60%;
-  background:
-    radial-gradient(1px 1px at 12% 22%, var(--star) 50%, transparent 51%),
-    radial-gradient(1px 1px at 31% 12%, var(--star) 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 58% 30%, var(--star) 50%, transparent 51%),
-    radial-gradient(1px 1px at 77% 16%, var(--star) 50%, transparent 51%),
-    radial-gradient(1px 1px at 91% 34%, var(--star) 50%, transparent 51%),
-    linear-gradient(180deg, var(--night), var(--deep));
-  pointer-events: none;
-}
-.footer__top {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.6fr);
-  gap: var(--s-8);
-  align-items: start;
-}
-.footer__name { font-family: var(--font-display); font-size: clamp(56px, 6.4vw, 96px); line-height: 1.05; }
-.footer__line { margin-top: var(--s-5); max-width: 36ch; color: var(--lavender); text-wrap: pretty; }
-.footer__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-6); padding-top: var(--s-4); }
-/* Quiet spaced labels over each column (the one small-caps role on the page, like a trail map's key). */
-.footer__label {
-  margin-bottom: var(--s-4);
-  font-family: var(--font-body);
-  font-size: var(--t-label);
-  font-weight: 500;
-  letter-spacing: var(--track-measure);
+.footer__close { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--s-5) 40px; position: relative; z-index: 2; }
+.footer__kicker, .footer__label, .footer__camp {
+  font-family: var(--font-altitude);
+  font-size: 12px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--lavender-quiet);
 }
-.footer__col ul { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
-.footer a {
+.footer__kicker { color: var(--lavender); }
+.footer__title { margin-top: 14px; font-family: var(--font-display); font-weight: 400; font-size: clamp(44px, min(5vw, 8.4vh), 72px); line-height: 1.05; text-wrap: balance; }
+.footer__title em { font-style: italic; color: var(--amber); }
+.footer__ctas { display: flex; flex-wrap: wrap; gap: 14px; flex-shrink: 0; }
+.footer__ctas .btn { min-height: 56px; padding-inline: 28px; }
+.footer__ctas .btn--primary { font-weight: 600; }
+/* The second button: a hairline pill. */
+.btn--line { border: 1px solid var(--footer-line-strong); background: transparent; color: var(--cream); }
+.btn--line:hover { border-color: var(--amber); color: var(--amber); }
+.btn--line:hover .i { transform: none; }
+/* The band of links. */
+.footer__band {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+  margin-top: clamp(28px, 6vh, 64px);
+  padding-top: clamp(18px, 3vh, 28px);
+  border-top: 1px solid var(--footer-line);
+}
+.footer__label { margin-bottom: 8px; font-weight: 400; color: var(--lavender-quiet); }
+.footer__col ul { display: grid; margin: 0; padding: 0; list-style: none; }
+.footer__about { max-width: 26ch; font-size: 15px; line-height: 1.55; color: var(--lavender); }
+.footer a:not(.btn) {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 44px;
-  color: var(--cream);
-  font-size: 17px;
+  min-height: clamp(30px, 4.4vh, 40px);
+  color: var(--lavender-light);
+  font-size: 15px;
   text-decoration: none;
-  /* an amber underline that draws in from the left on hover or focus */
-  background: linear-gradient(var(--amber), var(--amber)) 0 calc(100% - 10px) / 0 1px no-repeat;
-  transition: background-size var(--t-base) var(--ease-arrive), color var(--t-fast) var(--ease-arrive);
+  transition: color var(--t-fast) var(--ease-arrive);
 }
-.footer a:hover, .footer a:focus-visible { background-size: 100% 1px; }
-/* The range rises softly out of the night as the footer arrives (js/pages/pages.js adds .is-in). */
-.footer__range { position: relative; margin-top: var(--s-8); }
-.footer__range svg { display: block; width: 100%; height: clamp(150px, 18vw, 260px); }
-.range-far, .range-mid, .range-near { transition: transform 2.2s var(--ease-arrive), opacity 2.2s var(--ease-arrive); }
-.range-far { fill: var(--range-far); }
-.range-mid { fill: var(--range-mid); transition-delay: 0.15s; }
-.range-near { fill: var(--range-near); transition-delay: 0.3s; }
-.footer:not(.is-in) .range-far { transform: translateY(30px); opacity: 0; }
-.footer:not(.is-in) .range-mid { transform: translateY(22px); opacity: 0; }
-.footer:not(.is-in) .range-near { transform: translateY(12px); opacity: 0; }
-/* The last line sits on the darkest, nearest ridge. */
-.footer__base {
+.footer a:not(.btn):hover, .footer a:not(.btn):focus-visible { color: var(--amber); }
+/* The dawn: the glow on the horizon, the giant name, and the two ridges in front of it. */
+.footer__dawn { position: absolute; inset: auto 0 0; height: var(--dawn-h); pointer-events: none; }
+.footer__glow { position: absolute; inset: 0; background: radial-gradient(50% 80% at 72% 100%, var(--footer-glow), transparent 70%); }
+.footer__word {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: max(var(--s-5), env(safe-area-inset-bottom));
+  left: max(var(--page-gutter), calc((100% - var(--content)) / 2 - 20px));
+  bottom: calc(var(--dawn-h) * 0.1);
+  font-family: var(--font-display);
+  font-size: clamp(120px, min(21vw, 29vh), 300px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--footer-word);
+  white-space: nowrap;
+  transition: transform 2.2s var(--ease-arrive);
+}
+.footer__ridges { position: absolute; inset: auto 0 0; width: 100%; height: calc(var(--dawn-h) * 0.72); transition: transform 2.2s var(--ease-arrive); }
+.ridge-back { fill: var(--footer-ridge-back); }
+.ridge-front { fill: var(--footer-ridge-front); }
+/* As the footer arrives, the name rises a little from behind the ridge (js/pages/pages.js adds .is-in). */
+.footer:not(.is-in) .footer__word { transform: translateY(18%); }
+.footer:not(.is-in) .footer__ridges { transform: translateY(6%); }
+/* The last line, on the nearest ridge. */
+.footer__base {
+  grid-row: 4;   /* (the dawn layer is positioned, so it takes no row: keep the last line in the last one) */
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--s-2) var(--s-6);
+  gap: 8px 24px;
+  padding-bottom: max(clamp(16px, 3vh, 30px), env(safe-area-inset-bottom));
+  font-size: 14px;
   color: var(--lavender);
-  font-size: 15px;
 }
-.footer__base .measure { color: var(--lavender-quiet); }
-.footer .footer__top-link { font-size: 15px; }
+.footer__camp { color: var(--lavender); }
+.footer .footer__top-link { color: var(--cream); font-size: 14px; }
 .footer__top-link .i { width: 16px; height: 16px; transition: transform var(--t-fast) var(--ease-arrive); }
 .footer__top-link:hover .i { transform: translateY(-3px); }
+/* Phones and narrow screens: everything stacks; the links in two columns. */
+@media (max-width: 900px) {
+  .footer { --dawn-h: 210px; height: auto; padding-top: var(--s-8); }
+  .footer__band { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 20px; }
+  .footer__ctas { width: 100%; flex-direction: column; }
+  .footer__ctas .btn { width: 100%; }
+  .footer__word { font-size: 32vw; bottom: calc(var(--dawn-h) * 0.4); }
+  /* the dawn scene in the flow, and the last lines below it on the nearest ridge's colour */
+  .footer__dawn { position: relative; grid-row: 3; inset: auto; height: var(--dawn-h); margin-top: var(--s-6); }
+  .footer { grid-template-rows: auto auto auto auto; }
+  .footer__base { flex-direction: column; align-items: flex-start; gap: 4px; padding-top: 4px; }
+  .footer__base::before { content: ""; position: absolute; inset: -2px calc(-1 * var(--page-gutter)) 0; z-index: -1; background: var(--footer-ridge-front); }
+  .footer a:not(.btn) { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) { .footer__word, .footer__ridges { transition: none; transform: none !important; } }
 
 /* ---------- The showreel ---------- */
 .reel {
@@ -1006,14 +1030,10 @@
   .contact__art { width: 100%; height: min(58vh, 520px); inset: 0 0 auto 0; -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 68%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 68%, transparent 100%); }
   .contact__art img { object-position: 82% 70%; }
   .contact { align-items: start; padding-top: min(50vh, 450px); }
-  .footer__top { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
-  .footer__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
   .form__row { grid-template-columns: 1fr; }
   .about__values { grid-template-columns: 1fr; gap: 18px; }
-  .footer__base { position: relative; bottom: auto; padding: var(--s-4) 0 max(var(--s-6), env(safe-area-inset-bottom)); flex-direction: column; align-items: flex-start; }
-  .footer__range svg { height: 120px; }
 }
 
 /* ---------- The phone page (no film) ---------- */

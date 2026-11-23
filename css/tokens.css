@@ -308,6 +308,15 @@
   --meter-tick: rgba(243, 236, 226, 0.6);
   --meter-quiet: rgba(243, 236, 226, 0.74);
   --meter-alt: #f6c38f;
+  /* Footer (references/round2/Footer.dc.html): night warming to dawn, the glow on the horizon (the
+     sun about to rise: a light source), the giant name, the two ridges in front of it, and hairlines. */
+  --footer-dawn: linear-gradient(180deg, #17142b 0%, #1f1834 50%, #3a2440 78%, #5a3446 100%);
+  --footer-glow: rgba(246, 160, 77, 0.45);
+  --footer-word: rgba(243, 236, 226, 0.92);
+  --footer-ridge-back: #2a2140;
+  --footer-ridge-front: #1a1630;
+  --footer-line: rgba(201, 190, 221, 0.18);
+  --footer-line-strong: rgba(201, 190, 221, 0.35);
   /* Tools (references/round2/Tools.dc.html): the plum glow behind the ribbon, the cards' face, edge
      and shadow (indigo, never black), and each tool's own colour for the soft glow on its card. */
   --tools-glow: radial-gradient(80% 60% at 50% 62%, #33264a 0%, #201a34 55%, #17142b 100%);
