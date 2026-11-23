@@ -192,7 +192,8 @@ html:not(.mobile-site) .m-only { display: none !important; }
 .opening__title .line:nth-child(2) > span { animation-delay: 0.26s; }
 .opening__lead {
   margin-top: var(--s-6);
-  max-width: 34ch;
+  max-width: 36ch;
+  text-wrap: pretty;
   font-size: var(--t-lead);
   line-height: 1.5;
   color: var(--lavender);
@@ -247,31 +248,30 @@ html:not(.mobile-site) .m-only { display: none !important; }
 
 /* ---------- Story beats along the climb ---------- */
 /* Each beat is composed into its shot (data-place); js/ui/story.js reveals it line by line. */
+/* Each beat is composed into its own shot (data-place), chosen by looking at the frames it plays
+   over: never on the trekker, a landmark, the moon or the sun, and never the same spot twice in a
+   row. Nothing sits behind the words: the scene itself darkens softly there (js/world/shade.js),
+   plus a very soft shadow. The words stay cream in every light. */
 .moment {
   position: absolute;
-  max-width: min(560px, 44vw);
+  max-width: min(520px, 40vw);
   opacity: 0;
   visibility: hidden;
-  text-shadow: 0 1px 2px rgba(21, 19, 42, 0.45), 0 2px 30px rgba(21, 19, 42, 0.55);
+  color: var(--cream);
+  text-shadow: 0 1px 18px rgba(21, 19, 42, 0.35);
 }
-.moment[data-place="left-high"] { left: var(--page-gutter); top: 15vh; }
-.moment[data-place="left-sky"]  { left: var(--page-gutter); top: 13vh; max-width: min(520px, 40vw); }
-/* A soft pool of shade behind the words, so they read over trees, grass or bright sky alike. At
-   night it's the deep indigo; by day it's the world's own mist (--mist, set by film.js), and the
-   words switch to the day ink. Never a box: a wide, soft-edged ellipse. */
-.moment::before, .gear-ui__title::before {
-  content: "";
-  position: absolute;
-  inset: -90px -140px -90px -160px;
-  z-index: -1;
-  background: radial-gradient(closest-side, rgba(21, 19, 42, 0.5), transparent);
-  transition: background 1.2s var(--ease-flow);
-}
-.is-day .moment--day::before, .is-day .gear-ui__title::before {
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--mist) 88%, transparent), transparent);
-}
-.is-day .moment--day, .is-day .gear-ui__title { color: var(--ink-day); text-shadow: none; }
-.is-day .moment--day .moment__text, .is-day .gear-ui__title .moment__text { color: var(--ink-day); }
+/* Base camp, leaving the tent: top right, over the dark trees. The camera turns here, so the
+   trekker crosses the left of the frame and the moon rises on the left; the right stays clear. */
+.moment[data-place="right-high"] { right: var(--page-gutter); top: 14vh; text-align: right; }
+.moment[data-place="right-high"] .moment__text { margin-left: auto; }
+/* The ridge opens out: top left, over the valley's far slope (the trekker and the lake are lower). */
+.moment[data-place="left-high"] { left: var(--page-gutter); top: 14vh; }
+/* The meadow's first light: centred in the open sky, above the trail. */
+.moment[data-place="sky-centre"] { left: 50%; top: 11vh; width: min(640px, 52vw); max-width: none; translate: -50% 0; text-align: center; }
+.moment[data-place="sky-centre"] .moment__text { margin-inline: auto; }
+/* Through the flowers: low left, above the altitude meter, clear of the gear mat. */
+.moment[data-place="low-left"] { left: var(--page-gutter); bottom: max(25vh, 190px); }
+.gear-ui__title { color: var(--cream); text-shadow: 0 1px 18px rgba(21, 19, 42, 0.35); }
 .moment__line {
   font-family: var(--font-display);
   font-weight: 400;
@@ -286,7 +286,7 @@ html:not(.mobile-site) .m-only { display: none !important; }
   max-width: 40ch;
   font-size: var(--t-body);
   line-height: var(--lh-body);
-  color: var(--lavender);
+  color: var(--lavender-light);
   text-wrap: pretty;
 }
 

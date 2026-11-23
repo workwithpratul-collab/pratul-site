@@ -27,6 +27,7 @@ import { createAltitudeMeter } from './ui/altitude.js';
 import { WIND } from './world/glsl.js';
 import { createGear } from './world/gear.js';
 import { createStory } from './ui/story.js';
+import { createShade } from './world/shade.js';
 import { createCampUI } from './ui/camp-ui.js';
 import { createGearUI } from './ui/gear-ui.js';
 import { veil, mistColour } from './ui/veil.js';
@@ -282,7 +283,11 @@ function placeTrekker(s, dt, stops) {
 }
 
 // ---------- Story, camps, gear check ----------
-const story = createStory({ reduceMotion });
+// The words' soft shade: the scene darkens a little right behind whatever text is showing.
+const shade = createShade();
+const story = createStory({ reduceMotion, shade });
+const openingEl = document.getElementById('opening');
+const gearTitle = document.querySelector('.gear-ui__title');
 const campUI = createCampUI({ camps, defs: CAMPS, camera, cameraPath, reduceMotion, getProgress: () => scroll.progress });
 const gearUI = createGearUI({ gear, camera, lenis, reduceMotion, onHover: (id) => trekker.lookAt(id ? gear.centres[id] : null) });
 
@@ -431,6 +436,10 @@ function frame(dt, time, rect) {
   trekker.update(dt, time);
 
   renderer.render(scene, camera);
+  // Then the shade behind the words on screen (the opening title, a story beat, the gear check).
+  shade.set('opening', openingEl, openingEl.style.visibility === 'hidden' ? 0 : Number(openingEl.style.opacity || 1));
+  shade.set('gear', gearTitle, settled > 0.92 ? 1 : 0);
+  shade.render(renderer, rect);
   countFps(performance.now());
 }
 

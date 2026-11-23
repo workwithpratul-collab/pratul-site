@@ -8,7 +8,9 @@
 
 import { gsap, lineReveal, reduceMotion, EASE } from '../core.js';
 
-export function createStory() {
+// shade (optional): the scene's soft darkening behind words (js/world/shade.js); each beat tells it
+// where it is and how visible it is right now.
+export function createStory({ shade = null } = {}) {
   const moments = [...document.querySelectorAll('.moment')].map((el) => ({
     el, from: Number(el.dataset.from), to: Number(el.dataset.to), on: false, tl: null,
   }));
@@ -40,11 +42,13 @@ export function createStory() {
 
   // p = film progress. Only acts when a beat enters or leaves its stretch.
   function update(p) {
-    for (const m of moments) {
+    moments.forEach((m, i) => {
       const inside = p >= m.from && p <= m.to;
       if (inside && !m.on) show(m);
       else if (!inside && m.on) hide(m);
-    }
+      // (opacity is read from GSAP's own record of it: no layout work)
+      if (shade) shade.set('moment' + i, m.el, Number(gsap.getProperty(m.el, 'opacity')) || 0);
+    });
   }
   return { update };
 }

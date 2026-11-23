@@ -59,6 +59,9 @@ export const PRESETS = {
       snowLit: '#9eaee4', snowShade: '#4a5898', snowWarmth: 0,
     },
     character: { level: 0.42, tint: '#c4cdf2' },
+    // The soft darkening the scene gets behind the film's words (shade.js): this scene's deep
+    // colour (Rule 2: navy at night, lilac by sunrise), never black. strength = how much at the centre.
+    textShade: { color: '#070b26', strength: 0.5 },
   },
 
   // ---------- 2. PRE-DAWN: the ridge. Indigo fading to violet, the first hint of rose. ----------
@@ -86,6 +89,7 @@ export const PRESETS = {
       snowLit: '#9eaee4', snowShade: '#4a5898', snowWarmth: 0,
     },
     character: { level: 0.52, tint: '#ddd2ea' },
+    textShade: { color: '#121741', strength: 0.55 },
   },
 
   // ---------- 3. FIRST LIGHT: the meadow. Soft lilac and peach sky, pale gold light on the grass. ----------
@@ -113,6 +117,7 @@ export const PRESETS = {
       snowLit: '#fff0dd', snowShade: '#a7aad2', snowWarmth: 0.55,
     },
     character: { level: 0.82, tint: '#fbe9e2' },
+    textShade: { color: '#2e2856', strength: 0.66 },
   },
 
   // ---------- 4. SUNRISE: the summit. Warm gold and rose, a sea of clouds glowing below. ----------
@@ -141,6 +146,7 @@ export const PRESETS = {
       snowLit: '#ffe2c4', snowShade: '#9c8bc2', snowWarmth: 1,
     },
     character: { level: 0.95, tint: '#fff0e4' },
+    textShade: { color: '#272140', strength: 0.62 },
   },
 };
 
