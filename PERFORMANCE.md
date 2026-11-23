@@ -63,3 +63,21 @@ In order of how much each one hurts:
 ## What was fixed
 
 (Filled in as the parts land.)
+
+## Feedback round (Nov 23): before and after
+
+Measured the same way on both versions (local gzip server, Chrome 157 with the real graphics card,
+1440 x 900, one scroll step per frame), two runs each. "Before" is commit `4432539` (Part 9).
+
+| What | Before | After |
+|---|---|---|
+| Film frame time, median / p95 | 7.2-7.3 ms / 12.1-12.9 ms | 7.1-7.2 ms / 11.6-12.2 ms |
+| Sections below the film, median / p95 | 6.9-7.0 ms / 8.1-8.2 ms | 6.9 ms / 8.2-8.3 ms |
+| Sections below the film, worst frame | 164-173 ms | 113-116 ms (the WebGL lanterns are gone) |
+| Boot to the live film | 4.4-4.8 s, 819-1008 ms blocking | 4.8-5.0 s, 973-983 ms blocking (within run-to-run noise) |
+| JS on desktop (after the film is ready) | 595 KB | 611 KB (process.js, tools.js; the ridge now loads at idle) |
+| Phone page: JS / fonts / images | 11 / 65 / 65 KB | 16 / 67 / 134 KB (the project cards' screenshots, lazy) |
+
+New costs, all small: the film's text shade is one see-through quad, drawn only while words show; the
+hand-over's blur is one quarter-size snapshot taken once; the film stops drawing once the page covers
+it. The Process trail and the Tools loop are plain HTML/CSS transforms that run only on screen.

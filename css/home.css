@@ -1186,8 +1186,13 @@
 /* The thin progress line at the very top while scrolling (js/mobile/mobile.js). */
 .m-progress { position: fixed; inset: 0 0 auto; z-index: 40; height: 2px; background: var(--m-peach); transform: scaleX(var(--p, 0)); transform-origin: left; pointer-events: none; }
 
+/* Phones: taps answer at once (no double-tap zoom wait), with our own pressed states instead of the grey flash. */
+.mobile-site a, .mobile-site button, .mobile-site select { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.field select option { background: var(--m-navy); color: var(--cream); }
+
 @media (prefers-reduced-motion: reduce) {
   .mobile-site .hero__poster::after { animation: none; }
+  .process__mist, .trail-lantern__halo { animation: none; }
   .mobile-site .hero__title .line, .mobile-site .hero__sub, .mobile-site .hero__actions { animation: none; }
   .reveal { transition-duration: 0.3s; transform: none; }
   .svc__gear img { transition-duration: 0.3s; transform: none; }

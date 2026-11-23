@@ -134,6 +134,15 @@
         ],
         "createdAt": "2026-11-19T11:42:05.600Z",
         "reason": "Brief (Tools, phone) explicitly asks for a gentle auto-scrolling logo marquee that pauses on touch"
+      },
+      {
+        "rule": "radial-spotlight-glow",
+        "value": "loop__glow",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-11-23T07:11:21.401Z",
+        "reason": "Claude: the soft amber light behind the tool in focus is the lantern the Tools thesis names; CLAUDE.md rule 3 (warm means light) allows warm light from lanterns"
       }
     ]
   }

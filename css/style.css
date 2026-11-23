@@ -16,6 +16,7 @@ html {
   color-scheme: dark;
   scrollbar-color: var(--dusk) var(--deep);   /* a thin indigo scrollbar, not the browser's grey */
   -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 84px;   /* keyboard focus never lands under the fixed top bar */
 }
 body {
   background: var(--night);
