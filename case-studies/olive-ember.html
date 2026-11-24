@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Which version this device gets (js/device.js): phones get the mobile styles below. -->
+  <script src="../js/device.js" data-preload="false"></script>
+  <title>Olive &amp; Ember · Mediterranean restaurant concept · Pratul</title>
+  <meta name="description" content="Olive &amp; Ember, a concept website for a Mediterranean restaurant: warm editorial design, a menu to linger over, and a table request form.">
+  <meta name="theme-color" content="#070b1a">
+  <!-- TODO(Pratul): replace SITE_URL with your domain. -->
+  <link rel="canonical" href="https://SITE_URL/case-studies/olive-ember.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Pratul">
+  <meta property="og:title" content="Olive &amp; Ember · a concept by Pratul">
+  <meta property="og:description" content="Olive &amp; Ember, a concept website for a Mediterranean restaurant: warm editorial design, a menu to linger over, and a table request form.">
+  <meta property="og:url" content="https://SITE_URL/case-studies/olive-ember.html">
+  <meta property="og:image" content="https://SITE_URL/assets/work/olive-ember-1.webp">
+  <meta property="og:image:alt" content="The Olive &amp; Ember home page: &quot;A little warmth, a lot of flavour.&quot; beside a grilled octopus dish by a wood-fired oven.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://SITE_URL/assets/work/olive-ember-1.webp">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <!-- Self-hosted fonts (css/tokens.css). Only the headline face is fetched early. -->
+  <link rel="preload" href="../assets/fonts/instrument-serif-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../assets/fonts/manrope-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages.css">
+  <link rel="stylesheet" href="../css/mobile.css">
+</head>
+<body class="case-page">
+  <!-- The mist the page dissolved into clears as this page appears (js/case.js). -->
+  <div id="veil" class="veil" aria-hidden="true"></div>
+
+  <!-- This project is in the Work section only (not on the film's trail), so "back" goes to Work. -->
+  <header class="case-top">
+    <a class="skip-link" href="../index.html#work" data-back>
+      <svg class="skip-link__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M10.5 6h-8M5.5 2.5 2 6l3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to the work
+    </a>
+    <a class="site-nav__name" href="../index.html">Pratul</a>
+  </header>
+
+  <main class="case">
+    <header class="case-hero">
+      <p class="case-hero__meta project-label">
+        <span class="project-label__name">Mediterranean restaurant</span>
+        <span class="project-label__type">2026</span>
+        <span class="project-label__tag">Concept</span>
+      </p>
+      <h1>Olive &amp; Ember</h1>
+      <p class="case-hero__lead">A concept website for a premium neighbourhood Mediterranean restaurant. The restaurant is fictional, and the site says so.</p>
+    </header>
+
+    <section class="case-block" aria-labelledby="h-problem">
+      <h2 id="h-problem">The business and its problem</h2>
+      <div class="case-block__body">
+        <p>A warm, refined neighbourhood restaurant.</p>
+        <p>It needed to feel premium but welcoming online, and turn that feeling into reservation requests.</p>
+      </div>
+    </section>
+
+    <section class="case-block" aria-labelledby="h-idea">
+      <h2 id="h-idea">My idea</h2>
+      <div class="case-block__body"><p>An editorial, magazine-like site in warm ivory, deep olive and terracotta, where every section leads back to one thing: reserving a table.</p></div>
+    </section>
+
+    <!-- A still of the home page, shown whole (no recording exists for this project). -->
+    <figure class="browser" aria-labelledby="h-home">
+      <div class="browser__bar" aria-hidden="true">
+        <span class="browser__dots"><i></i><i></i><i></i></span>
+        <span class="browser__url">Olive &amp; Ember · concept</span>
+      </div>
+      <div class="browser__screen browser__screen--still">
+        <img src="../assets/work/olive-ember-1.webp" srcset="../assets/work/olive-ember-1-800.webp 800w, ../assets/work/olive-ember-1.webp 1440w" sizes="(min-width: 1100px) 1000px, 100vw" width="1440" height="900" alt="The Olive &amp; Ember home page: the headline &quot;A little warmth, a lot of flavour.&quot;, a Reserve a Table button, and a grilled octopus dish by a wood-fired oven.">
+      </div>
+      <figcaption class="visually-hidden" id="h-home">The Olive &amp; Ember home page on a laptop.</figcaption>
+    </figure>
+
+    <section class="case-block" aria-labelledby="h-built">
+      <h2 id="h-built">What I built</h2>
+      <div class="case-block__body">
+        <p>One page, in plain HTML, CSS and JavaScript.</p>
+        <p>A header with the wordmark and a Reserve a Table button, the hero, the restaurant's story, a menu in three courses, a reservation request form, a gallery of eight photographs, the address and opening hours, and the footer. It works from small phones up, with a menu button that folds the navigation away on narrow screens.</p>
+      </div>
+    </section>
+
+    <section class="case-block" aria-labelledby="h-decisions">
+      <h2 id="h-decisions">Key decisions</h2>
+      <div class="case-block__body">
+        <!-- TODO(Pratul): written from the project's code and plan; check they say it the way you would. -->
+        <ol class="case-decisions">
+          <li><strong>One clear next step</strong><span>"Reserve a Table" sits in the header and again in the hero, and the gallery closes with "Join us at the table", so the way to book is never far away.</span></li>
+          <li><strong>Type and colour that feel like a good menu</strong><span>Bodoni Moda headlines with a terracotta italic word, Cormorant Garamond for the wordmark and dish names, DM Sans for reading; warm ivory, deep olive, terracotta and sandstone.</span></li>
+          <li><strong>A menu that reads like one</strong><span>Small plates, from the flame, something sweet: each dish with its name, one line on what's in it, and its price.</span></li>
+          <li><strong>An honest booking form</strong><span>It checks the details in the browser (no past dates, no time that has already gone today) and says plainly that it is a demo: no real table is booked. The address and opening hours are marked as samples too.</span></li>
+          <li><strong>Calm, accessible details</strong><span>Sections fade up gently as they arrive, and not at all for visitors who ask for less motion; visible focus outlines, labelled form fields, and Escape closes the phone menu.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="case-block" aria-labelledby="h-stills">
+      <h2 id="h-stills">Stills</h2>
+      <div class="gallery">
+        <figure><img src="../assets/work/olive-ember-2-800.webp" srcset="../assets/work/olive-ember-2-800.webp 800w, ../assets/work/olive-ember-2.webp 1440w" sizes="(min-width: 860px) 30vw, 100vw" width="1440" height="900" loading="lazy" alt="The menu: a shakshuka-style dish beside &quot;Begin with a little something.&quot; and three small plates with their prices."></figure>
+        <figure><img src="../assets/work/olive-ember-3-800.webp" srcset="../assets/work/olive-ember-3-800.webp 800w, ../assets/work/olive-ember-3.webp 1440w" sizes="(min-width: 860px) 30vw, 100vw" width="1440" height="900" loading="lazy" alt="The gallery, &quot;Life around our table.&quot;: a sea-view terrace, grilled seafood, the dining room, burrata, pasta and a cocktail."></figure>
+        <figure><img src="../assets/work/olive-ember-4-800.webp" srcset="../assets/work/olive-ember-4-800.webp 800w, ../assets/work/olive-ember-4.webp 1440w" sizes="(min-width: 860px) 30vw, 100vw" width="1440" height="900" loading="lazy" alt="&quot;Your table is waiting.&quot; beside the reservation request form: name, email, date, time, guests and special requests."></figure>
+      </div>
+    </section>
+
+    <section class="case-block" aria-labelledby="h-phone">
+      <h2 id="h-phone">On a phone</h2>
+      <figure class="case-phone">
+        <img src="../assets/work/olive-ember-phone.webp" width="780" height="1688" loading="lazy" alt="The Olive &amp; Ember home page on a phone: the wordmark and menu button, the headline, Reserve a Table and Explore Our Menu, and the octopus dish below.">
+      </figure>
+    </section>
+
+    <nav class="case-actions" aria-label="Project">
+      <!-- TODO(Pratul): when Olive & Ember is live, add a "View live site" button here (as on the other case studies). -->
+      <a class="skip-link" href="../index.html#work" data-back>Back to the work</a>
+      <a class="case-next" href="dermae.html"><span>Next project</span><strong>DERMAÉ</strong></a>
+    </nav>
+  </main>
+
+  <footer class="footer footer--case">
+    <div class="footer__brand">
+      <p class="footer__name">Pratul</p>
+      <p class="footer__line">I build websites that stand out, for businesses that refuse to blend in.</p>
+    </div>
+    <nav class="footer__links" aria-label="Footer">
+      <a href="../index.html#work">Work</a>
+      <a href="../index.html#process">Process</a>
+      <a href="../index.html#about">About</a>
+      <a href="../index.html#contact">Contact</a>
+      <a href="https://github.com/workwithpratul-collab" rel="me noopener" target="_blank">GitHub</a>
+    </nav>
+    <a class="btn btn--primary btn--small" href="../index.html#contact">Book a call<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <p class="footer__small">© 2026 Pratul.</p>
+  </footer>
+  <script type="module" src="../js/case.js"></script>
+</body>
+</html>

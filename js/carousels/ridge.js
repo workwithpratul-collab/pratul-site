@@ -1,6 +1,6 @@
 // ridge.js: "the prayer-flag ridge", the selected-work carousel (desktop only). DESIGN.md §6.
 //
-// The three projects hang as framed browser panels along a curved mountain ridge at dusk, with
+// The projects hang as framed browser panels along a curved mountain ridge at dusk, with
 // strings of prayer flags between them. Scrolling walks the camera along the ridge (the section is
 // held on screen while you scroll, GSAP ScrollTrigger). The panel in front is sharp and lit by a
 // warm lantern; the others fall back into soft focus and the evening haze, like a film camera
@@ -41,7 +41,10 @@ export async function createRidge({ root, slides, core, onChange }) {
     new THREE.Vector3(4.6, 0.9, 0.5),
     new THREE.Vector3(9.5, 1.5, -2.2),
   ]);
-  const AT = [0.27, 0.5, 0.73];   // where the three panels hang on it
+  // Where the panels hang on it: spread evenly around the middle of the curve. Three panels sat
+  // 0.23 apart; with more, they move a little closer so the walk stays the same calm length per panel.
+  const gap = Math.min(0.23, 0.6 / Math.max(slides.length - 1, 1));
+  const AT = slides.map((_, i) => 0.5 + (i - (slides.length - 1) / 2) * gap);
 
   // ---------- The painted ridges: three soft layers, paler with distance ----------
   scene.add(ridgeLayer({ y: -1.6, z: -12, amp: 2.4, colour: C.layers[0], snow: true, seed: 3 }));
@@ -147,7 +150,7 @@ export async function createRidge({ root, slides, core, onChange }) {
 
   // ---------- Scroll walks the ridge ----------
   // The whole work section (heading and ridge, one screen) is pinned while you scroll: 0.85 of a
-  // screen per panel, 0 = first panel, 2 = last.
+  // screen per panel, 0 = first panel, last = the last one.
   let target = 0, shown = 0, index = 0;
   const last = panels.length - 1;
   const section = root.closest('.work');

@@ -548,6 +548,7 @@ html:not(.mobile-site) .m-only { display: none !important; }
    screen the video is small, and a button on top would hide part of it. */
 .mobile-site .browser__screen { aspect-ratio: auto; display: grid; }
 .mobile-site .browser__screen video { position: static; width: 100%; height: auto; aspect-ratio: 1888 / 908; }
+.mobile-site .browser__screen--still img { position: static; width: 100%; height: auto; aspect-ratio: 16 / 10; }
 .mobile-site .browser__play { position: static; justify-self: center; min-height: var(--tap); margin: var(--space-3) 0; }
 .mobile-site .browser__play[hidden] { display: none; }
 .mobile-site .case-actions { gap: var(--space-4); }

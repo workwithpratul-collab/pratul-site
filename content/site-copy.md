@@ -67,3 +67,9 @@ I work with businesses worldwide, from India to anywhere.
 - **The business:** a branding and signage agency
 - **What it needed:** to show how a project goes from idea to finished hoarding
 - **The highlight:** a scroll film that walks through a real client job, step by step
+
+### Olive & Ember (concept, Work section only, not in the film)
+- **The business:** a premium neighbourhood Mediterranean restaurant (fictional; the site says so)
+- **What it needed:** to feel premium but welcoming online, and turn that into reservation requests
+- **The highlight:** warm editorial design, a menu in three courses, and a demo table request form
+- Card line: "A warm, editorial restaurant site with a menu to linger over and a table request form."

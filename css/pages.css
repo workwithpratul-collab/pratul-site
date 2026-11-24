@@ -756,6 +756,12 @@
 .browser__screen { position: relative; aspect-ratio: 1888 / 908; background: var(--page); }
 .browser__screen video, .browser__screen img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .browser__play { position: absolute; right: var(--space-4); bottom: var(--space-4); }
+/* A still screenshot instead of a recording: the frame takes the screenshot's own 16:10 shape, so it
+   is shown whole, never cropped. */
+.browser__screen--still { aspect-ratio: 16 / 10; }
+/* A phone view: the screenshot in a slim rounded phone outline, centred in its column. */
+.case-phone { margin: 0; justify-self: center; width: min(300px, 100%); padding: 8px; border-radius: 34px; background: var(--surface); outline: var(--hairline) solid var(--line-soft); }
+.case-phone img { display: block; width: 100%; height: auto; border-radius: 27px; }
 @media (max-width: 860px) { .browser { width: 100%; } .case-block { grid-template-columns: 1fr; gap: var(--space-4); } }
 .gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
 .gallery figure { margin: 0; }
