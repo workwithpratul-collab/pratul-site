@@ -90,6 +90,8 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] Services, first visit only: the very first time a browser draws the sequence (empty graphics-shader cache), about 7 frames stutter (up to ~230 ms) while the graphics driver compiles its shaders; every later pass, and every later visit, runs at 144 fps with no frame over 14 ms (PERFORMANCE.md). Pre-warming was tried and didn't help; worth a look on a weaker laptop.
 - [ ] Services: windows narrower than 1100 px (a small desktop window) get the calm list instead of the sequence, because the scaled stage's words would be too small to read.
 - [ ] Services on phones: still the three cards; the phone version of the exploded website is to be designed later.
+- [x] Fix: Tools has no "Hover to pause" label or pause button. The ribbon still glides to a stop under the mouse, and while it has keyboard focus (it is one Tab stop, with an amber ring); still and flat under reduce motion.
+- [ ] Tools on touch screens: with the button gone there is no way to pause the drift by touch (WCAG 2.2.2 asks for one on content that moves for over 5 s). A tap-to-pause could be added silently if wanted.
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.

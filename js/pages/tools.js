@@ -24,11 +24,10 @@ export function initTools() {
   const root = document.querySelector('[data-ribbon]');
   if (!root) return;
   const track = root.querySelector('.ribbon__track');
-  const pauseBtn = document.querySelector('[data-ribbon-pause]');
   const originals = [...track.children];
   if (reduceMotion) {
     root.classList.add('is-still');
-    pauseBtn.closest('.ribbon__hint').hidden = true;
+    root.removeAttribute('tabindex');   // (nothing moves, so nothing to pause)
     return;
   }
   // The second set: copies, for the loop.
@@ -92,18 +91,14 @@ export function initTools() {
   new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; setRunning(); }, { rootMargin: '10% 0px' }).observe(root);
   document.addEventListener('visibilitychange', setRunning);
 
-  // Pausing: while the pointer is over it, or with the button (which keyboard and touch can use too).
-  let hovering = false, held = false;
-  const update = () => { want = hovering || held ? 0 : 1; };
+  // Pausing, with no button or label: while the mouse is over the ribbon, or while it has keyboard
+  // focus (it's one Tab stop). Either one glides it to a stop; leaving lets it drift on again.
+  let hovering = false, focused = false;
+  const update = () => { want = hovering || focused ? 0 : 1; };
   root.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { hovering = true; update(); } });
   root.addEventListener('pointerleave', () => { hovering = false; update(); });
-  pauseBtn.addEventListener('click', () => {
-    held = !held;
-    pauseBtn.setAttribute('aria-pressed', String(held));
-    pauseBtn.querySelector('use').setAttribute('href', held ? '#i-play' : '#i-pause');
-    pauseBtn.querySelector('.ribbon__pause-label').textContent = held ? 'Play the tools' : 'Pause the tools';
-    update();
-  });
+  root.addEventListener('focus', () => { focused = true; update(); });
+  root.addEventListener('blur', () => { focused = false; update(); });
 
   root.classList.add('is-live');
   let lastW = window.innerWidth;

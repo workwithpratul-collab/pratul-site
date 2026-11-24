@@ -221,7 +221,6 @@
     <symbol id="s-tent" viewBox="0 0 200 60"><path fill="var(--m-plum)" d="M0 60 L50 44 L90 50 L140 40 L200 48 L200 60Z"/><path fill="var(--m-peach)" d="M104 58 L132 26 L160 58Z"/><path fill="var(--m-cream)" opacity=".85" d="M126 58 L132 40 L138 58Z"/><path stroke="var(--m-navy)" stroke-width="1.2" fill="none" d="M132 26 L132 58M118 58 L132 26"/></symbol>
     <symbol id="i-left" viewBox="0 0 24 24"><path d="M20 12H4M10 6l-6 6 6 6"/></symbol>
     <symbol id="i-right" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
-    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 7v10M15 7v10"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M9 7v10l8-5z"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
     <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7 12 13l8.5-6"/></symbol>
@@ -695,8 +694,10 @@
         <li>Next.js: Fast, search-friendly sites.</li>
         <li>Tailwind: Consistent styling at speed.</li>
       </ul>
-      <div class="ribbon" data-ribbon aria-hidden="true">
-        <div class="ribbon__stage">
+      <!-- One focus stop for the keyboard: focusing the ribbon pauses it, like hovering (js/pages/tools.js).
+           Screen readers get the list above instead of the moving cards. -->
+      <div class="ribbon" data-ribbon tabindex="0" role="group" aria-label="The tools, drifting past (focus to pause)">
+        <div class="ribbon__stage" aria-hidden="true">
           <ul class="ribbon__track" role="presentation">
             <li class="ribbon__card" data-tool="html">
               <span class="ribbon__glow"></span>
@@ -743,12 +744,6 @@
           </ul>
         </div>
       </div>
-      <p class="ribbon__hint">
-        <button class="ribbon__pause" type="button" aria-pressed="false" data-ribbon-pause>
-          <svg class="i" aria-hidden="true"><use href="#i-pause"/></svg><span class="ribbon__pause-label">Pause the tools</span>
-        </button>
-        <span class="ribbon__hover" aria-hidden="true">Hover to pause</span>
-      </p>
     </section>
 
     <!-- ========== CONTACT: back at camp ========== -->

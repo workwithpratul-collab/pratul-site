@@ -969,13 +969,12 @@
 .quote__name { margin-top: var(--s-5); color: var(--lavender); }
 
 /* ---------- Tools: the lanterns I carry (js/pages/tools.js, references/round2/Tools.dc.html) ---------- */
-/* One screen: the heading centred at the top, the ribbon of cards below it, and a quiet pause line at
-   the foot. The cards' size follows the window's height as well as its width, so it fits at 720 px. */
+/* One screen: the heading centred at the top, the ribbon of cards below it. The cards' size follows the window's height as well as its width, so it fits at 720 px. */
 .tools {
   --card-w: clamp(150px, min(14.6vw, 23.5vh), 210px);
   --card-h: calc(var(--card-w) * 1.524);
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
   min-height: 100vh;
   min-height: 100svh;
   padding-block: calc(76px + clamp(12px, 3vh, 40px)) clamp(16px, 3vh, 30px);
@@ -1032,23 +1031,8 @@
 .ribbon__card[data-tool="nextjs"] { --tool: var(--tool-next); }
 .ribbon__card[data-tool="tailwind"] { --tool: var(--tool-tailwind); }
 /* The foot: a pause button (keyboard and touch) and the quiet hover hint. */
-.ribbon__hint { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: clamp(4px, 1.4vh, 16px); font-family: var(--font-altitude); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--lavender-quiet); }
-.ribbon__pause {
-  display: inline-grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--hair-strong);
-  border-radius: 50%;
-  background: transparent;
-  color: var(--cream);
-  transition: border-color var(--t-fast) var(--ease-arrive), color var(--t-fast) var(--ease-arrive);
-}
-.ribbon__pause:hover { border-color: var(--amber); color: var(--amber); }
-.ribbon__pause .i { width: 16px; height: 16px; }
-.ribbon__pause-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.ribbon__hint[hidden] { display: none; }   /* (nothing to pause under "reduce motion") */
-@media (hover: none) { .ribbon__hover { display: none; } }
+/* Keyboard focus (it pauses the drift): a ring inside the ribbon, clear of its faded edges. */
+.ribbon:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; border-radius: 12px; }
 /* Reduce motion: a still, flat row of every tool (it wraps on narrow screens). */
 .ribbon.is-still { height: auto; -webkit-mask-image: none; mask-image: none; }
 .ribbon.is-still .ribbon__stage, .ribbon.is-still .ribbon__track { position: static; }
