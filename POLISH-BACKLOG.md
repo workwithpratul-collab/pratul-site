@@ -20,6 +20,9 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] Phase 7 check: open the mobile page on your own phone (and a friend's Android), scroll the whole climb, play with the gear check and the demos, and send the form; then open the site on a laptop and confirm the film.
 - [ ] Services: the old list rows opened the contact form with that need ticked; the new design has no click on the services. Decide whether each layer's words should link to the form.
 
+- [ ] Olive & Ember: add its live address to the case study when it is deployed (TODO(Pratul) in case-studies/olive-ember.html), and check its "Key decisions" read the way you would say them.
+- [ ] The nursery and agency case studies now show only "YEAR · Concept" above the heading (the category moved into the name). Replace YEAR as before; Olive & Ember shows 2026 (from its Git history).
+
 ## CLAUDE CODE: the world
 - [x] Summit climb looks plain: smooth lilac snow, rock only as soft bands, big bland dome in the final shot.
 - [x] Big pale, smooth hillside with sparse trees behind THE KING'S GARDEN and between camps.
@@ -96,6 +99,15 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Fix: the gear check items are no longer links (clicking one used to skip the whole film to #services). Each is a focusable target with its name and line as its accessible name: hover and Tab show the same label and lift the item, the cursor stays an arrow, click and Enter do nothing.
 - [x] Fix: new section order, desktop and phone: hero, Services, Work, Process, About, Tools, Contact, footer. The film's hand-over now forms the Services heading over the dimmed summit, then the Services stage (its glow, the small website, Skip) fades in around it; the exploded-website sequence starts exactly where the forming ends (one held section, no second pin). Work is now an ordinary pinned ridge. "Explore my work", the top bar and the footer land on the right sections, and so does arriving from a case study with #work, #services, #process, #about or #contact (it used to fall short once the ridge's pin arrived). Reduced motion and narrow windows: the calm Services list holds its heading in place while it forms.
 - [x] Fix: "Services" is in the top bar on desktop too, first: Services, Work, Process, About, Book a call. The phone menu follows the same order (then Contact, Book a call, the social links), each line still arriving a beat after the one above.
+
+- [x] Polish 1: every project is labelled "Concept" (no "Pitch demo" left in the film, Work, case studies, meta tags or style guide).
+- [x] Polish 2: King's Garden shows as "Plant nursery" and Trinetra as "Advertising & branding agency" in all text (film captions, Work, case studies, titles, meta and alt text); DERMAÉ and all screenshots unchanged.
+- [x] Polish 3: Olive & Ember is the fourth Work project (card, 3D ridge panel, case study with stills and a phone view, screenshots as .webp in assets/work/); the Work intro says "Four concepts". It is not in the film.
+- [x] Polish 4: "All of this. One website." sits lower (clear of the top bar) and larger (84 px); checked at 1440x900, 1366x768 and 1536x864.
+- [x] Polish 5: the film starts sooner (3.0-3.2 s instead of 3.6-4.6 s on this laptop, 2.7-2.9 s when cool) and appears without the old stutter; before and after in PERFORMANCE.md.
+- [ ] Film start is still 2.7-3.1 s on this laptop, not the 2.5 s target: ~0.8 s of building base camp and ~0.6 s for the graphics driver to prepare the trekker's cel-shaded shaders remain. Next ideas: build the forest in a worker, or a simpler trekker shader for the first seconds.
+- [ ] While loading (under the poster), preparing the trekker holds the page for up to ~0.6-0.8 s in one go (about the same as before); Skip and the menu don't answer during it.
+- [ ] The later zones finish preparing in the background ~2-3 s after the film appears; a visitor who scrolls very fast in the first seconds gets a short mist while they finish (the same mist as a fast drag).
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.
