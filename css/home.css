@@ -594,10 +594,15 @@
 /* The words: the heading at the top, then one service at a time beside its layer. */
 .svx__head, .svx__end { position: absolute; left: 0; right: 0; top: 78px; text-align: center; pointer-events: none; }
 .svx__head .heading, .svx__end-title { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 72px; line-height: 1.06; }
+/* The closing line sits lower and a little larger than the heading: well clear of the top bar, in the
+   open space above the folded website, so it reads as the sequence's last word. (Stage pixels: the
+   whole stage is scaled to the window.) */
+.svx__end { top: 150px; }
+.svx__end-title { font-size: 84px; }
 .svx__end-title em { font-style: italic; color: var(--amber); }
 .svx__intro { margin: 16px auto 0; max-width: 680px; font-size: 18px; line-height: 1.6; color: var(--lavender); }
 .svx__end { opacity: 0; }
-.svx__end-line { margin: 14px 0 0; font-size: 18px; line-height: 1.6; color: var(--lavender); }
+.svx__end-line { margin: 18px 0 0; font-size: 19px; line-height: 1.6; color: var(--lavender); }
 .svx__list { margin: 0; padding: 0; list-style: none; }
 .svx__focus { position: absolute; top: 50%; width: 400px; opacity: 0; pointer-events: none; transform: translateY(-50%); }
 .svx__focus[data-side="left"] { left: 110px; text-align: left; }
