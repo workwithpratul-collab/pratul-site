@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Altitude meter</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Manrope:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 900px; height: 500px; position: relative; overflow: hidden; font-family: Manrope, sans-serif; color: #F3ECE2; background: linear-gradient(180deg, #4E4A8A 0%, #5B6A86 55%, #4E6A66 100%)">
+  <svg width="900" height="500" viewBox="0 0 900 500" style="position: absolute; inset: 0" aria-hidden="true">
+    <polygon points="0,300 180,230 360,280 560,200 760,260 900,220 900,500 0,500" fill="#4A6461"></polygon>
+    <polygon points="0,380 300,330 600,370 900,320 900,500 0,500" fill="#3E5755"></polygon>
+  </svg>
+  <div style="position: absolute; left: 0; bottom: 0; width: 520px; height: 260px; background: radial-gradient(70% 80% at 0% 100%, rgba(23,20,43,0.55), rgba(23,20,43,0))"></div>
+
+  <div style="position: absolute; left: 48px; bottom: 44px; display: flex; gap: 18px; align-items: flex-end">
+    <div style="position: relative; width: 2px; height: 140px; background: rgba(243,236,226,0.25); border-radius: 1px">
+      <div style="position: absolute; left: 0; bottom: 0; width: 2px; height: 82px; background: #F6A04D; border-radius: 1px"></div>
+      <div style="position: absolute; left: -5px; bottom: 78px; width: 12px; height: 2px; background: #F6A04D"></div>
+      <div style="position: absolute; left: -3px; top: 0; width: 8px; height: 1px; background: rgba(243,236,226,0.6)"></div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px; padding-bottom: 2px">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em; color: rgba(243,236,226,0.7)">NOW</div>
+      <div style="font-family: 'Instrument Serif', serif; font-size: 30px; line-height: 1">The ridge</div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.12em; color: #F6C38F">ALT. 3,240 M</div>
+      <div style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: rgba(243,236,226,0.6)">SUMMIT 4,410 M · 1,170 M TO GO</div>
+    </div>
+  </div>
+
+  <div style="position: absolute; right: 40px; top: 40px; width: 300px; padding: 18px 20px; border-radius: 14px; background: rgba(23,20,43,0.6); font-size: 14px; line-height: 1.55; color: #E4DAEE">
+    <div style="font-weight: 600; color: #F3ECE2; margin-bottom: 6px">What changes</div>
+    One stacked label instead of three overlapping ones. The place name crossfades as you climb; the summit target sits quietly underneath.
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":900,"height":500}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

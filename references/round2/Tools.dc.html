@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tools: curved drifting ribbon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Manrope:wght@400;500;700;800&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1440px; height: 810px; position: relative; overflow: hidden; font-family: Manrope, sans-serif; color: #F3ECE2; background: radial-gradient(80% 60% at 50% 62%, #33264A 0%, #201A34 55%, #17142B 100%)">
+  <div style="position: absolute; left: 0; right: 0; top: 72px; text-align: center">
+    <h2 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 72px; line-height: 1.08">The lanterns I <span style="font-style: italic; color: #F6A04D">carry.</span></h2>
+    <p style="margin: 14px auto 0; font-size: 18px; line-height: 1.6; color: #C9BEDD; max-width: 560px">The tools I build with, chosen for speed, polish, and sites that stay easy to look after.</p>
+  </div>
+
+  <div onMouseEnter="{{pause}}" onMouseLeave="{{resume}}" style="position: absolute; left: 0; right: 0; top: 280px; height: 470px; perspective: 1100px; -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%)">
+    <sc-for list="{{cards}}" as="c" hint-placeholder-count="14">
+      <div style="{{c.style}}">
+        <div style="{{c.glow}}"></div>
+        <div style="position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box; padding: 26px 24px">
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: rgba(243,236,226,0.6)">{{c.num}}</span>
+          <span style="{{c.markStyle}}">{{c.mark}}</span>
+          <div>
+            <div style="font-family: 'Instrument Serif', serif; font-size: 30px; line-height: 1.1">{{c.name}}</div>
+            <div style="font-size: 13px; line-height: 1.5; color: #C9BEDD; margin-top: 6px">{{c.desc}}</div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="position: absolute; left: 0; right: 0; bottom: 30px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em; color: #9C90B8">HOVER TO PAUSE</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":810}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { off: 0, paused: false }; }
+  componentDidMount(){
+    this.t = setInterval(() => { if (!this.state.paused) this.setState({ off: this.state.off + 0.6 }); }, 16);
+  }
+  componentWillUnmount(){ clearInterval(this.t); }
+  renderVals() {
+    const tools = [
+      { name: 'HTML', mark: 'HTML5', color: '#E86A3A', desc: 'Clean, accessible structure.' },
+      { name: 'CSS', mark: 'CSS3', color: '#4C8FE0', desc: 'Layouts that hold up everywhere.' },
+      { name: 'JavaScript', mark: 'JS', color: '#E8C93A', desc: 'Interactions that feel alive.' },
+      { name: 'GSAP', mark: 'GSAP', color: '#7BE36B', desc: 'Smooth, carefully timed motion.' },
+      { name: 'React', mark: 'React', color: '#5ED3F3', desc: 'Interfaces from reusable parts.' },
+      { name: 'Next.js', mark: 'N', color: '#F3ECE2', desc: 'Fast, search-friendly sites.' },
+      { name: 'Tailwind', mark: 'tw', color: '#38BDF8', desc: 'Consistent styling at speed.' }
+    ];
+    const list = tools.concat(tools);
+    const W = 210, GAP = 26, step = W + GAP, total = list.length * step, cx = 720, half = 760;
+    const cards = list.map((t, k) => {
+      let x = ((k * step - this.state.off) % total + total) % total - total / 2 + cx;
+      const tt = Math.max(-1, Math.min(1, (x - cx) / half));
+      const rot = -tt * 34, scale = 1 + Math.pow(Math.abs(tt), 1.6) * 0.28, z = Math.abs(tt) * 120;
+      return { ...t, num: '0' + ((k % tools.length) + 1),
+        style: `position:absolute;left:${x - W/2}px;top:40px;width:${W}px;height:320px;border-radius:20px;overflow:hidden;background:linear-gradient(165deg,#3A2E52 0%,#231C38 70%);border:1px solid rgba(201,190,221,0.16);box-shadow:0 30px 60px rgba(0,0,0,0.4);transform:translateZ(${z}px) rotateY(${rot}deg) scale(${scale});transform-origin:50% 50%`,
+        glow: `position:absolute;inset:0;background:radial-gradient(90% 60% at 50% 40%, ${t.color}33, transparent 70%)`,
+        markStyle: `align-self:center;font-weight:800;font-size:44px;letter-spacing:-0.02em;color:${t.color}`
+      };
+    });
+    return { cards, pause: () => this.setState({ paused: true }), resume: () => this.setState({ paused: false }) };
+  }
+}
+</script>
+</body>
+</html>

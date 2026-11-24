@@ -14,3 +14,13 @@ ehthumbs.db
 
 # Test screenshots (Phase 7 device checks): kept on disk, not in Git.
 tests/
+
+# Full-size source files: kept on this computer, not on GitHub. The site only uses the
+# smaller .webp versions made from them.
+assets/originals/
+assets/redesign/*.png
+assets/redesign/about-photo.jpg
+references/mockups/
+
+# The design checker's private cache (rebuilt on its own).
+.impeccable/hook.cache.json
