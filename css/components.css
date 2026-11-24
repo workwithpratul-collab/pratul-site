@@ -148,6 +148,8 @@
   background: var(--ink-faint);
   vertical-align: middle;
 }
+/* (No dot when the label starts with it: the project's name is already the heading.) */
+.project-label__type:first-child::before { display: none; }
 .project-label__tag {
   padding: 1px var(--space-2);
   border: var(--hairline) solid rgba(255, 184, 119, 0.45);

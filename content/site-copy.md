@@ -56,12 +56,14 @@ I work with businesses worldwide, from India to anywhere.
 - **What it needed:** to feel luxurious and trustworthy, so people feel safe booking
 - **The highlight:** a soft colour palette and a smooth scroll film that feels like a luxury advert
 
-### The King's Garden (concept)
+### Plant nursery (concept)
+(The King's Garden project. On the site it is only ever called "Plant nursery".)
 - **The business:** a plant nursery that sells plants and styles spaces
 - **What it needed:** to show buyers how plants are grown, cared for and delivered, so they trust ordering online
 - **The highlight:** a cinematic film of the nursery's work and 360° plants you can explore
 
-### Trinetra (concept)
+### Advertising & branding agency (concept)
+(The Trinetra project. On the site it is only ever called "Advertising & branding agency".)
 - **The business:** a branding and signage agency
 - **What it needed:** to show how a project goes from idea to finished hoarding
 - **The highlight:** a scroll film that walks through a real client job, step by step
