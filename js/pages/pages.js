@@ -358,8 +358,10 @@ function initShowreel() {
 function initReveal({ core }) {
   if (reduceMotion) return;
   if (core) {
-    // (The work's heading is formed by the film's hand-over instead: js/site.js.)
-    const headings = [...document.querySelectorAll('.page .heading')].filter((h) => !h.closest('.work'));
+    // (The Services heading is formed by the film's hand-over instead: js/site.js. Without the live
+    // film, .no-film, there is no hand-over, so it arrives like every other heading.)
+    const formed = !document.documentElement.classList.contains('no-film');
+    const headings = [...document.querySelectorAll('.page .heading')].filter((h) => !(formed && h.id === 'services-title'));
     headings.forEach((h) => { h.style.opacity = '0'; });
     // Split into lines only once the real fonts have arrived: lines measured in the fallback font
     // break in the wrong places (and a too-small mask cuts the letters).
@@ -370,7 +372,7 @@ function initReveal({ core }) {
       }
     });
   }
-  const items = document.querySelectorAll('.page section:not(.work) .lead, .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__values, .contact__actions, .footer__close, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
+  const items = document.querySelectorAll('.page section .lead, .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__values, .contact__actions, .footer__close, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (!e.isIntersecting) continue;

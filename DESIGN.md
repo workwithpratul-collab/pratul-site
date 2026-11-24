@@ -14,8 +14,8 @@ little later in the light, until the contact section is back at a glowing tent u
 |---|---|---|
 | Film | the climb | night → pre-dawn → first light → sunrise |
 | Hero | the summit | sunrise: navy sky, peach horizon, lavender cloud sea |
-| Work | the prayer-flag ridge | the summit darkens and blurs, and the ridge forms out of it: the work is the first thing after the hero (proof first). The one warm panel is lit by lanterns |
-| Services | above the clouds | cool lilac |
+| Services | above the clouds | the summit darkens and blurs, and Services forms out of it: what I build is the first thing after the hero. Cool lilac |
+| Work | the prayer-flag ridge | dusk on the ridge: the one warm panel is lit by lanterns |
 | Process | the trail down | evening, the ridge line glows as it draws |
 | About | a rest on the way | late golden light on the portrait |
 | Tools | lanterns at the summit | night, lanterns are the only warm light |
@@ -51,8 +51,8 @@ before dawn, with a soft blend at the top of each section instead of identical f
 | Section | Tone |
 |---|---|
 | Hero | the live summit at sunrise (phones: the summit painting) |
-| Work | Midnight `#17142B` (the summit sinks into it during the hand-over); the ridge's dusk melts into the next tone |
-| Services | `#1C1832`, the page colour behind it (Services' own rules are untouched) |
+| Services | the summit sinks into Midnight `#17142B` during the hand-over, then its stage glow rises (`--svx-bg`) and settles into `#1C1832` at its foot |
+| Work | Midnight `#17142B`; the ridge's dusk melts into the next tone |
 | Process | `#221C38`: the evening sky warms to a plum horizon behind the range |
 | About | a plum glow (`#3A2747`) behind the portrait, settling to indigo |
 | Tools | Indigo with a plum glow under the ribbon |
@@ -145,7 +145,7 @@ that simply shows the end state (or a 300ms fade).
 |---|---|---|
 | Film | Each text beat is composed into its shot (never over the trekker, a landmark or the sun) and set line by line with SplitText. | DOM text, transform/opacity only |
 | Hero | **Hero ambience** (ThreeUI Background-style): lavender and amber motes drift slowly through the summit air, behind the text side kept faint. Clouds drift, the flag waves, the trekker breathes. Laid out on a three-row grid (top bar, words, altitude), sized by width and height, so nothing overlaps from 1280x720 up. | one instanced points draw, shader-driven; idle frame < 4 ms |
-| Hand-over | **The last shot holds**: the screen stays pinned while the summit softly blurs and dims into the page colour, the hero's words lift away, and the work's heading forms line by line over it; then the ridge fades in. Nothing scrolls in. Scroll lengths live in css/style.css (--hold, --darken, --form). | the blur is one quarter-size snapshot blurred once and faded by opacity; the film stops drawing once covered |
+| Hand-over | **The last shot holds**: the screen stays pinned while the summit softly blurs and dims into the page colour, the hero's words lift away, and the Services heading forms line by line over it; then the Services stage (its glow, the small website) fades in around it, and its own sequence begins. Nothing scrolls in. Scroll lengths live in css/style.css (--hold, --darken, --form). | the blur is one quarter-size snapshot blurred once and faded by opacity; the film stops drawing once covered |
 | Services | **The exploded website** (references/services-explode/): an 8-screen held section. A small tilted example site (the made-up "Aurel" studio, labelled as an example) grows, splits into five solid layers (Film, Interaction, Layout, Commerce, Code), and each in turn comes to the front, turns flat and plays its small demo beside its service and gear picture (left, right, left...); the others drop to 6% and blur. They fold back together under "All of this. One website." A quiet Skip link; reduced motion and windows under 1100 px get the five services as a calm list. | CSS 3D transforms and opacity (plus the receding layers' blur), one scrubbed ScrollTrigger; will-change only while held; phones keep their three cards |
 | Work | **The prayer-flag ridge**: framed project panels hang along a curved ridge at dusk; scrolling dollies the camera along it, the front panel lit warm and sharp, the rest racked out of focus into fog. | the shared renderer; blur is a pre-blurred texture mix, not post-processing |
 | Process | **The evening trail** (pinned, references/round2/Main.dc.html): one screen holds while scrolling draws an amber trail up an evening range (far ridge with snow, near slope, mist). Five checkpoints are round markers with Phosphor icons (Understand MagnifyingGlass, Explore Compass, Build Code, Launch RocketLaunch, Refine Sparkle). States: done = amber ring, title and a short line; current = filled amber with a soft glow, "STEP N OF 5" and the full description; ahead = dim lavender ring, title only. Each label sits beside its own checkpoint on the side away from the trail; after layout every label is measured against the drawn line and its neighbours and nudged clear (14 px). Desktop: a 16:9 box fitted to the window, sized in container units. Phones: the trail zig-zags up the left and the words sit in one column on the right; the gaps either side of the current step open up to fit its description. | CSS sticky; desktop progress from ScrollTrigger, label reveal with GSAP; phones: no library, rAF only while on screen. Checked by script at 10 sizes x 5 steps: no overlaps. Reduced motion: scroll still walks it, nothing drifts |
@@ -209,7 +209,7 @@ capitals, peach) appears on phones only, above the hero and each section heading
 it; desktop keeps the no-eyebrow rule.
 
 ### Layout (phone)
-One column, 16 px side gutter, sections separated by `--s-8`. Order: hero, work, services, process,
+One column, 16 px side gutter, sections separated by `--s-8`. Order: hero, services, work, process,
 about, tools, contact, footer.
 
 - **Top bar:** the peaks mark and "Pratul" left, a three-line menu button right (44 px). No button in

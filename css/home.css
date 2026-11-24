@@ -259,11 +259,13 @@
 }
 .handover__blur { transform: scale(1.04); }
 .handover__dim { background: var(--handover); }
-/* The page is pulled up under the film's last screens, so the work section rises (still empty)
-   behind the darkening summit and is already in place when its words form. */
+/* The page is pulled up under the film's last screens, so the Services section rises (still unseen)
+   over the darkening summit and is already in place when its heading forms. */
 [data-mode="film"]:not(.no-film) .page { margin-top: calc(-1 * (1 + var(--form)) * 100vh); }
-/* Until the hand-over has formed it, the work's words wait unseen (js/site.js reveals them). */
-.handover .work__head, .handover .ridge__track, .handover .ridge__controls { opacity: 0; }
+/* Until the hand-over has formed it, Services waits unseen (js/site.js reveals it): its heading rises
+   over the dimmed summit, then the rest fades in through --svx-in. */
+.handover .svx__head .heading, .handover .svx__intro { opacity: 0; }
+.handover .svx { --svx-in: 0; }
 
 /* ---------- Sections: shared rhythm ---------- */
 .services, .work, .process, .about, .tools, .contact { position: relative; padding-block: var(--s-9); }
@@ -292,15 +294,26 @@
    script), so every size below is the design's pixel size and the proportions always match it.
    Only transforms and opacity change while you scroll: nothing here re-lays out the page. */
 [data-mode="film"] .services { padding-block: 0; }
-.svx { position: relative; z-index: 2; height: 800vh; }
+/* (z-index 5: above the film's pinned stage, which Services forms over during the hand-over) */
+.svx { position: relative; z-index: 5; height: 800vh; }
+/* With the film, the section first holds for the hand-over's forming stretch (--form screens, while
+   its heading rises over the summit), then for the 7 screens of the sequence. */
+[data-mode="film"]:not(.no-film) .svx { height: calc((8 + var(--form)) * 100vh); }
 .svx__pin {
   position: sticky;
   top: 0;
   height: 100vh;
   overflow: hidden;
-  /* (its last strip settles into the Services tone, the colour Process rises out of: no seam) */
+}
+/* The stage's own colour, on a layer of its own so the hand-over can fade it in over the summit.
+   (Its last strip settles into the Services tone, the colour Work's ridge rises out of: no seam.) */
+.svx__bg {
+  position: absolute;
+  inset: 0;
   background: linear-gradient(180deg, transparent 86%, var(--tone-services)), var(--svx-bg);
 }
+/* Everything but the heading arrives once the summit is covered (--svx-in, js/site.js). */
+.svx__bg, .svx__3d, .svx__list { opacity: var(--svx-in, 1); }
 .svx__stage {
   position: absolute;
   left: 50%;
@@ -608,6 +621,7 @@
   font-size: 14px;
   color: var(--lavender-quiet);
   text-decoration: none;
+  filter: opacity(var(--svx-in, 1));   /* (its own opacity belongs to .is-done) */
   transition: color var(--t-fast) var(--ease-arrive), opacity 0.4s var(--ease-arrive), visibility 0s;
 }
 .svx__skip .i { width: 14px; height: 14px; }
@@ -618,11 +632,16 @@
 /* "Reduce motion", or a desktop window too narrow for the stage (its words would shrink below a
    comfortable size): no hold, no 3D. The heading, then the five services as a calm list. */
 @media (prefers-reduced-motion: reduce), (max-width: 1099px) {
-  .svx { height: auto; }
+  .svx, [data-mode="film"]:not(.no-film) .svx { height: auto; }
   .svx__pin { position: static; height: auto; overflow: visible; padding: calc(76px + var(--s-7)) 0 var(--s-9); }
-  .svx__stage { position: static; width: min(100% - 2 * var(--page-gutter), var(--content)); height: auto; margin: 0 auto; transform: none; }
+  /* (relative: so its words paint above the stage colour, .svx__bg) */
+  .svx__stage { position: relative; left: auto; top: auto; width: min(100% - 2 * var(--page-gutter), var(--content)); height: auto; margin: 0 auto; transform: none; }
   .svx__3d, .svx__end, .svx__skip { display: none; }
-  .svx__head { position: static; text-align: left; pointer-events: auto; }
+  /* The heading sits where it always does; after the film it holds there (sticky) for the hand-over's
+     forming stretch, then the list follows straight beneath it. */
+  .svx__head { position: sticky; top: calc(76px + var(--s-7)); text-align: left; pointer-events: auto; }
+  /* (a spacer, not padding: a sticky element only travels inside its parent's content) */
+  [data-mode="film"]:not(.no-film) .svx__headwrap::after { content: ""; display: block; height: calc(var(--form) * 100vh); }
   .svx__head .heading { font-size: var(--t-heading); }
   .svx__intro { margin-left: 0; }
   .svx__list { margin-top: var(--s-7); border-bottom: 1px solid var(--hair); }
@@ -720,7 +739,7 @@
 /* With the 3D ridge the whole section is one pinned screen: the heading row under the top bar, and
    the ridge filling the rest (js/carousels/ridge.js pins it). */
 .work.is-pinned {
-  z-index: 5;   /* above the film's pinned stage, which it forms over during the hand-over */
+  z-index: 5;   /* above the shared 3D canvas and the film's stage */
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   height: 100vh;

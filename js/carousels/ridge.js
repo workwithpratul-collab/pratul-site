@@ -146,27 +146,24 @@ export async function createRidge({ root, slides, core, onChange }) {
   }
 
   // ---------- Scroll walks the ridge ----------
-  // The whole work section (heading and ridge, one screen) is pinned while you scroll. With the
-  // film's hand-over (js/site.js), the pin starts with a short stretch where the section forms over
-  // the dimmed summit; then the walk: 0.85 of a screen per panel, 0 = first panel, 2 = last.
+  // The whole work section (heading and ridge, one screen) is pinned while you scroll: 0.85 of a
+  // screen per panel, 0 = first panel, 2 = last.
   let target = 0, shown = 0, index = 0;
   const last = panels.length - 1;
   const section = root.closest('.work');
   const html = document.documentElement;
-  const formLength = () => (html.classList.contains('handover')
-    ? (parseFloat(getComputedStyle(html).getPropertyValue('--form')) || 0) * window.innerHeight : 0);
   const walkLength = () => window.innerHeight * 0.85 * last;
   root.classList.add('is-3d');
   section.classList.add('is-pinned');
   const st = ScrollTrigger.create({
     trigger: section,
     start: 'top top',
-    end: () => `+=${formLength() + walkLength()}`,
+    end: () => `+=${walkLength()}`,
     pin: true,
     pinSpacing: true,
     invalidateOnRefresh: true,
     onUpdate: (self) => {
-      const walked = self.progress * (self.end - self.start) - formLength();
+      const walked = self.progress * (self.end - self.start);
       target = Math.min(Math.max(walked / walkLength(), 0), 1) * last;
     },
   });
@@ -175,7 +172,7 @@ export async function createRidge({ root, slides, core, onChange }) {
   // Arrows, keys and the counter move the page to the matching point of the walk.
   function goTo(i) {
     i = Math.max(0, Math.min(last, i));
-    const y = st.start + formLength() + (i / last) * walkLength();
+    const y = st.start + (i / last) * walkLength();
     lenis.scrollTo(y, { duration: reduceMotion ? 0 : 1.3, easing: (t) => 1 - Math.pow(1 - t, 3) });
   }
 
@@ -189,7 +186,8 @@ export async function createRidge({ root, slides, core, onChange }) {
 
   // ---------- Every frame (only while on screen) ----------
   function frame(dt, time, rect) {
-    // During the film's hand-over the ridge waits, unseen, until the summit has been covered.
+    // While the film is still drawing (the hand-over hasn't covered the summit yet), the ridge waits:
+    // they share the canvas.
     if (html.classList.contains('handover') && !html.classList.contains('work-ready')) return;
     if (!paused && !reduceMotion) idle += dt;
     flags.material.uniforms.uTime.value = idle;

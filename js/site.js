@@ -20,7 +20,7 @@ const heroEl = document.getElementById('hero');
 const nav = document.getElementById('site-nav');
 
 // How the scroll is shared out, in screen heights (set once, in css/style.css): the film, then the
-// hero holding, then the summit darkening, then the work forming over it (the hand-over, part 7).
+// hero holding, then the summit darkening, then Services forming over it (the hand-over, part 7).
 const cssNumber = (name) => parseFloat(getComputedStyle(root).getPropertyValue(name));
 const FILM_SCREENS = cssNumber('--film') || 13;
 const HOLD = cssNumber('--hold') || 0.6;
@@ -31,7 +31,7 @@ let filmTop = film.offsetTop;
 const filmEnd = () => filmTop + FILM_SCREENS * vh;                     // the last shot is reached
 const heroScroll = () => filmTop + (FILM_SCREENS + HOLD * 0.5) * vh;   // the hero, settled
 const handoverStart = () => filmTop + (FILM_SCREENS + HOLD) * vh;      // the summit starts to darken
-const workFormed = () => handoverStart() + (DARKEN + FORM) * vh;       // the work is fully formed
+const servicesFormed = () => handoverStart() + (DARKEN + FORM) * vh;   // Services has fully formed
 window.addEventListener('resize', () => { vh = window.innerHeight; filmTop = film.offsetTop; onScroll(); });
 
 // ---------- 1. Until the world is ready: the poster, and a quiet progress line ----------
@@ -148,33 +148,48 @@ for (const a of document.querySelectorAll('[data-to-top]')) {
     lenis.scrollTo(heroScroll(), { duration: reduceMotion ? 0 : 2.2, force: true });
   });
 }
-// Links to the work (the hero's "Explore my work", the top bar) land where the work has fully formed,
-// not at the top of its section (where it is still forming over the summit).
+// Links to Services (the top bar, the footer) land where its heading has fully formed: the first
+// frame of its sequence. Links to the work (the hero's "Explore my work", the top bar, the footer)
+// land at the start of its pinned ridge, where its heading and first project show. (Numbers, not the
+// elements: Lenis would also subtract the page's scroll-padding, and a pinned section's own top
+// moves while it's pinned.) stopPropagation: Lenis's own # link handler, on the window, would
+// otherwise replace these scrolls.
+function landingFor(hash) {
+  if (hash === '#services') return servicesFormed();
+  if (hash === '#work') {
+    const work = document.getElementById('work');
+    const pin = ScrollTrigger.getAll().find((t) => t.pin === work);
+    return pin ? pin.start : work.getBoundingClientRect().top + lenis.scroll;
+  }
+  return null;
+}
 document.addEventListener('click', (e) => {
-  const a = e.target.closest('a[href="#work"]');
+  // (not Services' own Skip link, which points at #work only as its no-script fallback)
+  const a = e.target.closest('a[href="#services"], a[href="#work"]:not([data-svx-skip])');
   if (!a || !root.classList.contains('handover')) return;
+  const y = landingFor(a.getAttribute('href'));
   e.preventDefault();
   e.stopPropagation();
-  lenis.scrollTo(workFormed(), { duration: reduceMotion ? 0 : 1.8 });
+  lenis.scrollTo(y, { duration: reduceMotion ? 0 : 1.8 });
 }, true);
 
 // ---------- 7. The hand-over: from the film to the page ----------
 // Like the last shot of a film: the screen holds while the summit softly blurs and darkens into the
-// page's colour, the hero's words lift away, and the work forms in its place, line by line. Nothing
-// scrolls in. Everything is scrubbed by the scroll, so scrolling back up plays it in reverse.
-//   0 → DARKEN          (the stage is pinned) words lift, the summit blurs and dims; meanwhile the
-//                       work section rises behind it, still empty (css: .page is pulled up)
-//   DARKEN → +FORM      (the work is pinned too: js/carousels/ridge.js) its heading forms over the
-//                       dimmed summit; the summit sinks fully into the page colour, the film stops
-//                       drawing, and the ridge fades in
+// page's colour, the hero's words lift away, and Services forms in its place: its heading rises line
+// by line, then its stage comes up around it. Nothing scrolls in. Everything is scrubbed by the
+// scroll, so scrolling back up plays it in reverse.
+//   0 → DARKEN          (the film's stage is pinned) words lift, the summit blurs and dims; meanwhile
+//                       the Services section rises over it, still unseen (css: .page is pulled up)
+//   DARKEN → +FORM      (Services holds too: its stage is sticky, and its own sequence waits for this
+//                       stretch, js/pages/services.js) its heading forms over the dimmed summit; the
+//                       summit sinks fully into the page colour, the film stops drawing, and the
+//                       Services stage (its colour, the small website, the intro) fades in around it
 function buildHandover() {
   const blur = document.querySelector('.handover__blur');
   const dim = document.querySelector('.handover__dim');
-  const work = document.getElementById('work');
-  const head = work.querySelector('.work__head');
-  const title = head.querySelector('.heading');
-  const lead = head.querySelector('.lead');
-  const ridgeParts = [work.querySelector('.ridge__track'), work.querySelector('.ridge__controls')];
+  const services = document.querySelector('[data-svx]');
+  const title = document.getElementById('services-title');
+  const intro = services.querySelector('.svx__intro');
   root.classList.add('handover');
   // The heading's lines, each in its own mask, ready to rise (the same reveal as every heading).
   const lines = reduceMotion ? [] : SplitText.create(title, { type: 'lines', mask: 'lines', linesClass: 'split-line', aria: 'auto' }).lines;
@@ -191,16 +206,16 @@ function buildHandover() {
   // The summit softens (the blurred picture fades in) and dims towards the page colour.
   if (!reduceMotion) tl.fromTo(blur, { autoAlpha: 0 }, { autoAlpha: 1, duration: D * 0.9, ease: 'power2.out' }, 0);
   tl.fromTo(dim, { autoAlpha: 0 }, { autoAlpha: 0.55, duration: D, ease: 'power1.inOut' }, 0);
-  // The work forms: the head appears, its heading rises line by line, then the rest.
-  tl.fromTo(head, { opacity: 0 }, { opacity: 1, duration: 0.01 }, D);
+  // Services forms: its heading rises line by line over the dimmed summit, then the line beneath.
+  tl.fromTo(title, { opacity: 0 }, { opacity: 1, duration: 0.01 }, D);
   if (lines.length) tl.fromTo(lines, { yPercent: 125 }, { yPercent: 0, duration: F * 0.45, ease: 'power3.out', stagger: F * 0.07 }, D);
   else tl.fromTo(title, { autoAlpha: 0 }, { autoAlpha: 1, duration: F * 0.3 }, D);
-  tl.fromTo(lead, { autoAlpha: 0, y: reduceMotion ? 0 : 14 }, { autoAlpha: 1, y: 0, duration: F * 0.35, ease: 'power2.out' }, D + F * 0.22);
-  // The summit sinks fully into the page colour, then the colour lifts off the ridge behind it.
+  tl.fromTo(intro, { autoAlpha: 0, y: reduceMotion ? 0 : 14 }, { autoAlpha: 1, y: 0, duration: F * 0.35, ease: 'power2.out' }, D + F * 0.22);
+  // The summit sinks fully into the page colour, and stays covered.
   tl.to(dim, { autoAlpha: 1, duration: STOP - (D + F * 0.4), ease: 'power1.inOut' }, D + F * 0.4);
-  tl.to(dim, { autoAlpha: 0, duration: D + F - STOP, ease: 'power1.out' }, STOP);
   tl.set(blur, { autoAlpha: 0 }, STOP);   // (hidden under the full colour by then)
-  tl.fromTo(ridgeParts, { autoAlpha: 0, y: reduceMotion ? 0 : 14 }, { autoAlpha: 1, y: 0, duration: D + F - STOP, ease: 'power2.out' }, STOP);
+  // Then the Services stage comes up around the heading: its glow, the small website and Skip.
+  tl.fromTo(services, { '--svx-in': 0 }, { '--svx-in': 1, duration: D + F - STOP, ease: 'power2.out' }, STOP);
   tl.set({}, {}, D + F);
 
   // On every frame (cheap: two comparisons), from where the timeline actually is. Not in a callback:
@@ -211,7 +226,8 @@ function buildHandover() {
     // Take the blurred picture as the hand-over begins (the summit, as it looks right now).
     if (t > 0 && t < 0.25 && !snapped) { api?.snapshot(blur); snapped = true; }
     if (t === 0) snapped = false;
-    // Once the summit is covered, the film stops drawing and the ridge may start (ridge.js).
+    // Once the summit is covered, the film stops drawing, and the work's 3D ridge may use the
+    // shared canvas when it's reached (.work-ready, js/carousels/ridge.js).
     const now = t >= STOP;
     if (now !== covered) {
       covered = now;
@@ -221,12 +237,11 @@ function buildHandover() {
   });
   ScrollTrigger.create({
     start: () => handoverStart(),
-    end: () => handoverStart() + (DARKEN + FORM) * vh,
+    end: () => servicesFormed(),
     // A soft catch-up (as in King's Garden), so the hand-over glides rather than ticks.
     scrub: reduceMotion ? true : 1,
     animation: tl,
   });
-  // The ridge's pin now starts with the forming stretch: measure everything again.
   ScrollTrigger.refresh();
 }
 
@@ -249,5 +264,21 @@ onScroll();
 // (#work, #contact) from another page should still land in the right place.
 if (location.hash && location.hash !== '#hero' && !new URLSearchParams(location.search).get('return')) {
   const target = document.querySelector(location.hash);
-  if (target) requestAnimationFrame(() => { lenis.start(); lenis.scrollTo(target, { immediate: true, offset: -72 }); });
+  // (#services and #work: the same landing points as the links above)
+  // (lenis.resize: Lenis measures the page length itself, a moment late; without it the last sections
+  // would be clamped to the old, shorter page)
+  const land = () => { lenis.resize(); lenis.scrollTo(landingFor(location.hash) ?? target, { immediate: true, force: true, offset: landingFor(location.hash) === null ? -72 : 0 }); };
+  if (target) {
+    requestAnimationFrame(() => { lenis.start(); land(); });
+    // The work's 3D ridge arrives a little later and its pin adds scroll length above the sections
+    // after it, which would leave us short of #process, #about or #contact. So each time the page is
+    // re-measured, land again, until the visitor moves for themselves.
+    let waiting = true;
+    const stop = () => { waiting = false; };
+    for (const type of ['wheel', 'pointerdown', 'keydown', 'touchstart']) window.addEventListener(type, stop, { once: true, passive: true });
+    setTimeout(stop, 20000);
+    ScrollTrigger.addEventListener('refresh', () => { if (waiting) land(); });
+    // (and whenever the page's height changes for any other reason: fonts, pictures, the Tools ribbon)
+    new ResizeObserver(() => { if (waiting) requestAnimationFrame(land); }).observe(document.querySelector('.page'));
+  }
 }

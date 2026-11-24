@@ -174,6 +174,13 @@ export function initServices({ core, lenis }) {
     flag(skip, 'is-done', p >= 0.97);
   }
 
+  // With the film, the section first holds for the hand-over's forming stretch (--form screens,
+  // js/site.js), so the sequence starts once the heading has formed. (css/home.css adds the same
+  // stretch to the section's height.)
+  const html = document.documentElement;
+  const formLength = () => (html.dataset.mode === 'film' && !html.classList.contains('no-film')
+    ? (parseFloat(getComputedStyle(html).getPropertyValue('--form')) || 0) * window.innerHeight : 0);
+
   // The scroll drives `p`. (scrub 0.5: it follows the scroll with half a second of give, so a
   // flick of the wheel still moves the layers gently.) GPU layers are only kept while it's on hold.
   const state = { p: 0 };
@@ -185,7 +192,8 @@ export function initServices({ core, lenis }) {
     onUpdate: () => render(state.p),
     scrollTrigger: {
       trigger: root,
-      start: 'top top',
+      // (after the film's hand-over, which forms the heading while the section already holds)
+      start: () => `top+=${formLength()} top`,
       end: 'bottom bottom',
       scrub: 0.5,
       onToggle: (self) => root.classList.toggle('is-live', self.isActive),
@@ -225,15 +233,4 @@ export function initServices({ core, lenis }) {
     end.setAttribute('tabindex', '-1');
     end.focus({ preventScroll: true });
   });
-
-  // Links to #services (the footer, the gear check) land at the very start of the sequence, with the
-  // stage filling the window (the site's other links stop 72 px short, to leave room for the bar).
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href="#services"]');
-    if (!a || e.defaultPrevented || narrow.matches) return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    // (a number, not the element: for an element, Lenis also subtracts the page's scroll-padding)
-    lenis.scrollTo(tween.scrollTrigger.start, { duration: 2 });
-  }, true);
 }
