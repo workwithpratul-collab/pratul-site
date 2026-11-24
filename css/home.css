@@ -938,31 +938,20 @@
 .about__standfirst { margin-top: clamp(14px, 2.6vh, 24px); max-width: 620px; font-size: clamp(17px, min(1.32vw, 2.4vh), 21px); line-height: 1.6; color: var(--cream); text-wrap: pretty; }
 .about__story { margin-top: clamp(10px, 2vh, 22px); max-width: 620px; color: var(--lavender); font-size: clamp(15px, min(1.12vw, 2vh), 17px); line-height: 1.65; }
 .about__story p { text-wrap: pretty; }
-/* Three short value lines under a hairline. */
-.about__values {
+/* Three short value lines under a hairline: the section ends on them, so they get a little more room. */
+.about .about__values {   /* (.about: so the list reset in style.css, ul[role="list"], doesn't zero its padding) */
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(20px, 2.2vw, 32px);
   max-width: 680px;
-  margin: clamp(20px, 3.6vh, 36px) 0 0;
-  padding: clamp(18px, 3.2vh, 26px) 0 0;
+  margin: clamp(26px, 4.6vh, 46px) 0 0;
+  padding: clamp(20px, 3.6vh, 30px) 0 0;
   border-top: 1px solid var(--hair-strong);
   list-style: none;
 }
 .about__value { font-family: var(--font-display); font-weight: 400; font-size: clamp(22px, min(1.8vw, 3.2vh), 26px); line-height: 1.15; color: var(--cream); }
 .about__value em { font-style: italic; color: var(--amber); }
 .about__values p { margin-top: 8px; font-size: 14px; line-height: 1.5; color: var(--lavender); text-wrap: pretty; }
-/* What fills the rest of the week: small, quiet, spaced capitals. */
-.about__off {
-  margin-top: clamp(16px, 3vh, 30px);
-  font-family: var(--font-altitude);
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  line-height: 1.8;
-  text-transform: uppercase;
-  color: var(--lavender);
-}
-
 /* ---------- Testimonial (hidden until a real quote exists) ---------- */
 .quote { padding-block: var(--s-8); }
 .quote__text { font-family: var(--font-display); font-size: var(--t-line); line-height: 1.2; max-width: 30ch; }
@@ -1642,15 +1631,11 @@
 .mobile-site .about__photo img { -webkit-mask-image: none; mask-image: none; object-position: 50% 24%; }
 .mobile-site .about__text { margin-top: var(--s-5); padding: 0; }
 .about__short { font-size: 17px; line-height: 1.65; color: var(--cream); text-wrap: pretty; }
-/* The three value lines, stacked, each with its short line; then the off-the-clock line. */
+/* The three value lines, stacked, each with its short line: the section ends on them. */
 .mobile-site .about__values { grid-template-columns: 1fr; gap: 18px; margin-top: var(--s-6); padding-top: var(--s-5); }
 .mobile-site .about__value { font-size: 26px; }
 .mobile-site .about__value em { color: var(--m-peach); }
 .mobile-site .about__values p { margin-top: 4px; font-size: 15px; }
-.mobile-site .about__off { margin-top: var(--s-5); }
-/* (phones: the label on its own line, so the list never wraps with a stray dot) */
-.mobile-site .about__off-label { display: block; }
-.mobile-site .about__off-sep { display: none; }
 
 /* ---- Contact: the form with icons, and a range of peaks below ---- */
 .mobile-site .contact { display: block; min-height: 0; padding: var(--s-8) 0 0; }

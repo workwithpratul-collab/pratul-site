@@ -370,7 +370,7 @@ function initReveal({ core }) {
       }
     });
   }
-  const items = document.querySelectorAll('.page section:not(.work) .lead, .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__values, .about__off, .contact__actions, .footer__close, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
+  const items = document.querySelectorAll('.page section:not(.work) .lead, .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__values, .contact__actions, .footer__close, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (!e.isIntersecting) continue;

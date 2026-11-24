@@ -92,6 +92,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] Services on phones: still the three cards; the phone version of the exploded website is to be designed later.
 - [x] Fix: Tools has no "Hover to pause" label or pause button. The ribbon still glides to a stop under the mouse, and while it has keyboard focus (it is one Tab stop, with an amber ring); still and flat under reduce motion.
 - [ ] Tools on touch screens: with the button gone there is no way to pause the drift by touch (WCAG 2.2.2 asks for one on content that moves for over 5 s). A tap-to-pause could be added silently if wanted.
+- [x] Fix: About ends on its three value lines (the "Off the clock" line is gone, desktop and phone). The values get a little more room above and below their hairline; their top padding had never applied (the ul[role="list"] reset in style.css was overriding it).
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.
