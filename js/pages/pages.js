@@ -1,4 +1,4 @@
-// pages.js: everything below the film: the top bar, services, the work ridge (or slider), the
+// pages.js: everything below the film: the top bar, services (services.js), the work ridge (or slider), the
 // process trail, about, the tools, the contact form and the showreel.
 //
 // Desktop (site.js) and the phone page (mobile/mobile.js) both use it. Phones get no animation
@@ -18,7 +18,8 @@ export async function initPages({ lenis, desktop = false }) {
   const core = desktop ? await import('../core.js') : null;
   initNav();
   initMenu();
-  initServices({ lenis });
+  // (the exploded-website Services is desktop only: phones never download it)
+  if (core) import('./services.js').then((m) => m.initServices({ core, lenis }));
   initServiceCards({ lenis });
   initWork({ core });
   initWorkFilter();
@@ -93,47 +94,6 @@ function initMenu() {
     if (e.key === 'Escape' && nav.classList.contains('is-open')) { setOpen(false); button.focus(); }
   });
   document.addEventListener('pointerdown', (e) => { if (!nav.contains(e.target)) setOpen(false); });
-}
-
-// ---------- Services: the active line and its piece of gear ----------
-// The active row is the one under the pointer or keyboard focus; otherwise the one in the middle
-// of the screen, so the gear changes gently as you scroll the list too.
-function initServices({ lenis }) {
-  const rows = [...document.querySelectorAll('.svc__row')];
-  const pics = [...document.querySelectorAll('.svc__gear img')];
-  const wide = window.matchMedia('(min-width: 901px)');
-  let hovered = null, centred = rows[0];
-  const show = () => {
-    const row = hovered || centred;
-    rows.forEach((r) => r.classList.toggle('is-active', r === row));
-    pics.forEach((img) => img.classList.toggle('is-active', img.dataset.gear === row?.dataset.gear));
-  };
-  for (const r of rows) {
-    r.addEventListener('pointerenter', () => { hovered = r; show(); });
-    r.addEventListener('pointerleave', () => { hovered = null; show(); });
-    r.addEventListener('focus', () => { hovered = r; show(); });
-    r.addEventListener('blur', () => { hovered = null; show(); });
-    // Choosing a service: the contact form opens with that need already ticked.
-    r.addEventListener('click', (e) => {
-      e.preventDefault();
-      const box = document.querySelector(`#contact-form input[name="need"][value="${r.dataset.need}"]`);
-      if (box) box.checked = true;
-      openForm(false);
-      lenis.scrollTo('#contact', { duration: reduceMotion ? 0 : 1.6 });
-      setTimeout(() => document.getElementById('f-name').focus({ preventScroll: true }), reduceMotion ? 0 : 1600);
-    });
-  }
-  const io = new IntersectionObserver((entries) => {
-    for (const e of entries) if (e.isIntersecting) { centred = e.target; show(); }
-  }, { rootMargin: '-48% 0px -48% 0px' });
-  rows.forEach((r) => io.observe(r));
-  // The pictures only download on screens that show them, as the section nears.
-  if (wide.matches) {
-    whenNear(document.getElementById('services'), () => {
-      for (const img of pics) { img.srcset = img.dataset.srcset; img.src = img.dataset.src; }
-    }, '150% 0px');
-  }
-  show();
 }
 
 // ---------- Phones: the three service cards ----------
@@ -410,7 +370,7 @@ function initReveal({ core }) {
       }
     });
   }
-  const items = document.querySelectorAll('.page section:not(.work) .lead, .svc li, .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__values, .about__off, .contact__actions, .footer__close, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
+  const items = document.querySelectorAll('.page section:not(.work) .lead, .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__values, .about__off, .contact__actions, .footer__close, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (!e.isIntersecting) continue;

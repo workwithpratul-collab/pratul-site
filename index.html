@@ -363,10 +363,8 @@
       </div>
     </section>
 
-    <!-- ========== SERVICES: an editorial list ========== -->
-    <!-- Each service is a line of display type. Hovering or focusing one reveals the piece of gear
-         that stands for it (the same gear as the film's gear check). Choosing one opens the contact
-         form with that need already ticked. -->
+    <!-- ========== SERVICES ========== -->
+    <!-- Desktop: the exploded website (below). Phones: three service cards. -->
     <section class="services" id="services" aria-labelledby="services-title">
       <!-- Phones: three cards (each opens the contact form with that need ticked). -->
       <div class="wrap scards m-only">
@@ -396,40 +394,148 @@
           </a></li>
         </ul>
       </div>
-      <div class="wrap services__head f-only">
-        <h2 class="heading" id="services-title">Websites that do<br> the <em>heavy lifting.</em></h2>
-        <p class="lead">From the first idea to launch day I design and build the whole thing, so your website looks like your brand and works like your best salesperson.</p>
-      </div>
-      <div class="wrap services__body f-only">
-        <ul class="svc" role="list">
-          <li><a class="svc__row" href="#contact" data-need="New website" data-gear="camera">
-            <span class="svc__name">Cinematic websites</span>
-            <span class="svc__text">Scroll films and motion that make a brand feel big.</span>
-          </a></li>
-          <li><a class="svc__row" href="#contact" data-need="New website" data-gear="lantern">
-            <span class="svc__name">Interactive experiences</span>
-            <span class="svc__text">3D product views, sliders and effects visitors can play with.</span>
-          </a></li>
-          <li><a class="svc__row" href="#contact" data-need="Redesign" data-gear="compass">
-            <span class="svc__name">Design that converts</span>
-            <span class="svc__text">Layouts that guide visitors to book, buy or call.</span>
-          </a></li>
-          <li><a class="svc__row" href="#contact" data-need="Online store" data-gear="rope">
-            <span class="svc__name">Online stores and booking</span>
-            <span class="svc__text">Ordering, enquiry and WhatsApp flows that hold together.</span>
-          </a></li>
-          <li><a class="svc__row" href="#contact" data-need="SEO / Performance" data-gear="map">
-            <span class="svc__name">Found and fast</span>
-            <span class="svc__text">SEO and speed, so customers find you and stay.</span>
-          </a></li>
-        </ul>
-        <!-- The gear pictures (loaded as the section nears). Decorative: the words say it all. -->
-        <div class="svc__gear" aria-hidden="true">
-          <img data-gear="camera" data-src="assets/redesign/gear-camera-360.webp" data-srcset="assets/redesign/gear-camera-360.webp 360w, assets/redesign/gear-camera-560.webp 560w" sizes="(min-width: 900px) 28vw, 60vw" width="560" height="560" alt="">
-          <img data-gear="lantern" data-src="assets/redesign/gear-lantern-360.webp" data-srcset="assets/redesign/gear-lantern-360.webp 360w, assets/redesign/gear-lantern-560.webp 560w" sizes="(min-width: 900px) 28vw, 60vw" width="560" height="560" alt="">
-          <img data-gear="compass" data-src="assets/redesign/gear-compass-360.webp" data-srcset="assets/redesign/gear-compass-360.webp 360w, assets/redesign/gear-compass-560.webp 560w" sizes="(min-width: 900px) 28vw, 60vw" width="560" height="560" alt="">
-          <img data-gear="rope" data-src="assets/redesign/gear-rope-360.webp" data-srcset="assets/redesign/gear-rope-360.webp 360w, assets/redesign/gear-rope-560.webp 560w" sizes="(min-width: 900px) 28vw, 60vw" width="560" height="560" alt="">
-          <img data-gear="map" data-src="assets/redesign/gear-map-360.webp" data-srcset="assets/redesign/gear-map-360.webp 360w, assets/redesign/gear-map-560.webp 560w" sizes="(min-width: 900px) 28vw, 60vw" width="560" height="560" alt="">
+      <!-- Desktop: "the exploded website" (approved design: references/services-explode/). The section is
+           eight screens tall and its stage holds still (sticky) while you scroll through seven of them:
+           a made-up client site splits into five layers, each layer comes forward with the service it
+           stands for, then they fold back into one site. js/pages/services.js drives it from the scroll.
+           The words are real HTML; the layers are only pictures of a website, so screen readers skip them. -->
+      <div class="svx f-only" data-svx>
+        <div class="svx__pin">
+          <div class="svx__stage" data-svx-stage>
+
+            <div class="svx__3d" aria-hidden="true">
+              <div class="svx__scene" data-svx-scene>
+                <div class="svx__shadow" data-svx-shadow></div>
+
+                <!-- Layer 5, Code (the bottom of the stack) -->
+                <div class="svx__layer svx-code" data-svx-layer>
+                  <div class="svx-code__lines">
+                    <div class="svx-code__note">&lt;!-- aurel.studio · example client site --&gt;</div>
+                    <div><b>&lt;title&gt;</b>Aurel · Skin &amp; Botanics Studio<b>&lt;/title&gt;</b></div>
+                    <div><b>&lt;meta</b> name="description" content="Calm skincare..."<b>&gt;</b></div>
+                    <div><b>&lt;link</b> rel="preload" as="font"<b>&gt;</b></div>
+                    <div class="svx-code__typed" data-svx-typed><b>&lt;img</b> loading="lazy" width="800" height="600"<b>&gt;</b></div>
+                    <div class="svx-code__serp" data-svx-serp>
+                      <div class="svx-code__url">aurel.studio</div>
+                      <div class="svx-code__link">Aurel · Skin &amp; Botanics Studio</div>
+                      <div class="svx-code__snip">Calm, science-led skincare and living plants, in one studio.</div>
+                    </div>
+                  </div>
+                  <span class="svx__rim" data-svx-rim></span>
+                </div>
+
+                <!-- Layer 4, Commerce -->
+                <div class="svx__layer svx-shop" data-svx-layer>
+                  <div class="svx-shop__grid">
+                    <div class="svx-shop__panel">
+                      <div class="svx-shop__label">BOOK A VISIT · DEC</div>
+                      <div class="svx-shop__days">
+                        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span>
+                        <span>8</span><span>9</span><span>10</span><span>11</span><span class="svx-shop__pick">12<i data-svx-pick>12</i></span><span>13</span><span>14</span>
+                        <span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span>
+                      </div>
+                    </div>
+                    <div class="svx-shop__side">
+                      <div class="svx-shop__item">
+                        <img src="assets/work/kings-garden-1-800.jpg" alt="" width="54" height="54" loading="lazy" decoding="async">
+                        <div class="svx-shop__what"><div>Monstera</div><div class="svx-shop__size">Large · 120 cm</div></div>
+                        <span class="svx-shop__cart" data-svx-cart><span>Add</span><span>Added ✓</span></span>
+                      </div>
+                      <span class="svx-shop__wa">Order on WhatsApp</span>
+                      <span class="svx-shop__ask">Enquire</span>
+                    </div>
+                  </div>
+                  <span class="svx__rim" data-svx-rim></span>
+                </div>
+
+                <!-- Layer 3, Layout -->
+                <div class="svx__layer svx-grid" data-svx-layer>
+                  <div class="svx-grid__lines" data-svx-grid></div>
+                  <div class="svx-grid__copy">
+                    <div class="svx-grid__bar svx-grid__bar--a"></div>
+                    <div class="svx-grid__title">Skin that feels<br>like you again.</div>
+                    <div class="svx-grid__bar svx-grid__bar--b"></div>
+                    <div class="svx-grid__bar svx-grid__bar--c"></div>
+                    <span class="svx-grid__cta"><span class="svx-grid__glow" data-svx-glow></span>Book a consultation</span>
+                  </div>
+                  <span class="svx__rim" data-svx-rim></span>
+                </div>
+
+                <!-- Layer 2, Interaction -->
+                <div class="svx__layer svx-play" data-svx-layer>
+                  <div class="svx-play__card"><img src="assets/work/dermae-1-800.jpg" alt="" width="170" height="240" loading="lazy" decoding="async" data-svx-product></div>
+                  <div class="svx-play__side">
+                    <div class="svx-play__labels"><span>BEFORE</span><span>AFTER · CAFÉ STYLING</span></div>
+                    <div class="svx-play__compare">
+                      <img src="assets/services/cafe-after-800.webp" alt="" width="346" height="236" loading="lazy" decoding="async">
+                      <div class="svx-play__before" data-svx-before><img src="assets/services/cafe-before-800.webp" alt="" width="346" height="236" loading="lazy" decoding="async" data-svx-before-img></div>
+                      <div class="svx-play__knob" data-svx-knob><span>↔</span></div>
+                    </div>
+                    <div class="svx-play__chips"><span class="is-on">Café</span><span>Mall atrium</span><span>Villa</span></div>
+                  </div>
+                  <span class="svx__rim" data-svx-rim></span>
+                </div>
+
+                <!-- Layer 1, Film (the top of the stack) -->
+                <div class="svx__layer svx-film" data-svx-layer>
+                  <img class="svx-film__img" src="assets/work/kings-garden-1-800.jpg" alt="" width="600" height="380" loading="lazy" decoding="async" data-svx-film>
+                  <div class="svx-film__veil"></div>
+                  <div class="svx-film__bar"><span class="svx-film__logo">AUREL</span><span>Treatments · Botanics · Studio</span></div>
+                  <div class="svx-film__copy">
+                    <div class="svx-film__title">Calm skin.<br>Living rooms.</div>
+                    <div class="svx-film__actions"><span class="svx-film__book">Book a visit</span><span class="svx-film__play">▶</span></div>
+                  </div>
+                  <span class="svx-film__example">Example client site</span>
+                  <span class="svx__rim" data-svx-rim></span>
+                </div>
+              </div>
+            </div>
+
+            <header class="svx__head" data-svx-head>
+              <h2 class="heading" id="services-title">Websites that do the <em>heavy lifting.</em></h2>
+              <p class="svx__intro">From the first idea to launch day I design and build the whole thing, so your website looks like your brand and works like your best salesperson.</p>
+            </header>
+
+            <!-- The five services: one comes forward with each layer, alternating left and right. -->
+            <ol class="svx__list" role="list">
+              <li class="svx__focus" data-side="left" data-svx-focus>
+                <p class="svx__tag">Layer 01 / 05 · Film</p>
+                <h3 class="svx__title">Cinematic websites</h3>
+                <p class="svx__desc">Scroll films and motion that make a brand feel big.</p>
+                <img class="svx__gear" src="assets/redesign/gear-camera-360.webp" srcset="assets/redesign/gear-camera-360.webp 360w, assets/redesign/gear-camera-560.webp 560w" sizes="180px" width="560" height="560" alt="" loading="lazy" decoding="async">
+              </li>
+              <li class="svx__focus" data-side="right" data-svx-focus>
+                <p class="svx__tag">Layer 02 / 05 · Interaction</p>
+                <h3 class="svx__title">Interactive experiences</h3>
+                <p class="svx__desc">3D product views, sliders and effects visitors can play with.</p>
+                <img class="svx__gear" src="assets/redesign/gear-compass-360.webp" srcset="assets/redesign/gear-compass-360.webp 360w, assets/redesign/gear-compass-560.webp 560w" sizes="180px" width="560" height="560" alt="" loading="lazy" decoding="async">
+              </li>
+              <li class="svx__focus" data-side="left" data-svx-focus>
+                <p class="svx__tag">Layer 03 / 05 · Layout</p>
+                <h3 class="svx__title">Design that converts</h3>
+                <p class="svx__desc">Layouts that guide visitors to book, buy or call.</p>
+                <img class="svx__gear" src="assets/redesign/gear-map-360.webp" srcset="assets/redesign/gear-map-360.webp 360w, assets/redesign/gear-map-560.webp 560w" sizes="180px" width="560" height="560" alt="" loading="lazy" decoding="async">
+              </li>
+              <li class="svx__focus" data-side="right" data-svx-focus>
+                <p class="svx__tag">Layer 04 / 05 · Commerce</p>
+                <h3 class="svx__title">Online stores and booking</h3>
+                <p class="svx__desc">Ordering, enquiry and WhatsApp flows that hold together.</p>
+                <img class="svx__gear" src="assets/redesign/gear-rope-360.webp" srcset="assets/redesign/gear-rope-360.webp 360w, assets/redesign/gear-rope-560.webp 560w" sizes="180px" width="560" height="560" alt="" loading="lazy" decoding="async">
+              </li>
+              <li class="svx__focus" data-side="left" data-svx-focus>
+                <p class="svx__tag">Layer 05 / 05 · Code</p>
+                <h3 class="svx__title">Found and fast</h3>
+                <p class="svx__desc">SEO and speed, so customers find you and stay.</p>
+                <img class="svx__gear" src="assets/redesign/gear-lantern-360.webp" srcset="assets/redesign/gear-lantern-360.webp 360w, assets/redesign/gear-lantern-560.webp 560w" sizes="180px" width="560" height="560" alt="" loading="lazy" decoding="async">
+              </li>
+            </ol>
+
+            <div class="svx__end" data-svx-end>
+              <p class="svx__end-title" data-svx-end-title>All of this. <em>One website.</em></p>
+              <p class="svx__end-line">Film, interaction, layout, commerce and code, designed and built together by one person.</p>
+            </div>
+          </div>
+          <a class="svx__skip" href="#process" data-svx-skip>Skip<svg class="i" aria-hidden="true"><use href="#i-down"/></svg></a>
         </div>
       </div>
     </section>

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Services: exploded website</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1440px; height: 810px; position: relative; overflow: hidden; font-family: Manrope, sans-serif; color: #F3ECE2; background: radial-gradient(70% 80% at 50% 55%, #2C2244 0%, #1C1832 55%, #17142B 100%)">
+
+  <!-- 3D STAGE (full width, centred) -->
+  <div style="position: absolute; inset: 0; perspective: 1900px; perspective-origin: 50% 40%">
+    <div style="{{sceneStyle}}">
+
+      <div style="{{shadowStyle}}"></div>
+
+      <!-- L5 CODE (bottom) -->
+      <div style="{{L.code}}">
+        <div style="padding: 28px 32px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.9; color: #C9BEDD">
+          <div style="color: #8E83A8">&lt;!-- aurel.studio --&gt;</div>
+          <div><span style="color: #F6A04D">&lt;title&gt;</span>Aurel · Skin &amp; Botanics Studio<span style="color: #F6A04D">&lt;/title&gt;</span></div>
+          <div><span style="color: #F6A04D">&lt;meta</span> name="description" content="Calm skincare..."<span style="color: #F6A04D">&gt;</span></div>
+          <div><span style="color: #F6A04D">&lt;link</span> rel="preload" as="font"<span style="color: #F6A04D">&gt;</span></div>
+          <div style="{{codeType}}"><span style="color: #F6A04D">&lt;img</span> loading="lazy" width="800" height="600"<span style="color: #F6A04D">&gt;</span></div>
+          <div style="{{serpStyle}}">
+            <div style="font-family: Manrope, sans-serif; font-size: 12px; color: #9C90B8">aurel.studio</div>
+            <div style="font-family: Manrope, sans-serif; font-size: 18px; color: #8AB4F8">Aurel · Skin &amp; Botanics Studio</div>
+            <div style="font-family: Manrope, sans-serif; font-size: 13px; color: #C9BEDD">Calm, science-led skincare and living plants, in one studio.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- L4 COMMERCE -->
+      <div style="{{L.commerce}}">
+        <div style="padding: 26px 28px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; height: 100%; box-sizing: border-box">
+          <div style="border-radius: 12px; background: #1B1630; padding: 16px">
+            <div style="font-size: 12px; color: #9C90B8; letter-spacing: 0.1em">BOOK A VISIT · DEC</div>
+            <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px">
+              <sc-for list="{{days}}" as="d" hint-placeholder-count="21"><span style="{{d.style}}">{{d.n}}</span></sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 14px; justify-content: center">
+            <div style="display: flex; align-items: center; gap: 12px; border-radius: 12px; background: #1B1630; padding: 12px">
+              <img src="/_blob/d98ff04325a0744ae54360b3d39d5754" alt="" style="width: 54px; height: 54px; object-fit: cover; border-radius: 8px">
+              <div style="flex-grow: 1"><div style="font-size: 14px">Monstera, large</div><div style="font-size: 12px; color: #9C90B8">₹[PRICE]</div></div>
+              <span style="{{cartStyle}}">{{cartLabel}}</span>
+            </div>
+            <span style="height: 40px; border-radius: 20px; background: #25D366; color: #0B2A17; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center">Order on WhatsApp</span>
+            <span style="height: 40px; border-radius: 20px; border: 1px solid rgba(201,190,221,0.4); font-size: 14px; display: flex; align-items: center; justify-content: center">Enquire</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- L3 LAYOUT -->
+      <div style="{{L.layout}}">
+        <div style="{{gridStyle}}"></div>
+        <div style="position: absolute; left: 40px; top: 46px; right: 40px">
+          <div style="height: 12px; width: 120px; border-radius: 6px; background: rgba(201,190,221,0.35)"></div>
+          <div style="margin-top: 16px; font-family: 'Instrument Serif', serif; font-size: 42px; line-height: 1.05">Skin that feels<br>like you again.</div>
+          <div style="margin-top: 14px; height: 10px; width: 300px; border-radius: 5px; background: rgba(201,190,221,0.25)"></div>
+          <div style="margin-top: 8px; height: 10px; width: 240px; border-radius: 5px; background: rgba(201,190,221,0.25)"></div>
+          <span style="{{ctaStyle}}">Book a consultation</span>
+        </div>
+      </div>
+
+      <!-- L2 INTERACTION -->
+      <div style="{{L.interaction}}">
+        <div style="position: absolute; left: 28px; top: 50px; width: 170px; height: 240px; perspective: 600px">
+          <img src="/_blob/b6264b21550aebde6f649bd698b782cf" alt="" style="{{productStyle}}">
+        </div>
+        <div style="position: absolute; left: 226px; top: 34px; right: 28px">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 0.14em; color: #9C90B8"><span>BEFORE</span><span>AFTER · CAFÉ STYLING</span></div>
+          <div style="margin-top: 10px; position: relative; height: 236px; border-radius: 12px; overflow: hidden; background: #111">
+            <img src="/_blob/12f5951688836e3bd9db46516a973793" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover">
+            <div style="{{beforeClip}}">
+              <img src="/_blob/563592ab36e85156634886aae5d6262a" alt="" style="position: absolute; left: 0; top: 0; width: 346px; height: 236px; object-fit: cover">
+            </div>
+            <div style="{{knobStyle}}"><span style="position: absolute; left: -15px; top: 102px; width: 32px; height: 32px; border-radius: 50%; background: #F3ECE2; color: #1D1932; font-size: 12px; display: flex; align-items: center; justify-content: center">↔</span></div>
+          </div>
+          <div style="margin-top: 14px; display: flex; gap: 10px">
+            <span style="height: 32px; padding: 0 14px; border-radius: 16px; background: rgba(246,160,77,0.18); border: 1px solid #F6A04D; font-size: 13px; display: flex; align-items: center">Café</span>
+            <span style="height: 32px; padding: 0 14px; border-radius: 16px; border: 1px solid rgba(201,190,221,0.35); font-size: 13px; display: flex; align-items: center">Mall atrium</span>
+            <span style="height: 32px; padding: 0 14px; border-radius: 16px; border: 1px solid rgba(201,190,221,0.35); font-size: 13px; display: flex; align-items: center">Villa</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- L1 FILM (top) -->
+      <div style="{{L.film}}">
+        <img src="/_blob/d98ff04325a0744ae54360b3d39d5754" alt="" style="{{filmImg}}">
+        <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(23,20,43,0.85), rgba(23,20,43,0.1) 70%)"></div>
+        <div style="position: absolute; left: 0; right: 0; top: 0; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font-size: 13px">
+          <span style="font-family: 'Instrument Serif', serif; font-size: 20px; letter-spacing: 0.08em">AUREL</span>
+          <span style="color: #E4DAEE">Treatments · Botanics · Studio</span>
+        </div>
+        <div style="position: absolute; left: 30px; bottom: 34px; width: 330px">
+          <div style="font-family: 'Instrument Serif', serif; font-size: 42px; line-height: 1.05">Calm skin.<br>Living rooms.</div>
+          <div style="margin-top: 14px; display: flex; gap: 10px; align-items: center">
+            <span style="height: 36px; padding: 0 16px; border-radius: 18px; background: #F6A04D; color: #1D1932; font-size: 13px; font-weight: 600; display: flex; align-items: center">Book a visit</span>
+            <span style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(243,236,226,0.6); display: flex; align-items: center; justify-content: center; font-size: 12px">▶</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HEADING: centred at the top, leaves when the explosion starts -->
+  <div style="{{headStyle}}">
+    <h2 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 72px; line-height: 1.06">Websites that do the <span style="font-style: italic; color: #F6A04D">heavy lifting.</span></h2>
+    <p style="margin: 16px auto 0; font-size: 18px; line-height: 1.6; color: #C9BEDD; max-width: 680px">From the first idea to launch day I design and build the whole thing, so your website looks like your brand and works like your best salesperson.</p>
+  </div>
+
+  <!-- LAYER DETAILS: alternate left / right -->
+  <div style="{{focusStyle}}">
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.16em; color: #F6A04D">LAYER {{focus.num}} / 05 · {{focus.layer}}</div>
+    <h3 style="margin: 14px 0 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 60px; line-height: 1.06">{{focus.title}}</h3>
+    <p style="margin: 16px 0 0; font-size: 19px; line-height: 1.6; color: #C9BEDD">{{focus.desc}}</p>
+    <img src="{{focus.gear}}" alt="" style="{{gearStyle}}">
+  </div>
+
+  <!-- END LINE -->
+  <div style="{{endStyle}}">
+    <h3 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 72px; line-height: 1.06">All of this. <span style="font-style: italic; color: #F6A04D">One website.</span></h3>
+    <p style="margin: 14px 0 0; font-size: 18px; line-height: 1.6; color: #C9BEDD">Film, interaction, layout, commerce and code, designed and built together by one person.</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"progress":{"editor":"range","min":0,"max":1,"step":0.01,"default":0.3},"$preview":{"width":1440,"height":810}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const p = Math.max(0, Math.min(1, Number(this.props.progress ?? 0.3)));
+    const ease = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    const cl = (t) => Math.max(0, Math.min(1, t));
+    const mix = (a, b, t) => a + (b - a) * t;
+
+    // e = how far apart the layers are; c = how "centred / full size" the stack is
+    let e, c;
+    if (p < 0.10) { e = 0; c = 0; }
+    else if (p < 0.25) { const u = ease((p - 0.10) / 0.15); e = u; c = u; }
+    else if (p < 0.85) { e = 1; c = 1; }
+    else { const u = ease((p - 0.85) / 0.15); e = 1 - u; c = 1 - u; }
+
+    let k = -1, t = 0, f = 0;
+    if (p >= 0.25 && p < 0.85) {
+      k = Math.min(4, Math.floor((p - 0.25) / 0.12));
+      t = cl(((p - 0.25) - k * 0.12) / 0.12);
+      f = t < 0.22 ? ease(t / 0.22) : t < 0.8 ? 1 : 1 - ease((t - 0.8) / 0.2);
+    }
+    const sideLeft = k % 2 === 0;            // layer 1,3,5 text left; 2,4 text right
+    const ss = mix(0.66, 1, c), sy = mix(150, 40, c);
+
+    const names = ['film', 'interaction', 'layout', 'commerce', 'code'];
+    const W = 600, H = 380, SIN = 0.848;
+    const L = {};
+    names.forEach((n, idx) => {
+      const s = 4 - idx;
+      const z0 = s * (e * 115 + 1.5);
+      const ff = idx === k ? f : 0;
+      const zF = 700;
+      const z = mix(z0, zF, ff);
+      const tx = (sideLeft ? 169 : -169) * ff / ss;
+      const ty = (zF * SIN - 120) * ff / ss;
+      const others = k >= 0 && idx !== k;
+      const op = others ? 1 - 0.94 * f : 1;
+      const blur = others ? 6 * f : 0;
+      const rim = e > 0.05 && !others ? `0 0 0 1px rgba(246,160,77,${0.35 * e + 0.3 * ff})` : '0 0 0 1px rgba(201,190,221,0.2)';
+      L[n] = `position:absolute;left:${-W/2}px;top:${-H/2}px;width:${W}px;height:${H}px;border-radius:16px;overflow:hidden;background:linear-gradient(160deg,#2C2347 0%,#201A35 100%);box-shadow:${rim}, 0 30px 60px rgba(0,0,0,0.5);transform:translateZ(${z}px) rotateZ(${36*ff}deg) rotateX(${-58*ff}deg) translate(${tx}px, ${ty}px) scale(${1 - 0.04*ff});opacity:${op};filter:blur(${blur}px)`;
+    });
+
+    const lt = (idx) => idx === k ? cl((t - 0.15) / 0.6) : (k > idx || p >= 0.85 ? 1 : 0);
+    const days = [];
+    for (let d = 1; d <= 21; d++) {
+      const pick = d === 12 && lt(3) > 0.4;
+      days.push({ n: d, style: `height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;${pick ? 'background:#F6A04D;color:#1D1932;font-weight:700' : 'color:#C9BEDD;background:rgba(201,190,221,0.08)'}` });
+    }
+    const added = lt(3) > 0.6;
+    const tc = lt(4);
+    const ba = 85 - 70 * lt(1);
+    const focusData = [
+      { num: '01', layer: 'FILM', title: 'Cinematic websites', desc: 'Scroll films and motion that make a brand feel big.', gear: '/_blob/e633f88aa252730f68fbd117fc946052' },
+      { num: '02', layer: 'INTERACTION', title: 'Interactive experiences', desc: '3D product views, sliders and effects visitors can play with.', gear: '/_blob/c479aa9df64481a73efed3d567f8df32' },
+      { num: '03', layer: 'LAYOUT', title: 'Design that converts', desc: 'Layouts that guide visitors to book, buy or call.', gear: '/_blob/2ad55ebf828c36411b9fa057c3791e4b' },
+      { num: '04', layer: 'COMMERCE', title: 'Online stores and booking', desc: 'Ordering, enquiry and WhatsApp flows that hold together.', gear: '/_blob/06b3bbcf63c2dcba41d65f4b6fbbbd67' },
+      { num: '05', layer: 'CODE', title: 'Found and fast', desc: 'SEO and speed, so customers find you and stay.', gear: '/_blob/a26d0cc8ef07b0e8ff3730a92fc2bb31' }
+    ];
+    const headOp = p < 0.10 ? 1 : 1 - cl((p - 0.10) / 0.06);
+    const focusOp = k >= 0 ? cl((f - 0.55) / 0.45) : 0;
+    const endOp = cl((p - 0.93) / 0.05);
+    const side = sideLeft ? 'left:110px' : 'right:110px';
+    return {
+      L,
+      sceneStyle: `position:absolute;left:720px;top:470px;width:0;height:0;transform-style:preserve-3d;transform:translateY(${sy}px) scale(${ss}) rotateX(58deg) rotateZ(-36deg)`,
+      headStyle: `position:absolute;left:0;right:0;top:${78 - (1 - headOp) * 20}px;text-align:center;opacity:${headOp};pointer-events:none`,
+      focusStyle: `position:absolute;${side};top:50%;width:400px;transform:translateY(-50%) translateX(${(sideLeft ? -1 : 1) * (1 - focusOp) * 24}px);opacity:${focusOp};text-align:${sideLeft ? 'left' : 'right'}`,
+      gearStyle: `margin-top:24px;width:180px;height:auto;filter:drop-shadow(0 20px 30px rgba(0,0,0,0.45));${sideLeft ? '' : 'margin-left:auto;display:block'}`,
+      endStyle: `position:absolute;left:0;right:0;top:${78 + (1 - endOp) * 16}px;text-align:center;opacity:${endOp}`,
+      focus: k >= 0 ? focusData[k] : focusData[0],
+      shadowStyle: `position:absolute;left:-330px;top:-210px;width:660px;height:420px;border-radius:30px;background:radial-gradient(closest-side, rgba(0,0,0,0.55), rgba(0,0,0,0));transform:translateZ(-4px) scale(${1 + 0.15 * e});opacity:${(0.9 - 0.4 * e) * (k >= 0 ? 1 - 0.8 * f : 1)}`,
+      filmImg: `position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(${1.02 + 0.1 * lt(0)})`,
+      productStyle: `width:100%;height:100%;object-fit:cover;border-radius:14px;box-shadow:0 20px 40px rgba(0,0,0,0.5);transform:rotateY(${-25 + 50 * lt(1)}deg)`,
+      beforeClip: `position:absolute;left:0;top:0;bottom:0;width:${ba}%;overflow:hidden`,
+      knobStyle: `position:absolute;top:0;bottom:0;left:calc(${ba}% - 1px);width:2px;background:#F3ECE2`,
+      gridStyle: `position:absolute;inset:0;background-image:repeating-linear-gradient(90deg, rgba(246,160,77,${0.06 + 0.2 * lt(2)}) 0 1px, transparent 1px 50px);`,
+      ctaStyle: `margin-top:26px;display:inline-flex;align-items:center;height:44px;padding:0 22px;border-radius:22px;background:#F6A04D;color:#1D1932;font-weight:600;font-size:15px;box-shadow:0 0 ${10 + 30 * lt(2)}px rgba(246,160,77,${0.2 + 0.5 * lt(2)})`,
+      days,
+      cartStyle: `height:32px;padding:0 12px;border-radius:16px;font-size:12px;font-weight:600;display:flex;align-items:center;${added ? 'background:#F6A04D;color:#1D1932' : 'border:1px solid rgba(201,190,221,0.4);color:#F3ECE2'}`,
+      cartLabel: added ? 'Added ✓' : 'Add',
+      codeType: `opacity:${tc > 0.2 ? 1 : 0.15}`,
+      serpStyle: `margin-top:14px;padding:12px 14px;border-radius:10px;background:#17142B;border:1px solid rgba(138,180,248,0.35);opacity:${cl((tc - 0.3) / 0.3)};transform:translateY(${(1 - cl((tc - 0.3) / 0.3)) * 10}px)`
+    };
+  }
+}
+</script>
+</body>
+</html>

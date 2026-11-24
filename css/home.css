@@ -271,7 +271,7 @@
 /* One section, one screen (desktop): each fills exactly the window, under the top bar, and its
    spacing and line sizes follow the window's height as well as its width, so a 768 px laptop gets a
    tighter version of the same layout instead of a section you'd have to scroll through. */
-[data-mode="film"] .services, [data-mode="film"] .about, [data-mode="film"] .contact {
+[data-mode="film"] .about, [data-mode="film"] .contact {
   height: 100vh;
   height: 100svh;
   min-height: 0;
@@ -285,81 +285,365 @@
 /* Anything that must sit above the shared 3D canvas. */
 .page .wrap, .footer .wrap, .about__photo, .about__text, .contact__art { position: relative; z-index: 2; }
 
-/* ---------- Services: an editorial list ---------- */
-[data-mode="film"] .services { display: grid; grid-template-rows: auto minmax(0, 1fr); align-content: start; }
-.services__head {
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-  align-items: end;
-  gap: var(--s-7);
+/* ---------- Services: the exploded website (desktop) ----------
+   Approved design: references/services-explode/Explode.dc.html. The section is 8 screens tall; its
+   stage sticks to the window for 7 of them while js/pages/services.js moves things from the scroll.
+   The stage is the design's own 1440 x 810 frame, scaled to fit the window (--svx-k, set by the
+   script), so every size below is the design's pixel size and the proportions always match it.
+   Only transforms and opacity change while you scroll: nothing here re-lays out the page. */
+[data-mode="film"] .services { padding-block: 0; }
+.svx { position: relative; z-index: 2; height: 800vh; }
+.svx__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  /* (its last strip settles into the Services tone, the colour Process rises out of: no seam) */
+  background: linear-gradient(180deg, transparent 86%, var(--tone-services)), var(--svx-bg);
 }
-.services__head .lead { justify-self: end; }
-.services__body {
-  display: grid;
-  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
-  gap: var(--s-7);
-  margin-top: clamp(16px, 3.4vh, 64px);
-}
-.svc { border-bottom: 1px solid var(--hair); align-self: start; }
-.svc__row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  align-items: baseline;
-  gap: var(--s-6);
-  padding: clamp(10px, 1.9vh, 28px) 0;
-  border-top: 1px solid var(--hair);
-  color: var(--cream);
-  text-decoration: none;
-  outline: none;
-  position: relative;
-}
-.svc__name {
-  font-family: var(--font-display);
-  font-size: clamp(28px, min(3vw, 5vh), 46px);
-  line-height: 1.08;
-  letter-spacing: var(--track-heading);
-  transition: transform var(--t-base) var(--ease-arrive), color var(--t-base) var(--ease-arrive);
-}
-.svc__text { font-size: var(--t-body); line-height: 1.4; color: var(--lavender); transition: color var(--t-base) var(--ease-arrive); }
-/* The amber line that draws along the active row. */
-.svc__row::after {
-  content: "";
+.svx__stage {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: -1px;
-  height: 1px;
-  background: var(--amber);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform var(--t-base) var(--ease-arrive);
+  left: 50%;
+  top: 50%;
+  width: 1440px;
+  height: 810px;
+  margin: -405px 0 0 -720px;
+  transform: scale(var(--svx-k, 1));
 }
-.svc__row.is-active::after { transform: scaleX(1); }
-.svc__row.is-active .svc__name { transform: translateX(14px); }
-.svc__row.is-active .svc__text { color: var(--cream); }
-/* Very short laptop windows (720 px): rows a little closer, so all five fit. */
-@media (max-height: 740px) and (min-width: 901px) { [data-mode="film"] .svc__row { padding-block: 8px; } }
-.svc__row:focus-visible { outline: 2px solid var(--amber); outline-offset: 6px; }
-/* The gear: one picture at a time, unmasked from below as its row becomes active. */
-.svc__gear {
-  position: relative;
-  align-self: center;
-  aspect-ratio: 1;
-  width: min(100%, 440px, 47vh);
-  justify-self: end;
+/* The 3D room: the camera sits a little above the middle, looking down at the stack. */
+.svx__3d { position: absolute; inset: 0; perspective: 1900px; perspective-origin: 50% 40%; pointer-events: none; }
+.svx__scene {
+  position: absolute;
+  left: 720px;
+  top: 470px;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  /* (the opening pose, before the script takes over) */
+  transform: translateY(150px) scale(0.66) rotateX(58deg) rotateZ(-36deg);
 }
-.svc__gear img {
+.svx__shadow {
+  position: absolute;
+  left: -330px;
+  top: -210px;
+  width: 660px;
+  height: 420px;
+  border-radius: 30px;
+  background: radial-gradient(closest-side, var(--svx-shadow-soft), transparent);
+  transform: translateZ(-4px);
+  opacity: 0.9;
+}
+/* One layer of the website: solid (never see-through), so layers never show through each other. */
+.svx__layer {
+  position: absolute;
+  left: -300px;
+  top: -190px;
+  width: 600px;
+  height: 380px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--svx-layer);
+  box-shadow: 0 0 0 1px rgb(var(--svx-lav) / 0.2), 0 30px 60px var(--svx-shadow);
+  font-family: var(--font-body);
+  color: var(--cream);
+}
+/* The amber outline a layer gets once the stack is apart (its strength is the script's). */
+.svx__rim {
   position: absolute;
   inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--amber);
+  opacity: 0;
+  pointer-events: none;
+}
+/* Promoted to their own GPU layers only while the section is on hold (.is-live). (Never opacity or
+   filter on the scene itself: either one would flatten its 3D, so the layers would lie in one plane.) */
+.svx.is-live .svx__scene { will-change: transform; }
+.svx.is-live .svx__layer { will-change: transform, opacity, filter; }
+
+/* Layer 1, Film: the hero of the made-up site, its photo drifting slowly closer. */
+.svx-film__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.02); }
+.svx-film__veil { position: absolute; inset: 0; background: var(--svx-veil); }
+.svx-film__bar {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  font-size: 13px;
+  color: var(--lavender-light);
+}
+.svx-film__logo { font-family: var(--font-display); font-size: 20px; letter-spacing: 0.08em; color: var(--cream); }
+.svx-film__copy { position: absolute; left: 30px; bottom: 34px; width: 330px; }
+.svx-film__title, .svx-grid__title { font-family: var(--font-display); font-size: 42px; line-height: 1.05; }
+.svx-film__actions { margin-top: 14px; display: flex; gap: 10px; align-items: center; }
+.svx-film__book {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 18px;
+  background: var(--amber);
+  color: var(--amber-ink);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+.svx-film__play {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--svx-cream) / 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+/* Aurel is a made-up brand: said quietly, on the layer itself. */
+.svx-film__example {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid rgb(var(--svx-lav) / 0.3);
+  background: rgb(var(--svx-night) / 0.55);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--lavender);
+}
+
+/* Layer 2, Interaction: a product card that turns, and a before / after slider that wipes across.
+   (The wipe is two transforms, one each way, so it never repaints: see services.js.) */
+.svx-play__card { position: absolute; left: 28px; top: 50px; width: 170px; height: 240px; perspective: 600px; }
+.svx-play__card img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  opacity: 0;
-  clip-path: inset(100% 0 0 0);
-  transform: translateY(18px) scale(0.97);
-  transition: clip-path 0.9s var(--ease-arrive), opacity 0.6s var(--ease-arrive), transform 0.9s var(--ease-arrive);
+  object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px var(--svx-shadow);
+  transform: rotateY(-25deg);
 }
-.svc__gear img.is-active { opacity: 1; clip-path: inset(0 0 0 0); transform: none; }
+.svx-play__side { position: absolute; left: 226px; top: 34px; right: 28px; }
+.svx-play__labels { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 0.14em; color: var(--svx-quiet); }
+.svx-play__compare { margin-top: 10px; position: relative; height: 236px; border-radius: 12px; overflow: hidden; background: var(--svx-photo-bg); }
+.svx-play__compare img { position: absolute; left: 0; top: 0; width: 346px; height: 236px; object-fit: cover; }
+.svx-play__before { position: absolute; inset: 0; overflow: hidden; transform: translateX(-15%); }
+.svx-play__before img { transform: translateX(15%); }
+.svx-play__knob { position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: var(--cream); transform: translateX(294px); }
+.svx-play__knob span {
+  position: absolute;
+  left: -15px;
+  top: 102px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--amber-ink);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.svx-play__chips { margin-top: 14px; display: flex; gap: 10px; }
+.svx-play__chips span {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: 1px solid rgb(var(--svx-lav) / 0.35);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+}
+.svx-play__chips .is-on { background: rgb(var(--svx-amber) / 0.18); border-color: var(--amber); }
+
+/* Layer 3, Layout: the grid it's built on lights up, and the main button starts to glow. */
+.svx-grid__lines {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(90deg, rgb(var(--svx-amber) / 0.26) 0 1px, transparent 1px 50px);
+  opacity: 0.23;
+}
+.svx-grid__copy { position: absolute; left: 40px; top: 46px; right: 40px; }
+.svx-grid__bar { border-radius: 6px; background: rgb(var(--svx-lav) / 0.25); }
+.svx-grid__bar--a { height: 12px; width: 120px; background: rgb(var(--svx-lav) / 0.35); }
+.svx-grid__title { margin-top: 16px; }
+.svx-grid__bar--b { margin-top: 14px; height: 10px; width: 300px; }
+.svx-grid__bar--c { margin-top: 8px; height: 10px; width: 240px; }
+.svx-grid__cta {
+  position: relative;
+  margin-top: 26px;
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 22px;
+  background: var(--amber);
+  color: var(--amber-ink);
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: 0 0 10px rgb(var(--svx-amber) / 0.2);
+}
+.svx-grid__glow { position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 40px rgb(var(--svx-amber) / 0.7); opacity: 0; }
+
+/* Layer 4, Commerce: a date gets picked, and the plant goes in the cart. */
+.svx-shop__grid {
+  padding: 26px 28px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  height: 100%;
+  box-sizing: border-box;
+}
+.svx-shop__panel { border-radius: 12px; background: var(--svx-panel); padding: 16px; }
+.svx-shop__label { font-size: 12px; color: var(--svx-quiet); letter-spacing: 0.1em; }
+.svx-shop__days { margin-top: 10px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.svx-shop__days span {
+  position: relative;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--lavender);
+  background: rgb(var(--svx-lav) / 0.08);
+}
+.svx-shop__days i, .svx-shop__cart span + span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  background: var(--amber);
+  color: var(--amber-ink);
+  font-style: normal;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-arrive);
+}
+.svx-shop__side { display: flex; flex-direction: column; gap: 14px; justify-content: center; }
+.svx-shop__item { display: flex; align-items: center; gap: 12px; border-radius: 12px; background: var(--svx-panel); padding: 12px; font-size: 14px; }
+.svx-shop__item img { width: 54px; height: 54px; object-fit: cover; border-radius: 8px; }
+.svx-shop__what { flex-grow: 1; }
+.svx-shop__size { font-size: 12px; color: var(--svx-quiet); }
+.svx-shop__cart {
+  position: relative;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 16px;
+  border: 1px solid rgb(var(--svx-lav) / 0.4);
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+.svx-shop__cart span + span { inset: -1px; white-space: nowrap; padding: 0 12px; }
+.svx-shop__cart span:first-child { transition: opacity 0.35s var(--ease-arrive); }
+.svx-shop__cart.is-on span:first-child { opacity: 0; }
+.svx-shop__days i.is-on, .svx-shop__cart.is-on span + span { opacity: 1; }
+/* (the cart button is as wide as its "Added ✓" state, so it doesn't change size) */
+.svx-shop__cart span:first-child { min-width: 52px; text-align: center; }
+.svx-shop__wa, .svx-shop__ask {
+  height: 40px;
+  border-radius: 20px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.svx-shop__wa { background: var(--svx-wa); color: var(--svx-wa-ink); font-weight: 600; }
+.svx-shop__ask { border: 1px solid rgb(var(--svx-lav) / 0.4); }
+
+/* Layer 5, Code: the page's head, its last line typed in, then how it shows on Google. */
+.svx-code__lines { padding: 28px 32px; font-family: var(--font-altitude); font-size: 13px; line-height: 1.9; color: var(--lavender); }
+.svx-code__lines b { font-weight: 400; color: var(--amber); }
+.svx-code__note { color: var(--svx-faint); }
+.svx-code__typed { opacity: 0.15; transition: opacity 0.35s var(--ease-arrive); }
+.svx-code__typed.is-on { opacity: 1; }
+.svx-code__serp {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--night);
+  border: 1px solid var(--svx-serp-line);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(10px);
+}
+.svx-code__url { font-size: 12px; color: var(--svx-quiet); }
+.svx-code__link { font-size: 18px; color: var(--svx-serp-link); }
+.svx-code__snip { font-size: 13px; color: var(--lavender); }
+
+/* The words: the heading at the top, then one service at a time beside its layer. */
+.svx__head, .svx__end { position: absolute; left: 0; right: 0; top: 78px; text-align: center; pointer-events: none; }
+.svx__head .heading, .svx__end-title { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 72px; line-height: 1.06; }
+.svx__end-title em { font-style: italic; color: var(--amber); }
+.svx__intro { margin: 16px auto 0; max-width: 680px; font-size: 18px; line-height: 1.6; color: var(--lavender); }
+.svx__end { opacity: 0; }
+.svx__end-line { margin: 14px 0 0; font-size: 18px; line-height: 1.6; color: var(--lavender); }
+.svx__list { margin: 0; padding: 0; list-style: none; }
+.svx__focus { position: absolute; top: 50%; width: 400px; opacity: 0; pointer-events: none; transform: translateY(-50%); }
+.svx__focus[data-side="left"] { left: 110px; text-align: left; }
+.svx__focus[data-side="right"] { right: 110px; text-align: right; }
+.svx__tag { margin: 0; font-family: var(--font-altitude); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); }
+.svx__title { margin: 14px 0 0; font-family: var(--font-display); font-weight: 400; font-size: 60px; line-height: 1.06; }
+.svx__desc { margin: 16px 0 0; font-size: 19px; line-height: 1.6; color: var(--lavender); }
+.svx__gear { display: block; margin-top: 24px; width: 180px; height: auto; filter: drop-shadow(0 20px 30px var(--svx-shadow-soft)); }
+.svx__focus[data-side="right"] .svx__gear { margin-left: auto; }
+
+/* Skip: a quiet way past the whole sequence (to its last frame). */
+.svx__skip {
+  position: absolute;
+  right: var(--page-gutter);
+  bottom: clamp(16px, 3.5vh, 32px);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px;
+  font-size: 14px;
+  color: var(--lavender-quiet);
+  text-decoration: none;
+  transition: color var(--t-fast) var(--ease-arrive), opacity 0.4s var(--ease-arrive), visibility 0s;
+}
+.svx__skip .i { width: 14px; height: 14px; }
+.svx__skip:hover { color: var(--cream); }
+.svx__skip:focus-visible { outline: 2px solid var(--amber); outline-offset: 4px; border-radius: 4px; }
+.svx__skip.is-done { opacity: 0; visibility: hidden; transition: opacity 0.4s var(--ease-arrive), visibility 0s 0.4s; }
+
+/* "Reduce motion", or a desktop window too narrow for the stage (its words would shrink below a
+   comfortable size): no hold, no 3D. The heading, then the five services as a calm list. */
+@media (prefers-reduced-motion: reduce), (max-width: 1099px) {
+  .svx { height: auto; }
+  .svx__pin { position: static; height: auto; overflow: visible; padding: calc(76px + var(--s-7)) 0 var(--s-9); }
+  .svx__stage { position: static; width: min(100% - 2 * var(--page-gutter), var(--content)); height: auto; margin: 0 auto; transform: none; }
+  .svx__3d, .svx__end, .svx__skip { display: none; }
+  .svx__head { position: static; text-align: left; pointer-events: auto; }
+  .svx__head .heading { font-size: var(--t-heading); }
+  .svx__intro { margin-left: 0; }
+  .svx__list { margin-top: var(--s-7); border-bottom: 1px solid var(--hair); }
+  .svx__focus, .svx__focus[data-side] {
+    position: static;
+    width: auto;
+    opacity: 1;
+    transform: none;
+    text-align: left;
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    column-gap: var(--s-6);
+    align-items: center;
+    padding: 20px 0;
+    border-top: 1px solid var(--hair);
+  }
+  .svx__focus > * { grid-column: 2; }
+  .svx__focus .svx__gear, .svx__focus[data-side="right"] .svx__gear { grid-column: 1; grid-row: 1 / span 3; width: 120px; margin: 0; }
+  .svx__title { margin-top: 6px; font-size: clamp(32px, 3vw, 44px); }
+  .svx__desc { margin-top: 6px; }
+}
 
 /* ---------- Work: the prayer-flag ridge ---------- */
 .work__head {
@@ -1022,12 +1306,8 @@
    Phones and narrow screens
    ====================================================================== */
 @media (max-width: 900px) {
-  .services__head, .work__head, .tools__head { grid-template-columns: 1fr; gap: var(--s-5); }
-  .services__head .lead, .work__head .lead, .tools__head .lead { justify-self: start; }
-  .services__body { grid-template-columns: 1fr; margin-top: var(--s-7); }
-  .svc__gear { display: none; }
-  .svc__row { grid-template-columns: 1fr; gap: 6px; padding: 22px 0; }
-  .svc__row.is-active .svc__name { transform: none; }
+  .work__head, .tools__head { grid-template-columns: 1fr; gap: var(--s-5); }
+  .work__head .lead, .tools__head .lead { justify-self: start; }
   .slide { grid-template-columns: 1fr; align-items: start; }
   .about { grid-template-columns: 1fr; padding-right: 0; gap: 0; }
   .about__photo { min-height: 0; height: 110vw; max-height: 620px; }
@@ -1429,6 +1709,5 @@
   .step__mark, .step__label { transition-duration: 0.3s; }
   .mobile-site .hero__title .line, .mobile-site .hero__sub, .mobile-site .hero__actions { animation: none; }
   .reveal { transition-duration: 0.3s; transform: none; }
-  .svc__gear img { transition-duration: 0.3s; transform: none; }
   .about__photo img { transition: none; }
 }

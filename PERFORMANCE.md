@@ -111,3 +111,30 @@ What changed, and why the numbers are where they are:
   the snow (two transform-only layers) and the Tools ribbon (transforms only, only while on screen).
   Both stop under "reduce motion". Slow frames are fewer than before.
 - The 3D Work ridge is unchanged; the Work section stays see-through so the canvas shows through it.
+
+## Services: the exploded website (Nov 24)
+
+The desktop Services section is now an 8-screen held sequence (references/services-explode/). Measured
+in Chrome 158 with the real graphics card (RTX 3050 laptop, 144 Hz screen), a windowed browser, gliding
+through the whole section in 12 s with Lenis (like a slow wheel). Frame times from `requestAnimationFrame`.
+
+| What | 1440 x 900 | 1366 x 768 |
+|---|---|---|
+| Median / p95 / p99 frame | 6.9 / 7.0 / 7.1 ms | 6.9 / 7.0 / 7.1 ms |
+| Average | 144 fps (screen-limited) | 144 fps |
+| Worst frame, Chrome that has drawn it before | 14 ms, 0 frames over 20 ms | 14 ms, 0 frames over 20 ms |
+| Worst frame, brand-new Chrome profile (first pass) | 229 ms, 7 frames over 33 ms | 236 ms, 7 frames over 33 ms |
+| Phone page | unchanged: same Services cards (pixel-identical), no new file downloaded | |
+
+What the first-pass stutter is: a Chrome trace shows the long jobs are all on the graphics process
+(`DoEndRasterCHROMIUM::Flush`, `FinishPaintRenderPass`): the driver compiling the shaders that draw these
+layers (rounded photo clips, 3D surfaces, the blur) for the first time. They happen as the section enters,
+at the split (0.14) and when the first layer turns forward (0.28). Chrome keeps compiled shaders on disk, so
+with the same profile reopened the worst frame fell to 97 ms on the second run and 21 ms on the third, then
+14 ms. Decoding the photos early and pre-drawing a tiny blurred square were both tried and made no
+difference, so they were not kept.
+
+How it stays light: only `transform` and `opacity` change while you scroll (plus `filter: blur` on the
+layers stepping back, in half-pixel steps); every style is written only when its value changes;
+`will-change` is on only while the section is held; the photos load lazily; services.js (11 KB before compression) is
+fetched on desktop only.

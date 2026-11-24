@@ -18,6 +18,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] After launch: replace the example score rings (98 / 100) with real Lighthouse scores.
 - [ ] Optional: download a ground-sitting Mixamo loop as assets/animations/Sitting.fbx for the gear check.
 - [ ] Phase 7 check: open the mobile page on your own phone (and a friend's Android), scroll the whole climb, play with the gear check and the demos, and send the form; then open the site on a laptop and confirm the film.
+- [ ] Services: the old list rows opened the contact form with that need ticked; the new design has no click on the services. Decide whether each layer's words should link to the form.
 
 ## CLAUDE CODE: the world
 - [x] Summit climb looks plain: smooth lilac snow, rock only as soft bands, big bland dome in the final shot.
@@ -85,6 +86,10 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Round 2 speed check (PERFORMANCE.md): desktop boot, film and sections level with before; the phone page paints first sooner and has fewer slow frames than before, after moving the phone trail's glide onto the compositor.
 - [ ] Phone page is 36 KB heavier (JetBrains Mono for the small labels, the real GSAP logo) and its typical frame about 1 ms longer (the snow and the Tools ribbon). Within budget; noted in case a real mid-range Android disagrees.
 - [ ] Process trail: on desktop the trail sits a little left of the mockup's position so Refine's full description fits before the right edge at 1280-1440 px. Pratul to judge whether that reads right.
+- [x] Services: the exploded website (references/services-explode/). Desktop list replaced by the approved 8-screen held sequence: Aurel example site splits into Film / Interaction / Layout / Commerce / Code, one layer at a time to the front with its service (alternating sides) and gear, others at 6% and blurred, folding back to "All of this. One website." Real HTML text, layers aria-hidden, "Example client site" label, cart shows "Large · 120 cm" (no price). Skip link, #services links land at its start, reduced motion = calm static list. Checked against the design at 0 / 0.24 / 0.31 / 0.43 / 0.55 / 0.67 / 0.80 / 1.0 at 1440x900 and 1366x768. Old list markup, styles and script deleted. Phone Services untouched (pixel-identical).
+- [ ] Services, first visit only: the very first time a browser draws the sequence (empty graphics-shader cache), about 7 frames stutter (up to ~230 ms) while the graphics driver compiles its shaders; every later pass, and every later visit, runs at 144 fps with no frame over 14 ms (PERFORMANCE.md). Pre-warming was tried and didn't help; worth a look on a weaker laptop.
+- [ ] Services: windows narrower than 1100 px (a small desktop window) get the calm list instead of the sequence, because the scaled stage's words would be too small to read.
+- [ ] Services on phones: still the three cards; the phone version of the exploded website is to be designed later.
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.

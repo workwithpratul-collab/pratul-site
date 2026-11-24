@@ -383,6 +383,26 @@
      down to the dawn-lit footer, with a soft blend at each section's top instead of an edge. */
   --tone-work: #17142b;
   --tone-services: #1c1832;
+  /* Services, the exploded website (references/services-explode/): the stage's glow, the layers of the
+     made-up "Aurel" site, and the few brand-like colours inside it (a search result's link blue, a
+     WhatsApp button). Shadows are deep navy, never black. */
+  --svx-bg: radial-gradient(70% 80% at 50% 55%, #2c2244 0%, #1c1832 55%, #17142b 100%);
+  --svx-layer: linear-gradient(160deg, #2c2347 0%, #201a35 100%);
+  --svx-panel: #1b1630;
+  --svx-quiet: #9c90b8;          /* small labels inside the layers */
+  --svx-faint: #8e83a8;          /* the code comment */
+  --svx-lav: 201 190 221;        /* lavender as numbers, for its see-through tints: rgb(var(--svx-lav) / 0.35) */
+  --svx-amber: 246 160 77;       /* amber as numbers, for the grid lines and glow */
+  --svx-cream: 243 236 226;
+  --svx-night: 23 20 43;
+  --svx-shadow: rgba(12, 9, 26, 0.5);
+  --svx-shadow-soft: rgba(12, 9, 26, 0.55);
+  --svx-veil: linear-gradient(90deg, rgba(23, 20, 43, 0.85), rgba(23, 20, 43, 0.1) 70%);
+  --svx-photo-bg: #141126;
+  --svx-serp-link: #8ab4f8;
+  --svx-serp-line: rgba(138, 180, 248, 0.35);
+  --svx-wa: #25d366;
+  --svx-wa-ink: #0b2a17;
   --tone-process: #221c38;
   --tone-about-top: #221d38;   /* (the Process slope it rises from) */
   --tone-about-bottom: #1a1630;   /* (where the About glow settles: Tools rises out of it) */
