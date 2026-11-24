@@ -1486,7 +1486,7 @@
 .mobile-site .nav.is-open .nav__links > a:not(.btn), .mobile-site .nav.is-open .nav__book { opacity: 1; transform: none; }
 .mobile-site .nav.is-open .nav__social { opacity: 1; }
 /* each line arrives a beat after the one above */
-.mobile-site .nav.is-open .nav__links > a[href="#services"] { transition-delay: 0.04s; }
+.mobile-site .nav.is-open .nav__links > a[href="#work"] { transition-delay: 0.04s; }
 .mobile-site .nav.is-open .nav__links > a[href="#process"] { transition-delay: 0.08s; }
 .mobile-site .nav.is-open .nav__links > a[href="#about"] { transition-delay: 0.12s; }
 .mobile-site .nav.is-open .nav__links > a[href="#contact"]:not(.btn) { transition-delay: 0.16s; }
