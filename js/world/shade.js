@@ -74,6 +74,8 @@ export function createShade() {
       s.target = alpha;
     },
     remeasure(key) { const s = spots.get(key); if (s) measure(s); },
+    // Build its shader while the film is loading (film.js), so its first appearance never waits for it.
+    compile(renderer) { return renderer.compileAsync(scene, camera); },
     // Draw the shade over the scene (call right after the scene is drawn). rect = the stage box.
     render(renderer, rect) {
       let i = 0;

@@ -31,6 +31,11 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.NoToneMapping;
 renderer.setClearColor(0x000000, 0);
 renderer.autoClear = false;          // we clear once per frame, then each view draws its box
+// Don't ask the graphics driver for each shader's error log. Reading the log makes the browser wait
+// until that shader is completely finished, so the first frame used to freeze for ~0.5 s while
+// every shader was read back one by one. The shaders are known to work; add ?debug to the address
+// to switch the checks back on while developing.
+renderer.debug.checkShaderErrors = new URLSearchParams(location.search).has('debug');
 
 const views = new Set();
 const timer = new THREE.Timer();

@@ -70,8 +70,10 @@ function loadFilm() {
   });
 }
 const whenIdle = (fn) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 1200 }) : setTimeout(fn, 200));
-if (document.readyState === 'complete') whenIdle(loadFilm);
-else window.addEventListener('load', () => whenIdle(loadFilm), { once: true });
+// The poster has already painted by the time this file runs, and device.js fetched the film's files
+// in the background, so start the film straight after the next frame: no waiting for every last
+// picture on the page to load (the 'load' event) or for an idle moment.
+requestAnimationFrame(() => setTimeout(loadFilm, 0));
 
 // The sections' own script: fetched early but quietly, so it's there long before anyone scrolls down.
 whenIdle(() => import('./pages/pages.js').then((m) => m.initPages({ lenis, desktop: true })));

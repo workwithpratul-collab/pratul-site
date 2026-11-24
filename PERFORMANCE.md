@@ -138,3 +138,63 @@ How it stays light: only `transform` and `opacity` change while you scroll (plus
 layers stepping back, in half-pixel steps); every style is written only when its value changes;
 `will-change` is on only while the section is held; the photos load lazily; services.js (11 KB before compression) is
 fetched on desktop only.
+
+## Polish round: faster film start (Nov 24)
+
+**How it was measured.** A small local Node server that gzips like a real host (scratchpad tool, not part of
+the site); the libraries still come from the real jsDelivr CDN over the internet. Chrome 158 headless with the
+real graphics card (RTX 3050 laptop, ANGLE on Direct3D 11), 1440 x 900, the browser's shader cache switched off
+(a first visit), and the browser warmed on the same server first (a new test browser spends ~0.7 s starting its
+network layer, which a visitor's browser never does). "Live" = the moment the film can be scrolled
+(`ascent:ready`). Smoothness = every frame for 2 s after that, scrolling gently. "Before" (commit `765f1d3`)
+and "after" were served side by side and run alternately, because this laptop's speed drifts as it warms up.
+
+| What | Before | After |
+|---|---|---|
+| Page open → live film (5 alternating runs, laptop warm) | 3.60-4.62 s, median **3.82 s** | 3.01-3.21 s, median **3.10 s** (one 4.49 s outlier) |
+| Same, earlier rounds with the laptop cool | 3.25-3.46 s (3.15-3.23 s at the start of the session) | **2.71-2.85 s** |
+| First paint (the poster and the opening words) | 0.52-0.57 s | 0.54-0.60 s (unchanged) |
+| Stutter as the film appears (frames over 33 ms / worst) | 3-5 / 69-117 ms | 1-3 / 50-61 ms |
+| All files the film needs, finished downloading | ~2.9 s (the trekker's two files started at 1.5 s and 2.0 s) | **~0.5 s** (all started at once) |
+| Trekker file | 2.77 MB (1.26 MB gzipped), 21.8 MB shape texture | 2.13 MB (0.93 MB gzipped), < 0.5 MB shape texture |
+| Shaders the graphics card prepares before the film appears | 42 | 27 (the later zones' 15 follow once it's live) |
+| Longest freeze while loading (under the poster) | 0.44-0.87 s | 0.62-0.80 s (see below) |
+
+**What was slow (measured, in order):**
+1. **The trekker's first draw: ~0.5-0.6 s of graphics-card work.** three.js read back every shader's error log
+   (`checkShaderErrors`), which made the page wait for the driver one shader at a time; and his face carried 57
+   shape keys × 3 parts, packed into a 21.8 MB texture on his first frame, although the film only uses *blink*.
+2. **A chain of downloads.** site.js → GSAP → gsap-core, film.js → three → three.core, and the trekker's two
+   files only once the world was half built: each step waited for the one before.
+3. **Waiting for the whole mountain.** The film waited for all four zones to be built *and* for all 42 shaders
+   to compile, though the opening only shows base camp.
+4. **The Work ridge was built the moment the film appeared**, and that is what made its first frames stutter.
+
+**What changed:**
+- `js/device.js` (film only): every file the film needs is requested at once, right at the start (modulepreload
+  for the code, preload for the trekker and his animations at low priority so the poster still comes first).
+  Phones download none of it (checked: 0 film files on the phone page).
+- `js/site.js`: the film starts right after the first paint, not after the page's `load` event plus an idle wait.
+- `assets/pratul-trekker-film.vrm`: a trimmed copy of the character with only the blink shape (made by a script
+  from `assets/pratul-trekker.vrm`, which stays as the source). Same model, textures and materials.
+- `js/gl.js`: shader error checks off for visitors (`?debug` turns them back on while developing).
+- `js/film.js`: base camp first (its lights are the last ones, so every shader is built once), then the trekker,
+  whose first draw starts straight away so the graphics card prepares him *while* the forest and terrain are
+  built; then the rest of the opening. The later zones (ridge, landmarks, meadow, gear, summit) are built before
+  the film appears but kept off camera (a render layer) until their shaders are ready, which happens in the
+  background, one zone at a time, right after the film goes live. "Skip the film", a fast drag down the film,
+  coming back from a case study and pages that open further down all wait for them, under the mist, first. One
+  real frame is drawn under the poster before the hand-over, and the GPU is given time to finish (a fence),
+  so that work doesn't land in the first live frames.
+- `js/pages/pages.js`: the Work ridge is built at the first quiet moment 3 s after the film appears (or as soon
+  as the visitor heads towards Work), not at the same moment.
+
+**Unchanged on purpose:** the look. Frames from before and after at four points of the film (base camp, the
+nursery hut, the meadow, the summit) differ only where things move (the trekker's idle sway, stars, grass,
+treetops in the wind): 0.14-1.04% of pixels. Landmark videos already loaded only near each landmark.
+
+**Not reached:** the 2.5 s target on this laptop (2.7-3.1 s). What's left is real work: ~0.8 s of building the
+base-camp world on the main thread and ~0.6 s for the graphics driver to prepare the trekker's cel-shaded
+shaders, plus three.js from the CDN. The trekker's preparation now holds the page for up to ~0.6-0.8 s in one go
+while the poster is showing (the page can't be scrolled yet, but the "Skip" button and the menu don't answer
+during it). Chrome keeps prepared shaders on disk, so a second visit is faster than these first-visit numbers.

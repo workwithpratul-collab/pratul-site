@@ -199,7 +199,9 @@ function initWork({ core }) {
       }
     };
     whenNear(root, load, '150% 0px');
-    const soon = () => ('requestIdleCallback' in window ? requestIdleCallback(load, { timeout: 2500 }) : setTimeout(load, 800));
+    // (Not the moment the film appears: building the ridge then made the film's first frames stutter.
+    // A few seconds later, at the next quiet moment, while the visitor is still reading the opening.)
+    const soon = () => setTimeout(() => ('requestIdleCallback' in window ? requestIdleCallback(load, { timeout: 2500 }) : load()), 3000);
     if (window.__ascent?.ready) soon();
     else window.addEventListener('ascent:ready', soon, { once: true });
   }

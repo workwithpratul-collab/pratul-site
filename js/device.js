@@ -35,6 +35,44 @@
       poster.href = 'assets/poster/opening-' + (large ? '1920' : '1280') + '.webp';
       poster.setAttribute('fetchpriority', 'high');
       document.head.appendChild(poster);
+
+      // Then everything the live film needs, all at once, instead of one file discovering the next
+      // (site.js → GSAP → gsap-core, film.js → three → three.core, and the trekker's two files only
+      // once the world was half built). The code at normal priority (it is small and the film waits for it);
+      // the two big character files at low priority, so the poster, fonts and styles still arrive first.
+      var CDN = 'https://cdn.jsdelivr.net/npm/';
+      var modules = [
+        // The page's animation library and smooth scrolling (site.js waits for them before anything moves).
+        'js/core.js', CDN + 'gsap@3.15.1/index.js', CDN + 'gsap@3.15.1/gsap-core.js', CDN + 'gsap@3.15.1/CSSPlugin.js',
+        CDN + 'gsap@3.15.1/ScrollTrigger.js', CDN + 'gsap@3.15.1/Observer.js', CDN + 'gsap@3.15.1/SplitText.js', CDN + 'lenis@1.3.27/dist/lenis.mjs',
+        // The film: its code (every file it imports), three.js and the character loader.
+        'js/film.js', 'js/gl.js', 'js/world/terrain.js', 'js/world/forest.js', 'js/world/trekker.js',
+        'js/world/landmarks.js', 'js/world/summit.js', 'js/world/meadow.js', 'js/world/sky.js', 'js/world/camp.js',
+        'js/world/ridge.js', 'js/world/grass.js', 'js/world/mist.js', 'js/world/motes.js', 'js/world/cameraPath.js',
+        'js/world/journey.js', 'js/world/palette.js', 'js/world/glsl.js', 'js/world/gear.js', 'js/world/shade.js',
+        'js/ui/altitude.js', 'js/ui/story.js', 'js/ui/camp-ui.js', 'js/ui/gear-ui.js', 'js/ui/veil.js',
+        CDN + 'three@0.187.0/build/three.module.min.js', CDN + 'three@0.187.0/build/three.core.js',
+        CDN + '@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js', CDN + 'three@0.187.0/examples/jsm/loaders/GLTFLoader.js',
+        CDN + 'three@0.187.0/examples/jsm/utils/BufferGeometryUtils.js', CDN + 'three@0.187.0/examples/jsm/utils/SkeletonUtils.js',
+        CDN + 'three@0.187.0/examples/jsm/geometries/RoundedBoxGeometry.js',
+      ];
+      var base = (document.currentScript.getAttribute('src') || '').replace('js/device.js', '');
+      modules.forEach(function (href, i) {
+        var m = document.createElement('link');
+        m.rel = 'modulepreload';
+        m.href = href.indexOf('http') === 0 ? href : base + href;
+        document.head.appendChild(m);
+      });
+      // The trekker and his animations (the same requests trekker.js makes, so the browser reuses them).
+      ['assets/pratul-trekker-film.vrm', 'assets/animations/clips.json'].forEach(function (href) {
+        var f = document.createElement('link');
+        f.rel = 'preload';
+        f.as = 'fetch';
+        f.href = base + href;
+        f.crossOrigin = 'anonymous';
+        f.setAttribute('fetchpriority', 'low');
+        document.head.appendChild(f);
+      });
     }
     // The phone page opens on the summit painting: fetch it straight away, first in line, so the
     // first screen paints fast (css/home.css shows it as the hero's background).

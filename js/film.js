@@ -60,12 +60,36 @@ const yieldToBrowser = () => new Promise((resolve) => {
 });
 const buildTimes = {};
 const warmTimes = [];   // (for measuring: how long each warm-up piece took)
+const LATER_LAYER = 1;      // (see 'The later zones' below)
+let buildingLater = false;
 async function step(name, build) {
   await yieldToBrowser();
+  const before = new Set(scene.children);
   const t = performance.now();
-  const result = build();
+  let result = build();
   buildTimes[name] = Math.round(performance.now() - t);
+  if (result?.then) result = await result;
+  // A later zone goes straight onto the layer the camera doesn't see (until its shaders are ready).
+  if (buildingLater) for (const c of scene.children) if (!before.has(c)) c.traverse((o) => o.layers.set(LATER_LAYER));
   return result;
+}
+
+// Wait until the graphics card has really finished everything asked of it so far (compiling and
+// first uploads), checking every few milliseconds, so the page stays free meanwhile. Without this,
+// that work would land in the first frames of the live film as a visible stutter.
+async function gpuSettled(maxMs = 2000) {
+  const gl = renderer.getContext();
+  if (!gl.fenceSync) return;
+  const fence = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+  gl.flush();
+  const t0 = performance.now();
+  while (performance.now() - t0 < maxMs) {
+    const status = gl.clientWaitSync(fence, 0, 0);
+    if (status === gl.ALREADY_SIGNALED || status === gl.CONDITION_SATISFIED) break;
+    await new Promise((resolve) => setTimeout(resolve, 6));
+  }
+  gl.deleteSync(fence);
+  buildTimes.gpu = Math.round(performance.now() - t0);
 }
 
 // ---------- 1. The scene and the camera ----------
@@ -78,10 +102,29 @@ const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerH
 // The sun's light comes from a little higher than the sun itself (a painter's cheat), so the
 // low morning light still lays warm gold on the meadow and the snow instead of only grazing them.
 const sky = createSky(scene, { sunLightDir: new THREE.Vector3(0.62, 0.32, -0.78) });
+// The camp lights (the warm glow that follows the nearest landmark) are added now, before anything is
+// built: every shader is built for a set number of lights, so adding lights later would mean
+// compiling every shader a second time. They're moved to their landmark once it exists.
+const campLights = createCampLights(scene);
 
 // ---------- 3. The world ----------
 // The camera path is worked out first, so the forest can keep trees off the camera's route.
 const cameraPath = await step('cameraPath', () => createCameraPath());
+// Base camp first: its tent and lantern lights are the last lights the world adds, and every shader is
+// built for a set number of lights, so from here on each shader is compiled once, correctly.
+const baseCamp = await step('baseCamp', () => createBaseCamp(scene));
+// Then the trekker: his file is already downloaded (device.js), and his shaders are by far the slowest
+// for the graphics card to prepare (~0.6 s), so we let him finish setting up on his own first (a few
+// hundred ms; with the world being built at the same time it took three times as long), then start
+// his first draw so the graphics card works on it while the forest and the terrain are built.
+// His eleven animations come ready-made in one small file (assets/animations/clips.json, baked
+// from the Mixamo FBX files and already fitted to this character), instead of eleven FBX files the
+// browser had to download and decode (about 2 MB and half a second of work).
+const CLIPS = ['idle', 'walk', 'jog', 'wave', 'sit', 'sitToStand', 'point', 'look', 'stretch', 'turnLeft', 'turnRight'];
+const trekker = await step('trekker', () => createTrekker(scene, renderer, camera, { onProgress: (f) => reportProgress(0.3 + f * 0.68), clips: CLIPS, clipFile: 'assets/animations/clips.json' }));
+await trekker.ready.catch((e) => console.error('[trekker] failed to load', e));
+buildTimes.trekkerAt = Math.round(performance.now());   // (for measuring: when he was ready)
+const trekkerFirstDraw = drawTrekkerEarly();
 const mountains = await step('mountains', () => createMountains(scene));
 await step('ground', () => createGround(scene, { pause: yieldToBrowser }));
 const forest = await step('forest', () => createForest(scene, {
@@ -90,19 +133,20 @@ const forest = await step('forest', () => createForest(scene, {
   sky,
   pause: yieldToBrowser,
 }));
-const baseCamp = await step('baseCamp', () => createBaseCamp(scene));
 const mist = await step('mist', () => createMist(scene));
-// His eleven animations come ready-made in one small file (assets/animations/clips.json, baked
-// from the Mixamo FBX files and already fitted to this character), instead of eleven FBX files the
-// browser had to download and decode (about 2 MB and half a second of work).
-const CLIPS = ['idle', 'walk', 'jog', 'wave', 'sit', 'sitToStand', 'point', 'look', 'stretch', 'turnLeft', 'turnRight'];
-const trekker = await step('trekker', () => createTrekker(scene, renderer, camera, { onProgress: (f) => reportProgress(0.3 + f * 0.68), clips: CLIPS, clipFile: 'assets/animations/clips.json' }));
+// Everything the opening shot needs now exists (sky, trekker, mountains, ground, forest, base camp,
+// mist). Hand just these shaders to the graphics driver, and start getting the opening ready on the
+// graphics card (warmOpening) WHILE the rest of the mountain is built below: the two run side by side.
+// The driver works through shaders in order, so the later zones' shaders are only handed over once
+// the film is live (compileTheRest), never ahead of the opening's.
+const openingParts = new Set(scene.children);
+const openingReady = warmOpening();
+buildingLater = true;
 
 // Scene 2: the ridge (grass, stones, trees, valley mist) and the three project landmarks along
 // the trail: a still lake, a stone hut and a trail signboard (journey.js, landmarks.js).
 await step('ridge', () => createRidge(scene));
 const camps = await step('landmarks', () => CAMPS.map((c) => createLandmark(scene, c, { renderer })));
-const campLights = createCampLights(scene);
 campLights.update(camps, camera);
 // Scene 3: the meadow and the gear check: the kit laid out on a canvas mat beside the trail.
 await step('meadow', () => createMeadowZone(scene));
@@ -115,26 +159,89 @@ const motes = await step('motes', () => createMotes(scene));
 
 reportProgress(0.3);   // the world is built
 
-// Build every shader now, while the poster still covers the canvas. Otherwise three.js compiles
-// each one the first time its object comes into view, which causes a small stutter mid-scroll.
-// (The sea of clouds and the far peaks start hidden, so show them for this one moment.)
-// compileAsync lets the graphics driver compile in the background where the browser supports it.
-summit.update(0, 1);
-{ const t0 = performance.now(); await renderer.compileAsync(scene, camera); buildTimes.compile = Math.round(performance.now() - t0); }
-summit.update(0, 0);
+// The later zones (ridge, landmarks, meadow, gear, summit) are kept off camera for now, on a render
+// layer the camera doesn't look at, until their shaders are ready (compileTheRest). The film can then
+// go live as soon as the OPENING is ready, instead of waiting for the whole mountain. They carry no
+// lights, so hiding them doesn't change any other shader.
+// (each one was put on that layer as it was built: see step())
+const laterParts = scene.children.filter((c) => !openingParts.has(c));
 
-// The first frame also has to send every texture and mesh to the graphics card, which used to take
-// half a second in one go. Do it piece by piece instead, with a pause between pieces.
-async function warmUp() {
+// Every part's shaders were handed to the graphics driver as that part was built (step(), above),
+// so they are compiling in the background already. The film doesn't wait for all of them: only for
+// what the opening shot draws (warmUp and gpuSettled, below). The ridge, meadow and summit, minutes of
+// scrolling away, finish compiling while the visitor reads the opening.
+// (The sea of clouds and the far peaks start hidden, so they're compiled once the film is live:
+// see compileTheRest.)
+async function compileTheRest() {
+  const t0 = performance.now();
+  // One part at a time, each finished on the graphics card before the next starts, with a frame's
+  // pause between: done all at once, this work made the first frames of the live film stutter.
+  const frame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+  for (const part of laterParts) {
+    summit.update(0, 1);
+    const done = renderer.compileAsync(part, camera, scene);   // (it collects what to compile right away...)
+    summit.update(0, 0);                                       // (...so they can be hidden again at once)
+    await done;
+    for (const t of texturesOf([part])) renderer.initTexture(t);
+    await gpuSettled();
+    await frame();
+  }
+  // Then back on camera.
+  laterParts.forEach((part) => part.traverse((o) => o.layers.set(0)));
+  buildTimes.rest = Math.round(performance.now() - t0);
+}
+let restReady = null;
+const readyTheRest = () => (restReady ??= compileTheRest());
+
+// Every texture used by these objects (pictures and painted maps; videos upload themselves).
+function texturesOf(objects) {
   const textures = new Set();
-  scene.traverse((o) => {
+  for (const obj of objects) obj.traverse((o) => {
     for (const m of [].concat(o.material || [])) {
       for (const v of Object.values(m)) if (v?.isTexture) textures.add(v);
       if (m.uniforms) for (const u of Object.values(m.uniforms)) if (u?.value?.isTexture) textures.add(u.value);
     }
   });
-  for (const t of textures) {
-    if (t.isVideoTexture || !t.image) continue;
+  return [...textures].filter((t) => !t.isVideoTexture && t.image);
+}
+
+// The first frame also has to send every texture and mesh to the graphics card, which used to take
+// half a second in one go. Do it piece by piece instead, with a pause between pieces.
+// Get the opening ready on the graphics card, without ever freezing the page: wait for the trekker,
+// wait (asynchronously) until the opening's shaders are compiled, draw the opening once, piece by
+// piece, then wait until the graphics card has really finished.
+async function warmOpening() {
+  // (one thing at a time for the graphics card: his shaders first, then the rest of the opening's,
+  // or he would wait in the same queue and hold the page up)
+  await trekkerFirstDraw;
+  const t0 = performance.now();
+  for (const part of openingParts) renderer.compile(part, camera, scene);
+  await Promise.all([...openingParts].map((part) => renderer.compileAsync(part, camera, scene)));
+  await warmUp();
+  await gpuSettled();
+  buildTimes.opening = Math.round(performance.now() - t0);
+}
+
+// The trekker's first draw, on his own (everything else hidden for that one draw), as soon as his
+// shaders are compiled. The page isn't held up: the graphics card does the slow part in the
+// background while we carry on building.
+async function drawTrekkerEarly() {
+  const root = scene.getObjectByName('trekker');
+  if (!root || !trekker.debug.vrm) return;
+  await renderer.compileAsync(root, camera, scene);
+  cameraPath.update(camera, 0, 0, true);
+  const others = scene.children.filter((c) => c !== root && c.visible && !hasLight(c));
+  others.forEach((c) => { c.visible = false; });
+  renderer.setScissorTest(false);
+  renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+  renderer.render(scene, camera);
+  others.forEach((c) => { c.visible = true; });
+}
+function hasLight(o) { let found = false; o.traverse((x) => { if (x.isLight) found = true; }); return found; }
+
+async function warmUp() {
+  // (only the opening's: the later zones send theirs once the film is live, compileTheRest)
+  for (const t of texturesOf([...openingParts])) {
     const t0 = performance.now();
     renderer.initTexture(t);
     warmTimes.push(['tex ' + (t.image.width || '?') + 'x' + (t.image.height || '?'), Math.round(performance.now() - t0)]);
@@ -143,8 +250,7 @@ async function warmUp() {
   // Then draw the opening shot one part at a time (each draw uploads only that part's shapes).
   // Lights stay on: hiding one changes every shader's light count, forcing them all to rebuild.
   cameraPath.update(camera, 0, 0, true);
-  const hasLight = (o) => { let found = false; o.traverse((x) => { if (x.isLight) found = true; }); return found; };
-  const parts = scene.children.filter((c) => c.visible && !hasLight(c));
+  const parts = [...openingParts].filter((c) => c.visible && !hasLight(c));
   parts.forEach((c) => { c.visible = false; });
   renderer.setScissorTest(false);
   renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
@@ -305,6 +411,7 @@ async function glideToEnd() {
   gliding = true;
   if (!reduceMotion) lenis.scrollTo(heroScroll(), { duration: 2.2, easing: (t) => 1 - Math.pow(1 - t, 3) });
   await veil(true, { duration: reduceMotion ? 500 : 1000 });
+  await readyTheRest();   // (the summit must be ready before the mist clears onto it)
   jumpTo(1, { moveScroll: false });
   lenis.scrollTo(heroScroll(), { immediate: true, force: true });
   summitBeat = 'look';   // straight to the final pose: no stretch on a skip
@@ -335,6 +442,7 @@ async function mistSkip() {
     still = now === last ? still + 1 : 0;
     last = now;
   }
+  await readyTheRest();   // (wherever we land must be ready before the mist clears)
   jumpTo(scroll.target, { moveScroll: false });
   skipping = false;
   await veil(false, { duration: reduceMotion ? 500 : 650 });
@@ -480,6 +588,8 @@ window.__ascent = {
   get progress() { return scroll.progress; },
   info: () => ({ trees: forest.counts, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, textures: renderer.info.memory.textures, geometries: renderer.info.memory.geometries, build: buildTimes, warm: warmTimes.filter((w) => w[1] > 8) }),
   jump: jumpTo,
+  // (tests: wait until the whole mountain, not just the opening, is ready to be shown)
+  whenComplete: () => readyTheRest(),
   glideToEnd,
   // The hand-over: copy the next frame (blurred) into a canvas, and stop or restart drawing the
   // film once the page has covered it (no point drawing what nobody can see).
@@ -496,22 +606,38 @@ window.__ascent = {
 };
 
 // ---------- 5. Handing over from the poster to the live scene ----------
-await trekker.ready.catch((e) => console.error('[trekker] failed to load', e));
-// The character arrives after the world's shaders were built: build its own (the cel-shaded
-// MToon materials) in the background too, so its first frame doesn't freeze the page.
-const trekkerRoot = scene.getObjectByName('trekker');
-if (trekkerRoot) await renderer.compileAsync(trekkerRoot, camera, scene);
-await warmUp();
+// The opening has been getting ready on the graphics card while the rest was built (warmOpening).
+await openingReady;
+// (and the soft shade behind the opening words, drawn from the very first frame)
+await shade.compile(renderer);
+// Opening somewhere further up (back from a project page, a poster still, a page that was already
+// scrolled, or "Skip the film" pressed while loading): that part of the mountain must be ready too.
+if (returning || STILL !== null || scroll.target > 0.05) await readyTheRest();
 reportProgress(1);
 if (returning) comeBack();
 else jumpTo(STILL ?? scroll.target, { moveScroll: STILL !== null });
 if (STILL !== null) summitBeat = 'look';
+// One real frame, drawn exactly as the live loop will draw it (gl.js), while the poster still covers
+// the canvas: the first live frames draw a few things the warm-up doesn't (the shade behind the
+// words, the exact stage box), and preparing those used to make the film stutter as it appeared.
+{
+  const r = stage.getBoundingClientRect();
+  const y = window.innerHeight - r.bottom;
+  renderer.setViewport(r.left, y, r.width, r.height);
+  renderer.setScissor(r.left, y, r.width, r.height);
+  renderer.setScissorTest(true);
+  frame(1 / 60, 0, r);
+  renderer.setScissorTest(false);
+  await gpuSettled();
+}
 view.ready = true;
 wake();
 live = true;
 window.__ascent.ready = true;
 // site.js listens for this: it fades the poster away and turns on the film's text.
 window.dispatchEvent(new CustomEvent('ascent:ready', { detail: window.__ascent }));
+// Now the rest of the mountain, in the background, while the visitor reads the opening.
+readyTheRest().catch((e) => console.error('[film] later zones', e));
 
 // Back from a project page: same spot on the trail, rising out of the mist (camp-ui.js).
 function comeBack() {

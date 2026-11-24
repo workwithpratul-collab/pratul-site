@@ -16,7 +16,9 @@ import { groundHeight } from './terrain.js';
 import { WIND_DIR, windGustAt } from './glsl.js';
 import { PRESETS, MATERIALS } from './palette.js';
 
-const MODEL_URL = 'assets/pratul-trekker.vrm';
+// A lighter copy of assets/pratul-trekker.vrm made for the film: only the face's blink shape is kept
+// (the film uses no other expression), which saves a 22 MB shape texture on the first frame.
+const MODEL_URL = 'assets/pratul-trekker-film.vrm';
 // The Mixamo files are FBX, read by three.js's FBXLoader. It's fetched only when FBX files are
 // actually loaded (the film), not by a scene that uses ready-made clips (the mobile opening).
 let fbxLoaderModule = null;
@@ -142,7 +144,8 @@ export function createTrekker(scene, renderer, camera, { onProgress, clips = nul
     vrm.update(0);
     root.visible = true;
     // Build the character's shaders right away (while the curtain is down), not mid-scroll.
-    if (renderer && camera) renderer.compile(scene, camera);
+    // (only his own: the rest of the world compiles on its own schedule, see film.js)
+    if (renderer && camera) renderer.compile(vrm.scene, camera, scene);
 
     // Load the Mixamo animations in the background, in two batches: first the three base camp
     // needs (walk, idle, jog), then, a little later, the moments used further up the trail
