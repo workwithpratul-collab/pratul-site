@@ -327,7 +327,7 @@ html:not(.mobile-site) .m-only { display: none !important; }
   letter-spacing: var(--track-heading);
 }
 .project-label__type { display: inline-flex; align-items: center; gap: 10px; font-size: 15px; color: var(--lavender); }
-/* The honest label: concept or pitch demo, never dressed up. */
+/* The honest label: every project is a concept, never dressed up. */
 .honest {
   display: inline-block;
   padding: 2px 9px;

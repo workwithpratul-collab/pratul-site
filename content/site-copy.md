@@ -56,7 +56,7 @@ I work with businesses worldwide, from India to anywhere.
 - **What it needed:** to feel luxurious and trustworthy, so people feel safe booking
 - **The highlight:** a soft colour palette and a smooth scroll film that feels like a luxury advert
 
-### The King's Garden (pitch demo)
+### The King's Garden (concept)
 - **The business:** a plant nursery that sells plants and styles spaces
 - **What it needed:** to show buyers how plants are grown, cared for and delivered, so they trust ordering online
 - **The highlight:** a cinematic film of the nursery's work and 360° plants you can explore

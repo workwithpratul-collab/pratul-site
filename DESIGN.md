@@ -185,7 +185,7 @@ version (phones never load three.js).
 Phones and portrait tablets get no film and no 3D (js/device.js). Their page is built to the mockup
 `5-phone-v2.png`, with two deliberate differences: About shows the real facts (6 websites built,
 1+ year building and learning, worldwide from India) instead of "3+ Years, 10+ Projects", and the
-work heading is "Work that speaks for itself." with each project's honest label (Concept / Pitch demo).
+work heading is "Work that speaks for itself." with each project's honest label (every project is a Concept).
 "Insights" is not in the menu (there is no blog). Process and Tools keep their desktop moments,
 recomposed for a tall screen.
 

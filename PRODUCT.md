@@ -24,7 +24,7 @@ Experience for the film and hero (the work is the interface), Persuade for the s
 3. "I can reach him easily." (Book a call, a short form, WhatsApp)
 
 ## Brand commitments
-- Honest: concepts and pitch demos are labelled as such; no invented clients, stats or quotes.
+- Honest: every project is labelled as a concept; no invented clients, stats or quotes.
 - Calm and cinematic, never flashy. No sound effects.
 - Painted, stylised, soft. Warm colour only from light sources.
 - Fast: a premium site that stutters is not premium.
