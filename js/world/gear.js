@@ -84,7 +84,7 @@ export function createGear(scene, { position, facing, renderer }) {
   }
   group.updateMatrixWorld(true);
 
-  // Each item's centre in the world, and how big it is (gear-ui.js lays a link over each one).
+  // Each item's centre in the world, and how big it is (gear-ui.js lays a target over each one).
   const centres = {}, radii = {}, near = {};
   for (const [id, item] of Object.entries(items)) {
     centres[id] = item.holder.localToWorld(new THREE.Vector3(0, 0.03, 0));

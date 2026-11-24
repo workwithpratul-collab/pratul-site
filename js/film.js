@@ -288,7 +288,7 @@ const story = createStory({ reduceMotion, shade });
 const openingEl = document.getElementById('opening');
 const gearTitle = document.querySelector('.gear-ui__title');
 const campUI = createCampUI({ camps, defs: CAMPS, camera, cameraPath, reduceMotion, getProgress: () => scroll.progress });
-const gearUI = createGearUI({ gear, camera, lenis, reduceMotion, onHover: (id) => trekker.lookAt(id ? gear.centres[id] : null) });
+const gearUI = createGearUI({ gear, camera, onHover: (id) => trekker.lookAt(id ? gear.centres[id] : null) });
 
 // ---------- Where the film ends and the hero holds ----------
 const filmEndScroll = () => film.offsetTop + FILM_SCREENS * window.innerHeight;

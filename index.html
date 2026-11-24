@@ -141,21 +141,22 @@
           </div>
         </div>
 
-        <!-- The gear check: one link over each item on the mat (positioned by js/ui/gear-ui.js). -->
-        <nav class="gear-ui" id="gear-ui" aria-labelledby="gear-title" hidden>
+        <!-- The gear check: a round target over each item on the mat (positioned by js/ui/gear-ui.js). Not links:
+             pointing at one (or Tab to it) shows its label; clicking does nothing, so the film carries on. -->
+        <div class="gear-ui" id="gear-ui" role="group" aria-labelledby="gear-title" hidden>
           <div class="gear-ui__title">
             <h2 class="moment__line moment__line--big" id="gear-title">What's in<br> the pack.</h2>
             <p class="moment__text">Every piece of gear is a skill. Point at one to see what it does for your business.</p>
           </div>
           <ul class="gear-ui__list">
-            <li><a class="gear-ui__item" data-item="camera" href="#services"><span class="gear-ui__label"><span class="gear-ui__name">Camera</span><span class="gear-ui__tip">Cinematic scroll films that make a brand feel big.</span></span></a></li>
-            <li><a class="gear-ui__item" data-item="lantern" href="#services"><span class="gear-ui__label"><span class="gear-ui__name">Lantern</span><span class="gear-ui__tip">3D and light effects visitors can play with.</span></span></a></li>
-            <li><a class="gear-ui__item" data-item="compass" href="#services"><span class="gear-ui__label"><span class="gear-ui__name">Compass</span><span class="gear-ui__tip">Clear design that guides visitors to book or buy.</span></span></a></li>
-            <li><a class="gear-ui__item" data-item="map" href="#services"><span class="gear-ui__label"><span class="gear-ui__name">Map</span><span class="gear-ui__tip">SEO, so customers find you on Google.</span></span></a></li>
-            <li><a class="gear-ui__item" data-item="rope" href="#services"><span class="gear-ui__label"><span class="gear-ui__name">Rope</span><span class="gear-ui__tip">Forms, booking and WhatsApp flows that hold together.</span></span></a></li>
-            <li><a class="gear-ui__item" data-item="watch" href="#services"><span class="gear-ui__label"><span class="gear-ui__name">Watch</span><span class="gear-ui__tip">Fast loading, so nobody waits.</span></span></a></li>
+            <li><span class="gear-ui__item" data-item="camera" tabindex="0" role="img" aria-label="Camera: Cinematic scroll films that make a brand feel big."><span class="gear-ui__label" aria-hidden="true"><span class="gear-ui__name">Camera</span><span class="gear-ui__tip">Cinematic scroll films that make a brand feel big.</span></span></span></li>
+            <li><span class="gear-ui__item" data-item="lantern" tabindex="0" role="img" aria-label="Lantern: 3D and light effects visitors can play with."><span class="gear-ui__label" aria-hidden="true"><span class="gear-ui__name">Lantern</span><span class="gear-ui__tip">3D and light effects visitors can play with.</span></span></span></li>
+            <li><span class="gear-ui__item" data-item="compass" tabindex="0" role="img" aria-label="Compass: Clear design that guides visitors to book or buy."><span class="gear-ui__label" aria-hidden="true"><span class="gear-ui__name">Compass</span><span class="gear-ui__tip">Clear design that guides visitors to book or buy.</span></span></span></li>
+            <li><span class="gear-ui__item" data-item="map" tabindex="0" role="img" aria-label="Map: SEO, so customers find you on Google."><span class="gear-ui__label" aria-hidden="true"><span class="gear-ui__name">Map</span><span class="gear-ui__tip">SEO, so customers find you on Google.</span></span></span></li>
+            <li><span class="gear-ui__item" data-item="rope" tabindex="0" role="img" aria-label="Rope: Forms, booking and WhatsApp flows that hold together."><span class="gear-ui__label" aria-hidden="true"><span class="gear-ui__name">Rope</span><span class="gear-ui__tip">Forms, booking and WhatsApp flows that hold together.</span></span></span></li>
+            <li><span class="gear-ui__item" data-item="watch" tabindex="0" role="img" aria-label="Watch: Fast loading, so nobody waits."><span class="gear-ui__label" aria-hidden="true"><span class="gear-ui__name">Watch</span><span class="gear-ui__tip">Fast loading, so nobody waits.</span></span></span></li>
           </ul>
-        </nav>
+        </div>
 
         <a class="skip-film" id="skip" href="#hero">
           Skip the film

@@ -93,6 +93,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Fix: Tools has no "Hover to pause" label or pause button. The ribbon still glides to a stop under the mouse, and while it has keyboard focus (it is one Tab stop, with an amber ring); still and flat under reduce motion.
 - [ ] Tools on touch screens: with the button gone there is no way to pause the drift by touch (WCAG 2.2.2 asks for one on content that moves for over 5 s). A tap-to-pause could be added silently if wanted.
 - [x] Fix: About ends on its three value lines (the "Off the clock" line is gone, desktop and phone). The values get a little more room above and below their hairline; their top padding had never applied (the ul[role="list"] reset in style.css was overriding it).
+- [x] Fix: the gear check items are no longer links (clicking one used to skip the whole film to #services). Each is a focusable target with its name and line as its accessible name: hover and Tab show the same label and lift the item, the cursor stays an arrow, click and Enter do nothing.
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.

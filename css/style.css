@@ -158,10 +158,10 @@ html:not(.mobile-site) .m-only { display: none !important; }
   position: absolute;
   inset: 0;
   z-index: 2;
-  pointer-events: none;   /* clicks pass through, except on links and buttons */
+  pointer-events: none;   /* clicks pass through, except on links, buttons and the gear targets */
   transition: opacity 0.9s var(--ease-arrive), visibility 0.9s;
 }
-.overlay a, .overlay button { pointer-events: auto; }
+.overlay a, .overlay button, .overlay .gear-ui__item { pointer-events: auto; }
 /* At the hero, the film's own text steps aside. */
 .hero-in .overlay { opacity: 0; visibility: hidden; }
 
@@ -366,7 +366,8 @@ html:not(.mobile-site) .m-only { display: none !important; }
 }
 .gear-ui__title .moment__text { margin-left: auto; }
 .gear-ui__list { list-style: none; padding: 0; margin: 0; }
-/* Each item's link is a round target covering the item (sized and placed by JavaScript). */
+/* Each item has a round target covering it (sized and placed by JavaScript). Not a link: the
+   ordinary arrow stays, and clicking does nothing. */
 .gear-ui__item {
   position: absolute;
   left: 0;
@@ -375,7 +376,7 @@ html:not(.mobile-site) .m-only { display: none !important; }
   height: 64px;
   border-radius: 50%;
   color: var(--cream);
-  text-decoration: none;
+  cursor: default;
   outline: none;
 }
 .gear-ui__item:focus-visible { box-shadow: 0 0 0 2px var(--amber), 0 0 0 6px rgba(21, 19, 42, 0.35); }
