@@ -125,14 +125,53 @@ function setHero(on) {
 }
 heroEl.inert = true;
 
-// ---------- 6. The top bar ----------
-// Hidden during the film; it appears with the hero (see-through over it), and turns into a soft
-// blurred bar once the hero has scrolled away.
+// ---------- 6. The top bar: it steps aside while you read, and comes back when you ask ----------
+// (references/round4/NavHero.dc.html)
+//   - At the very top of the page it's always there, see-through over base camp.
+//   - With the summit hero it's there too, see-through (the hero is the film's resting place).
+//   - Scrolling down anywhere else: it slides away, so the film and the sections have the screen.
+//   - Small or gentle upward scrolls change nothing. Only a deliberate scroll up brings it back:
+//     NAV_UP px of continuous upward scrolling, or a quick upward flick. It then slides in as a soft
+//     blurred bar.
+//   - Pressing Tab into it (keyboard) always brings it back, and it stays while it has the focus.
+// (Phones keep their own bar: js/pages/pages.js.)
+const NAV_UP = 120;         // px of continuous upward scrolling that counts as "deliberate"
+const NAV_FLICK = 18;       // a flick: the smooth scroll moving up faster than this (px per frame)
+const NAV_UP_PAUSE = 600;   // ms: a pause longer than this starts the upward count again
+let navShown = true;
+let navUp = 0;              // how far we've scrolled up without stopping or turning back
+let lastUpAt = 0;
+let lastY = lenis.scroll;
+let navFocused = false;
 function updateNav(y) {
-  const below = y > handoverStart() + vh * 0.5;
-  nav.classList.toggle('is-shown', heroIn || y > filmEnd());
-  nav.classList.toggle('is-solid', below);
+  const dy = y - lastY;
+  lastY = y;
+  const now = performance.now();
+  if (dy > 0) navUp = 0;
+  else if (dy < 0) {
+    if (now - lastUpAt > NAV_UP_PAUSE) navUp = 0;   // (a fresh scroll up after a pause starts from zero)
+    navUp -= dy;
+    lastUpAt = now;
+  }
+  const atTop = y < 8;
+  const atHero = heroIn && y < handoverStart();   // the hero is showing, not yet handing over
+  let show = navShown;
+  if (atTop || atHero || navFocused) show = true;
+  else if (dy > 0.5) show = false;
+  else if (navUp >= NAV_UP || lenis.velocity < -NAV_FLICK) show = true;
+  navShown = show;
+  nav.classList.toggle('is-shown', show);
+  // See-through at the top and over the hero; a soft blurred bar everywhere else.
+  // (It stays solid while it slides away, so it leaves as it arrived.)
+  nav.classList.toggle('is-solid', !atTop && !atHero);
+  // ("Skip the film" steps down out of its way while it's showing over the film: css/style.css)
+  root.classList.toggle('nav-shown', show);
 }
+nav.addEventListener('focusin', () => { navFocused = true; updateNav(lenis.scroll); });
+nav.addEventListener('focusout', (e) => {
+  navFocused = nav.contains(e.relatedTarget);
+  updateNav(lenis.scroll);
+});
 // "Pratul" goes back to the summit hero: the live last shot of the film, settled, with its words.
 // ("Pratul" in the top bar, "Back to the summit" in the footer.) stopPropagation matters: Lenis
 // has its own handler for # links on the window, and would otherwise replace this scroll with one to

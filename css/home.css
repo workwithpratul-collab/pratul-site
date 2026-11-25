@@ -157,8 +157,12 @@
 }
 .nav__links a:hover::after, .nav__links a[aria-current]::after { transform: scaleX(1); }
 .nav__menu { display: none; }
-/* On the film the bar waits for the hero, then arrives softly. */
-[data-mode="film"] .nav:not(.is-shown) { opacity: 0; visibility: hidden; transform: translateY(-10px); }
+/* Desktop: the bar slides up out of the way while you scroll down, and back in when you clearly
+   scroll up (js/site.js). It stays focusable while away, so pressing Tab brings it straight back. */
+[data-mode="film"] .nav {
+  transition: background var(--t-base) var(--ease-arrive), backdrop-filter var(--t-base) var(--ease-arrive), box-shadow var(--t-base) var(--ease-arrive), transform 520ms var(--ease-out);
+}
+[data-mode="film"] .nav:not(.is-shown) { transform: translateY(-100%); pointer-events: none; }
 .nav.is-solid {
   background: rgba(28, 26, 51, 0.72);
   backdrop-filter: blur(14px) saturate(1.2);

@@ -53,7 +53,7 @@ function markIn(el, { margin = '0px 0px -20% 0px', again = false } = {}) {
 }
 
 // ---------- The top bar ----------
-// Desktop: site.js shows and hides it with the hero. Phones: it's always there, and turns into a
+// Desktop: site.js slides it away as you scroll down and back on a clear scroll up. Phones: it's always there, and turns into a
 // soft bar once the hero has scrolled away. Both: the link of the section being read is marked.
 function initNav() {
   const nav = document.getElementById('site-nav');
