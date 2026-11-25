@@ -1174,6 +1174,9 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
   background: var(--form-panel);
   -webkit-backdrop-filter: blur(10px);
           backdrop-filter: blur(10px);
+  /* (moved up so its bottom lines up with the left column's button: --card-lift, js/pages/pages.js) */
+  position: relative;
+  top: calc(-1 * var(--card-lift, 0px));
 }
 [data-mode="film"] .contact .form__row { gap: 16px; }
 [data-mode="film"] .contact .field label, [data-mode="film"] .contact .field legend { font-size: 14px; }

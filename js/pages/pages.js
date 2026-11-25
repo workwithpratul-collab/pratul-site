@@ -236,9 +236,35 @@ function openForm(focus = true) {
   document.querySelector('[data-open-form]')?.setAttribute('aria-expanded', 'true');
   if (focus) form.elements.name.focus({ preventScroll: true });
 }
+// Desktop: the form card is taller than the words beside it, so centred in the row it hung below the
+// "Book a 20-min call" button, and on shorter windows down to the foot of the section. This moves the
+// card (only the card) up so its bottom lines up with the bottom of the left column; never so far that
+// its top comes closer than 16 px to the top of the section. (Measured, because both heights change
+// with the window's size; it sets one CSS variable, read by the card's own rule in css/home.css.)
+function liftFormCard(card) {
+  const section = document.getElementById('contact');
+  const words = section.querySelector('.contact__words');
+  const place = () => {
+    card.style.setProperty('--card-lift', '0px');
+    const c = card.getBoundingClientRect();
+    const hang = c.bottom - words.getBoundingClientRect().bottom;   // how far below the button it ends
+    const room = c.top - section.getBoundingClientRect().top - 16;  // how far it can go up
+    card.style.setProperty('--card-lift', `${Math.max(0, Math.min(hang, room)).toFixed(1)}px`);
+  };
+  // Again whenever the words or the section change size (the fonts arriving, the headline's lines being
+  // split for their reveal, the window being resized). Moving the card changes no sizes, so this settles.
+  let raf = 0;
+  const later = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(place); };
+  const watch = new ResizeObserver(later);
+  watch.observe(words);
+  watch.observe(section);
+  document.fonts.ready.then(later);
+}
+
 function initContact({ lenis }) {
   markIn(document.getElementById('contact'), { margin: '0px 0px -30% 0px' });
   const form = document.getElementById('contact-form');
+  if (isFilm) liftFormCard(form);
   // Each version shows its own way of choosing a need (desktop: chips; phones: one menu, and no
   // "business" field). Whatever isn't shown is switched off, so it's never sent with the form.
   const menu = document.getElementById('f-need');
