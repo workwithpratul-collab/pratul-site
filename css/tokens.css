@@ -310,6 +310,7 @@
   --meter-tick: rgba(243, 236, 226, 0.6);
   --meter-quiet: rgba(243, 236, 226, 0.74);
   --meter-alt: #f6c38f;
+  --nav-over-film: rgba(23, 20, 43, 0.8);     /* the top bar over the live film (no blur there: css/home.css) */
   /* The loading screen (references/round4/Loader.dc.html): falling snow, the cherry petals, the
      soft shade at the foot of the painting behind the percentage, and the bar's empty track. */
   --loader-snow: rgba(255, 248, 240, 0.85);

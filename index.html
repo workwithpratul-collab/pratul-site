@@ -75,6 +75,15 @@
     }
     .loader[hidden], .is-still .loader { display: none !important; }
     .loader.is-done { opacity: 0; pointer-events: none; }
+    /* As the screen dissolves into the film (100%, js/loader.js), the snowy painting becomes a plain
+       copy of itself (no sliding window, no mask: it is fully revealed by then, so it looks the same),
+       and the full bar and the mist step out. What's left is far lighter to fade over the live film:
+       with them, the first frame of the dissolve stalled (40-160 ms, measured). */
+    .loader.is-done :is(.loader__mist, .loader__reveal, .loader__bar) { display: none; }
+    .loader.is-done .loader__bare { background-image: url("assets/loader/mountain-snow-1280.webp"); }
+    @media (min-width: 1300px), (min-resolution: 1.5dppx) {
+      .loader.is-done .loader__bare { background-image: url("assets/loader/mountain-snow-1920.webp"); }
+    }
     /* The two paintings, lined up exactly: bare below, snowy above. */
     .loader__art { position: absolute; left: 0; top: 0; width: 100%; height: var(--h); background: center 30% / cover no-repeat; }
     .loader__bare { background-image: url("assets/loader/mountain-bare-1280.webp"); }

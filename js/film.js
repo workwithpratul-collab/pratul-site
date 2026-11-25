@@ -735,8 +735,14 @@ live = true;
 window.__ascent.ready = true;
 // site.js and loader.js listen for this: the loading screen glides to 100% and fades into the film.
 window.dispatchEvent(new CustomEvent('ascent:ready', { detail: window.__ascent }));
-// Now the rest of the mountain, in the background, while the visitor reads the opening.
-readyTheRest().catch((e) => console.error('[film] later zones', e));
+// Now the rest of the mountain, in the background, while the visitor reads the opening: once the
+// loading screen has faded (1.2 s after it starts to), so the graphics card is free while the film
+// appears. Done at the same moment, every frame of the fade queued behind that work and stuttered.
+// (Anything that needs those zones sooner, a skip or a fast drag down the film, starts it at once.)
+const startTheRest = () => readyTheRest().catch((e) => console.error('[film] later zones', e));
+if (revealed) setTimeout(startTheRest, 1200);
+else window.addEventListener('ascent:revealed', () => setTimeout(startTheRest, 1200), { once: true });
+setTimeout(startTheRest, 6000);   // (in case the loading screen never reports: no screen, a still picture)
 
 // Back from a project page: same spot on the trail, rising out of the mist (camp-ui.js).
 function comeBack() {

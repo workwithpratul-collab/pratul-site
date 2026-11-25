@@ -419,8 +419,9 @@ html:not(.mobile-site) .m-only { display: none !important; }
   padding: 0 18px;
   border: 1px solid var(--hair-strong);
   border-radius: 999px;
-  background: rgba(21, 19, 42, 0.35);
-  backdrop-filter: blur(10px);
+  /* (no background blur: blurring the live film behind it costs every frame, and preparing the blur
+     the first time it appeared over the film made the opening stutter. A denser tint reads the same.) */
+  background: rgba(21, 19, 42, 0.5);
   color: var(--cream);
   font-size: 15px;
   font-weight: 500;
@@ -433,7 +434,7 @@ html:not(.mobile-site) .m-only { display: none !important; }
 /* (translate, not transform: its entrance animation holds the transform) */
 .skip-film { transition: translate 520ms var(--ease-out), border-color var(--t-fast) var(--ease-arrive), background var(--t-fast) var(--ease-arrive); }
 .nav-shown .skip-film { translate: 0 60px; }
-.skip-film:hover { border-color: var(--cream); background: rgba(21, 19, 42, 0.55); }
+.skip-film:hover { border-color: var(--cream); background: rgba(21, 19, 42, 0.66); }
 .skip-film:hover .i { transform: translateY(2px); }
 
 /* ---------- The altitude meter (bottom left, references/round2/Meter.dc.html) ---------- */
