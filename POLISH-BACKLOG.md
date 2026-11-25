@@ -22,6 +22,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 
 - [ ] Olive & Ember: add its live address to the case study when it is deployed (TODO(Pratul) in case-studies/olive-ember.html), and check its "Key decisions" read the way you would say them.
 - [ ] The nursery and agency case studies now show only "YEAR · Concept" above the heading (the category moved into the name). Replace YEAR as before; Olive & Ember shows 2026 (from its Git history).
+- [ ] Laptops no longer show the YEAR placeholder on the DERMAÉ, nursery and agency case studies; phones still do (phones were left as they are). Add each real year, or say to hide it on phones too.
 
 ## CLAUDE CODE: the world
 - [x] Summit climb looks plain: smooth lilac snow, rock only as soft bands, big bland dome in the final shot.
@@ -40,7 +41,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Canvas looks flat and grey; add warm projector light across the whole cloth.
 - [x] Poles are plain sticks; add straps, lashing, tips, and pegs where the ropes meet the ground.
 - [x] Opening a project: the camera glides close past the trekker's head on the way to the sheet.
-- [ ] One ~60 ms frame when each landmark's video first starts playing (the browser starting a video decoder); a small hitch while the camera moves.
+- [x] One ~60 ms frame when each landmark's video first starts playing (the browser starting a video decoder); a small hitch while the camera moves.
 - [x] The trekker is large in frame at TRINETRA's sign, and the KING'S GARDEN arrival cuts him at the right edge.
 - [ ] DERMAÉ's lake water is still a little saturated blue.
 
@@ -49,7 +50,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] The wave is small (hand only reaches head height); may need a more open Mixamo wave.
 - [x] Faint glowing outline around the body looks like a sticker.
 - [x] Character file is 11.5 MB; compress textures to get it under ~5 MB.
-- [ ] The eleven animation clips are 7.5 MB of FBX (Idle alone is 1 MB); a compact clip format would roughly halve that download.
+- [x] The eleven animation clips are 7.5 MB of FBX (Idle alone is 1 MB); a compact clip format would roughly halve that download.
 - [ ] Foot placement is a simple two-bone fix: on the steepest summit spots a foot can still sit ~2 cm into the snow.
 - [ ] The turn-on-the-spot steps (TurnLeft / TurnRight) were checked by their blend weights only, not filmed up close.
 
@@ -60,7 +61,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] 404.html uses root paths (/css/...), so it only styles correctly from the domain root.
 - [x] Fonts load from Google Fonts; self-host them.
 - [ ] The painted gear images are more detailed and more realistic than the painted world around them, with warmer, saturated reds (rope, camera leather) than rule 3 allows outside light sources.
-- [ ] 404.html: relative paths work at the site root or in a subfolder, but not for a missing address several folders deep (the host may need to point at 404.html).
+- [x] 404.html: relative paths work at the site root or in a subfolder, but not for a missing address several folders deep (the host may need to point at 404.html).
 - [x] Feedback 1: descenders (y, g, p, j, q) cut by the SplitText line masks; masks now have room below, above and at the sides, display line heights 1.05 or more (checked by a script at 1440x900, 1366x768, 390x844: 0 cut).
 - [x] Feedback 2: Instrument Serif (headings, italic accent) and Manrope (body, UI), self-hosted woff2, only the weights used, metric-matched fallbacks; JetBrains Mono kept for altitude numbers only. DESIGN.md updated.
 - [x] Feedback 3: film text composed per shot (top right, top left, sky centre, low left; never the trekker, landmarks, moon or sun) with no panels behind it; the scene darkens softly behind the words instead (js/world/shade.js, colours in palette.js textShade).
@@ -90,7 +91,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] Phone page is 36 KB heavier (JetBrains Mono for the small labels, the real GSAP logo) and its typical frame about 1 ms longer (the snow and the Tools ribbon). Within budget; noted in case a real mid-range Android disagrees.
 - [ ] Process trail: on desktop the trail sits a little left of the mockup's position so Refine's full description fits before the right edge at 1280-1440 px. Pratul to judge whether that reads right.
 - [x] Services: the exploded website (references/services-explode/). Desktop list replaced by the approved 8-screen held sequence: Aurel example site splits into Film / Interaction / Layout / Commerce / Code, one layer at a time to the front with its service (alternating sides) and gear, others at 6% and blurred, folding back to "All of this. One website." Real HTML text, layers aria-hidden, "Example client site" label, cart shows "Large · 120 cm" (no price). Skip link, #services links land at its start, reduced motion = calm static list. Checked against the design at 0 / 0.24 / 0.31 / 0.43 / 0.55 / 0.67 / 0.80 / 1.0 at 1440x900 and 1366x768. Old list markup, styles and script deleted. Phone Services untouched (pixel-identical).
-- [ ] Services, first visit only: the very first time a browser draws the sequence (empty graphics-shader cache), about 7 frames stutter (up to ~230 ms) while the graphics driver compiles its shaders; every later pass, and every later visit, runs at 144 fps with no frame over 14 ms (PERFORMANCE.md). Pre-warming was tried and didn't help; worth a look on a weaker laptop.
+- [x] Services, first visit only: the very first time a browser draws the sequence (empty graphics-shader cache), about 7 frames stutter (up to ~230 ms) while the graphics driver compiles its shaders; every later pass, and every later visit, runs at 144 fps with no frame over 14 ms (PERFORMANCE.md). Pre-warming was tried and didn't help; worth a look on a weaker laptop.
 - [ ] Services: windows narrower than 1100 px (a small desktop window) get the calm list instead of the sequence, because the scaled stage's words would be too small to read.
 - [ ] Services on phones: still the three cards; the phone version of the exploded website is to be designed later.
 - [x] Fix: Tools has no "Hover to pause" label or pause button. The ribbon still glides to a stop under the mouse, and while it has keyboard focus (it is one Tab stop, with an amber ring); still and flat under reduce motion.
@@ -105,8 +106,8 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] Polish 3: Olive & Ember is the fourth Work project (card, 3D ridge panel, case study with stills and a phone view, screenshots as .webp in assets/work/); the Work intro says "Four concepts". It is not in the film.
 - [x] Polish 4: "All of this. One website." sits lower (clear of the top bar) and larger (84 px); checked at 1440x900, 1366x768 and 1536x864.
 - [x] Polish 5: the film starts sooner (3.0-3.2 s instead of 3.6-4.6 s on this laptop, 2.7-2.9 s when cool) and appears without the old stutter; before and after in PERFORMANCE.md.
-- [ ] Film start is still 2.7-3.1 s on this laptop, not the 2.5 s target: ~0.8 s of building base camp and ~0.6 s for the graphics driver to prepare the trekker's cel-shaded shaders remain. Next ideas: build the forest in a worker, or a simpler trekker shader for the first seconds.
-- [ ] While loading (under the poster), preparing the trekker holds the page for up to ~0.6-0.8 s in one go (about the same as before); Skip and the menu don't answer during it.
+- [x] Film start is still 2.7-3.1 s on this laptop, not the 2.5 s target: ~0.8 s of building base camp and ~0.6 s for the graphics driver to prepare the trekker's cel-shaded shaders remain. Next ideas: build the forest in a worker, or a simpler trekker shader for the first seconds.
+- [x] While loading (under the poster), preparing the trekker holds the page for up to ~0.6-0.8 s in one go (about the same as before); Skip and the menu don't answer during it.
 - [ ] The later zones finish preparing in the background ~2-3 s after the film appears; a visitor who scrolls very fast in the first seconds gets a short mist while they finish (the same mist as a fast drag).
 
 - [x] New 1: loading screen (references/round4/Loader.dc.html). Snow spreads down the mountain from the peak as the film really loads (files downloaded, world built, opening prepared on the graphics card, last checks), smoothed so it only rises and never shows 100% early; snowfall thickens, petals drift, mist rests at the base; percentage and thin bar; fades into the film. Instant (inline styles, 9 + 18 KB pictures, film mode only); reduce motion = no snowfall or petals, the snow simply fades in. Phones unchanged. Checked at 1440x900 and 1366x768.
@@ -116,20 +117,36 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [x] New 5: the trekker faces us and waves when the film appears, then turns to the trail; at the summit he turns to us, waves, turns back to the sunrise and the flag, and rests (breathing, looking out, a stretch now and then). Crossfades throughout; scrolling back reverses it.
 - [x] New 6: P mark and full logo saved as optimised .webp (and a 180 px PNG) in assets/brand/, not placed yet.
 - [x] New round speed check (PERFORMANCE.md): film live as soon as before or sooner, no new stutter (after fixing three found by the check), phones unchanged.
-- [ ] Loading screen: it uses the small 588 px preview paintings, which look soft on a big screen. Pratul: put the full-size mountain-bare.png and mountain-snow.png in assets/loader/ and run `bash assets/loader/make-webp.sh`.
-- [ ] Loading screen: while the trekker's shaders are prepared (~0.6 s in one go) the percentage pauses; the snow and the bar keep gliding through it.
-- [ ] Loading screen: it covers "Skip the film" while it shows (before, Skip worked over the poster during loading).
-- [ ] Top bar over the film: no background blur there (it stalled 90-290 ms per slide), a denser night tint instead; the blur returns below the film. Pratul to judge the look.
+- [x] Loading screen: it uses the small 588 px preview paintings, which look soft on a big screen. Pratul: put the full-size mountain-bare.png and mountain-snow.png in assets/loader/ and run `bash assets/loader/make-webp.sh`.
+- [x] Loading screen: while the trekker's shaders are prepared (~0.6 s in one go) the percentage pauses; the snow and the bar keep gliding through it.
+- [x] Loading screen: it covers "Skip the film" while it shows (before, Skip worked over the poster during loading).
+- [x] Top bar over the film: no background blur there (it stalled 90-290 ms per slide), a denser night tint instead; the blur returns below the film. Pratul to judge the look.
 - [ ] "Skip the film" lost its background blur too (same reason), with a denser tint.
-- [ ] Footer "Explore" lists Services, Work and Process, as in the design: About is no longer linked from the footer (it is in the top bar).
-- [ ] Case-study pages still show plain "Pratul" in their top bar, not the new wordmark.
+- [x] Footer "Explore" lists Services, Work and Process, as in the design: About is no longer linked from the footer (it is in the top bar).
+- [x] Case-study pages still show plain "Pratul" in their top bar, not the new wordmark.
 - [ ] Trekker: the wave is the whole Waving clip (one greeting with a few hand swings, ~4.3 s). Pratul to judge whether "once" should be shorter. "Skip the film" goes straight to his calm summit loop, without the greeting.
 - [x] Fix: the loading screen froze at ~35% on the live site on every reload or return visit (the import map came after device.js's preloads; with a warm cache the code arrived before the map). Import map first; safety net (hand over after 4 s without progress or 8 s in all, Skip after 3 s, failures count as done, the page carries on without the film after 20 s). Live: 5 empty-cache loads and 2 normal-cache loads all reach the film.
 - [x] Reveals play once, going down only (desktop): once scrolled through, the climb, Services, Work and Process stay finished and their held scroll length is removed at the next rest, with no jump (measured). The top of the page becomes the summit hero, with "Replay the climb" beside the altitude label (plays it again from base camp, wave included). Links and the footer still land right. Phones unchanged.
-- [ ] Scrolling up from Services into the summit, the Services link in the top bar stays underlined at the hero (the section marker never clears when no section is in the middle of the screen). It did this before as well.
+- [x] Scrolling up from Services into the summit, the Services link in the top bar stays underlined at the hero (the section marker never clears when no section is in the middle of the screen). It did this before as well.
 - [ ] Reveals play once: the hand-over from the summit into Services still plays both ways (so scrolling up comes back to the summit hero, as asked). Landing on Services from the top bar now shows its finished state, not its heading forming.
-- [ ] The safety net shows the film's first frame as a picture if it hands over before the film is ready; the page can't be scrolled until the film is live (as before the loading screen existed), except Skip the film.
+- [x] The safety net shows the film's first frame as a picture if it hands over before the film is ready; the page can't be scrolled until the film is live (as before the loading screen existed), except Skip the film.
 - [x] Contact to footer (desktop): the contact painting no longer runs past the section (it was 112% tall, so the tent and rocks were cut off where the footer picture starts); it holds still with the camp up behind the form, and both sections meet in one colour (#16101a, the darkest purple of the contact painting) through two 220 px gradients. Checked at 1440x900 and 1280x800; phones pixel-identical.
+
+- [x] Laptop round 1-6, 8, 10-12 (first session): full-size loader paintings; one Skip, bottom right, from the first moment; the percentage keeps gliding; no freeze while the trekker is prepared and the film live in ~2 s; the animations in one 189 KB binary file; the safety net lets the page scroll at once; landmark videos start before the camera arrives; summit hero words beside the flag; the top bar's blur back over the film.
+- [x] Laptop 7: fonts checked: 4 self-hosted subset woff2 (82 KB), display font preloaded, no Google Fonts stylesheet on any page. (Trimming Manrope to 400-600 was tried and undone: it redrew letter edges on phones.)
+- [x] Laptop 9: the film is never more than ~1.1 s behind the scroll (a time limit on falling behind, then the soft mist skip); worst was 1.40 s. Gentle and brisk scrolling unchanged.
+- [x] Laptop 13: Services' first-visit stutter gone from the scroll (2-3 frames over 33 ms, worst 42-56 ms, instead of 8-9 up to ~600 ms): its graphics are prepared while you rest on the summit hero. Later visits unchanged.
+- [x] Laptop 14: About on laptops is a signed note: "Designed by me. Built by me.", intro, psychology story, three numbered promises, the closing line and the signature; old story and value lines gone. One screen at 1440x900 and 1366x768. About links now land with the whole section on screen (they stopped 156 px short).
+- [x] Laptop 15: About is back in the footer's Explore column (laptops); the columns line up by their labels.
+- [x] Laptop 16 + 17: case-study pages show the PRATUL.dev wordmark and no "YEAR" placeholder on laptops.
+- [x] Laptop 18: no section stays underlined in the top bar on the summit hero.
+- [x] Laptop 19: 404.html finds the site's root (a <base>), so it is styled for missing addresses at any depth on GitHub Pages.
+- [ ] Right after the film appears, 2-5 frames take 100-120 ms (0-1 before the laptop round): the later zones are now built in small pieces in those first seconds (items 4 + 5), while the opening wave plays. Worth spreading further or waiting for the wave to end.
+- [ ] Services, first visit: its graphics warm-up runs while the visitor rests on the summit hero, as ~6 slow frames (worst ~0.7 s) over the still summit: only the trekker's breathing pauses. Only once per browser.
+- [ ] One 54-78 ms frame at 19.5% of the climb, when DERMAÉ's caption appears (not its video; found in Laptop 10).
+- [ ] 404 page: its body line sits over the lighter mist band at about 4:1 contrast (AA asks 4.5:1). Unchanged so the phone 404 stays the same; Pratul to decide.
+- [ ] 404 page: Chrome still requests its styles once from the wrong folder for a deep missing address before the root is found (harmless 404s).
+- [ ] Footer: the "SAY HELLO" label is faint over the bright sky of the footer picture.
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.
@@ -146,7 +163,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] The scene parallax is gentle but simple: one picture drifting plus a band of CSS mist, not separately painted layers.
 - [x] The painted gear on the mobile flat-lay still shows its baked lilac shadow halos (compass, rope) at this larger size.
 - [x] Project pages at 360 px: the Play / Pause button covers a fair part of the small video in its frame.
-- [ ] First paint on 4G varies (about 1.1 s to 3.3 s in tests) mostly with the Google Fonts stylesheet, which blocks drawing; self-hosting the fonts (listed above) would make it steady.
+- [x] First paint on 4G varies (about 1.1 s to 3.3 s in tests) mostly with the Google Fonts stylesheet, which blocks drawing; self-hosting the fonts (listed above) would make it steady.
 
 ## Done
 - [x] (P4) Pacing: 13 screen-heights plus a walking speed limit, so feet don't slide.

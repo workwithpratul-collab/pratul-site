@@ -272,3 +272,41 @@ scrolled through, while the page is at rest: one ScrollTrigger re-measure, **12-
 and 1366 x 768). Afterwards the page is shorter (at 1440 x 900: from ~31,400 px to ~8,200 px), so scrolling back up
 is quick and the hand-over is the only scroll animation left above the sections. No cost per frame beyond one
 check of an empty queue.
+
+## Laptop round (Nov 25): 19 items
+
+**How it was measured.** As in the polish round: the local gzip server (scratchpad tool), libraries from the real
+jsDelivr CDN, Chrome 158 headless with the real graphics card (RTX 3050 laptop, ANGLE on Direct3D 11), 1440 x 900,
+shader cache off (a first visit). "Before" is commit `d913035` (the last commit before this round), served side by
+side and run alternately. Film start: 5 alternating runs against `d913035`, then 9 more of the current version
+against `d6a27ed` (the start of the second session), which showed the same spread.
+
+| What | Before (`d913035`) | After |
+|---|---|---|
+| Page open -> live film | 2.65-2.90 s, median **2.70 s** | 1.93-2.35 s in 11 of 14 runs, 3.04-3.12 s in 3; median **2.08 s** (the ~3.1 s runs happen on `d6a27ed` too: noise) |
+| Download before the film is live | **2,320 KB** | **2,056 KB** (the trekker's animations: 189 KB binary instead of 554 KB JSON) |
+| Main-thread blocking before live | 1.10-1.22 s | 0.43-0.57 s |
+| Longest single block before live | 0.49-0.53 s | 0.15-0.17 s |
+| First paint (the loading screen) | 0.59-0.69 s | 0.68-0.72 s (the full-size loader paintings) |
+| 2 s right after live: p95 / worst / frames over 33 ms | 8.6-9.3 ms / 29-38 ms / 0-1 | 16.9-24.6 ms / 97-122 ms / 2-5 (see below) |
+| Climbing the whole film (950 frames): median / p95 / worst | 7.0 / 8.7-8.8 / 102-104 ms (`d6a27ed`) | 7.0 / 8.8 / 100-105 ms, same single mist skip |
+| Services, first visit, gliding through (1440 x 900) | 8-9 frames over 33 ms, worst 570-595 ms | 2 frames, worst 42-49 ms |
+| Services, first visit (1366 x 768) | 8 frames, worst 599 ms | 3 frames, worst 56 ms |
+| Services warm-up while resting on the summit hero | (none) | first visit: ~6 slow frames, worst ~0.7 s, on the still hero; later visits: 0 over 33 ms (worst 29-31 ms) |
+| Film lag behind the scroll, worst (3 starts x 12 speeds) | 1.37-1.40 s (a steady 5-6 px/frame jog) | **1.10 s**, then the mist covers the jump; 1-4 px/frame unchanged, no new mist skips |
+| Fonts | 4 self-hosted subset woff2, 82 KB | unchanged (no Google Fonts anywhere) |
+| Phone page | | pixel-identical (About, footer, case pages checked at 390 x 844); index.html +0.4 KB and home.css +0.6 KB compressed (the laptop-only About and footer lines) |
+
+**Notes.**
+- **Smoothness right after the film appears got worse** (2-5 frames over 33 ms instead of 0-1). This came with items
+  4 + 5, which moved the ridge, meadow and summit building to just after "live" in small pieces, to start the film
+  ~0.6 s sooner without freezing the loading screen. The cost is a few 100-120 ms frames in the first 2 s, while
+  the opening wave plays. It was the same at the start of the second session (`d6a27ed`), so items 7-19 didn't
+  add to it. Logged in POLISH-BACKLOG.md.
+- **Services (item 13):** the graphics driver's one-off work is not gone, it moved: the stage is drawn at 0.5%
+  opacity for a few frames once the visitor rests on the summit hero, so the stalls happen over a still picture
+  (only the trekker's breathing moves). Chrome keeps that work on disk, so later visits don't pay it at all.
+- **Fonts (item 7):** already done before this round. Trimming Manrope to 400-600 saved 2.4 KB and was identical on
+  laptops, but redrew some letter edges on phones at 2x, so the original file was kept.
+- **Fast scrolling (item 9):** the film keeps 3 s of scroll history (a few hundred numbers) and checks it once per
+  frame; the climb's frame times are unchanged.
