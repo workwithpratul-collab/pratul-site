@@ -1121,16 +1121,30 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
 [data-mode="film"] .contact__inner .lead { margin-top: clamp(16px, 2.8vh, 26px); max-width: 500px; font-size: clamp(17px, min(1.32vw, 2.4vh), 19px); line-height: 1.6; }
 [data-mode="film"] .contact__actions { margin-top: clamp(22px, 4vh, 36px); }
 [data-mode="film"] .contact__actions .btn { min-height: 56px; padding-inline: 30px; font-weight: 600; }
-/* The tent painting, full-bleed, with the shade over it. */
+/* The tent painting, with the shade over it. It holds still (no transform, no parallax). Its box stops
+   short of the section's foot and the painting sits on the box's bottom edge, so the camp is up behind
+   the form, and the rocks below it melt softly away before the section ends. */
 .contact__art {
   position: absolute;
-  inset: 0;
+  inset: 0 0 auto;
+  z-index: 1;   /* (under the words and the form, .contact__inner) */
+  height: calc(100% - 140px);
   pointer-events: none;
-  /* (its foot melts into the page colour, which the footer's picture also rises out of: no seam) */
-  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 120px), transparent);
-  mask-image: linear-gradient(180deg, #000 calc(100% - 120px), transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 180px), transparent);
+  mask-image: linear-gradient(180deg, #000 calc(100% - 180px), transparent);
 }
-.contact__art img { width: 100%; height: 112%; object-fit: cover; object-position: 50% 62%; opacity: 0.85; }   /* (the glowing tent shows below the form panel) */
+.contact__art img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; opacity: 0.85; }
+/* Desktop: the section fades down into the colour the footer rises out of (--seam), under the words. */
+[data-mode="film"] .contact::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
+  height: 220px;
+  background: linear-gradient(180deg, var(--seam-clear), var(--seam));
+  pointer-events: none;
+}
+[data-mode="film"] .contact__inner { z-index: 2; }
 .contact__art::after { content: ""; position: absolute; inset: 0; background: var(--contact-shade); }
 .contact__inner { max-width: var(--content); }
 .contact__inner .heading { max-width: 14ch; }
@@ -1236,8 +1250,10 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
 .footer:not(.is-in) .footer__art img { transform: scale(1.04); }
 .footer::before, .footer__art::before, .footer__art::after { content: ""; position: absolute; pointer-events: none; }
 .footer::before { inset: 0; z-index: 1; background: var(--footer-side); }
-/* (the picture's top melts out of the page colour above it: no hard edge between sections) */
-.footer__art::before { inset: 0 0 auto; z-index: 1; height: 110px; background: var(--footer-top); }
+/* (the picture's top rises out of the colour the contact section fades into, --seam: no line between
+   them. Above the picture, below the words. Phones: a shorter fade from their own page colour.) */
+.footer__art::before { inset: 0 0 auto; z-index: 1; height: 220px; background: linear-gradient(180deg, var(--seam), var(--seam-clear)); }
+.mobile-site .footer__art::before { height: 110px; background: var(--footer-top); }
 .footer__art::after { inset: auto 0 0; height: 190px; background: var(--footer-fade); }
 
 /* Top left, over the sky: the closing line and the two ways to get in touch. */

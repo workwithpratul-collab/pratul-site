@@ -129,6 +129,7 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] Scrolling up from Services into the summit, the Services link in the top bar stays underlined at the hero (the section marker never clears when no section is in the middle of the screen). It did this before as well.
 - [ ] Reveals play once: the hand-over from the summit into Services still plays both ways (so scrolling up comes back to the summit hero, as asked). Landing on Services from the top bar now shows its finished state, not its heading forming.
 - [ ] The safety net shows the film's first frame as a picture if it hands over before the film is ready; the page can't be scrolled until the film is live (as before the loading screen existed), except Skip the film.
+- [x] Contact to footer (desktop): the contact painting no longer runs past the section (it was 112% tall, so the tent and rocks were cut off where the footer picture starts); it holds still with the camp up behind the form, and both sections meet in one colour (#16101a, the darkest purple of the contact painting) through two 220 px gradients. Checked at 1440x900 and 1280x800; phones pixel-identical.
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.

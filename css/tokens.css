@@ -323,7 +323,12 @@
      the fade at the foot of the picture behind the links (into --night), the labels, links and hairlines. */
   --footer-side: linear-gradient(90deg, rgba(23, 20, 43, 0.78) 0%, rgba(23, 20, 43, 0.35) 34%, rgba(23, 20, 43, 0) 55%);
   --footer-fade: linear-gradient(180deg, rgba(23, 20, 43, 0) 0%, rgba(23, 20, 43, 0.85) 50%, #17142b 100%);
-  --footer-top: linear-gradient(180deg, #1f1834 0%, rgba(31, 24, 52, 0) 100%);   /* (starts on the contact section's last colour, --tone-contact) */
+  --footer-top: linear-gradient(180deg, #1f1834 0%, rgba(31, 24, 52, 0) 100%);   /* (phones: the footer picture's top, from the contact section's last colour) */
+  /* Desktop: the one colour the contact section and the footer meet in (the darkest purple of the contact
+     painting, assets/redesign/bg-contact.webp: the average of its darkest 2% of purple pixels). The contact
+     section fades down into it, the footer's picture rises out of it. */
+  --seam: #16101a;
+  --seam-clear: rgba(22, 16, 26, 0);
   --footer-label: #9c90b8;
   --footer-link: #e4daee;
   --footer-small: #b7a9d6;
