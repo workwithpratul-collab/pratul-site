@@ -439,15 +439,18 @@ export function createTrekker(scene, renderer, camera, { onProgress, clips = nul
 
   // ---------- What main.js can ask for ----------
   // Play a one-shot moment ('point', 'stretch', 'wave'). Returns false if the clip is missing.
-  function play(name) {
+  // speed: 1 plays it as recorded (the wave greeting plays a touch quicker, film.js).
+  function play(name, { speed = 1 } = {}) {
     const act = state.actions?.[name];
     if (!act) return false;
-    act.reset().setEffectiveTimeScale(1).play();
+    act.reset().setEffectiveTimeScale(speed).play();
     state.shot = name;
     return true;
   }
   // Is a one-shot playing right now?
   const playing = (name) => state.shot === name;
+  // Let go of a one-shot early (its weight then eases out, so it never snaps).
+  function stop(name) { if (state.shot === name) state.shot = null; }
   // Hold a looping pose while standing ('look'), or null for plain idle.
   function setLoop(name) { state.loop = name; }
   // Turn the head towards a point in the world (or null to look ahead again).
@@ -507,6 +510,7 @@ export function createTrekker(scene, renderer, camera, { onProgress, clips = nul
     setSitting,
     play,
     playing,
+    stop,
     setLoop,
     lookAt,
     get sitting() { return state.sitPhase; },

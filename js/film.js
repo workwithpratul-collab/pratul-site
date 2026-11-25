@@ -364,11 +364,15 @@ function countFps(now) {
 
 // ---------- Moving the trekker along the trail ----------
 const trekPos = new THREE.Vector3();
-let summitBeat = 'arrive';   // the summit: he arrives, stretches, then stands looking at the sunrise
 const pointed = CAMPS.map(() => false);
 const trekDir = new THREE.Vector3();
 let heading = null;
-function placeTrekker(s, dt, stops) {
+let headingError = 0;          // how far he still has to turn (radians), for the beats below
+// faceCamera: turn to look at us (the opening and summit greetings, see "His beats").
+// calm: turn at a slow walking pace (a calm on-the-spot turn, his feet stepping round) instead
+// of the usual easing, which is quick at the start of a big turn.
+const CALM_TURN = 2.2;         // radians per second (about 1.4 s to turn right round)
+function placeTrekker(s, dt, stops, { faceCamera = false, calm = false } = {}) {
   trailPointAt(s, trekPos);
   trailDirectionAt(s, trekDir);
   let target = Math.atan2(trekDir.x, trekDir.z);
@@ -393,11 +397,91 @@ function placeTrekker(s, dt, stops) {
     d = Math.atan2(Math.sin(d), Math.cos(d));
     target += d * here * amount;
   }
+  // Greeting us: face the camera.
+  if (faceCamera) target = Math.atan2(camera.position.x - trekPos.x, camera.position.z - trekPos.z);
   if (heading === null) heading = target;
   let diff = target - heading;
   diff = Math.atan2(Math.sin(diff), Math.cos(diff));
-  heading += diff * (1 - Math.exp(-dt * 3.2));   // a slow, calm turn
+  let turn = diff * (1 - Math.exp(-dt * 3.2));   // a slow, calm turn
+  if (calm) turn = Math.sign(turn) * Math.min(Math.abs(turn), CALM_TURN * dt);
+  heading += turn;
+  headingError = Math.abs(diff - turn);
   trekker.place(trekPos.x, trekPos.z, heading);
+}
+
+// ---------- His beats: greeting us at the start, and at the summit ----------
+// Opening (once the loading screen has lifted): he stands facing us, waves once on his own, then
+// turns round to the trail; from there he walks as the visitor scrolls. If the visitor starts
+// scrolling before he's done, he simply turns and sets off.
+// Summit (as he arrives): he turns back to us, waves, turns back to the sunrise and the flag, then
+// settles into a calm loop while the hero shows: breathing (his idle), now and then looking out over
+// the view, and a long stretch from time to time. Scrolling back down undoes it as he walks away.
+// Every change is a crossfade (trekker.js eases every clip's weight), and turns are calm, stepping.
+const WAVE_SPEED = 1.1;        // the wave, a touch quicker than recorded (about 4.3 s)
+const WAVE_DELAY = 0.7;        // seconds after the loading screen starts to fade
+let opening = 'off';           // 'face' -> 'wave' -> 'turn' -> 'off'
+let openingClock = 0;
+let revealed = false;
+window.addEventListener('ascent:revealed', () => { revealed = true; }, { once: true });
+function openingBeat(dt, p) {
+  if (opening === 'off') return {};
+  // The visitor set off: let him go (he turns and walks, as ever).
+  if (p > 0.003 || gliding || skipping) { opening = 'off'; trekker.stop('wave'); return {}; }
+  if (opening === 'face') {
+    if (revealed) openingClock += dt;
+    if (openingClock > WAVE_DELAY) opening = trekker.play('wave', { speed: WAVE_SPEED }) ? 'wave' : 'turn';
+    return { faceCamera: true, calm: true };
+  }
+  if (opening === 'wave') {
+    if (!trekker.playing('wave')) opening = 'turn';
+    return { faceCamera: true, calm: true };
+  }
+  // 'turn': back round to the trail, then the normal film takes over.
+  if (headingError < 0.05) opening = 'off';
+  return { calm: true };
+}
+
+// Calm summit loop, in seconds: idle (breathing), looking out over the view, idle, then a stretch.
+const REST = { look: 9, lookEnd: 15, stretch: 24 };
+let summitBeat = 'arrive';     // 'arrive' -> 'face' -> 'wave' -> 'back' -> 'rest'
+let summitClock = 0;
+let summitLoop = null;         // a looping pose while resting ('look'), or null
+function summitBeatFor(dt, atTop) {
+  summitLoop = null;
+  // Walking back down (or not quite there): start again next time he arrives.
+  if (atTop.here < 0.6) { summitBeat = 'arrive'; return {}; }
+  const settled = atTop.here > 0.98 && atTop.shot > 0.9 && trekker.walking < 0.08 && !gliding;
+  if (!settled && summitBeat !== 'rest') return {};
+  summitClock += dt;
+  switch (summitBeat) {
+    case 'arrive':
+      summitBeat = 'face';
+      summitClock = 0;
+      return { faceCamera: true, calm: true };
+    case 'face':
+      // Turned round to us (or it's taking too long): wave.
+      if (headingError < 0.12 || summitClock > 2.5) {
+        summitBeat = trekker.play('wave', { speed: WAVE_SPEED }) ? 'wave' : 'back';
+        summitClock = 0;
+      }
+      return { faceCamera: true, calm: true };
+    case 'wave':
+      if (!trekker.playing('wave')) { summitBeat = 'back'; summitClock = 0; }
+      return { faceCamera: true, calm: true };
+    case 'back':
+      // Back to the sunrise and the flag (the summit stop's own facing, placeTrekker).
+      // (not in the first moment: the error measured then is still the one from facing us)
+      if ((summitClock > 0.3 && headingError < 0.05) || summitClock > 3) { summitBeat = 'rest'; summitClock = 0; }
+      return { calm: true };
+    case 'rest':
+      if (summitClock > REST.look && summitClock < REST.lookEnd) summitLoop = 'look';
+      if (summitClock > REST.stretch && !trekker.playing('stretch')) {
+        trekker.play('stretch');
+        summitClock = 0;   // (the stretch plays out over the next ~9 s of idle, then the loop begins again)
+      }
+      return {};
+  }
+  return {};
 }
 
 // ---------- Story, camps, gear check ----------
@@ -427,7 +511,7 @@ async function glideToEnd() {
   await readyTheRest();   // (the summit must be ready before the mist clears onto it)
   jumpTo(1, { moveScroll: false });
   lenis.scrollTo(heroScroll(), { immediate: true, force: true });
-  summitBeat = 'look';   // straight to the final pose: no stretch on a skip
+  summitBeat = 'rest';   // straight to the calm loop: no greeting on a skip
   if (!reduceMotion) {
     // Start a little back down the slope from the final shot, then settle into it.
     const shot = cameraPath.stops[cameraPath.stops.length - 1].shot;
@@ -490,7 +574,10 @@ function frame(dt, time, rect) {
 
   const s = cameraPath.update(camera, p, dt, snapNextFrame);   // metres along the trail
   const stops = cameraPath.stopInfo(p);
-  placeTrekker(s, dt, stops);
+  // His beats (greeting us at the start and at the summit) can ask him to face us, and to turn calmly.
+  const atTop = stops[stops.length - 1];
+  const beat = opening !== 'off' ? openingBeat(dt, p) : summitBeatFor(dt, atTop);
+  placeTrekker(s, dt, stops, beat);
   snapNextFrame = false;
 
   // Light: one "climb" number (0 = night ... 1 = sunrise) sets the palette's mood. Sky, fog,
@@ -528,14 +615,6 @@ function frame(dt, time, rect) {
   trekker.setSitting(settled > 0.9);
   gear.update(dt, time);
 
-  // The summit: he stretches as the sun breaks, then turns to stand looking at the sunrise,
-  // breathing (his idle). Scrolling back down resets it.
-  const atTop = stops[stops.length - 1];
-  if (atTop.here > 0.98 && atTop.shot > 0.9 && trekker.walking < 0.08 && !gliding) {
-    if (summitBeat === 'arrive') summitBeat = trekker.play('stretch') ? 'stretch' : 'look';
-    else if (summitBeat === 'stretch' && !trekker.playing('stretch')) summitBeat = 'look';
-  }
-  if (atTop.here < 0.6) summitBeat = 'arrive';
 
   // At each landmark: he points at it as the camera arrives, then looks around while we watch.
   camps.forEach((_, i) => {
@@ -543,7 +622,7 @@ function frame(dt, time, rect) {
     if (at.here > 0.9 && at.shot > 0.5 && !pointed[i]) { pointed[i] = true; trekker.play('point'); }
     if (at.here < 0.5) pointed[i] = false;
   });
-  trekker.setLoop(stops.some((st) => st.stop.camp && st.here > 0.95) ? 'look' : null);
+  trekker.setLoop(stops.some((st) => st.stop.camp && st.here > 0.95) ? 'look' : summitLoop);
 
   summit.update(time, mood.climb);
   motes.update(time, smoothstep(0.86, 0.98, mood.climb), camera);
@@ -599,6 +678,8 @@ window.__ascent = {
   ready: false,
   get fps() { return fps; },
   get progress() { return scroll.progress; },
+  // (tests: which of his beats he is in, see "His beats")
+  get beats() { return { opening, summit: summitBeat, turnLeft: Math.round(headingError * 100) / 100 }; },
   info: () => ({ trees: forest.counts, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, textures: renderer.info.memory.textures, geometries: renderer.info.memory.geometries, build: buildTimes, warm: warmTimes.filter((w) => w[1] > 8) }),
   jump: jumpTo,
   // (tests: wait until the whole mountain, not just the opening, is ready to be shown)
@@ -630,7 +711,10 @@ if (returning || STILL !== null || scroll.target > 0.05) await readyTheRest();
 reportProgress('final', 0.6);
 if (returning) comeBack();
 else jumpTo(STILL ?? scroll.target, { moveScroll: STILL !== null });
-if (STILL !== null) summitBeat = 'look';
+if (STILL !== null) summitBeat = 'rest';
+// At the very start of the climb, he greets us once the loading screen lifts (see "His beats").
+// (Not when coming back from a project, in a still picture, or on a page that opened further down.)
+if (!returning && STILL === null && scroll.target < 0.003) opening = 'face';
 // One real frame, drawn exactly as the live loop will draw it (gl.js), while the loading screen covers
 // the canvas: the first live frames draw a few things the warm-up doesn't (the shade behind the
 // words, the exact stage box), and preparing those used to make the film stutter as it appeared.
