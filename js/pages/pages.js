@@ -240,16 +240,26 @@ function openForm(focus = true) {
 // "Book a 20-min call" button, and on shorter windows down to the foot of the section. This moves the
 // card (only the card) up so its bottom lines up with the bottom of the left column; never so far that
 // its top comes closer than 16 px to the top of the section. (Measured, because both heights change
-// with the window's size; it sets one CSS variable, read by the card's own rule in css/home.css.)
+// with the window's size; it sets one CSS variable on the two-column container, read by the card's rule
+// in css/home.css, and by the left column's, which starts at the card's top.)
 function liftFormCard(card) {
   const section = document.getElementById('contact');
   const words = section.querySelector('.contact__words');
+  const row = card.parentElement;   // (the two columns)
   const place = () => {
-    card.style.setProperty('--card-lift', '0px');
+    row.style.setProperty('--card-lift', '0px');
     const c = card.getBoundingClientRect();
-    const hang = c.bottom - words.getBoundingClientRect().bottom;   // how far below the button it ends
+    // How far below the button the card would end with the words centred beside it, from the two heights
+    // alone (so it doesn't depend on where the left column is placed). (The left column is measured without
+    // the headline's small negative margin, which lines its capitals up with the card's top: that margin
+    // must not move the card. Switched off and back on at once, so nothing is ever drawn without it.)
+    const head = words.firstElementChild;
+    head.style.marginTop = '0px';
+    const wordsHeight = words.getBoundingClientRect().height;
+    head.style.marginTop = '';
+    const hang = (c.height - wordsHeight) / 2;
     const room = c.top - section.getBoundingClientRect().top - 16;  // how far it can go up
-    card.style.setProperty('--card-lift', `${Math.max(0, Math.min(hang, room)).toFixed(1)}px`);
+    row.style.setProperty('--card-lift', `${Math.max(0, Math.min(hang, room)).toFixed(1)}px`);
   };
   // Again whenever the words or the section change size (the fonts arriving, the headline's lines being
   // split for their reveal, the window being resized). Moving the card changes no sizes, so this settles.
