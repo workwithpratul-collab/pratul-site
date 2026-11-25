@@ -27,7 +27,7 @@
 @font-face {
   font-family: "Manrope";
   src: url("../assets/fonts/manrope-variable.woff2") format("woff2");
-  font-weight: 400 600;   /* one variable file, cut down to just the weights we use (400 to 600) */
+  font-weight: 400 600;   /* one variable file covers the three weights we use (400, 500, 600) */
   font-style: normal;
   font-display: swap;
 }
