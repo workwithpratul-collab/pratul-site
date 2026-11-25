@@ -1366,6 +1366,8 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
 .footer__mark { font-size: 40px; }
 .footer__small { margin-top: 10px; font-size: 13px; color: var(--footer-small); }
 .footer__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; align-items: end; }
+/* (laptops: Explore has a fourth link, About, so the columns line up by their labels instead) */
+html:not(.mobile-site) .footer__cols { align-items: start; }
 .footer__label {
   margin-bottom: 6px;
   font-family: var(--font-altitude);

@@ -250,11 +250,14 @@ function landingFor(hash) {
     const pin = ScrollTrigger.getAll().find((t) => t.pin === work);
     return pin ? pin.start : work.getBoundingClientRect().top + lenis.scroll;
   }
+  // (About fills exactly one screen, its words already clear of the top bar: its top goes to the top,
+  // so the signature at its foot is on screen too)
+  if (hash === '#about') return document.getElementById('about').getBoundingClientRect().top + lenis.scroll;
   return null;
 }
 document.addEventListener('click', (e) => {
   // (not Services' own Skip link, which points at #work only as its no-script fallback)
-  const a = e.target.closest('a[href="#services"], a[href="#work"]:not([data-svx-skip])');
+  const a = e.target.closest('a[href="#services"], a[href="#work"]:not([data-svx-skip]), a[href="#about"]');
   if (!a || !root.classList.contains('handover')) return;
   const y = landingFor(a.getAttribute('href'));
   e.preventDefault();
