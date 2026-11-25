@@ -122,14 +122,21 @@
   padding: 0 var(--page-gutter);
   transition: background var(--t-base) var(--ease-arrive), backdrop-filter var(--t-base) var(--ease-arrive), opacity var(--t-base) var(--ease-arrive), transform var(--t-base) var(--ease-arrive), box-shadow var(--t-base) var(--ease-arrive);
 }
-.nav__name {
-  margin-right: auto;
+.nav__name { margin-right: auto; }
+/* The wordmark, PRATUL.dev (references/round4/NavHero.dc.html): one baseline, three sizes. The sizes
+   are shares of the P, so the whole mark scales from one number (font-size), here and in the footer. */
+.wordmark {
+  display: inline-flex;
+  align-items: baseline;
   font-family: var(--font-display);
-  font-size: 28px;
-  letter-spacing: -0.01em;
+  font-size: 38px;
+  line-height: 1;
   color: var(--cream);
   text-decoration: none;
+  white-space: nowrap;
 }
+.wordmark__ratul { font-size: 0.66em; letter-spacing: 0.07em; }
+.wordmark__dev { font-size: 0.55em; color: var(--amber); }
 .nav__links { display: flex; gap: var(--s-6); }
 .nav__links a {
   position: relative;
@@ -1371,7 +1378,7 @@
 /* The phone's top bar: name, Book a call, and the menu. */
 .mobile-site .nav { height: 68px; gap: var(--s-3); }
 .mobile-site .nav.is-solid { background: rgba(28, 26, 51, 0.86); }
-.mobile-site .nav__name { font-size: 26px; }
+.mobile-site .nav__name { font-size: 32px; }
 .mobile-site .nav__menu {
   display: inline-grid;
   place-content: center;
@@ -1418,9 +1425,8 @@
 }
 .mobile-site .eyebrow { color: var(--m-peach); }
 /* The mark beside the name (both versions). */
-.nav__name { display: inline-flex; align-items: center; gap: 10px; }
-.nav__mark { width: 34px; height: 20px; fill: none; stroke: var(--amber); stroke-width: 1.5; stroke-linejoin: round; }
-.mobile-site .nav__mark { stroke: var(--m-peach); }
+/* The wordmark on phones: a little smaller, its .dev in the phone's peach. */
+.mobile-site .wordmark__dev { color: var(--m-peach); }
 
 /* Accent and buttons in the mockup's peach. */
 .mobile-site .heading em, .mobile-site .hero__title em { color: var(--m-peach); }

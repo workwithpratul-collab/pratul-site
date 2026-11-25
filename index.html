@@ -353,8 +353,6 @@
     <symbol id="i-ne" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></symbol>
     <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v16M6 14l6 6 6-6"/></symbol>
     <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 20V4M6 10l6-6 6 6"/></symbol>
-    <!-- The mark: two peaks and a smaller one, drawn as one line (the phone's top bar and menu). -->
-    <symbol id="i-peaks" viewBox="0 0 40 24"><path d="M2 21 13 6l6 8 4-5 15 12H2Z"/><path d="M10 10.5 13 6l3 4.2"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></symbol>
     <symbol id="i-need" viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z"/><circle cx="12" cy="12" r="2.6"/></symbol>
     <symbol id="i-note" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></symbol>
@@ -384,7 +382,9 @@
   <!-- One bar everywhere. On the film it appears with the summit hero (see-through over it), and
        becomes a soft blurred bar once you've scrolled past the hero. -->
   <header class="nav" id="site-nav">
-    <a class="nav__name" href="#hero" data-to-top><svg class="nav__mark" aria-hidden="true"><use href="#i-peaks"/></svg>Pratul</a>
+    <!-- The wordmark (references/round4/NavHero.dc.html): a large P, RATUL in smaller capitals, and
+         .dev smaller again in amber, on one baseline. It takes you back to the summit hero. -->
+    <a class="nav__name wordmark" href="#hero" data-to-top aria-label="Pratul.dev, back to the summit"><span class="wordmark__p">P</span><span class="wordmark__ratul">RATUL</span><span class="wordmark__dev">.dev</span></a>
     <nav class="nav__links" id="nav-links" aria-label="Sections">
       <a href="#services">Services</a>
       <a href="#work">Work</a>
