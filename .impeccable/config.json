@@ -143,6 +143,15 @@
         ],
         "createdAt": "2026-11-23T07:11:21.401Z",
         "reason": "Claude: the soft amber light behind the tool in focus is the lantern the Tools thesis names; CLAUDE.md rule 3 (warm means light) allows warm light from lanterns"
+      },
+      {
+        "rule": "overused-font",
+        "value": "instrument serif",
+        "files": [
+          "css/tokens.css"
+        ],
+        "createdAt": "2026-11-25T07:15:43.214Z",
+        "reason": "Pratul's brief: Instrument Serif is the site's chosen display face (CLAUDE.md, references/round4 designs, and the round-4 brief names it for the loader percentage and the wordmark); already ignored for index.html and the style guide"
       }
     ]
   }
