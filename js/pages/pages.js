@@ -422,7 +422,7 @@ function initReveal({ core }) {
   }
   // (Desktop: the contact section's words and button don't slide up into place: they sit still where they
   // are, so nothing in that section moves while scrolling towards the footer.)
-  const items = document.querySelectorAll((core ? '.page section:not(.contact) .lead' : '.page section .lead, .contact__actions') + ', .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__values, .footer__call, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
+  const items = document.querySelectorAll((core ? '.page section:not(.contact) .lead' : '.page section .lead, .contact__actions') + ', .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__values, .about__label, .about__promises, .about__close, .about__sign, .footer__call, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (!e.isIntersecting) continue;
