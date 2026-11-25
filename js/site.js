@@ -219,6 +219,24 @@ function updateNav(y) {
   nav.classList.toggle('is-solid', !atTop && !atHero);
   // (a class on the page too, for anything that must make room for the bar)
   root.classList.toggle('nav-shown', show);
+  updateMarker(atTop || atHero);
+}
+// The section marker (the underline under Services, Work...: js/pages/pages.js) follows the section in
+// the middle of the screen, but it only hears about changes, so coming back up to the summit hero it
+// kept the last section underlined. Over the hero (and the film's start) it is cleared; leaving the
+// hero, whichever section is now in the middle is marked again. (css: .nav-at-hero)
+const navLinks = [...nav.querySelectorAll('.nav__links > a[href^="#"]:not(.btn)')];
+let markerAtHero = null;
+function updateMarker(atHeroNow) {
+  if (atHeroNow === markerAtHero) return;   // (only when that changes, not on every scroll)
+  markerAtHero = atHeroNow;
+  root.classList.toggle('nav-at-hero', atHeroNow);
+  const mid = window.innerHeight * 0.475;   // (the middle band pages.js watches: 45-50% down)
+  for (const a of navLinks) {
+    const r = document.querySelector(a.getAttribute('href'))?.getBoundingClientRect();
+    if (!atHeroNow && r && r.top <= mid && r.bottom >= mid) a.setAttribute('aria-current', 'true');
+    else a.removeAttribute('aria-current');
+  }
 }
 nav.addEventListener('focusin', () => { navFocused = true; updateNav(lenis.scroll); });
 nav.addEventListener('focusout', (e) => {

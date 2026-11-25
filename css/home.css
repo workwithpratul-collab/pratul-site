@@ -143,6 +143,8 @@
   transition: transform var(--t-base) var(--ease-arrive);
 }
 .nav__links a:hover::after, .nav__links a[aria-current]::after { transform: scaleX(1); }
+/* (over the summit hero no section is "here": js/site.js updateMarker) */
+.nav-at-hero .nav__links a[aria-current]:not(:hover)::after { transform: scaleX(0); }
 .nav__menu { display: none; }
 /* Desktop: the bar slides up out of the way while you scroll down, and back in when you clearly
    scroll up (js/site.js). It stays focusable while away, so pressing Tab brings it straight back. */
