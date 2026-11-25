@@ -237,7 +237,7 @@ graphics card prepares something for the first time over the live 3D scene):
    prepared 1.2 s after the dissolve starts instead of at "live".
 
 **What the loader costs and doesn't:** it is drawn by the compositor (transforms and opacity only), so it
-doesn't hold up the world being built; its script is 6 KB and does almost nothing per frame; once it has faded
+doesn't hold up the world being built; its script is 7 KB (3 KB compressed) and does almost nothing per frame; once it has faded
 it is removed (`hidden`), so the film draws exactly as before. The film reaches "live" slightly sooner than
 before, because the poster image is no longer fetched and the later zones' shader work no longer competes with
 the first live frames.
