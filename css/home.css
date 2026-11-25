@@ -1086,6 +1086,9 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  /* (its foot melts into the page colour, which the footer's picture also rises out of: no seam) */
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 120px), transparent);
+  mask-image: linear-gradient(180deg, #000 calc(100% - 120px), transparent);
 }
 .contact__art img { width: 100%; height: 112%; object-fit: cover; object-position: 50% 62%; opacity: 0.85; }   /* (the glowing tent shows below the form panel) */
 .contact__art::after { content: ""; position: absolute; inset: 0; background: var(--contact-shade); }
@@ -1168,119 +1171,125 @@
 .form-done h3 { font-family: var(--font-display); font-weight: 400; font-size: var(--t-line); line-height: 1.1; }
 .form-done p { margin-top: var(--s-3); color: var(--lavender); }
 
-/* ---------- Footer: dawn at base camp (references/round2/Footer.dc.html) ---------- */
-/* One screen: the closing line and its two buttons, a band of links, then the giant name sinking
-   behind two ridges in the first dawn glow, and the last line on the nearest ridge. Every size
-   follows the window's height as well as its width, so it fits from 720 px tall. */
+/* ---------- Footer: "Be the business they look up to." (references/round4/FooterV2.dc.html) ---------- */
+/* Full width, about 560 px tall at 1440 wide (it grows a little with the window, so the picture never
+   crops the trekker). The picture fills it; a soft night shade from the left carries the closing line,
+   and a fade at the foot carries the wordmark and the links. */
 .footer {
-  --dawn-h: clamp(200px, 38vh, 360px);
   position: relative;
   z-index: 2;
-  display: grid;
-  grid-template-rows: auto auto minmax(calc(var(--dawn-h) - 104px), 1fr) auto;
-  height: 100vh;
-  height: 100svh;   /* (exactly one screen, so the last line always sits on the nearest ridge) */
-  padding-top: calc(76px + clamp(16px, 4vh, 40px));
+  height: clamp(520px, 39vw, 680px);
   overflow: clip;
-  background: var(--footer-dawn);
+  background: var(--night);
   color: var(--cream);
 }
-.footer__close { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--s-5) 40px; position: relative; z-index: 2; }
-.footer__kicker, .footer__label, .footer__camp {
+.footer__art { position: absolute; inset: 0; }
+.footer__art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 55% 8%;   /* (keeps the trekker on the summit fully in the frame) */
+  transition: transform 2.4s var(--ease-arrive);
+}
+/* As the footer arrives, the picture settles gently into place (js/pages/pages.js adds .is-in). */
+.footer:not(.is-in) .footer__art img { transform: scale(1.04); }
+.footer::before, .footer__art::before, .footer__art::after { content: ""; position: absolute; pointer-events: none; }
+.footer::before { inset: 0; z-index: 1; background: var(--footer-side); }
+/* (the picture's top melts out of the page colour above it: no hard edge between sections) */
+.footer__art::before { inset: 0 0 auto; z-index: 1; height: 110px; background: var(--footer-top); }
+.footer__art::after { inset: auto 0 0; height: 190px; background: var(--footer-fade); }
+
+/* Top left, over the sky: the closing line and the two ways to get in touch. */
+.footer__call {
+  position: absolute;
+  z-index: 2;
+  left: var(--page-gutter);
+  top: clamp(40px, 4.4vw, 64px);
+  width: min(520px, 42vw);
+}
+.footer__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(44px, 4.45vw, 64px);
+  line-height: 1.04;
+  text-wrap: balance;
+}
+.footer__title em { font-style: italic; color: var(--amber); }
+.footer__line { margin-top: 16px; font-size: 18px; line-height: 1.5; color: var(--cream); }
+.footer__ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+.footer__ctas .btn { min-height: 54px; padding-inline: 28px; }
+.footer__ctas .btn--primary { font-weight: 600; }
+/* The second button: a hairline pill on a little night glass. */
+.btn--line { border: 1px solid var(--footer-line-strong); background: var(--footer-glass); color: var(--cream); padding-inline: 24px; }
+.btn--line:hover { border-color: var(--amber); color: var(--amber); }
+
+/* At the foot, over the fade: the wordmark and the small print, then three columns of links. */
+.footer__base {
+  position: absolute;
+  z-index: 2;
+  left: var(--page-gutter);
+  right: var(--page-gutter);
+  bottom: max(28px, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: 1.3fr 3fr;
+  gap: 32px;
+  align-items: end;
+}
+.footer__mark { font-size: 40px; }
+.footer__small { margin-top: 10px; font-size: 13px; color: var(--footer-small); }
+.footer__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; align-items: end; }
+.footer__label {
+  margin-bottom: 6px;
   font-family: var(--font-altitude);
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 400;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+  color: var(--footer-label);
 }
-.footer__kicker { color: var(--lavender); }
-.footer__title { margin-top: 14px; font-family: var(--font-display); font-weight: 400; font-size: clamp(44px, min(5vw, 8.4vh), 72px); line-height: 1.05; text-wrap: balance; }
-.footer__title em { font-style: italic; color: var(--amber); }
-.footer__ctas { display: flex; flex-wrap: wrap; gap: 14px; flex-shrink: 0; }
-.footer__ctas .btn { min-height: 56px; padding-inline: 28px; }
-.footer__ctas .btn--primary { font-weight: 600; }
-/* The second button: a hairline pill. */
-.btn--line { border: 1px solid var(--footer-line-strong); background: transparent; color: var(--cream); }
-.btn--line:hover { border-color: var(--amber); color: var(--amber); }
-.btn--line:hover .i { transform: none; }
-/* The band of links. */
-.footer__band {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 32px;
-  margin-top: clamp(28px, 6vh, 64px);
-  padding-top: clamp(18px, 3vh, 28px);
-  border-top: 1px solid var(--footer-line);
-}
-.footer__label { margin-bottom: 8px; font-weight: 400; color: var(--lavender-quiet); }
-.footer__col ul { display: grid; margin: 0; padding: 0; list-style: none; }
-.footer__about { max-width: 26ch; font-size: 15px; line-height: 1.55; color: var(--lavender); }
-.footer a:not(.btn) {
+.footer__col ul { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.footer__col a {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: clamp(30px, 4.4vh, 40px);
-  color: var(--lavender-light);
+  min-height: 28px;
+  color: var(--footer-link);
   font-size: 15px;
   text-decoration: none;
   transition: color var(--t-fast) var(--ease-arrive);
 }
-.footer a:not(.btn):hover, .footer a:not(.btn):focus-visible { color: var(--amber); }
-/* The dawn: the glow on the horizon, the giant name, and the two ridges in front of it. */
-.footer__dawn { position: absolute; inset: auto 0 0; height: var(--dawn-h); pointer-events: none; }
-.footer__glow { position: absolute; inset: 0; background: radial-gradient(50% 80% at 72% 100%, var(--footer-glow), transparent 70%); }
-.footer__word {
-  position: absolute;
-  left: max(var(--page-gutter), calc((100% - var(--content)) / 2 - 20px));
-  bottom: calc(var(--dawn-h) * 0.1);
-  font-family: var(--font-display);
-  font-size: clamp(120px, min(21vw, 29vh), 300px);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: var(--footer-word);
-  white-space: nowrap;
-  transition: transform 2.2s var(--ease-arrive);
-}
-.footer__ridges { position: absolute; inset: auto 0 0; width: 100%; height: calc(var(--dawn-h) * 0.72); transition: transform 2.2s var(--ease-arrive); }
-.ridge-back { fill: var(--footer-ridge-back); }
-.ridge-front { fill: var(--footer-ridge-front); }
-/* As the footer arrives, the name rises a little from behind the ridge (js/pages/pages.js adds .is-in). */
-.footer:not(.is-in) .footer__word { transform: translateY(18%); }
-.footer:not(.is-in) .footer__ridges { transform: translateY(6%); }
-/* The last line, on the nearest ridge. */
-.footer__base {
-  grid-row: 4;   /* (the dawn layer is positioned, so it takes no row: keep the last line in the last one) */
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 24px;
-  padding-bottom: max(clamp(16px, 3vh, 30px), env(safe-area-inset-bottom));
-  font-size: 14px;
-  color: var(--lavender);
-}
-.footer__camp { color: var(--lavender); }
-.footer .footer__top-link { color: var(--cream); font-size: 14px; }
-.footer__top-link .i { width: 16px; height: 16px; transition: transform var(--t-fast) var(--ease-arrive); }
-.footer__top-link:hover .i { transform: translateY(-3px); }
-/* Phones and narrow screens: everything stacks; the links in two columns. */
+.footer .footer__top-link { color: var(--cream); }
+.footer__col a:hover, .footer__col a:focus-visible, .footer .footer__top-link:hover { color: var(--amber); }
+
+/* Phones and narrow screens: the picture on top, then the closing line, the links, and the small print. */
 @media (max-width: 900px) {
-  .footer { --dawn-h: 210px; height: auto; padding-top: var(--s-8); }
-  .footer__band { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 20px; }
-  .footer__ctas { width: 100%; flex-direction: column; }
+  .footer { height: auto; display: flex; flex-direction: column; }
+  .footer::before { content: none; }
+  .footer__art { position: relative; aspect-ratio: 5 / 4; }
+  .footer__art img { object-position: 54% 12%; }
+  .footer__art::after { height: 40%; }
+  .footer__call { position: static; width: auto; margin-top: -8px; padding: 0 var(--page-gutter); }
+  .footer__title { font-size: clamp(38px, 10.5vw, 48px); }
+  .footer__line { font-size: 17px; }
+  .footer__ctas { flex-direction: column; margin-top: 24px; }
   .footer__ctas .btn { width: 100%; }
-  .footer__word { font-size: 32vw; bottom: calc(var(--dawn-h) * 0.4); }
-  /* the dawn scene in the flow, and the last lines below it on the nearest ridge's colour */
-  .footer__dawn { position: relative; grid-row: 3; inset: auto; height: var(--dawn-h); margin-top: var(--s-6); }
-  .footer { grid-template-rows: auto auto auto auto; }
-  .footer__base { flex-direction: column; align-items: flex-start; gap: 4px; padding-top: 4px; }
-  .footer__base::before { content: ""; position: absolute; inset: -2px calc(-1 * var(--page-gutter)) 0; z-index: -1; background: var(--footer-ridge-front); }
-  .footer a:not(.btn) { min-height: 44px; }
+  .footer__base {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 32px;
+    margin-top: 40px;
+    padding: 28px var(--page-gutter) calc(28px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--hair);
+  }
+  .footer__brand { order: 2; }
+  .footer__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 20px; align-items: start; }
+  .footer__col a { min-height: 44px; }   /* (a thumb's height) */
+  .footer__mark { font-size: 36px; }
 }
-@media (prefers-reduced-motion: reduce) { .footer__word, .footer__ridges { transition: none; transform: none !important; } }
+.mobile-site .footer__title em { color: var(--m-peach); }
+@media (prefers-reduced-motion: reduce) { .footer__art img { transition: none; transform: none !important; } }
 
 /* ---------- The showreel ---------- */
 .reel {

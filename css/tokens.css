@@ -318,15 +318,16 @@
   --loader-shade: rgba(23, 20, 43, 0.75);
   --loader-mist: rgba(201, 190, 221, 0.16);
   --loader-track: rgba(243, 236, 226, 0.22);
-  /* Footer (references/round2/Footer.dc.html): night warming to dawn, the glow on the horizon (the
-     sun about to rise: a light source), the giant name, the two ridges in front of it, and hairlines. */
-  --footer-dawn: linear-gradient(180deg, #1f1834 0%, #1f1834 40%, #3a2440 76%, #5a3446 100%);
-  --footer-glow: rgba(246, 160, 77, 0.45);
-  --footer-word: rgba(243, 236, 226, 0.92);
-  --footer-ridge-back: #2a2140;
-  --footer-ridge-front: #1a1630;
-  --footer-line: rgba(201, 190, 221, 0.18);
-  --footer-line-strong: rgba(201, 190, 221, 0.35);
+  /* Footer (references/round4/FooterV2.dc.html): the soft night shade from the left behind the closing line,
+     the fade at the foot of the picture behind the links (into --night), the labels, links and hairlines. */
+  --footer-side: linear-gradient(90deg, rgba(23, 20, 43, 0.78) 0%, rgba(23, 20, 43, 0.35) 34%, rgba(23, 20, 43, 0) 55%);
+  --footer-fade: linear-gradient(180deg, rgba(23, 20, 43, 0) 0%, rgba(23, 20, 43, 0.85) 50%, #17142b 100%);
+  --footer-top: linear-gradient(180deg, #1f1834 0%, rgba(31, 24, 52, 0) 100%);   /* (starts on the contact section's last colour, --tone-contact) */
+  --footer-label: #9c90b8;
+  --footer-link: #e4daee;
+  --footer-small: #b7a9d6;
+  --footer-glass: rgba(23, 20, 43, 0.3);
+  --footer-line-strong: rgba(243, 236, 226, 0.45);
   /* Tools (references/round2/Tools.dc.html): the plum glow behind the ribbon, the cards' face, edge
      and shadow (indigo, never black), and each tool's own colour for the soft glow on its card. */
   --tools-glow: radial-gradient(80% 60% at 50% 62%, #3a2a4e 0%, #2a2140 55%, #241d3a 100%);

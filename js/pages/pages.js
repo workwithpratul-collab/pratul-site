@@ -212,7 +212,7 @@ function initAbout() {
   markIn(document.getElementById('about'), { margin: '0px 0px -25% 0px' });
 }
 
-// ---------- The footer: its mountains rise softly as it arrives ----------
+// ---------- The footer: its picture settles softly into place as it arrives ----------
 function initFooter() {
   const footer = document.querySelector('.footer');
   if (reduceMotion) footer.classList.add('is-in');
@@ -374,7 +374,7 @@ function initReveal({ core }) {
       }
     });
   }
-  const items = document.querySelectorAll('.page section .lead, .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__values, .contact__actions, .footer__close, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
+  const items = document.querySelectorAll('.page section .lead, .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__values, .contact__actions, .footer__call, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (!e.isIntersecting) continue;
