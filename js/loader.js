@@ -62,7 +62,7 @@ function setPart(name, value) {
 // ---------- Part 1: files downloaded ----------
 // Every file device.js asked for early (the film's code, three.js, the trekker and his moves). Big
 // files count for more, so the bar doesn't race to 90% and then wait on the character.
-const BIG = [[/pratul-trekker-film\.vrm/, 10], [/clips\.json/, 3], [/three\.(module\.min|core)\.js/, 4]];
+const BIG = [[/pratul-trekker-film\.vrm/, 10], [/clips\.bin/, 1], [/three\.(module\.min|core)\.js/, 4]];
 const wanted = new Map();
 for (const link of document.querySelectorAll('link[rel="modulepreload"], link[rel="preload"]')) {
   if (/\.(webp|woff2)$/.test(link.href)) continue;   // (pictures and fonts: not the film)

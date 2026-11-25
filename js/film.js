@@ -184,11 +184,11 @@ const baseCamp = await step('baseCamp', () => createBaseCamp(scene));
 // for the graphics card to prepare (~0.6 s), so we let him finish setting up on his own first (a few
 // hundred ms; with the world being built at the same time it took three times as long), then start
 // his first draw so the graphics card works on it while the forest and the terrain are built.
-// His eleven animations come ready-made in one small file (assets/animations/clips.json, baked
+// His eleven animations come ready-made in one small file (assets/animations/clips.bin, baked
 // from the Mixamo FBX files and already fitted to this character), instead of eleven FBX files the
 // browser had to download and decode (about 2 MB and half a second of work).
 const CLIPS = ['idle', 'walk', 'jog', 'wave', 'sit', 'sitToStand', 'point', 'look', 'stretch', 'turnLeft', 'turnRight'];
-const trekker = await step('trekker', () => createTrekker(scene, renderer, camera, { clips: CLIPS, clipFile: 'assets/animations/clips.json' }));
+const trekker = await step('trekker', () => createTrekker(scene, renderer, camera, { clips: CLIPS, clipFile: 'assets/animations/clips.bin' }));
 await trekker.ready.catch((e) => console.error('[trekker] failed to load', e));
 buildTimes.trekkerAt = Math.round(performance.now());   // (for measuring: when he was ready)
 const trekkerFirstDraw = drawTrekkerEarly();

@@ -78,8 +78,9 @@ const NIGHT_TINT = new THREE.Color(PRESETS.night.character.tint);
 // onProgress (optional): called with 0..1 as the character file downloads (the loading screen).
 // clips (optional): load only these animations (e.g. ['idle', 'look'] for the mobile opening,
 // where he stands at base camp); by default the film's full set loads, in two batches.
-// clipFile (optional): read those clips from one small JSON file made from the FBX files (already
-// fitted to this character, with repeated keyframes removed) instead of the FBX files themselves.
+// clipFile (optional): read those clips from one small binary file made from the FBX files (already
+// fitted to this character, with repeated keyframes removed: assets/animations/make-clips.mjs)
+// instead of the FBX files themselves.
 export function createTrekker(scene, renderer, camera, { onProgress, clips = null, clipFile = null } = {}) {
   // (The film: start fetching the FBX reader now, alongside the character, as before.)
   if (!clipFile) getFBXLoader();
@@ -169,8 +170,8 @@ export function createTrekker(scene, renderer, camera, { onProgress, clips = nul
     };
     if (clips && clipFile) {
       fetch(clipFile, { signal: clipAbort.signal })
-        .then((res) => res.json())
-        .then((json) => addClips(Object.fromEntries(clips.filter((n) => json[n]).map((n) => [n, THREE.AnimationClip.parse(json[n])]))))
+        .then((res) => res.arrayBuffer())
+        .then((buffer) => addClips(readClipFile(buffer, clips)))
         .catch((err) => console.warn('[trekker] Could not read', clipFile, err));
       return vrm;
     }
@@ -686,6 +687,53 @@ async function loadMixamoClips(vrm, names = Object.keys(ANIMATION_URLS)) {
     return null;
   }
   return clips;
+}
+
+// Read the clips from clips.bin (made by assets/animations/make-clips.mjs, which describes the layout):
+// a short JSON header naming every clip and track, then all the numbers as plain binary. Rotations
+// are stored as 16-bit whole numbers (value x 32767) and come back as the same rotations to within
+// 0.003 degrees; key times (whole milliseconds) and the hips' positions come back exactly.
+// names: which clips to make. Returns { name: THREE.AnimationClip }.
+function readClipFile(buffer, names) {
+  const view = new DataView(buffer);
+  const headerLength = view.getUint32(0, true);
+  const { clips } = JSON.parse(new TextDecoder().decode(new Uint8Array(buffer, 4, headerLength)));
+  // First count how many numbers of each kind there are, to find where each block starts.
+  let floatCount = 0, shortCount = 0, timeCount = 0;
+  for (const clip of Object.values(clips)) {
+    for (const t of clip.tracks) {
+      timeCount += t.keys;
+      if (t.type === 'vector') floatCount += t.keys * 3; else shortCount += t.keys * 4;
+    }
+  }
+  let at = 4 + headerLength;
+  const floats = new Float32Array(buffer, at, floatCount); at += floatCount * 4;
+  const shorts = new Int16Array(buffer, at, shortCount); at += shortCount * 2;
+  const times = new Uint16Array(buffer, at, timeCount);
+  // Then walk through every track in order, taking its share of each block.
+  let f = 0, q = 0, k = 0;
+  const out = {};
+  for (const [name, clip] of Object.entries(clips)) {
+    const tracks = clip.tracks.map((t) => {
+      const keyTimes = new Float32Array(t.keys);
+      for (let i = 0; i < t.keys; i++) keyTimes[i] = times[k++] / 1000;
+      if (t.type === 'vector') {
+        const values = floats.slice(f, f + t.keys * 3);
+        f += t.keys * 3;
+        return new THREE.VectorKeyframeTrack(t.name, keyTimes, values);
+      }
+      const values = new Float32Array(t.keys * 4);
+      for (let i = 0; i < values.length; i += 4) {
+        const x = shorts[q++] / 32767, y = shorts[q++] / 32767, z = shorts[q++] / 32767, w = shorts[q++] / 32767;
+        // (rescaled to exactly unit length, as a rotation should be: the rounding nudges it by ~0.00003)
+        const len = Math.hypot(x, y, z, w) || 1;
+        values[i] = x / len; values[i + 1] = y / len; values[i + 2] = z / len; values[i + 3] = w / len;
+      }
+      return new THREE.QuaternionKeyframeTrack(t.name, keyTimes, values);
+    });
+    if (names.includes(name)) out[name] = new THREE.AnimationClip(name, clip.duration, tracks, clip.blendMode);
+  }
+  return out;
 }
 
 // Convert one Mixamo FBX animation into a clip for this VRM.

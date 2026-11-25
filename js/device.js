@@ -68,7 +68,7 @@
         document.head.appendChild(m);
       });
       // The trekker and his animations (the same requests trekker.js makes, so the browser reuses them).
-      ['assets/pratul-trekker-film.vrm', 'assets/animations/clips.json'].forEach(function (href) {
+      ['assets/pratul-trekker-film.vrm', 'assets/animations/clips.bin'].forEach(function (href) {
         var f = document.createElement('link');
         f.rel = 'preload';
         f.as = 'fetch';
