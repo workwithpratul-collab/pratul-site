@@ -27,6 +27,8 @@ const WEIGHT = { files: 0.3, build: 0.3, gpu: 0.32, final: 0.08 };
 const parts = { files: 0, build: 0, gpu: 0, final: 0 };
 const real = () => Object.keys(WEIGHT).reduce((sum, k) => sum + WEIGHT[k] * parts[k], 0);
 
+const GLIDE = 0.1;      // the slowest the number moves while loading: 10% a second (1% every 0.1 s)...
+const LEAD = 0.15;      // ...but never more than this far ahead of the real progress
 let shown = 0;          // what the screen shows (0..1)
 let goal = 0;           // where the shown value is heading
 let written = -1;       // the last value shown as a number (so we only touch it when it changes)
@@ -112,6 +114,11 @@ function tick(now) {
     const waited = (now - realSince) / 1000;
     goal = Math.max(goal, Math.min(r + 0.06 * (1 - Math.exp(-waited / 1.6)), 0.97));
     if (goal > shown) shown += (goal - shown) * (1 - Math.exp(-dt * 2.6));
+    // And it never stands still: it always glides on by at least GLIDE per second, up to LEAD ahead of
+    // the real value (still never past 97%). Waiting for the libraries to download used to hold the
+    // number on 2-3% for almost half a second.
+    const ahead = Math.min(r + LEAD, 0.97);
+    if (shown < ahead) { shown = Math.min(shown + GLIDE * dt, ahead); goal = Math.max(goal, shown); }
   }
   write();
   if (shown >= 1) { setTimeout(() => finish(false), 120); return; }
