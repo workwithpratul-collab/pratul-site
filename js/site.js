@@ -55,6 +55,14 @@ window.addEventListener('ascent:ready', (e) => {
   document.fonts.ready.then(buildHandover);
   onScroll();
 }, { once: true });
+// The loading screen's safety net handed over before the film was ready (a slow connection, a stuck
+// download): the page is never locked. It can be scrolled at once, over the film's pictures, and the
+// film catches up behind a soft mist when it's ready (js/film.js).
+window.addEventListener('ascent:revealed', () => {
+  if (api || root.classList.contains('no-film')) return;
+  root.classList.remove('is-loading');
+  lenis.start();
+}, { once: true });
 
 // ---------- 2. Load the film after the page has painted ----------
 // requestIdleCallback waits for a quiet moment, so the first paint and the first interactions are

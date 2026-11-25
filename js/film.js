@@ -281,7 +281,10 @@ async function compileTheRest() {
     summit.update(0, 0);           // (...so they can be hidden again at once)
     await done;
     for (const t of texturesOf([part])) renderer.initTexture(t);
-    await gpuSettled();
+    // (in a hurry, only a short wait: nothing new is on screen meanwhile, and while the canvas isn't
+    // drawing, the browser only checks the graphics card's progress every ~0.17 s, so a full wait for
+    // each of the ~50 parts added up to 8 s)
+    await gpuSettled(hurry ? 30 : 2000);
     await frame();
   }
   // Then back on camera.
@@ -550,7 +553,9 @@ const WAVE_SPEED = 1.1;        // the wave, a touch quicker than recorded (about
 const WAVE_DELAY = 0.7;        // seconds after the loading screen starts to fade
 let opening = 'off';           // 'face' -> 'wave' -> 'turn' -> 'off'
 let openingClock = 0;
-let revealed = false;
+// (The loading screen may have lifted already, before this line ran: the safety net can hand over
+// while the world is still being built. It removes .film-veiled from the page when it lifts.)
+let revealed = !document.documentElement.classList.contains('film-veiled');
 window.addEventListener('ascent:revealed', () => { revealed = true; }, { once: true });
 function openingBeat(dt, p) {
   if (opening === 'off') return {};
@@ -891,12 +896,31 @@ if (!returning && STILL === null && scroll.target < 0.003) opening = 'face';
   await gpuSettled();
   reportProgress('final', 1);
 }
+// The safety net: the loading screen handed over before the film was ready (js/loader.js), and the
+// page could be scrolled meanwhile (site.js doesn't lock it). If the visitor is now somewhere up the
+// climb, the film catches up behind a soft mist: the mist rolls in over the pictures, the film jumps
+// to where the page is now and starts drawing, the pictures fade away under the mist, and it clears
+// onto the live film. (Not on the summit hero, after "Skip the film": its picture simply cross-fades
+// into the live summit, which looks the same.)
+const catchUp = revealed && !returning && STILL === null && scroll.target > 0.003 && scroll.target < 0.999
+  && lenis.targetScroll < filmEndScroll() + window.innerHeight;
+if (catchUp) {
+  await veil(true, { duration: reduceMotion ? 400 : 700 });
+  if (scroll.target > 0.05) await readyTheRest();   // (the page may have moved on further meanwhile)
+  jumpTo(scroll.target, { moveScroll: false });
+}
 view.ready = true;
 wake();
 live = true;
 window.__ascent.ready = true;
 // site.js and loader.js listen for this: the loading screen glides to 100% and fades into the film.
 window.dispatchEvent(new CustomEvent('ascent:ready', { detail: window.__ascent }));
+if (catchUp) {
+  // (a few frames drawn under the mist first, so nothing new is prepared in plain sight)
+  for (let i = 0; i < 3; i++) await new Promise((resolve) => requestAnimationFrame(resolve));
+  await gpuSettled(400);
+  await veil(false, { duration: reduceMotion ? 500 : 900 });
+}
 // Now the rest of the mountain, in the background, while the visitor reads the opening: once the
 // loading screen has faded (1.2 s after it starts to), so the graphics card is free while the film
 // appears. Done at the same moment, every frame of the fade queued behind that work and stuttered.
