@@ -109,6 +109,22 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] While loading (under the poster), preparing the trekker holds the page for up to ~0.6-0.8 s in one go (about the same as before); Skip and the menu don't answer during it.
 - [ ] The later zones finish preparing in the background ~2-3 s after the film appears; a visitor who scrolls very fast in the first seconds gets a short mist while they finish (the same mist as a fast drag).
 
+- [x] New 1: loading screen (references/round4/Loader.dc.html). Snow spreads down the mountain from the peak as the film really loads (files downloaded, world built, opening prepared on the graphics card, last checks), smoothed so it only rises and never shows 100% early; snowfall thickens, petals drift, mist rests at the base; percentage and thin bar; fades into the film. Instant (inline styles, 9 + 18 KB pictures, film mode only); reduce motion = no snowfall or petals, the snow simply fades in. Phones unchanged. Checked at 1440x900 and 1366x768.
+- [x] New 2: footer to round4/FooterV2.dc.html: summit-crowd picture full-bleed (78 KB .webp), "Be the business they look up to." with Book a call / Email me, the wordmark, small print and three link columns over the fade. Phones: picture on top, then stacked. No seam with the contact section above.
+- [x] New 3: PRATUL.dev wordmark (large P, RATUL, amber .dev, one baseline) in the top bar on desktop and phone, and in the footer; the mountain icon is gone. Still goes back to the summit hero.
+- [x] New 4: desktop top bar hides on scroll down, comes back on a deliberate scroll up (120 px or a quick flick) or keyboard focus; always there at the top and over the summit hero. Phones unchanged.
+- [x] New 5: the trekker faces us and waves when the film appears, then turns to the trail; at the summit he turns to us, waves, turns back to the sunrise and the flag, and rests (breathing, looking out, a stretch now and then). Crossfades throughout; scrolling back reverses it.
+- [x] New 6: P mark and full logo saved as optimised .webp (and a 180 px PNG) in assets/brand/, not placed yet.
+- [x] New round speed check (PERFORMANCE.md): film live as soon as before or sooner, no new stutter (after fixing three found by the check), phones unchanged.
+- [ ] Loading screen: it uses the small 588 px preview paintings, which look soft on a big screen. Pratul: put the full-size mountain-bare.png and mountain-snow.png in assets/loader/ and run `bash assets/loader/make-webp.sh`.
+- [ ] Loading screen: while the trekker's shaders are prepared (~0.6 s in one go) the percentage pauses; the snow and the bar keep gliding through it.
+- [ ] Loading screen: it covers "Skip the film" while it shows (before, Skip worked over the poster during loading).
+- [ ] Top bar over the film: no background blur there (it stalled 90-290 ms per slide), a denser night tint instead; the blur returns below the film. Pratul to judge the look.
+- [ ] "Skip the film" lost its background blur too (same reason), with a denser tint.
+- [ ] Footer "Explore" lists Services, Work and Process, as in the design: About is no longer linked from the footer (it is in the top bar).
+- [ ] Case-study pages still show plain "Pratul" in their top bar, not the new wordmark.
+- [ ] Trekker: the wave is the whole Waving clip (one greeting with a few hand swings, ~4.3 s). Pratul to judge whether "once" should be shorter. "Skip the film" goes straight to his calm summit loop, without the greeting.
+
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.
 - [x] Work cards only play video on hover, so touch screens see stills.

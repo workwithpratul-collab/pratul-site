@@ -198,3 +198,50 @@ base-camp world on the main thread and ~0.6 s for the graphics driver to prepare
 shaders, plus three.js from the CDN. The trekker's preparation now holds the page for up to ~0.6-0.8 s in one go
 while the poster is showing (the page can't be scrolled yet, but the "Skip" button and the menu don't answer
 during it). Chrome keeps prepared shaders on disk, so a second visit is faster than these first-visit numbers.
+
+## New ideas round: loader, footer, wordmark, hiding top bar, trekker greetings (Nov 25)
+
+**How it was measured.** The same way as the polish round: the local gzip server (scratchpad tool), libraries
+from the real jsDelivr CDN, Chrome with the real graphics card (RTX 3050 laptop, ANGLE on Direct3D 11), 1440 x 900,
+the shader cache switched off (a first visit). "Before" is commit `190e80a` (the end of the polish round), served
+side by side with the new version and run alternately, 5 runs each. "Live" = the film can be scrolled
+(`ascent:ready`); "shown" = the loading screen starts to dissolve into it (new). Smoothness right after going
+live = every frame for 2 s, scrolling gently. The climb = the whole film dragged through in ~950 frames.
+
+| What | Before | After |
+|---|---|---|
+| Page open -> live film (median of 5) | 2.67 s (2.66-2.73) | **2.59 s** (2.57-2.67) |
+| Main-thread blocking before live (median) | 1.27 s | 1.17 s |
+| Longest single block before live | 0.49-0.54 s | 0.49-0.52 s |
+| First paint | 0.57-0.63 s (the poster) | 0.59-0.70 s (the loading screen, 0% and the bare mountain) |
+| Film shown to the visitor | poster cross-fades from "live" (1.2 s fade) | live + 0.65 s (the loader glides to 100%), then a 1.1 s dissolve |
+| 2 s after live: p95 frame / worst / frames over 33 ms | 8.5-8.9 ms / 41-43 ms / 1 | 8.6-8.9 ms / 45-69 ms / 1 |
+| Climbing the whole film: median / p95 frame | 6.9-7.2 ms / 8.8-11.7 ms | 7.1-7.3 ms / 11.6-12.6 ms (run-to-run noise) |
+| Top bar sliding in and out over the film (3 cycles) | (it never showed during the film) | 7 ms worst after the first scroll |
+| Desktop download before live | 2,302 KB | 2,312 KB (the loader's two small pictures; the poster is no longer fetched) |
+| Phone first load: total / first paint | 241 KB / 1.44 s | 245 KB / 1.39 s (+3 KB of HTML; no loader, footer or brand files) |
+
+**Three stutters the check found, and fixed before committing** (all only visible on a first visit, when the
+graphics card prepares something for the first time over the live 3D scene):
+1. **The top bar's background blur over the moving film: 90-290 ms on every slide** (not only the first). Over
+   the film the bar now has a denser night tint and no blur; it gets its blur back once the summit has sunk into
+   the page, where sliding it in and out with the blur costs nothing (measured over Work's 3D ridge and Process:
+   7-14 ms worst).
+2. **"Skip the film"'s background blur: ~200 ms** the first time it appeared over the live scene (it used to
+   appear over the poster while loading). A denser tint, no blur. This also saves a little on every frame of the
+   film, since a blur over the moving scene is redone every frame.
+3. **The loader's first dissolve frame: 40-160 ms.** Fading the sliding snow window (with its mask), the full bar
+   and the mist over the live film was the cost, together with the later zones' shaders being prepared at the
+   same moment. As the dissolve starts, the snow window becomes a plain copy of the same painting (it is fully
+   revealed by then, so it looks identical), the full bar and the mist step out, and the later zones are
+   prepared 1.2 s after the dissolve starts instead of at "live".
+
+**What the loader costs and doesn't:** it is drawn by the compositor (transforms and opacity only), so it
+doesn't hold up the world being built; its script is 6 KB and does almost nothing per frame; once it has faded
+it is removed (`hidden`), so the film draws exactly as before. The film reaches "live" slightly sooner than
+before, because the poster image is no longer fetched and the later zones' shader work no longer competes with
+the first live frames.
+
+**Not changed:** the remaining slow frames on the climb are the ones from before (mist skips on a fast drag, each
+project video starting its decoder), and the ~80-110 ms frame ~3 s after live is the Work ridge being built
+(as before).
