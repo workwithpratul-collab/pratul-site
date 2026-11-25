@@ -316,10 +316,15 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
   min-height: 0;
   padding-block: calc(76px + clamp(16px, 4vh, 48px)) clamp(20px, 5vh, 56px);
 }
+/* (Contact: more room at its foot, so the words, the button and the form sit a little higher, clear of
+   the fade into the footer.) */
+[data-mode="film"] .contact { padding-bottom: clamp(72px, 13vh, 150px); }
 /* Each section's tone (references/round2/Palette.dc.html): slowly warmer from Work down to the
    dawn-lit footer. Every section blends in from the one above it, so there is no hard edge. */
 .about { background: linear-gradient(180deg, var(--tone-about-top) 0, transparent 16vh), var(--about-glow); }
 .tools { background: linear-gradient(180deg, var(--tone-about-bottom) 0, transparent 14vh), var(--tools-glow); }
+/* (Desktop: its foot settles into --tone-tools, the colour Contact begins with: no line between them.) */
+[data-mode="film"] .tools { background: linear-gradient(180deg, var(--tone-about-bottom) 0, transparent 14vh), linear-gradient(180deg, transparent calc(100% - 22vh), var(--tone-tools)), var(--tools-glow); }
 .contact { background: var(--tone-contact); }
 /* Anything that must sit above the shared 3D canvas. */
 .page .wrap, .footer .wrap, .about__photo, .about__text, .contact__art { position: relative; z-index: 2; }
@@ -1130,18 +1135,22 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
   z-index: 1;   /* (under the words and the form, .contact__inner) */
   height: calc(100% - 140px);
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 180px), transparent);
-  mask-image: linear-gradient(180deg, #000 calc(100% - 180px), transparent);
+  /* (it fades in at its top, so the section begins on its plain colour, and melts away at its foot) */
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 200px, #000 calc(100% - 180px), transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 200px, #000 calc(100% - 180px), transparent);
 }
 .contact__art img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; opacity: 0.85; }
-/* Desktop: the section fades down into the colour the footer rises out of (--seam), under the words. */
+/* Desktop: the section fades down into the footer picture's own top colours (--seam-ramp), under the
+   words, so the picture starts at its natural brightness with nothing over it and no line between. */
 [data-mode="film"] .contact::after {
   content: "";
   position: absolute;
   inset: auto 0 0;
   z-index: 1;
   height: 220px;
-  background: linear-gradient(180deg, var(--seam-clear), var(--seam));
+  background: var(--seam-ramp);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000);
+  mask-image: linear-gradient(180deg, transparent, #000);
   pointer-events: none;
 }
 [data-mode="film"] .contact__inner { z-index: 2; }
@@ -1248,12 +1257,11 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
 }
 /* As the footer arrives, the picture settles gently into place (js/pages/pages.js adds .is-in). */
 .footer:not(.is-in) .footer__art img { transform: scale(1.04); }
-.footer::before, .footer__art::before, .footer__art::after { content: ""; position: absolute; pointer-events: none; }
+.footer::before, .footer__art::after, .mobile-site .footer__art::before { content: ""; position: absolute; pointer-events: none; }
 .footer::before { inset: 0; z-index: 1; background: var(--footer-side); }
-/* (the picture's top rises out of the colour the contact section fades into, --seam: no line between
-   them. Above the picture, below the words. Phones: a shorter fade from their own page colour.) */
-.footer__art::before { inset: 0 0 auto; z-index: 1; height: 220px; background: linear-gradient(180deg, var(--seam), var(--seam-clear)); }
-.mobile-site .footer__art::before { height: 110px; background: var(--footer-top); }
+/* (Desktop: nothing over the top of the picture, so the trekker's face is at full brightness; the contact
+   section fades into it instead. Phones: unchanged, a short fade from their own page colour.) */
+.mobile-site .footer__art::before { inset: 0 0 auto; z-index: 1; height: 110px; background: var(--footer-top); }
 .footer__art::after { inset: auto 0 0; height: 190px; background: var(--footer-fade); }
 
 /* Top left, over the sky: the closing line and the two ways to get in touch. */
