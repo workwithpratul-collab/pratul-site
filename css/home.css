@@ -190,7 +190,11 @@
   row-gap: clamp(20px, 3.5vh, 40px);
   padding: 0 var(--page-gutter) clamp(24px, 4.5vh, 44px);
 }
-[data-mode="film"] .hero__inner { grid-row: 2; align-self: center; position: relative; width: min(820px, 60vw); }
+/* The words sit low, on the same band as the trekker and the flag (beside them, over the knoll and the
+   sea of clouds), not high in the open sky: the headline's lines line up with the flag, and the sky
+   above stays open. (Checked at 1440x900, 1366x768 and 1536x864: clear of the trekker and the flag.) */
+[data-mode="film"] .hero__inner { grid-row: 2; align-self: end; position: relative; width: min(820px, 60vw); padding-bottom: clamp(6px, 1.6vh, 16px); }
+[data-mode="film"] .hero__title { font-size: clamp(52px, min(5.6vw, 9.4vh), 96px); }
 /* The bottom row: the altitude label, and "Replay the climb" beside it (desktop). */
 .hero__base { display: contents; }
 [data-mode="film"] .hero__base { grid-row: 3; display: flex; align-items: flex-end; gap: clamp(28px, 3vw, 48px); justify-self: start; }
@@ -235,6 +239,14 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
     linear-gradient(180deg, rgba(21, 19, 42, 0.45) 0%, rgba(21, 19, 42, 0) 22%);
   opacity: 0;
   transition: opacity 1.4s var(--ease-flow);
+}
+/* Desktop: the words sit low, over the bright sea of clouds, so the shade gathers a little more there
+   (a soft pool of night colour, lower left, fading out well before the trekker). */
+[data-mode="film"] .hero__shade {
+  background:
+    radial-gradient(48% 52% at 16% 74%, rgba(21, 19, 42, 0.5), rgba(21, 19, 42, 0.22) 55%, rgba(21, 19, 42, 0) 100%),
+    linear-gradient(90deg, rgba(21, 19, 42, 0.62) 0%, rgba(21, 19, 42, 0.34) 34%, rgba(21, 19, 42, 0) 58%),
+    linear-gradient(180deg, rgba(21, 19, 42, 0.45) 0%, rgba(21, 19, 42, 0) 22%);
 }
 .hero-in .hero__shade, .mobile-site .hero__shade { opacity: 1; }
 .hero__title {
