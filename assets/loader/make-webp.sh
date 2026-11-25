@@ -15,8 +15,9 @@ for name in mountain-bare mountain-snow; do
   src="$name.png"
   [ -f "$src" ] || src="$name-preview.jpg"
   for w in 1280 1920; do
-    # scale: shrink to w wide if larger, keep the shape; quality 78 is plenty for a soft painting
-    ffmpeg -y -v error -i "$src" -vf "scale='min($w,iw)':-2" -c:v libwebp -quality 78 -compression_level 6 "$name-$w.webp"
+    # scale: shrink to w wide if larger, keep the shape (-1: the exact height, no rounding to an even
+    # number, so both pictures keep exactly the same shape); quality 78 is plenty for a soft painting
+    ffmpeg -y -v error -i "$src" -vf "scale='min($w,iw)':-1" -c:v libwebp -quality 78 -compression_level 6 "$name-$w.webp"
   done
   echo "$name: from $src"
 done

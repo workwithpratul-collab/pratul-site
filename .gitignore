@@ -18,6 +18,7 @@ tests/
 # Full-size source files: kept on this computer, not on GitHub. The site only uses the
 # smaller .webp versions made from them.
 assets/originals/
+assets/loader/*.png
 assets/redesign/*.png
 assets/redesign/about-photo.jpg
 references/mockups/
