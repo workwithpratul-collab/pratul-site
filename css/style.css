@@ -145,9 +145,10 @@ html:not(.mobile-site) .m-only { display: none !important; }
   background: var(--night) center / cover no-repeat;
   transition: opacity 1.2s var(--ease-flow);
 }
-[data-mode="film"] .poster--opening { background-image: url("../assets/poster/opening-1280.webp"); }
+/* (Only if the film can't start: while it loads, the loading screen covers the stage, index.html.) */
+[data-mode="film"].no-film .poster--opening { background-image: url("../assets/poster/opening-1280.webp"); }
 @media (min-width: 1300px), (min-resolution: 1.5dppx) {
-  [data-mode="film"] .poster--opening { background-image: url("../assets/poster/opening-1920.webp"); }
+  [data-mode="film"].no-film .poster--opening { background-image: url("../assets/poster/opening-1920.webp"); }
 }
 .is-live .poster--opening { opacity: 0; }
 .no-film .poster--opening { opacity: 1; }
@@ -245,6 +246,8 @@ html:not(.mobile-site) .m-only { display: none !important; }
   animation: breathe 3.2s var(--ease-flow) infinite;
 }
 .is-loading .scroll-hint__rail { animation: none; opacity: 0.4; }
+/* Under the loading screen the film's words wait, then rise as it fades away (js/loader.js). */
+.film-veiled .overlay, .film-veiled .overlay * { animation-play-state: paused !important; }
 .has-climbed .scroll-hint { animation: none; opacity: 0; }
 @keyframes breathe {
   0%, 100% { transform: scaleY(0.35); opacity: 0.4; }

@@ -53,6 +53,126 @@
   <!-- The hero and every section below it, on the film and on phones. -->
   <link rel="stylesheet" href="css/home.css">
 
+  <!-- The loading screen (desktop film only, js/loader.js): written here, not in a CSS file, so it is
+       styled on the very first frame. Phones never show it, so they never download its pictures
+       (they are CSS backgrounds that only apply in film mode).
+       --p is how far the film has loaded (0..1); --e is where the snow's soft edge has reached down
+       the screen (from just above the top at 0, to the bottom at 1). -->
+  <style>
+    .loader { display: none; }
+    [data-mode="film"] .loader {
+      --p: 0;
+      --h: 100vh;
+      --edge: 0.26;   /* how soft the snow's edge is, as a share of the screen's height */
+      --e: calc(var(--p) * (1 + var(--edge)) - var(--edge));
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      overflow: hidden;
+      background: var(--night);
+      transition: opacity 1.1s var(--ease-flow);
+    }
+    .loader[hidden], .is-still .loader { display: none !important; }
+    .loader.is-done { opacity: 0; pointer-events: none; }
+    /* The two paintings, lined up exactly: bare below, snowy above. */
+    .loader__art { position: absolute; left: 0; top: 0; width: 100%; height: var(--h); background: center 30% / cover no-repeat; }
+    .loader__bare { background-image: url("assets/loader/mountain-bare-1280.webp"); }
+    .loader__snow { background-image: url("assets/loader/mountain-snow-1280.webp"); }
+    @media (min-width: 1300px), (min-resolution: 1.5dppx) {
+      .loader__bare { background-image: url("assets/loader/mountain-bare-1920.webp"); }
+      .loader__snow { background-image: url("assets/loader/mountain-snow-1920.webp"); }
+    }
+    /* The snowy painting is shown through a window that slides down from the top, with a soft lower
+       edge (a gradient mask). The painting inside slides back up by the same amount, so it stays
+       exactly in place over the bare one. Only transforms move: smooth even while the page is busy. */
+    .loader__reveal {
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      height: calc(var(--h) * (1 + var(--edge)));
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(#000 calc(100% - var(--h) * var(--edge)), transparent);
+      mask-image: linear-gradient(#000 calc(100% - var(--h) * var(--edge)), transparent);
+      transform: translate3d(0, calc((var(--e) - 1) * var(--h)), 0);
+    }
+    .loader__reveal > .loader__snow { transform: translate3d(0, calc((1 - var(--e)) * var(--h)), 0); }
+    .loader__reveal, .loader__reveal > .loader__snow, .loader__bar > span { transition: transform 1.2s var(--ease-out); will-change: transform; }
+    /* Falling snow: three layers of tiny dots that loop downwards; the nearer layers fade in as
+       the film loads, so the snowfall thickens. */
+    .loader__fall {
+      position: absolute;
+      left: -8%; right: -8%;
+      top: calc(-1 * var(--tile));
+      height: calc(100% + var(--tile));
+      background-size: 100% var(--tile);
+      animation: loader-fall var(--fall) linear infinite;
+      transition: opacity 0.9s var(--ease-flow);
+      will-change: transform;
+    }
+    .loader__fall--far {
+      --tile: 180px; --fall: 26s;
+      opacity: calc(0.45 + 0.55 * min(1, var(--p) * 2));
+      background-image: radial-gradient(1px 1px at 12% 30%, var(--loader-snow-soft) 60%, transparent), radial-gradient(1px 1px at 37% 82%, var(--loader-snow-soft) 60%, transparent), radial-gradient(1.5px 1.5px at 58% 12%, var(--loader-snow-soft) 60%, transparent), radial-gradient(1px 1px at 76% 60%, var(--loader-snow-soft) 60%, transparent), radial-gradient(1px 1px at 91% 24%, var(--loader-snow-soft) 60%, transparent), radial-gradient(1px 1px at 4% 70%, var(--loader-snow-soft) 60%, transparent);
+    }
+    .loader__fall--mid {
+      --tile: 260px; --fall: 17s;
+      opacity: clamp(0, (var(--p) - 0.15) * 2.5, 1);
+      background-image: radial-gradient(1.5px 1.5px at 8% 14%, var(--loader-snow) 60%, transparent), radial-gradient(2px 2px at 27% 58%, var(--loader-snow-soft) 60%, transparent), radial-gradient(1.5px 1.5px at 46% 36%, var(--loader-snow) 60%, transparent), radial-gradient(2px 2px at 64% 88%, var(--loader-snow-soft) 60%, transparent), radial-gradient(1.5px 1.5px at 83% 46%, var(--loader-snow) 60%, transparent), radial-gradient(1.5px 1.5px at 96% 6%, var(--loader-snow-soft) 60%, transparent);
+    }
+    .loader__fall--near {
+      --tile: 340px; --fall: 11s;
+      opacity: clamp(0, (var(--p) - 0.45) * 2.4, 1);
+      background-image: radial-gradient(2.5px 2.5px at 16% 80%, var(--loader-snow) 60%, transparent), radial-gradient(3px 3px at 41% 22%, var(--loader-snow) 60%, transparent), radial-gradient(2.5px 2.5px at 69% 64%, var(--loader-snow) 60%, transparent), radial-gradient(3px 3px at 88% 10%, var(--loader-snow-soft) 60%, transparent);
+    }
+    @keyframes loader-fall { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-2%, var(--tile), 0); } }
+    /* A few cherry petals, drifting down from the branch at the top left. */
+    .loader__petal {
+      position: absolute;
+      top: -12px;
+      width: 9px; height: 6px;
+      border-radius: 60% 40% 60% 40%;
+      background: var(--loader-petal);
+      opacity: 0.85;
+      animation: loader-petal var(--d) linear var(--w) infinite;
+      will-change: transform;
+    }
+    @keyframes loader-petal {
+      from { transform: translate3d(0, 0, 0) rotate(0deg); }
+      to   { transform: translate3d(var(--x), calc(100vh + 24px), 0) rotate(540deg); }
+    }
+    /* Mist resting at the foot of the mountain, drifting very slowly. */
+    .loader__mist {
+      position: absolute;
+      left: -10%; right: -10%; bottom: 8%;
+      height: 32%;
+      background: radial-gradient(40% 45% at 25% 60%, var(--loader-mist), transparent 70%), radial-gradient(45% 40% at 72% 55%, var(--loader-mist), transparent 70%);
+      animation: loader-mist 24s var(--ease-flow) infinite alternate;
+      will-change: transform;
+    }
+    @keyframes loader-mist { to { transform: translate3d(4%, 0, 0); } }
+    /* The soft shade at the bottom, behind the percentage. */
+    .loader__shade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, var(--loader-shade)); }
+    .loader__count {
+      position: absolute;
+      left: 0; right: 0; bottom: clamp(56px, 10vh, 92px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      color: var(--cream);
+    }
+    .loader__pct { margin: 0; font-family: var(--font-display); font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; }
+    .loader__bar { width: 240px; height: 3px; border-radius: 2px; background: var(--loader-track); overflow: hidden; }
+    .loader__bar > span { display: block; height: 100%; background: var(--cream); border-radius: inherit; transform: scaleX(var(--p)); transform-origin: left; }
+    /* "Reduce motion": no falling snow, no petals, no drifting mist; the snow simply fades in. */
+    @media (prefers-reduced-motion: reduce) {
+      .loader__fall, .loader__petal, .loader__mist { animation: none; }
+      .loader__fall, .loader__petal { display: none; }
+      .loader__reveal { height: var(--h); transform: none; -webkit-mask-image: none; mask-image: none; }
+      .loader__reveal > .loader__snow { transform: none; opacity: var(--p); transition: opacity 0.8s var(--ease-flow); }
+    }
+  </style>
+
   <!--
     The import map tells the browser where to find each library when our code says
     `import ... from 'three'`. Every version is pinned, so the site never changes by surprise.
@@ -75,6 +195,31 @@
 <body>
   <a class="skip-to-content" href="#content">Skip to the content</a>
 
+  <!-- The loading screen (desktop film only): snow spreads down the mountain as the film loads, then
+       it fades into the film. Styles above (inline), behaviour in js/loader.js. -->
+  <div class="loader" id="loader" role="progressbar" aria-label="Loading the film" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div class="loader__art loader__bare" aria-hidden="true"></div>
+    <div class="loader__reveal" aria-hidden="true"><div class="loader__art loader__snow"></div></div>
+    <div class="loader__mist" aria-hidden="true"></div>
+    <div class="loader__fall loader__fall--far" aria-hidden="true"></div>
+    <div class="loader__fall loader__fall--mid" aria-hidden="true"></div>
+    <div class="loader__fall loader__fall--near" aria-hidden="true"></div>
+    <!-- each petal: where it starts (left), how far it drifts sideways (--x), how long it takes (--d)
+         and how far into its fall it already is when the page opens (a negative delay, --w) -->
+    <span class="loader__petal" style="left:4%;--x:22vw;--d:13s;--w:-2s" aria-hidden="true"></span>
+    <span class="loader__petal" style="left:11%;--x:14vw;--d:16s;--w:-9s" aria-hidden="true"></span>
+    <span class="loader__petal" style="left:17%;--x:26vw;--d:12s;--w:-5s" aria-hidden="true"></span>
+    <span class="loader__petal" style="left:23%;--x:12vw;--d:18s;--w:-13s" aria-hidden="true"></span>
+    <span class="loader__petal" style="left:29%;--x:20vw;--d:14.5s;--w:-1s" aria-hidden="true"></span>
+    <span class="loader__petal" style="left:7%;--x:30vw;--d:20s;--w:-16s" aria-hidden="true"></span>
+    <span class="loader__petal" style="left:34%;--x:16vw;--d:15.5s;--w:-7s" aria-hidden="true"></span>
+    <div class="loader__shade" aria-hidden="true"></div>
+    <div class="loader__count">
+      <p class="loader__pct" aria-hidden="true"><span id="loader-pct">0</span>%</p>
+      <div class="loader__bar" aria-hidden="true"><span></span></div>
+    </div>
+  </div>
+
   <!-- The ONE canvas for every 3D view on the page (js/gl.js): the film, the hero, the work ridge
        and the tool lanterns. It's fixed behind the page and see-through wherever nothing is drawn. -->
   <canvas id="gl" aria-hidden="true"></canvas>
@@ -86,8 +231,8 @@
        ("sticky") until the film ends, then scrolls away and the page continues below. -->
   <section id="film" class="film" aria-label="The Ascent: a short film about my work. Scroll to climb.">
     <div class="film__stage" id="stage">
-      <!-- The first frame of the film as a picture (a CSS background, so phones never download it):
-           it paints instantly, then the live 3D scene cross-fades in over it (js/site.js). -->
+      <!-- The first frame of the film as a picture, only shown if the film can't start (old graphics,
+           a blocked CDN): a CSS background that applies only then (css/style.css .no-film). -->
       <div class="poster poster--opening" aria-hidden="true"></div>
 
       <!-- All real text lives in this HTML layer, on top of the 3D. -->
@@ -96,7 +241,7 @@
           <p class="opening__title"><span class="line"><span>Every good website</span></span> <span class="line"><span>starts at <em>base camp.</em></span></span></p>
           <p class="opening__lead">I'm Pratul, a web designer and developer. Climb with me from the first idea to the summit, past the work I've built along the way.</p>
         </header>
-        <p class="scroll-hint" id="scroll-hint"><span class="scroll-hint__text" data-hint>Preparing the climb</span><span class="scroll-hint__rail" aria-hidden="true"></span></p>
+        <p class="scroll-hint" id="scroll-hint"><span class="scroll-hint__text" data-hint>Scroll to begin the climb</span><span class="scroll-hint__rail" aria-hidden="true"></span></p>
 
         <!-- Story beats: each is composed into its own shot (data-place) and appears line by line
              at its point of the climb (data-from / data-to, js/ui/story.js). -->

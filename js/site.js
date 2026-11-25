@@ -1,12 +1,12 @@
 // site.js: the desktop page, before and around the 3D film.
 //
 // The order things happen in (DESIGN.md §8, "load in order"):
-//   1. The page paints at once: the opening poster (a picture of the film's first frame) and
-//      the real HTML text over it. Only this small file, GSAP and Lenis are needed for that.
+//   1. The page paints at once, under the loading screen (index.html, js/loader.js), which shows
+//      how far the film has really loaded. Only this small file, GSAP and Lenis are needed here.
 //   2. Once the browser is idle after loading, film.js (three.js and the whole world) is fetched
 //      and built in short steps, so the page never freezes.
-//   3. When the world and the trekker are ready, the live scene cross-fades in over the poster
-//      and scrolling the film begins.
+//   3. When the world and the trekker are ready, the loading screen reaches 100% and fades into
+//      the live scene, and scrolling the film begins.
 // The sections below the film get their scripts (pages.js) while the visitor is still up the
 // mountain, and the 3D carousels only when they come near.
 
@@ -34,17 +34,11 @@ const handoverStart = () => filmTop + (FILM_SCREENS + HOLD) * vh;      // the su
 const servicesFormed = () => handoverStart() + (DARKEN + FORM) * vh;   // Services has fully formed
 window.addEventListener('resize', () => { vh = window.innerHeight; filmTop = film.offsetTop; onScroll(); });
 
-// ---------- 1. Until the world is ready: the poster, and a quiet progress line ----------
+// ---------- 1. Until the world is ready: the loading screen ----------
+// (index.html and js/loader.js: snow spreads down a mountain as the film loads, then fades into it)
 root.classList.add('is-loading');
-lenis.stop();   // the film can't be scrolled before it exists (Skip still works)
+lenis.stop();   // the film can't be scrolled before it exists
 let api = null; // the film's controls, once it's ready (jump, glideToEnd...)
-let shownPercent = -1;
-window.addEventListener('ascent:progress', (e) => {
-  const pct = Math.round(Math.min(e.detail, 1) * 100);
-  if (pct === shownPercent || api) return;
-  shownPercent = pct;
-  hint.textContent = `Preparing the climb · ${pct}%`;
-});
 window.addEventListener('ascent:ready', (e) => {
   api = e.detail;
   root.classList.remove('is-loading');
@@ -65,6 +59,7 @@ function loadFilm() {
     root.classList.remove('is-loading');
     root.classList.add('no-film');
     hint.textContent = 'Scroll down';
+    window.dispatchEvent(new CustomEvent('ascent:failed'));   // (the loading screen steps aside)
     lenis.start();
     ScrollTrigger.refresh();   // (the page is no longer pulled up under the film: css .no-film)
   });

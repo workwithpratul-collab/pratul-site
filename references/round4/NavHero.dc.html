@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>New wordmark and hiding navbar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0} a{color:#F3ECE2;text-decoration:none}</style>
+</helmet>
+<div style="width: 1440px; height: 810px; position: relative; overflow: hidden; font-family: Manrope, sans-serif; color: #F3ECE2; background: #241D3A">
+  <img src="/_blob/97c5846300efc4b470b3fb91be1e7aee" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover">
+  <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(23,20,43,0.45), rgba(23,20,43,0) 50%)"></div>
+
+  <header style="{{navStyle}}">
+    <a href="#" aria-label="Pratul.dev, back to the summit" style="font-family: 'Instrument Serif', serif; line-height: 1; display: flex; align-items: baseline">
+      <span style="font-size: 38px">P</span><span style="font-size: 25px; letter-spacing: 0.07em">RATUL</span><span style="font-size: 21px; color: #F6A04D">.dev</span>
+    </a>
+    <nav style="display: flex; align-items: center; gap: 36px; font-size: 16px">
+      <a href="#">Services</a><a href="#">Work</a><a href="#">Process</a><a href="#">About</a>
+      <a href="#" style="height: 46px; padding: 0 22px; border-radius: 23px; background: #F6A04D; color: #1D1932; font-weight: 600; display: flex; align-items: center">Book a call</a>
+    </nav>
+  </header>
+
+  <div style="position: absolute; left: 80px; top: 150px; width: 560px">
+    <h1 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 84px; line-height: 1.08">I build websites that <span style="font-style: italic; color: #F6A04D">move</span> business forward.</h1>
+  </div>
+
+  <div style="position: absolute; left: 80px; bottom: 40px; display: flex; gap: 10px; align-items: center; background: rgba(23,20,43,0.78); padding: 14px 16px; border-radius: 18px">
+    <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #B7A9D6; margin-right: 6px">TRY IT</span>
+    <button onClick="{{down}}" style="height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid rgba(243,236,226,0.4); background: transparent; color: #F3ECE2; font: inherit; font-size: 14px; cursor: pointer">↓ Scroll down</button>
+    <button onClick="{{gentle}}" style="height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid rgba(243,236,226,0.4); background: transparent; color: #F3ECE2; font: inherit; font-size: 14px; cursor: pointer">↑ Small scroll up</button>
+    <button onClick="{{intent}}" style="height: 40px; padding: 0 16px; border-radius: 20px; border: 0; background: #F6A04D; color: #1D1932; font: inherit; font-weight: 600; font-size: 14px; cursor: pointer">⇈ Deliberate scroll up</button>
+    <span style="font-size: 14px; color: #E4DAEE; margin-left: 8px; min-width: 280px">{{msg}}</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":810}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { shown: true, solid: false, msg: 'At the top: the navbar is always visible.' }; }
+  renderVals() {
+    const s = this.state;
+    return {
+      msg: s.msg,
+      navStyle: `position:absolute;left:0;right:0;top:0;height:84px;box-sizing:border-box;padding:0 80px;display:flex;align-items:center;justify-content:space-between;transform:translateY(${s.shown ? 0 : -100}%);transition:transform 520ms cubic-bezier(0.22,1,0.36,1), background 400ms;background:${s.solid ? 'rgba(23,20,43,0.62)' : 'transparent'};backdrop-filter:${s.solid ? 'blur(14px)' : 'none'};border-bottom:1px solid ${s.solid ? 'rgba(201,190,221,0.14)' : 'transparent'}`,
+      down: () => this.setState({ shown: false, solid: true, msg: 'Scrolling down: the navbar slides away.' }),
+      gentle: () => this.setState({ msg: s.shown ? 'Small scroll: nothing changes.' : 'Small scroll up: it stays hidden.' }),
+      intent: () => this.setState({ shown: true, solid: true, msg: 'Clear scroll up: it slides back in, blurred.' })
+    };
+  }
+}
+</script>
+</body>
+</html>

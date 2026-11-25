@@ -32,9 +32,16 @@ import { createCampUI } from './ui/camp-ui.js';
 import { createGearUI } from './ui/gear-ui.js';
 import { veil, mistColour } from './ui/veil.js';
 
-// The progress the page shows while this loads (0..1): the code has arrived by now.
-const reportProgress = (value) => window.dispatchEvent(new CustomEvent('ascent:progress', { detail: value }));
-reportProgress(0.2);
+// How far we've got, for the loading screen (js/loader.js). Each part goes 0..1 on its own:
+//   build  the world's building steps    gpu  the opening prepared on the graphics card
+//   final  the last checks before going live (the loading screen counts the downloads itself)
+const reportProgress = (part, value) => window.dispatchEvent(new CustomEvent('ascent:progress', { detail: { part, value } }));
+const BUILD_STEPS = 13;   // (the number of step() calls below)
+let stepsDone = 0;
+// The graphics card's share is counted in pieces of work: the trekker's first draw, compiling the
+// opening's shaders, each of its textures and parts drawn once, and the final wait (warmOpening).
+const gpuWork = { done: 0, total: 1 };
+const gpuDone = () => { gpuWork.done++; reportProgress('gpu', gpuWork.done / gpuWork.total); };
 
 // ---------- Settings you may want to change ----------
 // Show the FPS counter? Add ?fps to the address, or press F to toggle it.
@@ -69,6 +76,7 @@ async function step(name, build) {
   let result = build();
   buildTimes[name] = Math.round(performance.now() - t);
   if (result?.then) result = await result;
+  reportProgress('build', ++stepsDone / BUILD_STEPS);
   // A later zone goes straight onto the layer the camera doesn't see (until its shaders are ready).
   if (buildingLater) for (const c of scene.children) if (!before.has(c)) c.traverse((o) => o.layers.set(LATER_LAYER));
   return result;
@@ -121,7 +129,7 @@ const baseCamp = await step('baseCamp', () => createBaseCamp(scene));
 // from the Mixamo FBX files and already fitted to this character), instead of eleven FBX files the
 // browser had to download and decode (about 2 MB and half a second of work).
 const CLIPS = ['idle', 'walk', 'jog', 'wave', 'sit', 'sitToStand', 'point', 'look', 'stretch', 'turnLeft', 'turnRight'];
-const trekker = await step('trekker', () => createTrekker(scene, renderer, camera, { onProgress: (f) => reportProgress(0.3 + f * 0.68), clips: CLIPS, clipFile: 'assets/animations/clips.json' }));
+const trekker = await step('trekker', () => createTrekker(scene, renderer, camera, { clips: CLIPS, clipFile: 'assets/animations/clips.json' }));
 await trekker.ready.catch((e) => console.error('[trekker] failed to load', e));
 buildTimes.trekkerAt = Math.round(performance.now());   // (for measuring: when he was ready)
 const trekkerFirstDraw = drawTrekkerEarly();
@@ -156,8 +164,6 @@ const gear = await step('gear', () => createGear(scene, { position: MEADOW.mat, 
 // ambience: slow motes of light drifting in the summit air.
 const summit = await step('summit', () => createSummitZone(scene, { sunDir: sky.sunDir }));
 const motes = await step('motes', () => createMotes(scene));
-
-reportProgress(0.3);   // the world is built
 
 // The later zones (ridge, landmarks, meadow, gear, summit) are kept off camera for now, on a render
 // layer the camera doesn't look at, until their shaders are ready (compileTheRest). The film can then
@@ -214,11 +220,16 @@ async function warmOpening() {
   // (one thing at a time for the graphics card: his shaders first, then the rest of the opening's,
   // or he would wait in the same queue and hold the page up)
   await trekkerFirstDraw;
+  // (for the loading screen: how many pieces of work are ahead, see gpuWork)
+  gpuWork.total = 3 + texturesOf([...openingParts]).length + [...openingParts].filter((c) => c.visible && !hasLight(c)).length;
+  gpuDone();   // the trekker's first draw
   const t0 = performance.now();
   for (const part of openingParts) renderer.compile(part, camera, scene);
   await Promise.all([...openingParts].map((part) => renderer.compileAsync(part, camera, scene)));
+  gpuDone();   // the opening's shaders
   await warmUp();
   await gpuSettled();
+  gpuDone();   // the graphics card has finished
   buildTimes.opening = Math.round(performance.now() - t0);
 }
 
@@ -245,6 +256,7 @@ async function warmUp() {
     const t0 = performance.now();
     renderer.initTexture(t);
     warmTimes.push(['tex ' + (t.image.width || '?') + 'x' + (t.image.height || '?'), Math.round(performance.now() - t0)]);
+    gpuDone();
     await yieldToBrowser();
   }
   // Then draw the opening shot one part at a time (each draw uploads only that part's shapes).
@@ -259,6 +271,7 @@ async function warmUp() {
     const t0 = performance.now();
     renderer.render(scene, camera);
     warmTimes.push(['draw ' + (c.name || c.type), Math.round(performance.now() - t0)]);
+    gpuDone();
     await yieldToBrowser();
   }
   renderer.clear();
@@ -605,19 +618,20 @@ window.__ascent = {
   videos: () => camps.map((c, i) => `${CAMPS[i].id}:${c.videoElement ? (c.videoElement.paused ? 'loaded' : 'playing') : '-'}`).join(' '),
 };
 
-// ---------- 5. Handing over from the poster to the live scene ----------
+// ---------- 5. Handing over from the loading screen to the live scene ----------
 // The opening has been getting ready on the graphics card while the rest was built (warmOpening).
 await openingReady;
 // (and the soft shade behind the opening words, drawn from the very first frame)
 await shade.compile(renderer);
+reportProgress('final', 0.3);
 // Opening somewhere further up (back from a project page, a poster still, a page that was already
 // scrolled, or "Skip the film" pressed while loading): that part of the mountain must be ready too.
 if (returning || STILL !== null || scroll.target > 0.05) await readyTheRest();
-reportProgress(1);
+reportProgress('final', 0.6);
 if (returning) comeBack();
 else jumpTo(STILL ?? scroll.target, { moveScroll: STILL !== null });
 if (STILL !== null) summitBeat = 'look';
-// One real frame, drawn exactly as the live loop will draw it (gl.js), while the poster still covers
+// One real frame, drawn exactly as the live loop will draw it (gl.js), while the loading screen covers
 // the canvas: the first live frames draw a few things the warm-up doesn't (the shade behind the
 // words, the exact stage box), and preparing those used to make the film stutter as it appeared.
 {
@@ -629,12 +643,13 @@ if (STILL !== null) summitBeat = 'look';
   frame(1 / 60, 0, r);
   renderer.setScissorTest(false);
   await gpuSettled();
+  reportProgress('final', 1);
 }
 view.ready = true;
 wake();
 live = true;
 window.__ascent.ready = true;
-// site.js listens for this: it fades the poster away and turns on the film's text.
+// site.js and loader.js listen for this: the loading screen glides to 100% and fades into the film.
 window.dispatchEvent(new CustomEvent('ascent:ready', { detail: window.__ascent }));
 // Now the rest of the mountain, in the background, while the visitor reads the opening.
 readyTheRest().catch((e) => console.error('[film] later zones', e));

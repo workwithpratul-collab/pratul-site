@@ -310,6 +310,14 @@
   --meter-tick: rgba(243, 236, 226, 0.6);
   --meter-quiet: rgba(243, 236, 226, 0.74);
   --meter-alt: #f6c38f;
+  /* The loading screen (references/round4/Loader.dc.html): falling snow, the cherry petals, the
+     soft shade at the foot of the painting behind the percentage, and the bar's empty track. */
+  --loader-snow: rgba(255, 248, 240, 0.85);
+  --loader-snow-soft: rgba(255, 248, 240, 0.5);
+  --loader-petal: #f2b6c6;
+  --loader-shade: rgba(23, 20, 43, 0.75);
+  --loader-mist: rgba(201, 190, 221, 0.16);
+  --loader-track: rgba(243, 236, 226, 0.22);
   /* Footer (references/round2/Footer.dc.html): night warming to dawn, the glow on the horizon (the
      sun about to rise: a light source), the giant name, the two ridges in front of it, and hairlines. */
   --footer-dawn: linear-gradient(180deg, #1f1834 0%, #1f1834 40%, #3a2440 76%, #5a3446 100%);

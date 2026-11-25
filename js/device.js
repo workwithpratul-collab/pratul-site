@@ -25,16 +25,20 @@
   link.href = (document.currentScript.getAttribute('src') || '').replace('device.js', mode === 'film' ? 'site.js' : 'mobile/mobile.js');
   if (document.currentScript.dataset.preload !== 'false') {
     document.head.appendChild(link);
-    // The film opens on a poster of its first frame (index.html), so that's the first thing to fetch.
+    // The film opens on the loading screen (index.html): its two small paintings are the first
+    // things to fetch. Until it has faded, the film's words wait under it (.film-veiled, js/loader.js).
     if (mode === 'film') {
-      var poster = document.createElement('link');
-      poster.rel = 'preload';
-      poster.as = 'image';
-      // (The same choice as css/style.css makes: the larger picture on wide or sharp screens.)
+      html.classList.add('film-veiled');
+      // (The same choice as the loading screen's styles make: the larger pictures on wide or sharp screens.)
       var large = window.innerWidth >= 1300 || (window.devicePixelRatio || 1) >= 1.5;
-      poster.href = 'assets/poster/opening-' + (large ? '1920' : '1280') + '.webp';
-      poster.setAttribute('fetchpriority', 'high');
-      document.head.appendChild(poster);
+      ['bare', 'snow'].forEach(function (name) {
+        var pic = document.createElement('link');
+        pic.rel = 'preload';
+        pic.as = 'image';
+        pic.href = 'assets/loader/mountain-' + name + '-' + (large ? '1920' : '1280') + '.webp';
+        pic.setAttribute('fetchpriority', 'high');
+        document.head.appendChild(pic);
+      });
 
       // Then everything the live film needs, all at once, instead of one file discovering the next
       // (site.js → GSAP → gsap-core, film.js → three → three.core, and the trekker's two files only
@@ -43,7 +47,7 @@
       var CDN = 'https://cdn.jsdelivr.net/npm/';
       var modules = [
         // The page's animation library and smooth scrolling (site.js waits for them before anything moves).
-        'js/core.js', CDN + 'gsap@3.15.1/index.js', CDN + 'gsap@3.15.1/gsap-core.js', CDN + 'gsap@3.15.1/CSSPlugin.js',
+        'js/loader.js', 'js/core.js', CDN + 'gsap@3.15.1/index.js', CDN + 'gsap@3.15.1/gsap-core.js', CDN + 'gsap@3.15.1/CSSPlugin.js',
         CDN + 'gsap@3.15.1/ScrollTrigger.js', CDN + 'gsap@3.15.1/Observer.js', CDN + 'gsap@3.15.1/SplitText.js', CDN + 'lenis@1.3.27/dist/lenis.mjs',
         // The film: its code (every file it imports), three.js and the character loader.
         'js/film.js', 'js/gl.js', 'js/world/terrain.js', 'js/world/forest.js', 'js/world/trekker.js',
