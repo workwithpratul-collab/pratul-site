@@ -44,7 +44,7 @@ function videoSource(src, renderer) {
   const placeholder = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
   placeholder.needsUpdate = true;
   const uniform = { value: placeholder };
-  let video = null, texture = null, ready = false;
+  let video = null, texture = null, ready = false, starting = false, warmed = false;
   function load() {
     if (video) return;
     video = document.createElement('video');
@@ -71,15 +71,29 @@ function videoSource(src, renderer) {
     texture?.dispose();
     texture = null;
     ready = false;
+    warmed = false;
     uniform.value = placeholder;
   }
   // near: 0..1 (1 = arrived). wanted: within loading distance. on: how lit the picture is now.
+  // The video starts playing (muted, quietly) as soon as it has loaded, while the camera is still
+  // well away, and keeps playing until it is let go. Starting it only on arrival used to cost a
+  // stutter just as the landmark came into view (the browser starting its video decoder).
   function update(near, wanted, on) {
     if (wanted) load();
     else if (on < 0.01) unload();
-    if (video) {
-      if (near > 0.25 && video.paused) video.play().catch(() => {});
-      if (near < 0.15 && !video.paused) video.pause();
+    if (video && ready && video.paused && !starting) {
+      starting = true;
+      const playing = video;
+      video.play().catch(() => {}).finally(() => { starting = false; });
+      // And its first moving frame goes up to the graphics card now, while the landmark is still out of
+      // sight: the first upload of a playing video is the slow one (later frames just replace it).
+      if (!warmed && 'requestVideoFrameCallback' in playing) {
+        playing.requestVideoFrameCallback(() => {
+          if (playing !== video || !texture) return;
+          warmed = true;
+          renderer?.initTexture(texture);
+        });
+      }
     }
   }
   return { uniform, update, get ready() { return ready; }, get element() { return video; } };

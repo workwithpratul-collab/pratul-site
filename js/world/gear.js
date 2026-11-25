@@ -173,14 +173,17 @@ export function createGear(scene, { position, facing, renderer }) {
 function shadowFrom(image, flipY = true) {
   const tiny = document.createElement('canvas');
   tiny.width = tiny.height = 24;
-  const t = tiny.getContext('2d');
+  // (Both canvases are drawn by the processor, not the graphics card, willReadFrequently: they are tiny,
+  // and on the graphics card their first smooth scaling cost a ~60 ms stutter mid-walk, 40% up the
+  // climb as the gear check gets ready, while the card prepared that kind of drawing.)
+  const t = tiny.getContext('2d', { willReadFrequently: true });
   t.drawImage(image, 1, 1, 22, 22);              // a 1-pixel margin, so the blur fades out inside
   t.globalCompositeOperation = 'source-in';       // keep the shape, paint it white
   t.fillStyle = '#fff';
   t.fillRect(0, 0, 24, 24);
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = 128;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(tiny, 0, 0, 128, 128);
