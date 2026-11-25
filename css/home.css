@@ -366,6 +366,10 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
   height: 100vh;
   overflow: hidden;
 }
+/* Its graphics warm-up over the summit hero (js/pages/services.js): the stage drawn for a few frames
+   at 0.5% (invisible to the eye), so the first real visit doesn't stutter. */
+.svx.is-warming { --svx-in: 1 !important; }
+.svx.is-warming .svx__pin { position: fixed; inset: 0; height: auto; z-index: 3; opacity: 0.005; pointer-events: none; }
 /* The stage's own colour, on a layer of its own so the hand-over can fade it in over the summit.
    (Its last strip settles into the Services tone, the colour Work's ridge rises out of: no seam.) */
 .svx__bg {

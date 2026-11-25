@@ -241,6 +241,38 @@ export function initServices({ core, lenis }) {
     collapseWhenStill('services', () => root.classList.add('is-collapsed'), root.closest('section').nextElementSibling);
   }
 
+  // ---------- Ready before it's needed (the first visit) ----------
+  // The very first time a browser draws these layers (turned in 3D, with rounded photo clips and the
+  // soft blur), its graphics driver has to prepare that kind of drawing, which stalled the sequence
+  // mid-scroll: about 8 frames, one of them over half a second. So that work is done at a calm moment
+  // instead: once the visitor has settled on the summit hero (js/site.js sends 'ascent:hero-rest'),
+  // the stage is drawn for a few frames, almost fully see-through (0.5%, css .svx.is-warming: nothing
+  // you can see), stepping through its key poses. Once per visit; later visits find the driver's work
+  // already saved, so it costs them almost nothing.
+  let warmed = false;
+  async function warmUp() {
+    if (warmed || finished || narrow.matches || root.classList.contains('is-live')) return;
+    warmed = true;
+    const frame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+    root.classList.add('is-warming', 'is-live');
+    // (every pose kind once, and the first layer's whole step forward, frame by frame: the blur behind it
+    // passes through each half-pixel strength, and each strength is prepared separately)
+    const ramp = Array.from({ length: 28 }, (_, i) => 0.25 + (0.12 * 0.24 * i) / 27);
+    for (const p of [0.05, 0.2, ...ramp, 0.31, 0.43, 0.55, 0.67, 0.79, 0.93, 1]) {
+      // (a scroll into the section meanwhile takes over at once)
+      if (tween.scrollTrigger?.isActive) break;
+      render(p);
+      await frame();
+      if (p < 0.25 || p > 0.28) await frame();
+    }
+    root.classList.remove('is-warming');
+    root.classList.toggle('is-live', !!tween.scrollTrigger?.isActive);
+    render(state.p);
+  }
+  window.addEventListener('ascent:hero-rest', () => warmUp());
+  // (this file can start after the visitor reached the hero: then the moment has already come)
+  if (document.documentElement.classList.contains('hero-in')) setTimeout(() => { if (!document.hidden) warmUp(); }, 2600);
+
   // Skip: straight to the last frame (a cut, not a fast-forward through every layer), and the
   // keyboard carries on from there.
   skip.addEventListener('click', (e) => {

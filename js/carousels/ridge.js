@@ -239,6 +239,9 @@ export async function createRidge({ root, slides, core, onChange }) {
     if (near !== index) { index = near; onChange(index); }
     renderer.render(scene, camera);
   }
+  // Its shaders are prepared in the background before its first frame: drawing it straight away
+  // compiled them on the spot, a ~90 ms stutter just as Work came on screen.
+  await renderer.compileAsync(scene, camera).catch(() => {});
   addView({ el: stageEl, frame, name: 'ridge' });
   onChange(0);
 

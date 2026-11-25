@@ -156,11 +156,27 @@ function setHero(on) {
   if (on) {
     heroTl ??= buildHeroReveal();
     heroTl.timeScale(1).play();
+    restOnHero();
   } else if (heroTl) {
     heroTl.timeScale(2.5).reverse();
   }
 }
 heroEl.inert = true;
+// Once the hero's words have risen and the page is at rest on it, tell the sections a calm moment has
+// come (js/pages/services.js prepares its graphics then, not mid-scroll).
+let restTimer = 0;
+function restOnHero() {
+  clearTimeout(restTimer);
+  restTimer = setTimeout(function check() {
+    if (!heroIn || lenis.scroll >= handoverStart()) return;   // (only while the hero itself is on screen)
+    if (Math.abs(lenis.velocity) > 0.01) { restTimer = setTimeout(check, 500); return; }
+    window.dispatchEvent(new CustomEvent('ascent:hero-rest'));
+    // (and the hand-over's soft picture of the summit is drawn once now, hidden: drawing that blur the
+    // first time made the hand-over's first frames stutter; it is drawn again, fresh, as it begins)
+    const blur = document.querySelector('.handover__blur');
+    if (api && blur) api.snapshot(blur);
+  }, 2600);
+}
 
 // ---------- 6. The top bar: it steps aside while you read, and comes back when you ask ----------
 // (references/round4/NavHero.dc.html)
