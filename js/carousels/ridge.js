@@ -18,6 +18,7 @@
 import * as THREE from 'three';
 import { renderer, addView, glowBlending } from '../gl.js';
 import { MATERIALS } from '../world/palette.js';
+import { collapseWhenStill, collapsing } from '../once.js';
 
 const C = MATERIALS.ridge;
 const PANEL_W = 3.2;                         // world units
@@ -152,6 +153,7 @@ export async function createRidge({ root, slides, core, onChange }) {
   // The whole work section (heading and ridge, one screen) is pinned while you scroll: 0.85 of a
   // screen per panel, 0 = first panel, last = the last one.
   let target = 0, shown = 0, index = 0;
+  let finished = false;   // (see "Once walked, it stays walked" below)
   const last = panels.length - 1;
   const section = root.closest('.work');
   const html = document.documentElement;
@@ -166,15 +168,31 @@ export async function createRidge({ root, slides, core, onChange }) {
     pinSpacing: true,
     invalidateOnRefresh: true,
     onUpdate: (self) => {
+      if (finished || collapsing()) return;   // (ignore what it sees while another section collapses)
       const walked = self.progress * (self.end - self.start);
       target = Math.min(Math.max(walked / walkLength(), 0), 1) * last;
+      // Walked to the last panel, going down: the walk is finished for this visit (js/once.js).
+      if (self.progress >= 0.999) finish();
     },
   });
   ScrollTrigger.refresh();
 
+  // ---------- Once walked, it stays walked ----------
+  // The camera stays at the last panel; scrolling back up never walks it backwards. When the scroll is
+  // next at rest the pin is removed (with its walking length), so the section is one screen again and
+  // scrolling up past it is quick. The arrows and keys still move between panels, without scrolling.
+  function finish() {
+    finished = true;
+    target = last;
+    const spacer = section.parentElement;   // (ScrollTrigger's pin-spacer, in the page's flow)
+    const after = spacer.nextElementSibling;
+    collapseWhenStill('work', () => st.kill(true), after);
+  }
+
   // Arrows, keys and the counter move the page to the matching point of the walk.
   function goTo(i) {
     i = Math.max(0, Math.min(last, i));
+    if (finished) { target = i; return; }   // (no walking length any more: just glide the camera there)
     const y = st.start + (i / last) * walkLength();
     lenis.scrollTo(y, { duration: reduceMotion ? 0 : 1.3, easing: (t) => 1 - Math.pow(1 - t, 3) });
   }

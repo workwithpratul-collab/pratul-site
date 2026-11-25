@@ -245,3 +245,30 @@ the first live frames.
 **Not changed:** the remaining slow frames on the climb are the ones from before (mist skips on a fast drag, each
 project video starting its decoder), and the ~80-110 ms frame ~3 s after live is the Work ridge being built
 (as before).
+
+## Fix: loading screen stuck on the live site, and reveals that play once (Nov 25)
+
+**The stuck loading screen.** On GitHub Pages the film loaded on a first visit but the loading screen froze at
+~35% on every reload or return visit. Cause: `device.js` (top of `<head>`) asks the browser to preload the film's
+code before the import map had been read. With a warm cache that code arrives instantly, its `import 'gsap'` /
+`'three'` can't be resolved yet ("Failed to resolve module specifier"), `site.js` fails, and the film never starts.
+The import map now comes first. Measured on the live site after the fix (Chrome, real graphics card, 1440 x 900):
+
+| Visit | Film live | Loading screen gone |
+|---|---|---|
+| Empty cache, 5 fresh browsers | 5.2-8.2 s (5.2, 5.3, 5.3, 7.3, 8.2; the slow ones are GitHub's CDN warming up) | 0.1-0.3 s after live |
+| Reload, normal cache | 2.0 s | 2.3 s |
+| Coming back, normal cache | 1.8 s | 2.1 s |
+
+(Before the fix, both normal-cache visits never reached the film.) Locally, film live 2.8-3.1 s vs 3.1-3.3 s for
+the version before (alternating runs): the loader now reaches 100% ~0.3 s after "live" instead of ~0.65 s.
+Safety net (no effect on a normal load): hand over after 4 s with no progress or 8 s in all (tested with a hung and
+a slow download: handed over at 5.9 s, the live film cross-faded in at 14 s when it arrived), Skip after 3 s, and
+the page carries on without the film if it isn't live after 20 s.
+
+**Reveals play once.** Each held section (the climb, Services, Work, Process) is collapsed once it has been
+scrolled through, while the page is at rest: one ScrollTrigger re-measure, **12-26 ms** each (logged in
+`window.__collapses`), with the scroll shifted in the same moment (anchor offset 0-0.4 px, measured at 1440 x 900
+and 1366 x 768). Afterwards the page is shorter (at 1440 x 900: from ~31,400 px to ~8,200 px), so scrolling back up
+is quick and the hand-over is the only scroll animation left above the sections. No cost per frame beyond one
+check of an empty queue.

@@ -119,6 +119,9 @@ html:not(.mobile-site) .m-only { display: none !important; }
 /* How the film's scroll is shared out, in screen heights (js/site.js reads these too):
    the film itself, the hero holding, the summit darkening, and the work forming over it. */
 :root { --film: 13; --hold: 0.6; --darken: 1; --form: 0.9; }
+/* Once the climb is finished (the summit hero reached, js/site.js), its 13 screens are removed for the
+   rest of the visit: the top of the page is the summit hero. "Replay the climb" puts them back. */
+html.film-done { --film: 0; }
 .film {
   position: relative;
   /* the film + the hero's stretch + the one screen the stage itself fills */

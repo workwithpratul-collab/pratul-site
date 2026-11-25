@@ -232,7 +232,11 @@ export function initProcess({ core = null } = {}) {
   }
 
   let shown = -1;
+  let finished = false;
   function render(progressNow) {
+    // Desktop: once the trail has been walked to the end going down, it stays drawn, every step
+    // shown, for the rest of the visit (see finish() below).
+    if (finished) progressNow = 1;
     if (Math.abs(progressNow - shown) < 0.0004) return;
     shown = progressNow;
     p = progressNow;
@@ -249,6 +253,19 @@ export function initProcess({ core = null } = {}) {
     return Math.min(Math.max(-r.top / run, 0), 1);
   };
 
+  // Desktop: the trail fully drawn, going down. It stays that way (render() above), and when the
+  // scroll is next at rest its held screens are removed (css: .is-collapsed), so it is one screen
+  // and scrolling back up past it is quick (js/once.js; loaded only here, so phones never fetch it).
+  function finish() {
+    finished = true;
+    render(1);
+    once.collapseWhenStill('process', () => section.classList.add('is-collapsed'), section.nextElementSibling);
+  }
+
+  // (desktop only: loaded up front there, so finish() can use it at once; phones never fetch it)
+  let once = null;
+  if (core) import('../once.js').then((m) => { once = m; });
+
   const relayout = () => { layout(); shown = -1; render(progress()); };
   document.fonts.ready.then(relayout);
   layout();
@@ -264,7 +281,7 @@ export function initProcess({ core = null } = {}) {
       start: 'top bottom',
       end: 'bottom top',
       refreshPriority: -1,   // measured after the sections above it
-      onUpdate: () => render(progress()),
+      onUpdate: () => { render(progress()); if (!finished && once && progress() >= 0.999 && !once.collapsing()) finish(); },
       onRefresh: relayout,
     });
     return;

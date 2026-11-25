@@ -17,6 +17,8 @@
 // Phones never get this (they keep the service cards), and "reduce motion" gets a calm static list
 // (css/home.css): in both cases this file does nothing.
 
+import { collapseWhenStill, collapsing } from '../once.js';
+
 export function initServices({ core, lenis }) {
   const root = document.querySelector('[data-svx]');
   if (!root || !core || core.reduceMotion) return;
@@ -184,12 +186,13 @@ export function initServices({ core, lenis }) {
   // The scroll drives `p`. (scrub 0.5: it follows the scroll with half a second of give, so a
   // flick of the wheel still moves the layers gently.) GPU layers are only kept while it's on hold.
   const state = { p: 0 };
+  let finished = false;   // (see "Once played, it stays played" below)
   layout();
   render(0);
   const tween = gsap.to(state, {
     p: 1,
     ease: 'none',
-    onUpdate: () => render(state.p),
+    onUpdate: () => { render(state.p); if (state.p >= 0.999 && !finished && !collapsing()) requestAnimationFrame(finish); },   // (next frame: never while the tween is still being created)
     scrollTrigger: {
       trigger: root,
       // (after the film's hand-over, which forms the heading while the section already holds)
@@ -217,19 +220,39 @@ export function initServices({ core, lenis }) {
       render(state.p);
     }
   };
-  narrow.addEventListener('change', fit);
+  narrow.addEventListener('change', () => { if (!finished) fit(); });
   fit();
+
+  // ---------- Once played, it stays played (js/once.js) ----------
+  // Reaching the last frame going down finishes the sequence for this visit: it stays on "All of this.
+  // One website." with the website back together, and scrolling back up never takes it apart again.
+  // When the scroll is next at rest, its 7 held screens are removed (css: .is-collapsed), keeping
+  // only the hand-over's forming stretch and one screen for the finished site.
+  function finish() {
+    if (finished || narrow.matches) return;
+    finished = true;
+    tween.scrollTrigger.kill();
+    tween.kill();
+    state.p = 1;
+    render(1);
+    root.classList.remove('is-live');
+    root.classList.add('is-finished');
+    // (anchored on whatever follows the whole Services section: .svx is its last child)
+    collapseWhenStill('services', () => root.classList.add('is-collapsed'), root.closest('section').nextElementSibling);
+  }
 
   // Skip: straight to the last frame (a cut, not a fast-forward through every layer), and the
   // keyboard carries on from there.
   skip.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();   // (or Lenis's own handler for # links, on the window, glides on to #process)
+    if (finished) return;   // (already on the last frame)
     lenis.scrollTo(tween.scrollTrigger.end, { immediate: true, force: true });
     ScrollTrigger.update();
     tween.scrollTrigger.getTween()?.progress(1);
     state.p = 1;
     render(1);
+    finish();
     end.setAttribute('tabindex', '-1');
     end.focus({ preventScroll: true });
   });

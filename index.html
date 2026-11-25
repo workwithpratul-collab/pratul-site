@@ -368,7 +368,12 @@
             </button>
           </div>
         </div>
-        <p class="hero__place measure" aria-hidden="true"><span>The summit</span><span class="alt">Alt. 4,410 m</span></p>
+        <div class="hero__base">
+          <p class="hero__place measure" aria-hidden="true"><span>The summit</span><span class="alt">Alt. 4,410 m</span></p>
+          <!-- Once the climb has been played, it stays finished for the visit (js/site.js); this plays it
+               again from base camp. -->
+          <button class="hero__replay measure f-only" type="button" data-replay><span aria-hidden="true">↺</span> Replay the climb</button>
+        </div>
         <a class="hero__down round-btn m-only" href="#work" aria-label="Down to my work"><svg class="i" aria-hidden="true"><use href="#i-down"/></svg></a>
       </div>
       <!-- The hand-over from the film to the page (js/site.js), as in a film's last shot: the screen

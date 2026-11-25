@@ -305,12 +305,16 @@ async function warmUp() {
 const film = document.getElementById('film');
 const stage = document.getElementById('stage');
 const scroll = { target: 0, progress: 0 };
+// Finished: the visitor has reached the summit hero. The film then holds its last shot for the rest
+// of the visit, whatever the scroll does (js/site.js removes the climb's scroll length), until
+// "Replay the climb" (replay(), below).
+let finished = false;
 const trigger = ScrollTrigger.create({
   trigger: '#film',
   start: 'top top',
   end: () => `+=${FILM_SCREENS * window.innerHeight}`,
   invalidateOnRefresh: true,
-  onUpdate: (self) => { scroll.target = self.progress; },
+  onUpdate: (self) => { if (!finished) scroll.target = self.progress; },
 });
 scroll.target = trigger.progress;
 
@@ -579,7 +583,7 @@ function frame(dt, time, rect) {
 
   // Visitors who jump far below the film (a nav link) while the trekker is far behind: finish
   // the film quietly, so it's at the summit if they scroll back up.
-  if (lenis.targetScroll > filmEndScroll() + window.innerHeight && scroll.progress < 0.999 && !gliding) jumpTo(1, { moveScroll: false });
+  if (!finished && lenis.targetScroll > filmEndScroll() + window.innerHeight && scroll.progress < 0.999 && !gliding) jumpTo(1, { moveScroll: false });
 
   // A second, gentle smoothing on top of Lenis, so the film never lurches.
   if (snapNextFrame) scroll.progress = scroll.target;
@@ -711,6 +715,25 @@ window.__ascent = {
   // film once the page has covered it (no point drawing what nobody can see).
   snapshot: (canvas) => { snapshotTo = canvas; },
   pause: (on) => { if (view.paused !== on) { view.paused = on; wake(); } },
+  // The climb is finished (the summit hero reached): hold the last shot from now on (js/site.js).
+  finish: () => { finished = true; scroll.target = 1; },
+  // "Replay the climb": under a soft mist, site.js puts the climb's length back and the page at the top
+  // (resetPage), then the film starts again from base camp as if it were the first time: the trekker
+  // faces us, waves, and turns to the trail.
+  replay: async (resetPage) => {
+    await veil(true, { duration: reduceMotion ? 500 : 1000 });
+    await readyTheRest();
+    resetPage();
+    finished = false;
+    jumpTo(0);
+    summitBeat = 'arrive';
+    trekker.stop('wave');
+    trekker.stop('stretch');
+    opening = 'face';
+    openingClock = reduceMotion ? 0 : -1.6;   // (he waves once the mist has cleared)
+    await new Promise((r) => setTimeout(r, 250));
+    await veil(false, { duration: reduceMotion ? 600 : 1800 });
+  },
   lenis,
   scene,
   camera,

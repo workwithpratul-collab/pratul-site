@@ -11,6 +11,7 @@
 // mountain, and the 3D carousels only when they come near.
 
 import { gsap, ScrollTrigger, SplitText, lenis, reduceMotion, lineReveal, EASE, TIME } from './core.js';
+import { collapseWhenStill, collapsing } from './once.js';
 
 const root = document.documentElement;
 const film = document.getElementById('film');
@@ -28,9 +29,12 @@ const DARKEN = cssNumber('--darken') || 1;
 const FORM = cssNumber('--form') || 0.9;
 let vh = window.innerHeight;
 let filmTop = film.offsetTop;
-const filmEnd = () => filmTop + FILM_SCREENS * vh;                     // the last shot is reached
-const heroScroll = () => filmTop + (FILM_SCREENS + HOLD * 0.5) * vh;   // the hero, settled
-const handoverStart = () => filmTop + (FILM_SCREENS + HOLD) * vh;      // the summit starts to darken
+// The climb's length: FILM_SCREENS until it's finished, then 0 (see 8, "The climb plays once").
+let filmScreens = FILM_SCREENS;
+let filmFinished = false;
+const filmEnd = () => filmTop + filmScreens * vh;                     // the last shot is reached
+const heroScroll = () => filmTop + (filmScreens + HOLD * 0.5) * vh;   // the hero, settled
+const handoverStart = () => filmTop + (filmScreens + HOLD) * vh;      // the summit starts to darken
 const servicesFormed = () => handoverStart() + (DARKEN + FORM) * vh;   // Services has fully formed
 window.addEventListener('resize', () => { vh = window.innerHeight; filmTop = film.offsetTop; onScroll(); });
 
@@ -97,7 +101,8 @@ document.getElementById('skip').addEventListener('click', (e) => {
 // ---------- 4. The opening: lines rise in on load (CSS), and fade away as the climb begins ----------
 let openingShown = 1;
 function updateOpening(y) {
-  const fade = Math.min(Math.max((y - filmTop) / (0.035 * FILM_SCREENS * vh), 0), 1);
+  // (Once the climb is finished, the opening never comes back: the top of the page is the summit.)
+  const fade = filmFinished ? 1 : Math.min(Math.max((y - filmTop) / (0.035 * FILM_SCREENS * vh), 0), 1);
   const v = 1 - fade;
   if (Math.abs(v - openingShown) < 0.002) return;
   openingShown = v;
@@ -115,7 +120,7 @@ let heroIn = false;
 function buildHeroReveal() {
   const tl = gsap.timeline({ paused: true });
   tl.add(lineReveal(heroEl.querySelector('.hero__title'), { stagger: 0.12 }).play(), 0);
-  tl.fromTo(heroEl.querySelectorAll('.hero__sub, .hero__actions, .hero__place, .hero__scroll'),
+  tl.fromTo(heroEl.querySelectorAll('.hero__sub, .hero__actions, .hero__place, .hero__replay, .hero__scroll'),
     { opacity: 0, y: reduceMotion ? 0 : 14 },
     { opacity: 1, y: 0, duration: TIME.slow, ease: EASE.arrive, stagger: 0.12 }, reduceMotion ? 0 : 0.55);
   return tl;
@@ -290,6 +295,39 @@ function buildHandover() {
   ScrollTrigger.refresh();
 }
 
+// ---------- 8. The climb plays once (going down only), and "Replay the climb" ----------
+// Once the visitor reaches the summit hero, the climb is finished: the film holds its last shot, and
+// scrolling back up never plays it in reverse. When the scroll is next at rest, the climb's 13
+// screens are removed (css: html.film-done), with the scroll shifted by the same amount in the same
+// moment, so nothing moves on screen and the top of the page is now the summit hero (js/once.js).
+// The hand-over from the summit into Services stays as it is, so scrolling up still comes back to
+// the summit. "Replay the climb" (in the hero) puts the climb back and plays it from base camp.
+function finishClimb() {
+  filmFinished = true;
+  api.finish();
+  root.classList.add('climb-done');   // (shows "Replay the climb", css/home.css)
+  collapseWhenStill('the climb', () => {
+    if (!filmFinished) return false;   // (replayed before the scroll came to rest)
+    filmScreens = 0;
+    root.classList.add('film-done');
+    filmTop = film.offsetTop;
+  }, document.querySelector('.page'));
+}
+async function replayClimb() {
+  if (!api || !filmFinished) return;
+  await api.replay(() => {
+    filmFinished = false;
+    filmScreens = FILM_SCREENS;
+    root.classList.remove('film-done', 'climb-done');
+    setHero(false);
+    ScrollTrigger.refresh();
+    lenis.resize();
+    lenis.scrollTo(0, { immediate: true, force: true });
+    onScroll();
+  });
+}
+document.querySelector('[data-replay]')?.addEventListener('click', replayClimb);
+
 // ---------- One scroll listener for all of it ----------
 // It only reads numbers it already knows (the scroll position and cached sizes), so it never
 // forces the browser to recalculate the layout.
@@ -298,8 +336,10 @@ function onScroll() {
   updateOpening(y);
   // The hero shows once the film has (almost) reached its last shot; it hides a little further
   // back up, so it doesn't flicker at the boundary.
-  if (!heroIn && y > filmEnd() - vh * 0.08) setHero(true);
-  else if (heroIn && y < filmEnd() - vh * 0.35) setHero(false);
+  if (!heroIn && (filmFinished || y > filmEnd() - vh * 0.08)) setHero(true);
+  else if (heroIn && !filmFinished && y < filmEnd() - vh * 0.35) setHero(false);
+  // The summit hero reached, with the film really there: the climb is finished for this visit.
+  if (heroIn && !filmFinished && api && api.progress > 0.995 && !collapsing()) finishClimb();
   updateNav(y);
 }
 lenis.on('scroll', onScroll);

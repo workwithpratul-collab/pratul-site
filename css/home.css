@@ -191,7 +191,29 @@
   padding: 0 var(--page-gutter) clamp(24px, 4.5vh, 44px);
 }
 [data-mode="film"] .hero__inner { grid-row: 2; align-self: center; position: relative; width: min(820px, 60vw); }
-[data-mode="film"] .hero__place { grid-row: 3; position: relative; left: auto; bottom: auto; justify-self: start; }
+/* The bottom row: the altitude label, and "Replay the climb" beside it (desktop). */
+.hero__base { display: contents; }
+[data-mode="film"] .hero__base { grid-row: 3; display: flex; align-items: flex-end; gap: clamp(28px, 3vw, 48px); justify-self: start; }
+[data-mode="film"] .hero__place { position: relative; left: auto; bottom: auto; }
+/* "Replay the climb": as quiet as the altitude label, with the same amber surveyor's line. Shown once the
+   climb is finished (.climb-done, js/site.js); it fades in with the hero's words. */
+.hero__replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 0 0 18px;
+  border: 0;
+  border-left: 1px solid var(--hair-strong);
+  background: none;
+  color: var(--lavender-light);
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease-arrive), border-color var(--t-fast) var(--ease-arrive);
+}
+.hero__replay:hover, .hero__replay:focus-visible { color: var(--cream); border-left-color: var(--amber); }
+.hero__replay span { font-size: 15px; letter-spacing: 0; }
+[data-mode="film"] .hero__replay { opacity: 0; filter: opacity(calc(1 - var(--lift, 0))); }
+html:not(.climb-done) .hero__replay { visibility: hidden; }
 /* The summit picture. Phones: the hero's painting. Desktop: only shown if the visitor reaches the
    hero before the live scene is ready (skipping during loading). */
 .hero__poster { position: absolute; inset: 0; background: var(--night) center / cover no-repeat; }
@@ -314,6 +336,10 @@
 /* With the film, the section first holds for the hand-over's forming stretch (--form screens, while
    its heading rises over the summit), then for the 7 screens of the sequence. */
 [data-mode="film"]:not(.no-film) .svx { height: calc((8 + var(--form)) * 100vh); }
+/* Once the sequence has played (js/pages/services.js, js/once.js), its 7 held screens are removed:
+   one screen for the finished site (plus the hand-over's forming stretch, with the film). */
+.svx.is-collapsed { height: 100vh; }
+[data-mode="film"]:not(.no-film) .svx.is-collapsed { height: calc((1 + var(--form)) * 100vh); }
 .svx__pin {
   position: sticky;
   top: 0;
@@ -329,6 +355,10 @@
 }
 /* Everything but the heading arrives once the summit is covered (--svx-in, js/site.js). */
 .svx__bg, .svx__3d, .svx__list { opacity: var(--svx-in, 1); }
+/* Once the sequence has played (.is-finished), its closing line stays on with the finished site, so it
+   leaves with the rest of the stage when the visitor scrolls back up into the summit (its own opacity
+   belongs to services.js, hence a filter). */
+.svx.is-finished .svx__end { filter: opacity(var(--svx-in, 1)); }
 .svx__stage {
   position: absolute;
   left: 50%;
@@ -774,6 +804,8 @@
 /* The section is tall; its one screen sticks while you scroll through it, so the trail is walked by
    the scroll. Five steps, about two thirds of a screen each, plus the screen itself. */
 .process { padding: 0; height: calc(100vh * 4.2); height: calc(100svh * 4.2); }
+/* Desktop: once the trail is fully drawn it stays drawn, and its held screens are removed (js/once.js). */
+.process.is-collapsed { height: 100vh; height: 100svh; }
 .process__pin {
   position: sticky;
   top: 0;

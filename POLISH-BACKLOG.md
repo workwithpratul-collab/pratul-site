@@ -124,6 +124,11 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] Footer "Explore" lists Services, Work and Process, as in the design: About is no longer linked from the footer (it is in the top bar).
 - [ ] Case-study pages still show plain "Pratul" in their top bar, not the new wordmark.
 - [ ] Trekker: the wave is the whole Waving clip (one greeting with a few hand swings, ~4.3 s). Pratul to judge whether "once" should be shorter. "Skip the film" goes straight to his calm summit loop, without the greeting.
+- [x] Fix: the loading screen froze at ~35% on the live site on every reload or return visit (the import map came after device.js's preloads; with a warm cache the code arrived before the map). Import map first; safety net (hand over after 4 s without progress or 8 s in all, Skip after 3 s, failures count as done, the page carries on without the film after 20 s). Live: 5 empty-cache loads and 2 normal-cache loads all reach the film.
+- [x] Reveals play once, going down only (desktop): once scrolled through, the climb, Services, Work and Process stay finished and their held scroll length is removed at the next rest, with no jump (measured). The top of the page becomes the summit hero, with "Replay the climb" beside the altitude label (plays it again from base camp, wave included). Links and the footer still land right. Phones unchanged.
+- [ ] Scrolling up from Services into the summit, the Services link in the top bar stays underlined at the hero (the section marker never clears when no section is in the middle of the screen). It did this before as well.
+- [ ] Reveals play once: the hand-over from the summit into Services still plays both ways (so scrolling up comes back to the summit hero, as asked). Landing on Services from the top bar now shows its finished state, not its heading forming.
+- [ ] The safety net shows the film's first frame as a picture if it hands over before the film is ready; the page can't be scrolled until the film is live (as before the loading screen existed), except Skip the film.
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.
