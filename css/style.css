@@ -145,10 +145,10 @@ html:not(.mobile-site) .m-only { display: none !important; }
   background: var(--night) center / cover no-repeat;
   transition: opacity 1.2s var(--ease-flow);
 }
-/* (Only if the film can't start: while it loads, the loading screen covers the stage, index.html.) */
-[data-mode="film"].no-film .poster--opening { background-image: url("../assets/poster/opening-1280.webp"); }
+/* (Only if the film can't start, or isn't ready when the loading screen hands over: index.html.) */
+[data-mode="film"]:is(.no-film, .film-waiting) .poster--opening { background-image: url("../assets/poster/opening-1280.webp"); }
 @media (min-width: 1300px), (min-resolution: 1.5dppx) {
-  [data-mode="film"].no-film .poster--opening { background-image: url("../assets/poster/opening-1920.webp"); }
+  [data-mode="film"]:is(.no-film, .film-waiting) .poster--opening { background-image: url("../assets/poster/opening-1920.webp"); }
 }
 .is-live .poster--opening { opacity: 0; }
 .no-film .poster--opening { opacity: 1; }

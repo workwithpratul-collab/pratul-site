@@ -40,6 +40,9 @@ root.classList.add('is-loading');
 lenis.stop();   // the film can't be scrolled before it exists
 let api = null; // the film's controls, once it's ready (jump, glideToEnd...)
 window.addEventListener('ascent:ready', (e) => {
+  // (Arrived after we'd already given up on it, see withoutFilm: keep the page as it is, and stop
+  // the film drawing under the picture.)
+  if (root.classList.contains('no-film')) { e.detail.pause(true); return; }
   api = e.detail;
   root.classList.remove('is-loading');
   root.classList.add('is-live');   // the posters fade away; the live scene shows through
@@ -53,17 +56,23 @@ window.addEventListener('ascent:ready', (e) => {
 // requestIdleCallback waits for a quiet moment, so the first paint and the first interactions are
 // never held up by the 3D download.
 function loadFilm() {
-  import('./film.js').catch((err) => {
-    // No 3D after all (an old graphics chip, a blocked CDN): keep the posters, let the page scroll.
-    console.error('[film] could not start', err);
-    root.classList.remove('is-loading');
-    root.classList.add('no-film');
-    hint.textContent = 'Scroll down';
-    window.dispatchEvent(new CustomEvent('ascent:failed'));   // (the loading screen steps aside)
-    lenis.start();
-    ScrollTrigger.refresh();   // (the page is no longer pulled up under the film: css .no-film)
-  });
+  import('./film.js').catch((err) => withoutFilm('could not start', err));
 }
+// No 3D after all (an old graphics chip, a blocked CDN, a download that never finishes): keep the
+// picture of the film's first frame, and let the page scroll.
+function withoutFilm(why, err) {
+  if (api || root.classList.contains('no-film')) return;
+  console.error('[film] ' + why, err ?? '');
+  root.classList.remove('is-loading');
+  root.classList.add('no-film');
+  hint.textContent = 'Scroll down';
+  window.dispatchEvent(new CustomEvent('ascent:failed'));   // (the loading screen steps aside)
+  lenis.start();
+  ScrollTrigger.refresh();   // (the page is no longer pulled up under the film: css .no-film)
+}
+// The last safety net: if the film still isn't live 20 s after the page opened, the page carries on
+// without it (normally it's live in about 3 s; the loading screen itself hands over after 8 s at most).
+setTimeout(() => { if (!api) withoutFilm('took too long (over 20 s)'); }, Math.max(0, 20000 - performance.now()));
 const whenIdle = (fn) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 1200 }) : setTimeout(fn, 200));
 // The poster has already painted by the time this file runs, and device.js fetched the film's files
 // in the background, so start the film straight after the next frame: no waiting for every last

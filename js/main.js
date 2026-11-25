@@ -11,6 +11,12 @@ const mode = document.documentElement.dataset.mode || 'film';
 if (mode === 'film') {
   // The loading screen first: it is tiny and needs nothing else, so the snow starts at once.
   import('./loader.js');
-  import('./site.js');
+  import('./site.js').catch((err) => {
+    // The page's own code couldn't start (a library that failed to download, say): never leave the
+    // visitor on the loading screen. Show the page without the film, as an old graphics chip would.
+    console.error('[site] could not start', err);
+    document.documentElement.classList.add('no-film');
+    window.dispatchEvent(new CustomEvent('ascent:failed'));
+  });
 }
 else import('./mobile/mobile.js');

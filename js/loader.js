@@ -34,7 +34,24 @@ let aimed = -1;         // the last value the snow and the bar were sent towards
 let lastReal = 0;       // the real value last time it moved...
 let realSince = performance.now();   // ...and when that was
 let ready = false;      // the film is live: glide to 100% and fade
+let givenUp = false;    // the safety net: stop waiting, glide to 100% and hand over anyway
 let done = false;
+
+// ---------- The safety net: the loading screen can never get stuck ----------
+// It only waits while something is really happening. If the real progress hasn't moved for STALL ms,
+// or loading has taken MAX ms in all, it glides to 100% and hands over anyway: the film's first frame
+// shows as a picture, with the real words on it (css: .film-waiting), and the live film cross-fades in
+// over it when it's ready, exactly as before there was a loading screen. After SKIP_AFTER ms a small
+// Skip link lets the visitor hand over at once.
+const STALL = 4000, MAX = 8000, SKIP_AFTER = 3000;
+function giveUp(why) {
+  if (givenUp || ready || done) return;
+  givenUp = true;
+  console.info('[loader] handing over before the film is ready:', why);
+}
+const skip = document.getElementById('loader-skip');
+setTimeout(() => { if (!done) skip.hidden = false; }, SKIP_AFTER);
+skip.addEventListener('click', () => { giveUp('skipped'); finish(false); });
 
 function setPart(name, value) {
   if (!(name in parts)) return;
@@ -84,9 +101,11 @@ function tick(now) {
   const r = real();
   if (r > lastReal + 1e-4) { lastReal = r; realSince = now; }
 
-  if (ready) {
-    // The film is live: finish the climb to 100% in about half a second.
-    shown += Math.max((1 - shown) * (1 - Math.exp(-dt * 6)), dt * 0.5);
+  if (!ready && (now - realSince > STALL || now > MAX)) giveUp(now > MAX ? 'slow' : 'no progress');
+  if (ready || givenUp) {
+    // The film is live (or we've stopped waiting): finish the climb to 100% quickly, in about a
+    // third of a second, so the loading screen never adds waiting of its own.
+    shown += Math.max((1 - shown) * (1 - Math.exp(-dt * 10)), dt * 1.2);
     if (shown >= 0.999) shown = 1;
   } else {
     // Creep up to 6% beyond the real value while it waits, more slowly the longer it waits,
@@ -96,7 +115,7 @@ function tick(now) {
     if (goal > shown) shown += (goal - shown) * (1 - Math.exp(-dt * 2.6));
   }
   write();
-  if (shown >= 1) { setTimeout(() => finish(false), 250); return; }
+  if (shown >= 1) { setTimeout(() => finish(false), 120); return; }
   requestAnimationFrame(tick);
 }
 
@@ -110,7 +129,7 @@ function write() {
   // The snow, the bar and the snowfall read --p (css in index.html). They are aimed a little ahead,
   // at where the number is heading (goal), and glide there by themselves: so if building the world
   // keeps this script busy for a moment, they carry on moving smoothly meanwhile.
-  const aim = ready ? 1 : Math.max(shown, goal);
+  const aim = ready || givenUp ? 1 : Math.max(shown, goal);
   if (Math.abs(aim - aimed) >= 0.004 || (aim === 1 && aimed !== 1)) {
     loader.style.setProperty('--p', aim.toFixed(3));
     aimed = aim;
@@ -123,6 +142,9 @@ function finish(fast) {
   if (done) return;
   done = true;
   root.classList.remove('film-veiled');   // the film's opening words begin to rise (css/style.css)
+  // Not live yet (the safety net, or Skip): show the film's first frame as a picture until it is.
+  if (!ready) root.classList.add('film-waiting');
+  skip.hidden = true;
   loader.classList.add('is-done');
   // Tell the film the curtain is up (the trekker waves, js/film.js).
   window.dispatchEvent(new CustomEvent('ascent:revealed'));

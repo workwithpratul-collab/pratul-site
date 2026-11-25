@@ -73,18 +73,40 @@ async function step(name, build) {
   await yieldToBrowser();
   const before = new Set(scene.children);
   const t = performance.now();
-  let result = build();
-  buildTimes[name] = Math.round(performance.now() - t);
-  if (result?.then) result = await result;
-  reportProgress('build', ++stepsDone / BUILD_STEPS);
+  let result;
+  try {
+    result = build();
+    buildTimes[name] = Math.round(performance.now() - t);
+    if (result?.then) result = await result;
+  } catch (err) {
+    // A step that fails still counts as done on the loading screen (it never freezes); the error is
+    // logged and passed on, and site.js then shows the page without the film.
+    console.error(`[film] building ${name} failed`, err);
+    throw err;
+  } finally {
+    reportProgress('build', ++stepsDone / BUILD_STEPS);
+  }
   // A later zone goes straight onto the layer the camera doesn't see (until its shaders are ready).
   if (buildingLater) for (const c of scene.children) if (!before.has(c)) c.traverse((o) => o.layers.set(LATER_LAYER));
   return result;
 }
 
+// Wait for a promise, but never longer than ms: if it hasn't settled by then, log it and carry on.
+// A failure is logged too, and counts as done. (The graphics driver tells us when shaders are ready;
+// one that never answers must not hold the film, or the loading screen, forever.)
+function within(ms, promise, what) {
+  let timer;
+  const late = new Promise((resolve) => {
+    timer = setTimeout(() => { console.warn(`[film] ${what}: still waiting after ${ms} ms, carrying on`); resolve(); }, ms);
+  });
+  const settled = Promise.resolve(promise).catch((e) => console.error(`[film] ${what} failed`, e));
+  return Promise.race([settled, late]).finally(() => clearTimeout(timer));
+}
+
 // Wait until the graphics card has really finished everything asked of it so far (compiling and
 // first uploads), checking every few milliseconds, so the page stays free meanwhile. Without this,
 // that work would land in the first frames of the live film as a visible stutter.
+
 async function gpuSettled(maxMs = 2000) {
   const gl = renderer.getContext();
   if (!gl.fenceSync) return;
@@ -219,13 +241,13 @@ function texturesOf(objects) {
 async function warmOpening() {
   // (one thing at a time for the graphics card: his shaders first, then the rest of the opening's,
   // or he would wait in the same queue and hold the page up)
-  await trekkerFirstDraw;
+  await within(4000, trekkerFirstDraw, "the trekker's first draw");
   // (for the loading screen: how many pieces of work are ahead, see gpuWork)
   gpuWork.total = 3 + texturesOf([...openingParts]).length + [...openingParts].filter((c) => c.visible && !hasLight(c)).length;
   gpuDone();   // the trekker's first draw
   const t0 = performance.now();
   for (const part of openingParts) renderer.compile(part, camera, scene);
-  await Promise.all([...openingParts].map((part) => renderer.compileAsync(part, camera, scene)));
+  await within(5000, Promise.all([...openingParts].map((part) => renderer.compileAsync(part, camera, scene))), "the opening's shaders");
   gpuDone();   // the opening's shaders
   await warmUp();
   await gpuSettled();
@@ -239,7 +261,7 @@ async function warmOpening() {
 async function drawTrekkerEarly() {
   const root = scene.getObjectByName('trekker');
   if (!root || !trekker.debug.vrm) return;
-  await renderer.compileAsync(root, camera, scene);
+  await within(4000, renderer.compileAsync(root, camera, scene), "the trekker's shaders");
   cameraPath.update(camera, 0, 0, true);
   const others = scene.children.filter((c) => c !== root && c.visible && !hasLight(c));
   others.forEach((c) => { c.visible = false; });
@@ -701,9 +723,9 @@ window.__ascent = {
 
 // ---------- 5. Handing over from the loading screen to the live scene ----------
 // The opening has been getting ready on the graphics card while the rest was built (warmOpening).
-await openingReady;
+await within(12000, openingReady, 'preparing the opening');
 // (and the soft shade behind the opening words, drawn from the very first frame)
-await shade.compile(renderer);
+await within(3000, shade.compile(renderer), 'the text shade');
 reportProgress('final', 0.3);
 // Opening somewhere further up (back from a project page, a poster still, a page that was already
 // scrolled, or "Skip the film" pressed while loading): that part of the mountain must be ready too.
