@@ -3,6 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Find the site's root first. The host shows this page for ANY missing address, however many
+       folders deep (e.g. /pratul-site/a/b/c), and the address stays as typed, so the relative paths
+       below (css/..., js/..., index.html) would be looked for inside those folders. A <base> makes
+       them start from the site's root instead: on GitHub Pages (*.github.io) that's the first folder,
+       the repository's name (/pratul-site/); on any other address (your own domain, Live Server) it's
+       "/". It must come before every other link on the page. -->
+  <script>
+    (function () {
+      var first = location.pathname.split('/')[1];
+      var root = /\.github\.io$/.test(location.hostname) && first ? '/' + first + '/' : '/';
+      var base = document.createElement('base');
+      base.href = root;
+      document.head.appendChild(base);
+    })();
+  </script>
   <!-- Which version this device gets (js/device.js): phones get the mobile styles below. -->
   <script src="js/device.js" data-preload="false"></script>
   <title>Off the trail · Pratul</title>
@@ -13,9 +28,9 @@
   <!-- Self-hosted fonts (css/tokens.css). Only the headline face is fetched early. -->
   <link rel="preload" href="assets/fonts/instrument-serif-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/manrope-variable.woff2" as="font" type="font/woff2" crossorigin>
-  <!-- Relative paths, so this page styles correctly wherever the site lives (at a domain root or
-       in a subfolder). A host shows this page for any missing address: for a missing page at the top
-       level that works; several folders deep, the host may need to be told where 404.html is. -->
+  <!-- Relative paths, read from the site's root (the <base> above), so this page styles correctly for
+       a missing address at any depth, at a domain root or in a subfolder. (Without JavaScript they
+       still work for a missing page at the top level.) -->
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/style.css">
