@@ -554,3 +554,19 @@ html.film-done { --film: 0; }
 .is-still .overlay, .is-still .hero, .is-still .nav, .is-still .poster, .is-still .stage-fade, .is-still .skip-to-content { display: none !important; }
 .is-still, .is-still body { scrollbar-width: none; }
 .is-still ::-webkit-scrollbar { display: none; }
+
+/* The wordmark, PRATUL.dev (references/round4/NavHero.dc.html): one baseline, three sizes. The sizes
+   are shares of the P, so the whole mark scales from one number (font-size), here, in the footer
+   and on the case-study pages. */
+.wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  font-family: var(--font-display);
+  font-size: 38px;
+  line-height: 1;
+  color: var(--cream);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.wordmark__ratul { font-size: 0.66em; letter-spacing: 0.07em; }
+.wordmark__dev { font-size: 0.55em; color: var(--amber); }

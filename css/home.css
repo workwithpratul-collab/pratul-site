@@ -123,20 +123,7 @@
   transition: background var(--t-base) var(--ease-arrive), backdrop-filter var(--t-base) var(--ease-arrive), opacity var(--t-base) var(--ease-arrive), transform var(--t-base) var(--ease-arrive), box-shadow var(--t-base) var(--ease-arrive);
 }
 .nav__name { margin-right: auto; }
-/* The wordmark, PRATUL.dev (references/round4/NavHero.dc.html): one baseline, three sizes. The sizes
-   are shares of the P, so the whole mark scales from one number (font-size), here and in the footer. */
-.wordmark {
-  display: inline-flex;
-  align-items: baseline;
-  font-family: var(--font-display);
-  font-size: 38px;
-  line-height: 1;
-  color: var(--cream);
-  text-decoration: none;
-  white-space: nowrap;
-}
-.wordmark__ratul { font-size: 0.66em; letter-spacing: 0.07em; }
-.wordmark__dev { font-size: 0.55em; color: var(--amber); }
+/* (The wordmark, PRATUL.dev, is styled in style.css: the case-study pages use it too.) */
 .nav__links { display: flex; gap: var(--s-6); }
 .nav__links a {
   position: relative;
