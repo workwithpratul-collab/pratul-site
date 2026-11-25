@@ -19,6 +19,7 @@ import { groundHeight, nearestTrail, noise2, smoothstep, seededRandom, legacy, t
 import { mood } from './palette.js';
 import { WIND, WIND_GLSL } from './glsl.js';
 import { CAMPS } from './journey.js';
+import { VARIANTS, paintTreeAtlasPixels, putTreeAtlas } from './tree-atlas.js';
 
 // ---------- Painted colours ----------
 // Tree, stone and wood colours live in palette.js (mood.trees, mood.stones, mood.wood).
@@ -60,7 +61,9 @@ const shared = {
 
 // pause: an optional async function, called every few thousand trees. film.js passes one that
 // hands the browser a moment back, so planting ~22,000 candidates never freezes the page.
-export async function createForest(scene, { routeDistance, legacyRouteDistance, sky, pause = null } = {}) {
+// atlas: optional, a promise of the far trees' silhouettes being painted in a background worker
+// (tree-atlas.js); film.js starts it as soon as it loads, so they are ready by the time we need them.
+export async function createForest(scene, { routeDistance, legacyRouteDistance, sky, pause = null, atlas = null } = {}) {
   // Share the sky's live key light direction (moon at night, sun later), so trees shade with it.
   if (sky) shared.uMoonDir.value = sky.keyDir;
 
@@ -163,7 +166,7 @@ export async function createForest(scene, { routeDistance, legacyRouteDistance, 
   const pineMesh = makeNearInstanced(buildSoftPine(), near.pine, nearMat, 'near-pines');
   const oakMesh = makeNearInstanced(buildSoftOak(), near.oak, nearMat, 'near-oaks');
   if (pause) await pause();
-  const cardMesh = makeCards(cards);
+  const cardMesh = makeCards(cards, { atlasPixels: await atlas });
   scene.add(pineMesh, oakMesh, cardMesh);
 
   // Colours need no per-frame work: every tree material holds the palette's live colours.
@@ -593,11 +596,11 @@ export function createStoneVariety(scene, stones, rand = Math.random, colors = m
 // =====================================================================
 // CARD TREES: painted silhouettes that face the camera
 // =====================================================================
-const VARIANTS = 8;              // 6 pine shapes + 2 broadleaf shapes in one texture
-const CELL_W = 256, CELL_H = 512;
+// (The silhouettes are painted by tree-atlas.js: 8 of them, 6 pines and 2 broadleaf trees.)
 
-function makeCards(cards, { facePoint = null } = {}) {
-  const atlas = paintTreeAtlas();
+// atlasPixels: the silhouettes, already painted in a background worker (or null: paint them here).
+function makeCards(cards, { facePoint = null, atlasPixels = null } = {}) {
+  const atlas = treeAtlasTexture(atlasPixels ?? paintTreeAtlasPixels(document.createElement('canvas')));
   const geo = new THREE.PlaneGeometry(1, 1);
   geo.translate(0, 0.5, 0);      // pivot at the bottom middle (where the trunk meets the ground)
 
@@ -710,100 +713,13 @@ function makeCards(cards, { facePoint = null } = {}) {
   return mesh;
 }
 
-// Draw 8 tree silhouettes side by side on one canvas.
-// Channels: A = the silhouette, R = soft brush variation, G = moonlit left edge.
-function paintTreeAtlas() {
-  const canvas = document.createElement('canvas');
-  canvas.width = CELL_W * VARIANTS;
-  canvas.height = CELL_H;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#fff';
-  const rand = seededRandom(99);
-  // A slight blur gives the mask soft edges, which the shader turns into smooth outlines.
-  ctx.filter = 'blur(1.2px)';
-  for (let v = 0; v < VARIANTS; v++) {
-    if (v < 6) drawPine(ctx, v * CELL_W, rand);
-    else drawBroadleaf(ctx, v * CELL_W, rand);
-  }
-  ctx.filter = 'none';
-
-  // Second pass, pixel by pixel: add brush variation (R) and a moonlit edge (G).
-  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const d = img.data;
-  const W = canvas.width;
-  const alphaAt = (x, y) => (x < 0 || y < 0 || x >= W || y >= CELL_H ? 0 : d[(y * W + x) * 4 + 3] / 255);
-  const out = new Uint8ClampedArray(d.length);
-  for (let y = 0; y < CELL_H; y++) {
-    for (let x = 0; x < W; x++) {
-      const i = (y * W + x) * 4;
-      const a = d[i + 3] / 255;
-      // Light comes from the upper left (the moon): edges with empty space up-left catch it.
-      const rim = a * (1 - alphaAt(x - 3, y - 2));
-      const brush = noise2(x * 0.045, y * 0.02, 5) * 0.7 + noise2(x * 0.15, y * 0.08, 6) * 0.3;
-      out[i] = brush * 255;
-      out[i + 1] = rim * 255;
-      out[i + 2] = 0;
-      out[i + 3] = d[i + 3];
-    }
-  }
-  ctx.putImageData(new ImageData(out, W, CELL_H), 0, 0);
-
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = THREE.NoColorSpace;     // this is data (masks), not a colour picture
+// The silhouettes as a texture. (They are data, masks, not a colour picture.)
+function treeAtlasTexture(pixels) {
+  const tex = new THREE.CanvasTexture(putTreeAtlas(pixels));
+  tex.colorSpace = THREE.NoColorSpace;
   tex.premultiplyAlpha = false;
   tex.generateMipmaps = true;
   tex.minFilter = THREE.LinearMipmapLinearFilter;
   tex.anisotropy = 4;
   return tex;
-}
-
-// A pine: one outline with drooping branch tips down both sides, each side jittered separately.
-function drawPine(ctx, ox, rand) {
-  const cx = ox + CELL_W / 2 + (rand() - 0.5) * 8;
-  const top = 10 + rand() * 18;
-  const base = CELL_H - 40;
-  const maxHalf = CELL_W * (0.36 + rand() * 0.1);
-  const tiers = 7 + Math.floor(rand() * 4);
-  const half = (y) => maxHalf * Math.pow((y - top) / (base - top), 0.92);
-
-  const side = (dir) => {
-    const pts = [];
-    for (let k = 1; k <= tiers; k++) {
-      const yTip = top + ((base - top) * k) / tiers + (rand() - 0.5) * 8;
-      const yNotch = yTip - ((base - top) / tiers) * (0.45 + rand() * 0.2);
-      pts.push([cx + dir * half(yNotch) * (0.58 + rand() * 0.2), yNotch]);
-      pts.push([cx + dir * half(yTip) * (0.9 + rand() * 0.25), yTip + 6 + rand() * 6]);   // drooping tip
-    }
-    return pts;
-  };
-  const left = side(-1);
-  const right = side(1);
-
-  ctx.beginPath();
-  ctx.moveTo(cx, top);
-  for (const [x, y] of left) ctx.lineTo(x, y);
-  ctx.lineTo(cx - maxHalf * 0.2, base + 2);
-  ctx.lineTo(cx + maxHalf * 0.2, base + 2);
-  for (const [x, y] of right.reverse()) ctx.lineTo(x, y);
-  ctx.closePath();
-  ctx.fill();
-  // A short trunk peeking out underneath.
-  ctx.fillRect(cx - 5, base - 4, 10, CELL_H - base);
-}
-
-// A broadleaf tree: a cloud of overlapping round clumps on a short trunk.
-function drawBroadleaf(ctx, ox, rand) {
-  const cx = ox + CELL_W / 2;
-  const base = CELL_H - 30;
-  ctx.fillRect(cx - 7, base - 140, 14, 170);
-  const clumps = 11;
-  for (let i = 0; i < clumps; i++) {
-    const a = rand() * Math.PI * 2;
-    const r = rand() * 48;
-    const x = cx + Math.cos(a) * r;
-    const y = base - 220 + Math.sin(a) * r * 1.3 - (i === 0 ? 30 : 0);
-    ctx.beginPath();
-    ctx.arc(x, y, 36 + rand() * 30, 0, Math.PI * 2);   // stays inside the 256 px cell
-    ctx.fill();
-  }
 }

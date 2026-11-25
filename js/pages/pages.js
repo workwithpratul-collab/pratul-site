@@ -13,25 +13,35 @@ const isFilm = !document.documentElement.classList.contains('mobile-site');
 
 // lenis: the smooth scroller on desktop, or on the phone page a small stand-in with the same
 // scrollTo() that uses the browser's own scrolling (js/mobile/mobile.js).
-export async function initPages({ lenis, desktop = false }) {
+// pause (desktop, optional): an async function called between the steps below. Desktop sets the
+// sections up while the film is already playing, and all at once they held it for ~60 ms (a visible
+// stutter); with a quiet moment between the steps, each piece is short. (Phones don't pass one, so
+// for them everything runs at once, exactly as before.)
+export async function initPages({ lenis, desktop = false, pause = null }) {
   // Desktop already has GSAP loaded (core.js); phones never load it.
   const core = desktop ? await import('../core.js') : null;
-  initNav();
-  initMenu();
-  // (the exploded-website Services is desktop only: phones never download it)
-  if (core) import('./services.js').then((m) => m.initServices({ core, lenis }));
-  initServiceCards({ lenis });
-  initWork({ core });
-  initWorkFilter();
-  initProcess({ core });
-  initAbout();
-  initFooter();
-  initTestimonial();
-  initTools();
-  initContact({ lenis });
-  initPlaceholders({ lenis });
-  initShowreel();
-  initReveal({ core });
+  const steps = [
+    initNav,
+    initMenu,
+    // (the exploded-website Services is desktop only: phones never download it)
+    () => { if (core) import('./services.js').then((m) => m.initServices({ core, lenis })); },
+    () => initServiceCards({ lenis }),
+    () => initWork({ core }),
+    initWorkFilter,
+    () => initProcess({ core }),
+    initAbout,
+    initFooter,
+    initTestimonial,
+    initTools,
+    () => initContact({ lenis }),
+    () => initPlaceholders({ lenis }),
+    initShowreel,
+    () => initReveal({ core }),
+  ];
+  for (const run of steps) {
+    if (pause) await pause();
+    run();
+  }
 }
 
 // Run fn once, when el comes within `margin` of the screen.

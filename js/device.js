@@ -50,7 +50,7 @@
         'js/loader.js', 'js/core.js', CDN + 'gsap@3.15.1/index.js', CDN + 'gsap@3.15.1/gsap-core.js', CDN + 'gsap@3.15.1/CSSPlugin.js',
         CDN + 'gsap@3.15.1/ScrollTrigger.js', CDN + 'gsap@3.15.1/Observer.js', CDN + 'gsap@3.15.1/SplitText.js', CDN + 'lenis@1.3.27/dist/lenis.mjs',
         // The film: its code (every file it imports), three.js and the character loader.
-        'js/film.js', 'js/gl.js', 'js/world/terrain.js', 'js/world/forest.js', 'js/world/trekker.js',
+        'js/film.js', 'js/gl.js', 'js/world/terrain.js', 'js/world/noise.js', 'js/world/forest.js', 'js/world/tree-atlas.js', 'js/world/trekker.js',
         'js/world/landmarks.js', 'js/world/summit.js', 'js/world/meadow.js', 'js/world/sky.js', 'js/world/camp.js',
         'js/world/ridge.js', 'js/world/grass.js', 'js/world/mist.js', 'js/world/motes.js', 'js/world/cameraPath.js',
         'js/world/journey.js', 'js/world/palette.js', 'js/world/glsl.js', 'js/world/gear.js', 'js/world/shade.js',

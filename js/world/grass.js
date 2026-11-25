@@ -59,7 +59,9 @@ function materials() {
 //   colors:   { base, lit, deep } hex colours from palette.js
 //   flowers:  wildflowers per metre of trail (0 = none), in drifts of one colour
 //   skip(x, z): optional, return true where nothing should grow (e.g. under a tent)
-export function createGrass(scene, { from, to, width = 20, perMetre = 120, colors, flowers = 0, seed = 1, skip }) {
+// pause (optional): an async function called between stretches of the trail. The film passes one
+// that waits for a quiet moment, so planting a zone's grass never makes the live film stutter.
+export async function createGrass(scene, { from, to, width = 20, perMetre = 120, colors, flowers = 0, seed = 1, skip, pause = null }) {
   sharedTuft ??= tuftGeometry();
   sharedFlower ??= flowerGeometry();
   materials();
@@ -73,6 +75,7 @@ export function createGrass(scene, { from, to, width = 20, perMetre = 120, color
   const up = new THREE.Vector3(0, 1, 0), c = new THREE.Color();
 
   for (let start = from; start < to; start += CHUNK_LENGTH) {
+    if (pause && start > from) await pause();
     const end = Math.min(start + CHUNK_LENGTH, to);
     const tufts = [], blooms = [];
     const count = Math.round((end - start) * perMetre);

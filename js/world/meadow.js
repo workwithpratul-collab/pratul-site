@@ -294,7 +294,8 @@ function buildFlowers(rand) {
 // one continuous landscape (terrain.js shapes the broad, rolling shelf), and this adds what
 // grows and lies on it: alpine grass and drifts of wildflowers, a few soft trees, stones in
 // four shapes, mist in the valley below, and the gear-check mat (a placeholder until Phase 4).
-export function createMeadowZone(scene) {
+// pause (optional): an async function called between the pieces (see createGrass).
+export async function createMeadowZone(scene, { pause = null } = {}) {
   const rand = seededRandom(4242);
   const [mx, mz] = MEADOW.mat;
   // Nothing grows on the mat or right around the camera spot (grass would fill the close shot).
@@ -303,11 +304,14 @@ export function createMeadowZone(scene) {
   // ---------- Grass and wildflowers, from the end of the ridge to the snow line ----------
   const start = trailDistanceAt(149, -200);
   const snow = trailDistanceAt(185, -284);
-  createGrass(scene, {
+  await createGrass(scene, {
+    pause,
     from: start, to: snow, width: 42, perMetre: 300, flowers: 70, colors: MEADOW_GRASS, seed: 33,
     // Nothing grows on the mat, under the camera, or up in the snow.
     skip: (x, z) => nearMat(x, z) || groundHeight(x, z) > 62,
   });
+
+  if (pause) await pause();
 
   // ---------- A few soft trees: a group on the knoll to the right, a lone pine on the left ----------
   const tree = (x, z, scale) => ({ x, z, y: groundHeight(x, z), scale, rot: rand() * 6.28, tint: 0.92 + rand() * 0.14 });
@@ -317,6 +321,7 @@ export function createMeadowZone(scene) {
   });
 
   // ---------- Stones: clusters in the grass, each a mix of shapes ----------
+  if (pause) await pause();
   const stones = [];
   for (const [cx, cz] of [[171, -238], [150, -226], [175, -264], [146, -248], [168, -216], [156, -270], [190, -262]]) {
     const n = 2 + Math.floor(rand() * 3);

@@ -84,7 +84,22 @@ const whenIdle = (fn) => ('requestIdleCallback' in window ? requestIdleCallback(
 requestAnimationFrame(() => setTimeout(loadFilm, 0));
 
 // The sections' own script: fetched early but quietly, so it's there long before anyone scrolls down.
-whenIdle(() => import('./pages/pages.js').then((m) => m.initPages({ lenis, desktop: true })));
+// It is only STARTED once the loading screen has handed over (setting up the sections takes the page
+// ~60-100 ms, which used to land in the middle of the film's loading and held it up), or straight
+// away when the page opens on a section (a #link from another page).
+const pagesModule = new Promise((resolve) => whenIdle(() => resolve(import('./pages/pages.js'))));
+let pagesStarted = false;
+function startPages() {
+  if (pagesStarted) return;
+  pagesStarted = true;
+  // (a quiet moment before each of its steps, so it never holds up the film's frames for long)
+  const pause = () => new Promise((resolve) => whenIdle(resolve));
+  pagesModule.then((m) => m.initPages({ lenis, desktop: true, pause }));
+}
+if (location.hash && location.hash !== '#hero') startPages();
+window.addEventListener('ascent:revealed', startPages, { once: true });
+window.addEventListener('ascent:failed', startPages, { once: true });
+setTimeout(startPages, 9000);   // (whatever happens to the film, the sections always start)
 
 // ---------- 3. "Skip the film" ----------
 document.getElementById('skip').addEventListener('click', (e) => {

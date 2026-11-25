@@ -135,6 +135,7 @@ export function createTrekker(scene, renderer, camera, { onProgress, clips = nul
     // Skinned meshes can be wrongly hidden by "frustum culling" when they animate; turn it off.
     vrm.scene.traverse((obj) => { obj.frustumCulled = false; });
 
+    dropOutlines(vrm);
     tuneMaterialsForNight(vrm);
     setLightLevel(NIGHT_LEVEL, NIGHT_TINT);
     root.add(vrm.scene);
@@ -534,6 +535,22 @@ export function createTrekker(scene, renderer, camera, { onProgress, clips = nul
 // MToon also reacts to light more strongly than our painted world, so we keep each
 // material's original colours and scale them with a "light level" (see setLightLevel).
 const toonMaterials = [];
+// The model file asks for a drawn outline, so three-vrm gives three of his parts a second
+// "outline" material. We set its width to 0 (it read as a sticker edge), so it draws nothing you
+// can see, but the graphics card still had to prepare its shader before his first frame: three of
+// his eight shaders, about a third of that wait. Removing the outline materials looks the same and
+// saves that work.
+function dropOutlines(vrm) {
+  vrm.scene.traverse((obj) => {
+    if (!obj.isMesh || !Array.isArray(obj.material)) return;
+    const surfaces = obj.material.filter((m) => !m.isOutline);
+    if (surfaces.length === obj.material.length) return;
+    // (the outline came with two draw groups over the same triangles: one per material)
+    obj.material = surfaces.length === 1 ? surfaces[0] : surfaces;
+    if (surfaces.length === 1) obj.geometry.clearGroups();
+  });
+}
+
 function tuneMaterialsForNight(vrm) {
   const moonRim = new THREE.Color(MATERIALS.characterRim);
   vrm.scene.traverse((obj) => {

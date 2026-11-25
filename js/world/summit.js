@@ -126,7 +126,8 @@ export function createSummit(scene, { renderer, camera }) {
 // sunDir: the film's sun (sky.js). cloudTop: where the top of the sea of clouds sits once the
 // sun is up (metres). The whole sea of clouds (with its puffs, banks and the far peaks' feet)
 // rises from below the valley floor as the light comes up: setClimb drives it via update().
-export function createSummitZone(scene, { sunDir, cloudTop = 20 }) {
+// pause (optional): an async function called between the pieces (see grass.js createGrass).
+export async function createSummitZone(scene, { sunDir, cloudTop = 20, pause = null }) {
   const [sx, sz] = SUMMIT.top;
   const topY = groundHeight(sx, sz);
   const sunFlat = new THREE.Vector3(sunDir.x, 0, sunDir.z).normalize();
@@ -149,6 +150,7 @@ export function createSummitZone(scene, { sunDir, cloudTop = 20 }) {
   const puffs = buildCloudPuffs(sunDir, rand, { cx: sx, cz: sz });
   sea.add(puffs);
   scene.add(sea);
+  if (pause) await pause();
 
   // ---------- 2. Big snow peaks rising out of the clouds, turned to face the film's sunrise ----------
   // The style frame's layout is rotated so the peaks sit in the same place relative to the sun.
@@ -158,10 +160,12 @@ export function createSummitZone(scene, { sunDir, cloudTop = 20 }) {
   const peaks = new THREE.Group();
   peaks.name = 'snow-peaks';
   for (const m of MASSIFS) {
+    if (pause) await pause();
     const x = sx + m.x * cos + m.z * sin, z = sz - m.x * sin + m.z * cos;
     peaks.add(...buildMassif({ ...m, x, z }, peakMat, rand, cloudTop));
   }
   scene.add(peaks);
+  if (pause) await pause();
 
   // ---------- 3. Rocks breaking through the snow, in four shapes ----------
   const stones = [];
@@ -179,6 +183,8 @@ export function createSummitZone(scene, { sunDir, cloudTop = 20 }) {
     stones.push({ x, z, y: y - s * 0.25, s, shape: [0, 1, 3][Math.floor(rand() * 3)] });
   }
   createStoneVariety(scene, stones, rand);
+
+  if (pause) await pause();
 
   // ---------- 3b. Crags, ridges and drifts: the summit's character ----------
   // Bare rock breaks through the snow in lines running down from the top (ridges, like the

@@ -6,20 +6,10 @@ import * as THREE from 'three';
 import { NOISE_GLSL } from './glsl.js';
 import { mood, MATERIALS } from './palette.js';
 import { CAMPS } from './journey.js';
+import { seededRandom, noise2 } from './noise.js';
 
-// ---------- A tiny seeded random generator ----------
-// Math.random() gives different mountains every reload. A "seeded" random gives the
-// same sequence every time, so the world always looks the same.
-export function seededRandom(seed) {
-  let a = seed >>> 0;
-  return function () {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+// (They live in noise.js, so a background worker can use them too; passed on from here as before.)
+export { seededRandom, noise2 };
 
 // Smooth 1D noise for mountain outlines: random heights at fixed steps, blended smoothly.
 function makeNoise1D(seed, count = 512) {
@@ -253,20 +243,6 @@ const TRAIL_MAP = [
 // The first 14 points are the Phase 1 trail; base camp's forest is still planted along it.
 const LEGACY_POINTS = 14;
 
-// Smooth 2D noise in JavaScript (same idea as the shader noise).
-function hash2(ix, iz, seed) {
-  let h = Math.imul(ix, 374761393) ^ Math.imul(iz, 668265263) ^ Math.imul(seed, 2147483647);
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-}
-export function noise2(x, z, seed = 1) {
-  const ix = Math.floor(x), iz = Math.floor(z);
-  const fx = x - ix, fz = z - iz;
-  const ux = fx * fx * (3 - 2 * fx), uz = fz * fz * (3 - 2 * fz);
-  const a = hash2(ix, iz, seed), b = hash2(ix + 1, iz, seed);
-  const c = hash2(ix, iz + 1, seed), d = hash2(ix + 1, iz + 1, seed);
-  return a + (b - a) * ux + (c - a) * uz + (a - b - c + d) * ux * uz;
-}
 export function smoothstep(e0, e1, x) {
   const t = Math.min(Math.max((x - e0) / (e1 - e0), 0), 1);
   return t * t * (3 - 2 * t);
@@ -344,6 +320,7 @@ function landHeight(x, z) {
     // The closest point on this piece of spine, and how far along it is (0..1).
     const t = Math.min(Math.max(((x - a[0]) * dx + (z - a[1]) * dz) / len2, 0), 1);
     const px = x - (a[0] + dx * t), pz = z - (a[1] + dz * t);
+    if (px * px + pz * pz > 25600) continue;   // (over 160 m away: skip it before the slower square root)
     const d = Math.hypot(px, pz);
     if (d > 160) continue;
     if (d < landDistance) landDistance = d;
@@ -674,7 +651,10 @@ export async function createGround(scene, { region = null, trailMetres = Infinit
       const hL = gridHeights[iz * cols + Math.max(ix - 1, ix0)], hR = gridHeights[iz * cols + Math.min(ix + 1, ix1)];
       const hF = gridHeights[Math.max(iz - 1, iz0) * cols + ix], hN = gridHeights[Math.min(iz + 1, iz1) * cols + ix];
       n.set((hL - hR) / (2 * GRID.cellX), 1, (hF - hN) / (2 * GRID.cellZ)).normalize();
-      normals.set([n.x, n.y, n.z], (iz * cols + ix) * 3);
+      // (each number written straight in: making a small array for every one of the ~190,000
+      // points, as this used to, cost about a tenth of a second on its own)
+      const o = (iz * cols + ix) * 3;
+      normals[o] = n.x; normals[o + 1] = n.y; normals[o + 2] = n.z;
     }
   }
   // 3. Colours.
@@ -685,7 +665,7 @@ export async function createGround(scene, { region = null, trailMetres = Infinit
     for (let ix = ix0; ix <= ix1; ix++) {
       const i = iz * cols + ix;
       groundColour(GRID.minX + ix * GRID.cellX, GRID.minZ + iz * GRID.cellZ, gridHeights[i], normals[i * 3 + 1], c, tmp);
-      colors.set([c.r, c.g, c.b], i * 3);
+      colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
     }
   }
 
@@ -705,25 +685,28 @@ export async function createGround(scene, { region = null, trailMetres = Infinit
       for (let iz = cz; iz <= cz + nz; iz++) {
         for (let ix = cx; ix <= cx + nx; ix++, k++) {
           const i = iz * cols + ix;
-          pos.set([GRID.minX + ix * GRID.cellX, gridHeights[i], GRID.minZ + iz * GRID.cellZ], k * 3);
-          nor.set(normals.subarray(i * 3, i * 3 + 3), k * 3);
-          col.set(colors.subarray(i * 3, i * 3 + 3), k * 3);
+          const o = k * 3, g = i * 3;
+          pos[o] = GRID.minX + ix * GRID.cellX; pos[o + 1] = gridHeights[i]; pos[o + 2] = GRID.minZ + iz * GRID.cellZ;
+          nor[o] = normals[g]; nor[o + 1] = normals[g + 1]; nor[o + 2] = normals[g + 2];
+          col[o] = colors[g]; col[o + 1] = colors[g + 1]; col[o + 2] = colors[g + 2];
         }
       }
       // Two triangles per square, split along the same diagonal groundHeight() assumes.
-      const index = [];
+      // (a chunk has at most 65 x 65 points, so 16-bit indices are enough)
+      const index = new Uint16Array(nx * nz * 6);
       const w = nx + 1;
+      let m = 0;
       for (let iz = 0; iz < nz; iz++) {
         for (let ix = 0; ix < nx; ix++) {
           const a = iz * w + ix, b = (iz + 1) * w + ix, cc = (iz + 1) * w + ix + 1, d = iz * w + ix + 1;
-          index.push(a, b, d, b, cc, d);
+          index[m++] = a; index[m++] = b; index[m++] = d; index[m++] = b; index[m++] = cc; index[m++] = d;
         }
       }
       const geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
       geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-      geo.setIndex(index);
+      geo.setIndex(new THREE.BufferAttribute(index, 1));
       geo.computeBoundingSphere();
       const chunk = new THREE.Mesh(geo, mat);
       chunk.name = 'ground-chunk';

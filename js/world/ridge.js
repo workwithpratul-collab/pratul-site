@@ -18,7 +18,8 @@ function toSegment(x, z, a, b) {
   return Math.hypot(x - (a[0] + dx * t), z - (a[1] + dz * t));
 }
 
-export function createRidge(scene) {
+// pause (optional): an async function called between the pieces (see createGrass).
+export async function createRidge(scene, { pause = null } = {}) {
   const rand = seededRandom(717);
   const [, kingsGarden, trinetra] = CAMPS;
   // Nothing grows right under a screen and its tent, or right in front of a camera spot.
@@ -27,7 +28,8 @@ export function createRidge(scene) {
   // ---------- Grass along the ridge, from just past DERMAÉ to where the meadow begins ----------
   const ridgeStart = trailDistanceAt(4, -164);
   const meadowStart = trailDistanceAt(152, -208);
-  createGrass(scene, { from: ridgeStart, to: meadowStart, width: 26, perMetre: 150, colors: RIDGE_GRASS, seed: 21, skip: nearCamp });
+  createGrass(scene, { from: ridgeStart, to: meadowStart, width: 26, perMetre: 150, colors: RIDGE_GRASS, seed: 21, skip: nearCamp, pause });
+  if (pause) await pause();
 
   // ---------- Stones: small clusters beside the path, each a mix of shapes ----------
   const stones = [];
@@ -49,6 +51,7 @@ export function createRidge(scene) {
   stones.push({ x: 33, z: -189, s: 1.1, shape: 0 }, { x: 34.6, z: -189.6, s: 0.5, shape: 3 });
   stones.push({ x: 49, z: -186, s: 0.8, shape: 1 });
   createStoneVariety(scene, stones, rand);
+  if (pause) await pause();
 
   const tree = (x, z, scale, tint = 1) => ({ x, z, y: groundHeight(x, z), scale, rot: rand() * 6.28, tint: tint * (0.92 + rand() * 0.14) });
 
@@ -103,6 +106,8 @@ export function createRidge(scene) {
     ],
     oak: [tree(kingsGarden.screen[0] + 10, kingsGarden.screen[1] - 6, 4.2), ...hillside.oak],
   });
+
+  if (pause) await pause();
 
   // ---------- Mist in the valley below the rim ----------
   // Long soft strips hanging along the valley side, below the path: seen from the ridge they
