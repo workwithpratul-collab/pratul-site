@@ -22,7 +22,7 @@ import { createMist } from './world/mist.js';
 import { createMotes } from './world/motes.js';
 import { createTrekker } from './world/trekker.js';
 import { createCameraPath } from './world/cameraPath.js';
-import { ZONES, LIGHT, ALTITUDE, FILM_SCREENS, MAX_WALK_SPEED, CATCH_UP_SECONDS, CATCH_UP_MIN_SPEED, CATCH_UP_MAX_SPEED, MIST_SKIP_METRES, CAMPS, MEADOW } from './world/journey.js';
+import { ZONES, LIGHT, ALTITUDE, FILM_SCREENS, MAX_WALK_SPEED, CATCH_UP_SECONDS, CATCH_UP_MIN_SPEED, CATCH_UP_MAX_SPEED, MIST_SKIP_METRES, MAX_LAG_SECONDS, CAMPS, MEADOW } from './world/journey.js';
 import { mood, setClimb } from './world/palette.js';
 import { createAltitudeMeter } from './ui/altitude.js';
 import { WIND } from './world/glsl.js';
@@ -456,6 +456,20 @@ function limitWalk(from, to, dt, gap) {
   return lo;
 }
 
+// ---------- Never long behind (a limit in time) ----------
+// The speed limit lets the film trail the scroll a little. This keeps a short memory of where the
+// scroll has been, so we can tell how long ago the scroll was where the film is now.
+const scrollTrail = [];   // [time in ms, scroll.target], the last 3 seconds
+function lagSeconds(now, p) {
+  scrollTrail.push([now, scroll.target]);
+  while (now - scrollTrail[0][0] > 3000) scrollTrail.shift();
+  // (step back to the last moment the scroll was still at the film's spot, going down or up)
+  const down = scroll.target > p;
+  let k = scrollTrail.length - 1;
+  while (k > 0 && (down ? scrollTrail[k][1] > p + 1e-4 : scrollTrail[k][1] < p - 1e-4)) k--;
+  return (now - scrollTrail[k][0]) / 1000;
+}
+
 // ---------- The interface on the film ----------
 // The altitude meter: one stacked label (the place we're in, the live altitude worked out from how
 // high the trekker is on the trail, and how far is left to the summit) beside the progress line.
@@ -703,8 +717,9 @@ function frame(dt, time, rect) {
   if (snapNextFrame) scroll.progress = scroll.target;
   const eased = scroll.progress + (scroll.target - scroll.progress) * (1 - Math.exp(-dt * 4));
   const gap = Math.abs(cameraPath.trekkerS(scroll.target) - cameraPath.trekkerS(scroll.progress));
+  const lag = lagSeconds(performance.now(), scroll.progress);
   if (skipping) jumpTo(scroll.target, { moveScroll: false });
-  else if (gap > MIST_SKIP_METRES && !gliding && !campUI.opening && live) mistSkip();
+  else if ((gap > MIST_SKIP_METRES || lag > MAX_LAG_SECONDS) && !gliding && !campUI.opening && live) mistSkip();
   // The later zones (built after the film went live) aren't ready yet: once the visitor sets off up
   // the trail, build them without waiting for quiet moments; if they get close before they're ready,
   // the film waits under the soft mist (mistSkip waits for them) and carries on from there.
@@ -714,7 +729,8 @@ function frame(dt, time, rect) {
   }
   // Leaving the gear check, he stands up before walking on (but never waits long).
   standUpWait = trekker.sitting === 'up' ? standUpWait + dt : 0;
-  if (!(standUpWait > 0 && standUpWait < STAND_UP_WAIT && !skipping && !gliding)) {
+  // (not while catching up: the pause would leave the film further behind)
+  if (!(standUpWait > 0 && standUpWait < STAND_UP_WAIT && !skipping && !gliding && !catchingUp)) {
     scroll.progress = snapNextFrame ? eased : limitWalk(scroll.progress, eased, dt, gap);
   }
   const p = scroll.progress;

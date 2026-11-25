@@ -111,6 +111,11 @@ export const CATCH_UP_MAX_SPEED = 55;
 // A gap bigger than this (metres of trail) would take more than about 1.5 s to walk: the film
 // skips ahead behind a short, soft mist dissolve instead (a long flick, a scrollbar drag).
 export const MIST_SKIP_METRES = 50;
+// And a limit in time, whatever the distance: if the film shows a spot the scroll left more than this
+// many seconds ago (a long, steady jog just under the skip distance, or a pause at a stop), it skips
+// ahead under the same mist. The mist takes ~0.45 s to cover, so the film is never seen more than
+// ~1.5 s behind.
+export const MAX_LAG_SECONDS = 1.1;
 
 // Each zone's share of the scroll (they add up to 1): base camp 15%, ridge 40%, meadow 25%, summit 20%.
 export const ZONES = [
