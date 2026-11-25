@@ -411,10 +411,17 @@ html.film-done { --film: 0; }
 
 /* ---------- "Skip the film" ---------- */
 /* Easy to find (it's the only quick way past 13 screens), but quiet. */
+/* Bottom right of the screen, away from "Book a call" in the top bar, and above the loading screen
+   (z-index 60), so it can be used from the very first moment. Film only; it steps aside with the
+   film's other words when the summit hero shows (and stays away below it). */
 .skip-film {
-  position: absolute;
-  top: var(--s-5);
+  position: fixed;
   right: var(--page-gutter);
+  bottom: clamp(40px, 7vh, 64px);
+  z-index: 61;
+  display: none;
+}
+[data-mode="film"] .skip-film {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -429,14 +436,11 @@ html.film-done { --film: 0; }
   font-size: 15px;
   font-weight: 500;
   text-decoration: none;
-  transition: border-color var(--t-fast) var(--ease-arrive), background var(--t-fast) var(--ease-arrive);
-  animation: rise-in var(--t-slow) var(--ease-arrive) 1s both;
+  transition: opacity 0.9s var(--ease-arrive), visibility 0.9s, border-color var(--t-fast) var(--ease-arrive), background var(--t-fast) var(--ease-arrive);
+  animation: rise-in var(--t-slow) var(--ease-arrive) 0.3s both;
 }
 .skip-film .i { width: 16px; height: 16px; transition: transform var(--t-fast) var(--ease-arrive); }
-/* While the top bar is showing over the film, "Skip the film" steps down below it, in step with it. */
-/* (translate, not transform: its entrance animation holds the transform) */
-.skip-film { transition: translate 520ms var(--ease-out), border-color var(--t-fast) var(--ease-arrive), background var(--t-fast) var(--ease-arrive); }
-.nav-shown .skip-film { translate: 0 60px; }
+.hero-in .skip-film, .is-still .skip-film { opacity: 0; visibility: hidden; }
 .skip-film:hover { border-color: var(--cream); background: rgba(21, 19, 42, 0.66); }
 .skip-film:hover .i { transform: translateY(2px); }
 

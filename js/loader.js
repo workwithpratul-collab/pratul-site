@@ -41,17 +41,16 @@ let done = false;
 // It only waits while something is really happening. If the real progress hasn't moved for STALL ms,
 // or loading has taken MAX ms in all, it glides to 100% and hands over anyway: the film's first frame
 // shows as a picture, with the real words on it (css: .film-waiting), and the live film cross-fades in
-// over it when it's ready, exactly as before there was a loading screen. After SKIP_AFTER ms a small
-// Skip link lets the visitor hand over at once.
-const STALL = 4000, MAX = 8000, SKIP_AFTER = 3000;
+// over it when it's ready, exactly as before there was a loading screen. "Skip the film" (always there,
+// bottom right, above this screen) hands over at once.
+const STALL = 4000, MAX = 8000;
 function giveUp(why) {
   if (givenUp || ready || done) return;
   givenUp = true;
   console.info('[loader] handing over before the film is ready:', why);
 }
-const skip = document.getElementById('loader-skip');
-setTimeout(() => { if (!done) skip.hidden = false; }, SKIP_AFTER);
-skip.addEventListener('click', () => { giveUp('skipped'); finish(false); });
+// (site.js takes the page to the summit hero; this only lifts the loading screen)
+document.getElementById('skip').addEventListener('click', () => { if (!done) { giveUp('skipped'); finish(false, true); } });
 
 function setPart(name, value) {
   if (!(name in parts)) return;
@@ -138,13 +137,14 @@ function write() {
 }
 
 // ---------- At 100%: fade into the film ----------
-function finish(fast) {
+// skipped: "Skip the film" was pressed. The page is already on the summit hero, so it shows the summit's
+// picture at once (css: .film-skipped), not the first frame's.
+function finish(fast, skipped = false) {
   if (done) return;
   done = true;
   root.classList.remove('film-veiled');   // the film's opening words begin to rise (css/style.css)
   // Not live yet (the safety net, or Skip): show the film's first frame as a picture until it is.
-  if (!ready) root.classList.add('film-waiting');
-  skip.hidden = true;
+  if (!ready) root.classList.add(skipped ? 'film-skipped' : 'film-waiting');
   loader.classList.add('is-done');
   // Tell the film the curtain is up (the trekker waves, js/film.js).
   window.dispatchEvent(new CustomEvent('ascent:revealed'));

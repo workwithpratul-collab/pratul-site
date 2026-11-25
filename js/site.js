@@ -193,7 +193,7 @@ function updateNav(y) {
   // See-through at the top and over the hero; a soft blurred bar everywhere else.
   // (It stays solid while it slides away, so it leaves as it arrived.)
   nav.classList.toggle('is-solid', !atTop && !atHero);
-  // ("Skip the film" steps down out of its way while it's showing over the film: css/style.css)
+  // (a class on the page too, for anything that must make room for the bar)
   root.classList.toggle('nav-shown', show);
 }
 nav.addEventListener('focusin', () => { navFocused = true; updateNav(lenis.scroll); });

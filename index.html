@@ -196,24 +196,6 @@
     .loader__pct { margin: 0; font-family: var(--font-display); font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; }
     .loader__bar { width: 240px; height: 3px; border-radius: 2px; background: var(--loader-track); overflow: hidden; }
     .loader__bar > span { display: block; height: 100%; background: var(--cream); border-radius: inherit; transform: scaleX(var(--p)); transform-origin: left; }
-    /* Skip (after 3 s, js/loader.js): quiet, bottom right, and only fades in. */
-    .loader__skip {
-      position: absolute;
-      right: var(--page-gutter);
-      bottom: clamp(40px, 7vh, 64px);
-      min-height: 44px;
-      padding: 0 18px;
-      border: 1px solid var(--hair-strong);
-      border-radius: 999px;
-      background: transparent;
-      color: var(--cream);
-      font: 500 15px/1 var(--font-body);
-      cursor: pointer;
-      animation: loader-skip-in 0.6s var(--ease-flow) both;
-      transition: border-color var(--t-fast) var(--ease-arrive);
-    }
-    .loader__skip:hover, .loader__skip:focus-visible { border-color: var(--cream); }
-    @keyframes loader-skip-in { from { opacity: 0; } }
     /* "Reduce motion": no falling snow, no petals, no drifting mist; the snow simply fades in. */
     @media (prefers-reduced-motion: reduce) {
       .loader__fall, .loader__petal, .loader__mist { animation: none; }
@@ -250,9 +232,15 @@
       <p class="loader__pct" aria-hidden="true"><span id="loader-pct">0</span>%</p>
       <div class="loader__bar" aria-hidden="true"><span></span></div>
     </div>
-    <!-- After a few seconds: hand over to the page now (the film keeps loading behind it). -->
-    <button class="loader__skip" id="loader-skip" type="button" hidden>Skip</button>
   </div>
+
+  <!-- "Skip the film": bottom right, away from "Book a call". It sits above the loading screen, so it
+       works from the first moment: pressed while loading, the page hands over at once and lands on the
+       summit hero (the film catches up behind it). Hidden once the hero shows (css/style.css). -->
+  <a class="skip-film" id="skip" href="#hero">
+    Skip the film
+    <svg class="i" aria-hidden="true"><use href="#i-down"/></svg>
+  </a>
 
   <!-- The ONE canvas for every 3D view on the page (js/gl.js): the film, the hero, the work ridge
        and the tool lanterns. It's fixed behind the page and see-through wherever nothing is drawn. -->
@@ -336,11 +324,6 @@
             <li><span class="gear-ui__item" data-item="watch" tabindex="0" role="img" aria-label="Watch: Fast loading, so nobody waits."><span class="gear-ui__label" aria-hidden="true"><span class="gear-ui__name">Watch</span><span class="gear-ui__tip">Fast loading, so nobody waits.</span></span></span></li>
           </ul>
         </div>
-
-        <a class="skip-film" id="skip" href="#hero">
-          Skip the film
-          <svg class="i" aria-hidden="true"><use href="#i-down"/></svg>
-        </a>
 
         <!-- How high we are: rises with the climb and doubles as the progress bar (js/ui/altitude.js). -->
         <div class="altitude" id="altitude" aria-hidden="true"></div>

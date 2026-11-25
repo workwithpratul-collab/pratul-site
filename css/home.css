@@ -223,6 +223,9 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
   transition: opacity 1.2s var(--ease-flow);
 }
 [data-mode="film"].hero-in:not(.is-live) .hero__poster, [data-mode="film"].no-film.hero-in .hero__poster { opacity: 1; }
+/* "Skip the film" pressed while loading: the summit's picture is there at once, under the loading
+   screen as it dissolves (not fading in at the same time, which showed both pictures at once). */
+[data-mode="film"].film-skipped:not(.is-live) .hero__poster { transition: none; }
 /* A soft shade over the left of the shot, where the words sit, so they always read. */
 .hero__shade {
   position: absolute;
