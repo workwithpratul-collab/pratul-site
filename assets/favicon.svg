@@ -1,8 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- The site's mark: a night sky, a snowy peak and the warm summit flag. -->
-  <rect width="64" height="64" rx="14" fill="#0e1747"/>
-  <path d="M6 54 L26 24 L34 34 L40 26 L58 54 Z" fill="#6b6fa8"/>
-  <path d="M26 24 L31 31 L28 33 L25 30 L22 32 Z" fill="#dfe3f5"/>
-  <path d="M40 26 L40 12" stroke="#f5f0e8" stroke-width="2.4" stroke-linecap="round"/>
-  <path d="M40 12 L50 15.5 L40 19 Z" fill="#ffb877"/>
+  <!-- The site's mark for the browser tab: a simplified version of the P logo (assets/brand/p-mark.png).
+       A cream P with a strong stem and an open bowl, and a tiny amber peak in the bowl, catching the
+       sunrise, on the night indigo. Shapes are kept big and simple so it still reads at 16 px. -->
+  <rect width="64" height="64" rx="13" fill="#17142b"/>
+  <!-- The P: outer edge, then the bowl's opening (cut out with evenodd). The stem flares a little at
+       the top and narrows to a fine point at the foot, like the logo's ribbon. -->
+  <path fill="#f3ece2" fill-rule="evenodd" d="M11 10.5 H37 C48 10.5 54.5 17.5 54.5 26.5 C54.5 35.5 48 42.5 37 42.5 H28.5 V49 C28.5 53.5 26.5 56.5 21.5 58.5 L13.5 58.5 C16.5 56 17 53 17 49 V16.5 C17 13.5 14.5 11.5 11 10.5 Z M28.5 17 H36 C42.5 17 47 20.8 47 26.5 C47 32.2 42.5 36 36 36 H28.5 Z"/>
+  <!-- The peak inside the bowl: the warm summit at sunrise. -->
+  <path fill="#f6a04d" d="M31 33.6 L37 24 L43 33.6 Z"/>
 </svg>
