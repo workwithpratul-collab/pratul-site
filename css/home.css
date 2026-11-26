@@ -327,7 +327,9 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
   letter-spacing: calc(0.2 * var(--u));
   color: var(--cream-sky);
   white-space: nowrap;
-  filter: drop-shadow(0 1px 10px rgba(40, 25, 60, 0.5));
+  /* (the mock-up's soft shadow, as a text-shadow on the words themselves: a filter on the whole
+     heading had to be redrawn on every frame of the reveal, around the huge invisible "move" too) */
+  text-shadow: 0 1px 10px rgba(40, 25, 60, 0.5);
 }
 [data-mode="film"] .hero__title .line { display: inline; }
 [data-mode="film"] .hero__l1, [data-mode="film"] .hero__that { display: inline-block; }
@@ -345,7 +347,7 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
   line-height: 1;
   letter-spacing: calc(-6 * var(--u));
   color: var(--word-color);
-  filter: none;
+  text-shadow: none;
 }
 [data-mode="film"].is-live .hero__move { color: transparent; }
 /* (without the live scene there are no peaks in front of it: the foot of the letters fades into the haze
@@ -357,7 +359,7 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
   left: calc((468 - 134) * var(--u));
   top: calc(151 * var(--u) + 0.84 * 33 * var(--u) - 0.84 * 35 * var(--u));
   font-size: calc(35 * var(--u));
-  filter: drop-shadow(0 1px 10px rgba(40, 25, 60, 0.55));
+  text-shadow: 0 1px 10px rgba(40, 25, 60, 0.55);
 }
 /* Subtext and buttons: their top 49 u below "move"'s baseline, at x 80; the subtext 439 u wide. */
 .hero__cta { display: contents; }

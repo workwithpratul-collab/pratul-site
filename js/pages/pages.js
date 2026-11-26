@@ -229,10 +229,20 @@ function initAbout() {
 // exactly the real one. It plays once per visit. Under "reduce motion" it is simply there, already written.
 function initSignature() {
   const sig = document.querySelector('.about__signature');
-  if (!sig || reduceMotion || !sig.getClientRects().length) return;   // (hidden on phones)
+  if (!sig || !sig.getClientRects().length) return;   // (hidden on phones)
+  // The picture itself is fetched only once About is near (about a screen away).
+  const image = sig.querySelector('image[data-href]');
+  // (an observer can deliver several updates at once after a quick jump: the newest one counts)
+  const latest = (entries) => entries[entries.length - 1];
+  new IntersectionObserver((entries, io) => {
+    if (!latest(entries).isIntersecting) return;
+    image.setAttribute('href', image.dataset.href);
+    io.disconnect();
+  }, { rootMargin: '100% 0px' }).observe(sig);
+  if (reduceMotion) return;   // (simply shown, already written)
   sig.classList.add('is-ready');   // out of sight, waiting for its moment
-  const io = new IntersectionObserver(([e]) => {
-    if (!e.isIntersecting) return;
+  const io = new IntersectionObserver((entries) => {
+    if (!latest(entries).isIntersecting) return;
     io.disconnect();
     sig.classList.add('is-writing');
     // (the last stroke ends at 2.0 s; a moment later the mask is lifted)

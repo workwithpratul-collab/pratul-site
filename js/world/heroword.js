@@ -164,9 +164,17 @@ export function createHeroWord({ el, inner }) {
     painted = key;
   }
 
+  // Paint the word and send it to the graphics card early, at a quiet moment while the film loads:
+  // done the moment the hero arrived, it cost one ~65 ms frame there.
   let fontReady = false;
+  let warmRenderer = null;
+  const prewarm = () => {
+    if (!fontReady || !warmRenderer) return;
+    const run = () => { paint(warmRenderer.getPixelRatio()); warmRenderer.initTexture(texture); };
+    if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 3000 }); else setTimeout(run, 500);
+  };
   const font = getComputedStyle(el);
-  document.fonts.load(`${font.fontSize} ${font.fontFamily}`, el.textContent).then(() => { fontReady = true; painted = null; });
+  document.fonts.load(`${font.fontSize} ${font.fontFamily}`, el.textContent).then(() => { fontReady = true; painted = null; prewarm(); });
   window.addEventListener('resize', () => { painted = null; });
 
   // How much of the sky's shade shows: it gathers gently when the hero arrives and lifts when it
@@ -177,7 +185,7 @@ export function createHeroWord({ el, inner }) {
 
   return {
     // Its shaders are prepared while the film loads (film.js), so its first appearance never waits.
-    compile(renderer) { return renderer.compileAsync(scene, flat); },
+    compile(renderer) { warmRenderer = renderer; prewarm(); return renderer.compileAsync(scene, flat); },
     // Call right after the world (and the film's text shade) is drawn. rect = the stage box.
     render(renderer, camera, rect) {
       if (!fontReady) return;
