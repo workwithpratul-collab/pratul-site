@@ -44,7 +44,11 @@ Benchmark: my King's Garden site. This must be clearly better: sharper, smoother
     js/mobile/mobile.js (phones and portrait tablets: no film, no 3D). Both share js/pages/pages.js and
     css/home.css (the hero and every section below it). Images in assets/redesign/, tool logos in
     assets/tools/, the showreel in recordings/showreel.mp4. css/pages.css and css/mobile.css now only
-    serve the case study pages and 404. Add ?mode=film|mobile|calm to the address to force a version.
+    serve the 404. Add ?mode=film|mobile|calm to the address to force a version.
+  - Round 5: the summit hero's "move" is drawn in the 3D scene by js/world/heroword.js (its HTML twin in
+    the <h1> sets its place). All four case studies are one page, case-studies/index.html (css/cases.css,
+    js/cases.js, recordings in recordings/cases/); the old case-study addresses forward to its chapters.
+    The site's address lives in site-url.txt (change it everywhere with tools/set-site-url.mjs).
 - Desktop first. The mobile version comes later (Phase 7), so don't over-optimise for phones yet.
 
 ## Folders

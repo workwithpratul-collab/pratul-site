@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Which version this device gets (js/device.js): phones get the phone styles of the top bar and footer. -->
+  <script src="../js/device.js" data-preload="false"></script>
+  <!-- The gentle fade-ins (js/cases.js) start hidden only when motion is welcome; set here, before the
+       page draws, so nothing flashes. -->
+  <script>
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('cases-fade');
+      // (if the page's script ever fails to load, show everything anyway after 3 s)
+      setTimeout(function () { if (!window.__casesReady) document.documentElement.classList.remove('cases-fade'); }, 3000);
+    }
+  </script>
+  <title>Case studies · Four websites and the people they're for · Pratul</title>
+  <meta name="description" content="The stories behind four websites by Pratul: a dermatology clinic, a plant nursery, an advertising agency and a restaurant. Who each one was for, what it had to do, and the choices behind it.">
+  <meta name="theme-color" content="#17142b">
+  <!-- (the address is one setting: site-url.txt; tools/set-site-url.mjs changes it everywhere) -->
+  <link rel="canonical" href="https://workwithpratul-collab.github.io/pratul-site/case-studies/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Pratul">
+  <meta property="og:title" content="Case studies · Pratul">
+  <meta property="og:description" content="Four websites and the people they're for: a skin clinic, a plant nursery, an advertising agency and a restaurant. What each had to do, and how it was built.">
+  <meta property="og:url" content="https://workwithpratul-collab.github.io/pratul-site/case-studies/">
+  <meta property="og:image" content="https://workwithpratul-collab.github.io/pratul-site/assets/share-summit.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The summit at sunrise above a sea of clouds, under the words &quot;I build websites that move business forward.&quot;">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Case studies · Pratul">
+  <meta name="twitter:description" content="Four websites and the people they're for: a skin clinic, a plant nursery, an advertising agency and a restaurant.">
+  <meta name="twitter:image" content="https://workwithpratul-collab.github.io/pratul-site/assets/share-summit.jpg">
+  <!-- The tab icon: the P mark as a sharp SVG, with small PNGs for browsers that can't use SVG icons;
+       the full P painting on a phone's home screen. -->
+  <link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="../assets/favicon-16.png" sizes="16x16" type="image/png">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/brand/p-mark-180.png">
+  <!-- Self-hosted fonts (css/tokens.css). -->
+  <link rel="preload" href="../assets/fonts/instrument-serif-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../assets/fonts/manrope-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- The same design settings, top bar and footer as the home page (tokens, components, home), then
+       this page's own calm reading layout (cases.css). -->
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/home.css">
+  <link rel="stylesheet" href="../css/cases.css">
+</head>
+<body class="cases-page">
+  <a class="skip-to-content" href="#content">Skip to content</a>
+
+  <!-- Line icons, drawn once and reused (as on the home page). -->
+  <svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-ne" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v16M6 14l6 6 6-6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M9 7v10l8-5z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 7v10M15 7v10"/></symbol>
+  </svg>
+
+  <!-- The home page's top bar: the wordmark, the sections (on the home page) and Book a call. -->
+  <header class="nav is-shown is-solid" id="site-nav">
+    <a class="nav__name wordmark" href="../index.html" aria-label="Pratul.dev, home"><span class="wordmark__p">P</span><span class="wordmark__ratul">RATUL</span><span class="wordmark__dev">.dev</span></a>
+    <nav class="nav__links" id="nav-links" aria-label="Sections">
+      <a href="../index.html#services">Services</a>
+      <a href="./" aria-current="page">Work</a>
+      <a href="../index.html#process">Process</a>
+      <a href="../index.html#about">About</a>
+      <a class="m-only" href="../index.html#contact">Contact</a>
+      <a class="btn btn--primary nav__book m-only" href="../index.html#contact">Book a call<svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+    </nav>
+    <a class="btn btn--primary btn--small" href="../index.html#contact">Book a call</a>
+    <button class="nav__menu" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Menu"><span></span><span></span><span></span></button>
+  </header>
+
+  <main id="content" class="cases">
+
+    <!-- ========== OPENING: a short human intro, and the four chapters ========== -->
+    <header class="cases-open">
+      <div class="cases-open__words">
+        <p class="cases-kicker" data-fade>Case studies</p>
+        <h1 class="cases-open__title" data-fade>The stories behind <em>the work.</em></h1>
+        <p class="cases-open__lead" data-fade>Every site here began with a person on the other side of the screen: someone booking a skin appointment, ordering a plant, choosing an agency, or picking a place for dinner. This is what each site had to do for them, and the choices that got it there.</p>
+      </div>
+      <!-- The four chapters: each row jumps to its story. -->
+      <nav class="cases-index" aria-label="The four projects" data-fade>
+        <ol role="list">
+          <li><a href="#dermae"><span class="cases-index__num" aria-hidden="true">01</span><span class="cases-index__name">DERMAÉ</span><span class="cases-index__kind">Dermatology clinic</span><span class="honest">Concept</span><svg class="i" aria-hidden="true"><use href="#i-down"/></svg></a></li>
+          <li><a href="#plant-nursery"><span class="cases-index__num" aria-hidden="true">02</span><span class="cases-index__name">Plant nursery</span><span class="cases-index__kind">Online shop</span><span class="honest">Client project</span><svg class="i" aria-hidden="true"><use href="#i-down"/></svg></a></li>
+          <li><a href="#agency"><span class="cases-index__num" aria-hidden="true">03</span><span class="cases-index__name">Advertising &amp; branding agency</span><span class="cases-index__kind">Two sites</span><span class="honest">Pitch demo</span><svg class="i" aria-hidden="true"><use href="#i-down"/></svg></a></li>
+          <li><a href="#olive-ember"><span class="cases-index__num" aria-hidden="true">04</span><span class="cases-index__name">Olive &amp; Ember</span><span class="cases-index__kind">Mediterranean restaurant</span><span class="honest">Concept</span><svg class="i" aria-hidden="true"><use href="#i-down"/></svg></a></li>
+        </ol>
+      </nav>
+    </header>
+
+    <!-- Each chapter has the same rhythm, one idea per screen: the business and its people, what the site
+         had to do, what I built (with a recording), the key decisions, and the honest label (and a live
+         link where there is one). Recordings: recordings/cases/, made with a real browser at 1440 x 900. -->
+
+    <!-- ========== 01 DERMAÉ ========== -->
+    <section class="chapter" id="dermae" aria-labelledby="dermae-title">
+      <header class="chapter__open" data-fade>
+        <p class="chapter__kicker"><span class="chapter__num">01</span>Dermatology clinic</p>
+        <h2 class="chapter__title" id="dermae-title">DERMAÉ</h2>
+        <p class="chapter__tag"><span class="honest">Concept</span></p>
+      </header>
+
+      <div class="beat" data-fade>
+        <p class="beat__label">The people</p>
+        <p class="beat__big">Think of someone booking their first appointment for a skin worry they've lived with for years. They're a little nervous, and they've seen too many clinics promise miracles. Before anything else, they want to feel safe.</p>
+      </div>
+
+      <div class="beat" data-fade>
+        <p class="beat__label">What the site had to do</p>
+        <p class="beat__big">Feel like walking into a calm, careful clinic, and make asking for a consultation feel easy, not like a sales pitch.</p>
+      </div>
+
+      <div class="beat beat--wide">
+        <div class="beat__words" data-fade>
+          <p class="beat__label">What I built</p>
+          <p class="beat__text">A short film you drive with your scroll: a drop of serum on skin, then a slow drift into a quiet treatment room, past the treatments, the doctor and the care journey. When it ends, the page turns plain and practical: treatments you can filter by what's bothering you, answers to 25 common questions, and booking in three short steps.</p>
+        </div>
+        <figure class="recording" data-fade>
+          <div class="browser">
+            <div class="browser__bar" aria-hidden="true"><span class="browser__dots"><i></i><i></i><i></i></span><span class="browser__url">workwithpratul-collab.github.io/Dermae</span></div>
+            <div class="browser__screen">
+              <video class="recording__video" muted loop playsinline preload="none" width="1280" height="800" data-poster="../recordings/cases/dermae-poster.webp" aria-label="Screen recording: scrolling through the DERMAÉ film, from the drop of serum into the treatment room and on to the treatments.">
+                <source data-src="../recordings/cases/dermae.webm" type="video/webm">
+                <source data-src="../recordings/cases/dermae.mp4" type="video/mp4">
+              </video>
+              <button class="recording__toggle" type="button" aria-label="Play the DERMAÉ recording" hidden><svg class="i" aria-hidden="true"><use href="#i-play"/></svg></button>
+            </div>
+          </div>
+          <figcaption>The opening film, recorded in a real browser.</figcaption>
+        </figure>
+      </div>
+
+      <div class="beat" data-fade>
+        <p class="beat__label">Key decisions</p>
+        <ol class="decisions" role="list">
+          <li>
+            <h3>Honest words, by rule.</h3>
+            <p>Health websites slide easily into promises. Every treatment says what it's designed to do, never "guaranteed" or "permanent", and every sample review, figure and before-and-after is labelled as a sample.</p>
+          </li>
+          <li>
+            <h3>A film you never have to sit through.</h3>
+            <p>One button on the first screen glides past the film to the treatments, and every section ends with a clear next step. Someone who already knows what they want shouldn't have to wait.</p>
+          </li>
+          <li>
+            <h3>Start from the worry, not the medical term.</h3>
+            <p>Visitors pick what's bothering them and the matching treatments open. "Book for this concern" carries that choice straight into the booking form.</p>
+          </li>
+        </ol>
+      </div>
+
+      <footer class="chapter__end" data-fade>
+        <p class="chapter__honest"><span class="honest">Concept</span> DERMAÉ isn't a real clinic. I made it to show clinics what their website could be, so there are no patients or results to report.</p>
+        <a class="btn btn--line" href="https://workwithpratul-collab.github.io/Dermae/" target="_blank" rel="noopener">Visit the live site<span class="visually-hidden"> (DERMAÉ, opens in a new tab)</span><svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+      </footer>
+    </section>
+
+    <!-- ========== 02 PLANT NURSERY ========== -->
+    <section class="chapter" id="plant-nursery" aria-labelledby="plant-nursery-title">
+      <header class="chapter__open" data-fade>
+        <p class="chapter__kicker"><span class="chapter__num">02</span>Online shop</p>
+        <h2 class="chapter__title" id="plant-nursery-title">Plant nursery</h2>
+        <p class="chapter__tag"><span class="honest">Client project</span></p>
+      </header>
+
+      <div class="beat" data-fade>
+        <p class="beat__label">The people</p>
+        <p class="beat__big">Buying a plant online takes a little faith. The buyer is picturing a box arriving with snapped stems and yellow leaves, and wondering whether the plant in the photo will look anything like the one at their door.</p>
+      </div>
+
+      <div class="beat" data-fade>
+        <p class="beat__label">What the site had to do</p>
+        <p class="beat__big">Show the care before the sale, so ordering a plant feels as safe as walking through the glasshouse. And then make buying easy, the way the nursery's customers already like to buy.</p>
+      </div>
+
+      <div class="beat beat--wide">
+        <div class="beat__words" data-fade>
+          <p class="beat__label">What I built</p>
+          <p class="beat__text">This one shows I can build <strong>3D, interactive e-commerce</strong>, not just a pretty page:</p>
+          <ul class="built-list" role="list">
+            <li><strong>A cinematic film</strong> of the nursery's work, played by scrolling: the greenhouse at golden hour, a monstera misted and wrapped by hand, the delivery van, and a room filling with plants.</li>
+            <li><strong>360° plants you can turn</strong>, every plant and pot, by dragging, swiping or using the keys.</li>
+            <li><strong>Product pages</strong> with care guides, details and "Choose a pot" with a live total.</li>
+            <li><strong>Styling projects</strong> for homes, cafés and offices, with before and after sliders.</li>
+            <li><strong>Ordering online or on WhatsApp</strong>: a cart that goes through a checkout, or straight to the nursery as a message.</li>
+          </ul>
+        </div>
+        <figure class="recording" data-fade>
+          <div class="browser">
+            <div class="browser__bar" aria-hidden="true"><span class="browser__dots"><i></i><i></i><i></i></span><span class="browser__url">Plant nursery · not live yet</span></div>
+            <div class="browser__screen">
+              <video class="recording__video" muted loop playsinline preload="none" width="1280" height="800" data-poster="../recordings/cases/plant-nursery-poster.webp" aria-label="Screen recording of the plant nursery site: the scroll film of the greenhouse and the plant being wrapped, the gold crest flying into the menu, a before and after slider in a styled café, and a monstera turned round in 360 degrees.">
+                <source data-src="../recordings/cases/plant-nursery.webm" type="video/webm">
+                <source data-src="../recordings/cases/plant-nursery.mp4" type="video/mp4">
+              </video>
+              <button class="recording__toggle" type="button" aria-label="Play the plant nursery recording" hidden><svg class="i" aria-hidden="true"><use href="#i-play"/></svg></button>
+            </div>
+          </div>
+          <figcaption>The film, the crest flying into the menu, a before and after, and a plant turned in 360°.</figcaption>
+        </figure>
+      </div>
+
+      <div class="beat" data-fade>
+        <p class="beat__label">Key decisions</p>
+        <ol class="decisions" role="list">
+          <li>
+            <h3>Show the care, not just the catalogue.</h3>
+            <p>The film follows a day of real work, so buyers see how their plant is looked after before it ever reaches them. The nursery's name only appears at the end, when its gold crest glides into the menu.</p>
+          </li>
+          <li>
+            <h3>Let people turn the plant round.</h3>
+            <p>A photo hides the back of a plant. In 360° you can drag it round, like standing at the bench, and see exactly what you're getting.</p>
+          </li>
+          <li>
+            <h3>Order the way people already do.</h3>
+            <p>Plenty of customers would rather send a message than fill in a form, so every cart can go to the nursery on WhatsApp as well as through a regular checkout.</p>
+          </li>
+        </ol>
+      </div>
+
+      <!-- The client's own words (also on the home page). -->
+      <figure class="chapter-quote" data-fade>
+        <span class="quote__mark" aria-hidden="true">&ldquo;</span>
+        <blockquote class="quote__text" lang="hi-Latn"><p>Ye bohot behetareen hai.</p></blockquote>
+        <p class="quote__english" lang="en">&ldquo;This is excellent.&rdquo;</p>
+        <figcaption class="quote__name">Akash, owner of the nursery</figcaption>
+      </figure>
+
+      <footer class="chapter__end" data-fade>
+        <p class="chapter__honest"><span class="honest">Client project</span> Built for Akash's nursery. It isn't live yet, so there's no link to share. Until it launches, the prices, photos and reviews on it are placeholders.</p>
+      </footer>
+    </section>
+
+    <!-- ========== 03 ADVERTISING & BRANDING AGENCY ========== -->
+    <section class="chapter" id="agency" aria-labelledby="agency-title">
+      <header class="chapter__open" data-fade>
+        <p class="chapter__kicker"><span class="chapter__num">03</span>Two sites</p>
+        <h2 class="chapter__title" id="agency-title">Advertising &amp; branding agency</h2>
+        <p class="chapter__tag"><span class="honest">Pitch demo</span></p>
+      </header>
+
+      <div class="beat" data-fade>
+        <p class="beat__label">The people</p>
+        <p class="beat__big">When a business hires an agency, it's handing over its name. Before signing, the owner wants to see how a job really gets done: who prints it, how it's checked, and whether it will look right on a street corner.</p>
+      </div>
+
+      <div class="beat" data-fade>
+        <p class="beat__label">What the site had to do</p>
+        <p class="beat__big">Show the work itself, not just talk about it, and make the first conversation easy for clients who aren't sure how to describe what they need.</p>
+      </div>
+
+      <div class="beat beat--wide">
+        <div class="beat__words" data-fade>
+          <p class="beat__label">What I built</p>
+          <p class="beat__text">I pitched Trinetra Creations, a printing and branding agency in Raipur, two ways to tell their story. The first is one page with a film you drive with your scroll: a blank sheet is printed, carried out, installed and lit up as a giant hoarding over the city.</p>
+        </div>
+        <figure class="recording" data-fade>
+          <div class="browser">
+            <div class="browser__bar" aria-hidden="true"><span class="browser__dots"><i></i><i></i><i></i></span><span class="browser__url">workwithpratul-collab.github.io/trinetra-v2</span></div>
+            <div class="browser__screen">
+              <video class="recording__video" muted loop playsinline preload="none" width="1280" height="800" data-poster="../recordings/cases/agency-film-poster.webp" aria-label="Screen recording of the agency's one-page site: scrolling drives a film of a hoarding being printed, carried out, installed and lit up over the city.">
+                <source data-src="../recordings/cases/agency-film.webm" type="video/webm">
+                <source data-src="../recordings/cases/agency-film.mp4" type="video/mp4">
+              </video>
+              <button class="recording__toggle" type="button" aria-label="Play the agency film recording" hidden><svg class="i" aria-hidden="true"><use href="#i-play"/></svg></button>
+            </div>
+          </div>
+          <figcaption>Site one: the life of a hoarding, from printer to skyline.</figcaption>
+        </figure>
+        <div class="beat__words beat__words--after" data-fade>
+          <p class="beat__text">The second is a full agency site: eight pages with case studies, services, a free consultation, a journal, and an order builder that turns "I need a banner" into a clear brief, step by step.</p>
+        </div>
+        <figure class="recording" data-fade>
+          <div class="browser">
+            <div class="browser__bar" aria-hidden="true"><span class="browser__dots"><i></i><i></i><i></i></span><span class="browser__url">workwithpratul-collab.github.io/Trinetra-Demo</span></div>
+            <div class="browser__screen">
+              <video class="recording__video" muted loop playsinline preload="none" width="1280" height="800" data-poster="../recordings/cases/agency-site-poster.webp" aria-label="Screen recording of the agency's multi-page site: scrolling down the home page past its services, featured work and call to action.">
+                <source data-src="../recordings/cases/agency-site.webm" type="video/webm">
+                <source data-src="../recordings/cases/agency-site.mp4" type="video/mp4">
+              </video>
+              <button class="recording__toggle" type="button" aria-label="Play the agency site recording" hidden><svg class="i" aria-hidden="true"><use href="#i-play"/></svg></button>
+            </div>
+          </div>
+          <figcaption>Site two: the full agency site, bold with a touch of luxury.</figcaption>
+        </figure>
+      </div>
+
+      <div class="beat" data-fade>
+        <p class="beat__label">Key decisions</p>
+        <ol class="decisions" role="list">
+          <li>
+            <h3>Follow one job from start to finish.</h3>
+            <p>Instead of a gallery of finished signs, the film follows a single hoarding from the printer to the street, so a client can see the care in every step.</p>
+          </li>
+          <li>
+            <h3>Make the first step small.</h3>
+            <p>Many clients don't know the words for what they need. The free consultation and the order builder ask simple questions, then put the answers together into a brief.</p>
+          </li>
+          <li>
+            <h3>Made for a phone held upright.</h3>
+            <p>The film has its own set of frames drawn for tall phone screens, so it fills the screen instead of shrinking into a letterbox.</p>
+          </li>
+        </ol>
+      </div>
+
+      <footer class="chapter__end" data-fade>
+        <p class="chapter__honest"><span class="honest">Pitch demo</span> Both sites were made to pitch the agency. The projects, clients and numbers on them are samples.</p>
+        <div class="chapter__links">
+          <a class="btn btn--line" href="https://workwithpratul-collab.github.io/trinetra-v2/" target="_blank" rel="noopener">The hoarding film<span class="visually-hidden"> (opens in a new tab)</span><svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+          <a class="btn btn--line" href="https://workwithpratul-collab.github.io/Trinetra-Demo/" target="_blank" rel="noopener">The agency site<span class="visually-hidden"> (opens in a new tab)</span><svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+        </div>
+      </footer>
+    </section>
+
+    <!-- ========== 04 OLIVE & EMBER ========== -->
+    <section class="chapter" id="olive-ember" aria-labelledby="olive-ember-title">
+      <header class="chapter__open" data-fade>
+        <p class="chapter__kicker"><span class="chapter__num">04</span>Mediterranean restaurant</p>
+        <h2 class="chapter__title" id="olive-ember-title">Olive &amp; Ember</h2>
+        <p class="chapter__tag"><span class="honest">Concept</span></p>
+      </header>
+
+      <div class="beat" data-fade>
+        <p class="beat__label">The people</p>
+        <p class="beat__big">Choosing where to have dinner is often a family decision made on a phone, half an hour before leaving. Will it feel special? Is there something for everyone? Can we get a table tonight?</p>
+      </div>
+
+      <div class="beat" data-fade>
+        <p class="beat__label">What the site had to do</p>
+        <p class="beat__big">Let the warmth of the room come through the screen, and turn that feeling into a booking.</p>
+      </div>
+
+      <div class="beat beat--wide">
+        <div class="beat__words" data-fade>
+          <p class="beat__label">What I built</p>
+          <p class="beat__text">A warm, editorial site in ivory, olive and terracotta: big serif headlines, the food and the room in large photographs, a menu to linger over, a gallery, and a reservation form that checks itself as you type. "Reserve a Table" is waiting in the header and on the first screen.</p>
+        </div>
+        <figure class="recording" data-fade>
+          <div class="browser">
+            <div class="browser__bar" aria-hidden="true"><span class="browser__dots"><i></i><i></i><i></i></span><span class="browser__url">Olive &amp; Ember · not live yet</span></div>
+            <div class="browser__screen">
+              <video class="recording__video" muted loop playsinline preload="none" width="1280" height="800" data-poster="../recordings/cases/olive-ember-poster.webp" aria-label="Screen recording of the Olive and Ember site: the hero, the story of the restaurant, the menu, the reservation form and the gallery.">
+                <source data-src="../recordings/cases/olive-ember.webm" type="video/webm">
+                <source data-src="../recordings/cases/olive-ember.mp4" type="video/mp4">
+              </video>
+              <button class="recording__toggle" type="button" aria-label="Play the Olive and Ember recording" hidden><svg class="i" aria-hidden="true"><use href="#i-play"/></svg></button>
+            </div>
+          </div>
+          <figcaption>From the first screen to the menu, the reservations and the gallery.</figcaption>
+        </figure>
+      </div>
+
+      <div class="beat" data-fade>
+        <p class="beat__label">Key decisions</p>
+        <ol class="decisions" role="list">
+          <li>
+            <h3>Let the food set the mood.</h3>
+            <p>Large, warm photographs and an editorial layout make it feel like a magazine about the place, not a list of dishes.</p>
+          </li>
+          <li>
+            <h3>Keep the table one tap away.</h3>
+            <p>"Reserve a Table" sits in the header and on the first screen, so the moment someone feels hungry, the next step is right there.</p>
+          </li>
+          <li>
+            <h3>Restraint over decoration.</h3>
+            <p>Few colours, lots of space and gentle motion. A good restaurant doesn't shout, and neither does its website.</p>
+          </li>
+        </ol>
+      </div>
+
+      <footer class="chapter__end" data-fade>
+        <p class="chapter__honest"><span class="honest">Concept</span> A restaurant I imagined, to show what a warm, booking-first site can do. It isn't live yet.</p>
+      </footer>
+    </section>
+
+    <!-- ========== CLOSING ========== -->
+    <section class="cases-close" aria-labelledby="close-title">
+      <div class="cases-close__words" data-fade>
+        <p class="beat__label">What ties them together</p>
+        <p class="beat__big">Four very different businesses, one way of working. Each started with a person on the other side of the screen and one feeling the site had to give them: safety, trust, proof, warmth. The design, the motion and the code are all there to serve that feeling.</p>
+      </div>
+      <div class="cases-close__call" data-fade>
+        <h2 class="cases-close__title" id="close-title">Got a project like these? <em>Let's talk.</em></h2>
+        <a class="btn btn--primary" href="../index.html#contact">Book a call<svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+      </div>
+    </section>
+  </main>
+
+  <!-- The home page's footer. -->
+  <footer class="footer" aria-labelledby="footer-title">
+    <picture class="footer__art">
+      <img src="../assets/footer/footer-summit-crowd-1774.webp" srcset="../assets/footer/footer-summit-crowd-960.webp 960w, ../assets/footer/footer-summit-crowd-1774.webp 1774w" sizes="100vw" width="1774" height="887" loading="lazy" decoding="async" alt="The trekker standing on a snowy summit at sunset while a crowd below points up at him">
+    </picture>
+    <div class="footer__call">
+      <h2 class="footer__title" id="footer-title">Be the business they <em>look up to.</em></h2>
+      <p class="footer__line">Got a summit in mind? Let's climb it.</p>
+      <div class="footer__ctas">
+        <a class="btn btn--primary" href="../index.html#contact">Book a call<svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+        <a class="btn btn--line" href="../index.html#contact">Email me</a>
+      </div>
+    </div>
+    <div class="footer__base">
+      <div class="footer__brand">
+        <a class="wordmark footer__mark" href="../index.html" aria-label="Pratul.dev, home"><span class="wordmark__p">P</span><span class="wordmark__ratul">RATUL</span><span class="wordmark__dev">.dev</span></a>
+        <p class="footer__small">© 2026 · Based in India, working worldwide</p>
+      </div>
+      <nav class="footer__cols" aria-label="Footer">
+        <div class="footer__col">
+          <h3 class="footer__label">Explore</h3>
+          <ul role="list">
+            <li><a href="../index.html#services">Services</a></li>
+            <li><a href="./">Work</a></li>
+            <li><a href="../index.html#process">Process</a></li>
+            <li class="f-only"><a href="../index.html#about">About</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h3 class="footer__label">Elsewhere</h3>
+          <ul role="list">
+            <li><a href="https://github.com/workwithpratul-collab" rel="me noopener" target="_blank">GitHub</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h3 class="footer__label">Say hello</h3>
+          <ul role="list">
+            <li><a href="../index.html#contact">Contact</a></li>
+            <li><a class="footer__top-link" href="../index.html">Back to the summit<span aria-hidden="true"> ↑</span></a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </footer>
+
+  <script type="module" src="../js/cases.js"></script>
+</body>
+</html>

@@ -2,132 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <!-- Which version this device gets (js/device.js): phones get the mobile styles below. -->
-  <script src="../js/device.js" data-preload="false"></script>
-  <title>Plant nursery · Concept · Pratul</title>
-  <meta name="description" content="A concept website for a plant nursery: a cinematic film of the nursery's work and 360° plants you can explore.">
-  <meta name="theme-color" content="#070b1a">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- This case study now lives as a chapter of the one case-study page (case-studies/index.html).
+       This little page keeps its old address working: it forwards straight to the chapter. The script
+       replaces this page in the history (so Back skips it); the meta refresh does the same without
+       JavaScript; and the link below is there if neither can. -->
+  <title>Plant nursery · Case study · Pratul</title>
   <!-- (the address is one setting: site-url.txt; tools/set-site-url.mjs changes it everywhere) -->
-  <link rel="canonical" href="https://workwithpratul-collab.github.io/pratul-site/case-studies/kings-garden.html">
-  <meta property="og:type" content="article">
-  <meta property="og:site_name" content="Pratul">
-  <meta property="og:title" content="Plant nursery · a concept by Pratul">
-  <meta property="og:description" content="A concept website for a plant nursery: a cinematic film of the nursery's work and 360° plants you can explore.">
-  <meta property="og:url" content="https://workwithpratul-collab.github.io/pratul-site/case-studies/kings-garden.html">
-  <meta property="og:image" content="https://workwithpratul-collab.github.io/pratul-site/assets/work/kings-garden-1.jpg">
-  <meta property="og:image:alt" content="A gardener misting a monstera leaf, under the line &quot;Misted by hand. Checked leaf by leaf.&quot;">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://workwithpratul-collab.github.io/pratul-site/assets/work/kings-garden-1.jpg">
-  <!-- The tab icon: the P mark as a sharp SVG, with small PNGs for browsers that can't use SVG icons;
-       the full P painting on a phone's home screen. -->
+  <link rel="canonical" href="https://workwithpratul-collab.github.io/pratul-site/case-studies/#plant-nursery">
+  <meta name="robots" content="noindex, follow">
+  <script>location.replace('./' + location.search + '#plant-nursery');</script>
+  <meta http-equiv="refresh" content="0; url=./#plant-nursery">
   <link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="../assets/favicon-16.png" sizes="16x16" type="image/png">
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="../assets/brand/p-mark-180.png">
-  <!-- Self-hosted fonts (css/tokens.css). Only the headline face is fetched early. -->
-  <link rel="preload" href="../assets/fonts/instrument-serif-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../assets/fonts/manrope-variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../css/tokens.css">
-  <link rel="stylesheet" href="../css/components.css">
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/pages.css">
-  <link rel="stylesheet" href="../css/mobile.css">
+  <style>body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--night); color: var(--cream); font-family: var(--font-body); } a { color: var(--amber); }</style>
 </head>
-<body class="case-page">
-  <!-- The mist the film dissolved into clears as this page appears (js/case.js). -->
-  <div id="veil" class="veil" aria-hidden="true"></div>
-
-  <header class="case-top">
-    <a class="skip-link" href="../index.html?return=kings-garden" data-back>
-      <svg class="skip-link__icon" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M10.5 6h-8M5.5 2.5 2 6l3.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Back to the trail
-    </a>
-    <!-- Laptops: the PRATUL.dev wordmark, as on the home page. Phones keep the plain name. -->
-    <a class="wordmark f-only" href="../index.html" aria-label="Pratul.dev, home"><span class="wordmark__p">P</span><span class="wordmark__ratul">RATUL</span><span class="wordmark__dev">.dev</span></a>
-    <a class="site-nav__name m-only" href="../index.html">Pratul</a>
-  </header>
-
-  <main class="case">
-    <header class="case-hero">
-      <p class="case-hero__meta project-label">
-        <span class="project-label__type m-only">YEAR</span><!-- TODO(Pratul): the year you made this (laptops hide this placeholder; phones still show it) -->
-        <span class="project-label__tag">Concept</span>
-      </p>
-      <h1>Plant nursery</h1>
-      <p class="case-hero__lead">A concept website for a plant nursery that sells plants and styles spaces.</p>
-    </header>
-
-    <section class="case-block" aria-labelledby="h-problem">
-      <h2 id="h-problem">The business and its problem</h2>
-      <div class="case-block__body">
-        <p>A plant nursery that sells plants and styles spaces.</p>
-        <p>It needed to show buyers how plants are grown, cared for and delivered, so they trust ordering online.</p>
-      </div>
-    </section>
-
-    <section class="case-block" aria-labelledby="h-idea">
-      <h2 id="h-idea">My idea</h2>
-      <div class="case-block__body"><p>A cinematic film of the nursery's work and 360° plants you can explore.</p></div>
-    </section>
-
-    <figure class="browser" aria-labelledby="h-film">
-      <div class="browser__bar" aria-hidden="true">
-        <span class="browser__dots"><i></i><i></i><i></i></span>
-        <span class="browser__url">Plant nursery · concept</span>
-      </div>
-      <div class="browser__screen">
-        <video src="../recordings/web/kings-garden.mp4" poster="../assets/work/kings-garden-1.jpg" muted loop playsinline preload="none" controls aria-label="A screen recording of the plant nursery website being scrolled."></video>
-        <button class="btn btn--secondary btn--small browser__play" type="button" hidden>Pause</button>
-      </div>
-      <figcaption class="visually-hidden" id="h-film">Screen recording of the plant nursery website.</figcaption>
-    </figure>
-
-    <section class="case-block" aria-labelledby="h-decisions">
-      <h2 id="h-decisions">Key decisions</h2>
-      <div class="case-block__body">
-        <!-- TODO(Pratul): these are written from your site recording; check they say it the way you would. -->
-        <ol class="case-decisions">
-          <li><strong>Show the care, not just the catalogue</strong><span>The film follows the daily work (&quot;Misted by hand. Checked leaf by leaf.&quot;) so buyers see how their plant is looked after before it arrives.</span></li>
-          <li><strong>Plants you can turn round</strong><span>Each plant sits under a glass dome you can drag to explore from every side, as if you were standing in the nursery.</span></li>
-          <li><strong>A shop that answers real questions</strong><span>Filters for light, care level, price and pet-safe plants, with light and watering needs shown on every plant.</span></li>
-          <li><strong>Plants in real rooms</strong><span>Styled spaces show what the plants look like at home, which is the other half of the business.</span></li>
-        </ol>
-      </div>
-    </section>
-
-    <section class="case-block" aria-labelledby="h-stills">
-      <h2 id="h-stills">Stills</h2>
-      <div class="gallery">
-        <figure><img src="../assets/work/kings-garden-1-800.jpg" srcset="../assets/work/kings-garden-1-800.jpg 800w, ../assets/work/kings-garden-1.jpg 1600w" sizes="(min-width: 860px) 30vw, 100vw" width="1600" height="770" loading="lazy" alt="A gardener misting a monstera leaf, under the line &quot;Misted by hand. Checked leaf by leaf.&quot;"></figure>
-        <figure><img src="../assets/work/kings-garden-2-800.jpg" srcset="../assets/work/kings-garden-2-800.jpg 800w, ../assets/work/kings-garden-2.jpg 1600w" sizes="(min-width: 860px) 30vw, 100vw" width="1600" height="770" loading="lazy" alt="A sunlit living room styled with large potted plants."></figure>
-        <figure><img src="../assets/work/kings-garden-3-800.jpg" srcset="../assets/work/kings-garden-3-800.jpg 800w, ../assets/work/kings-garden-3.jpg 1600w" sizes="(min-width: 860px) 30vw, 100vw" width="1600" height="770" loading="lazy" alt="The plant shop: a monstera under a glass dome you can drag to turn, with filters and price."></figure>
-      </div>
-    </section>
-
-    <nav class="case-actions" aria-label="Project">
-      <!-- TODO(Pratul): replace LIVE_URL_KINGS_GARDEN with the live site address (or remove this button). -->
-      <a class="btn btn--primary" href="LIVE_URL_KINGS_GARDEN" data-placeholder="LIVE_URL_KINGS_GARDEN" rel="noopener" target="_blank">View live site<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-      <a class="skip-link" href="../index.html?return=kings-garden" data-back>Back to the trail</a>
-      <a class="case-next" href="trinetra.html"><span>Next project</span><strong>Advertising &amp; branding agency</strong></a>
-    </nav>
-  </main>
-
-  <footer class="footer footer--case">
-    <div class="footer__brand">
-      <p class="footer__name">Pratul</p>
-      <p class="footer__line">I build websites that stand out, for businesses that refuse to blend in.</p>
-    </div>
-    <nav class="footer__links" aria-label="Footer">
-      <a href="../index.html#work">Work</a>
-      <a href="../index.html#process">Process</a>
-      <a href="../index.html#about">About</a>
-      <a href="../index.html#contact">Contact</a>
-      <a href="https://github.com/workwithpratul-collab" rel="me noopener" target="_blank">GitHub</a>
-    </nav>
-    <a class="btn btn--primary btn--small" href="../index.html#contact">Book a call<svg class="btn__arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-    <p class="footer__small">© 2026 Pratul.</p>
-  </footer>
-  <script type="module" src="../js/case.js"></script>
+<body>
+  <p>This case study has moved. <a href="./#plant-nursery">Read Plant nursery here</a>.</p>
 </body>
 </html>

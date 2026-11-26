@@ -1,0 +1,208 @@
+/* cases.css: the combined case study page (case-studies/index.html).
+   The same colours, fonts, top bar and footer as the home page (tokens.css, home.css); this file only
+   lays out the reading. The feeling: calm, lots of breathing room, big readable type, one idea per
+   screen, and gentle fade-ins only. Every colour comes from tokens.css. */
+
+.cases-page { background: var(--night); color: var(--cream); }
+/* (anchor jumps leave room for the top bar through style.css's scroll-padding-top; js/cases.js makes clicks on
+   the index glide) */
+
+/* The reading column: about 70 characters of body text, centred. The recordings step out wider. */
+.cases {
+  --col: min(880px, 100% - 2 * var(--page-gutter));
+  --wide: min(66vw, 1120px);
+  padding-top: 76px;   /* (the top bar) */
+}
+
+/* ---------- Small labels (the same quiet mono capitals as the home page's) ---------- */
+.cases-kicker, .beat__label, .chapter__kicker {
+  font-family: var(--font-altitude);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lavender-quiet);
+}
+/* (a short amber line before each label, like the surveyor's mark under the hero) */
+.beat__label::before { content: ""; display: inline-block; width: 22px; height: 1px; margin-right: 12px; vertical-align: 0.32em; background: var(--amber); }
+
+/* ---------- Opening ---------- */
+.cases-open {
+  display: grid;
+  align-content: center;
+  gap: var(--s-7);
+  min-height: calc(100svh - 76px);
+  padding: var(--s-8) 0;
+  width: var(--col);
+  margin-inline: auto;
+}
+.cases-open__title {
+  margin-top: 18px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(52px, min(6.4vw, 11vh), 104px);
+  line-height: var(--lh-display);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.cases-open__title em, .cases-close__title em { font-style: italic; color: var(--amber); }
+.cases-open__lead { margin-top: var(--s-5); max-width: 40em; font-size: var(--t-lead); line-height: 1.6; color: var(--lavender-light); text-wrap: pretty; }
+
+/* The index of the four chapters: one calm row each, numbered, with its honest label. */
+.cases-index ol { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--hair); }
+.cases-index li { border-bottom: 1px solid var(--hair); }
+.cases-index a {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto auto 20px;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 4px;
+  color: var(--cream);
+  text-decoration: none;
+  transition: color var(--t-fast) var(--ease-arrive), padding var(--t-base) var(--ease-arrive);
+}
+.cases-index__num { font-family: var(--font-altitude); font-size: 12px; letter-spacing: 0.12em; color: var(--amber); }
+.cases-index__name { font-family: var(--font-display); font-size: clamp(24px, 2.2vw, 32px); line-height: 1.15; }
+.cases-index__kind { font-size: 15px; color: var(--lavender); }
+.cases-index .i { width: 18px; height: 18px; color: var(--lavender-quiet); transition: transform var(--t-fast) var(--ease-arrive), color var(--t-fast) var(--ease-arrive); }
+.cases-index a:hover, .cases-index a:focus-visible { padding-left: 12px; }
+.cases-index a:hover .cases-index__name, .cases-index a:focus-visible .cases-index__name { color: var(--amber); }
+.cases-index a:hover .i, .cases-index a:focus-visible .i { transform: translateY(3px); color: var(--amber); }
+.cases-index a:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
+
+/* ---------- A chapter ---------- */
+/* Each chapter opens on its own screen: the number and kind, the name very large, the honest label.
+   A soft plum glow behind it marks the start of a new story. */
+.chapter { position: relative; padding-bottom: var(--s-8); }
+.chapter::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 100svh;
+  background: radial-gradient(70% 60% at 78% 40%, color-mix(in srgb, var(--plum) 55%, transparent), transparent 70%);
+  pointer-events: none;
+}
+.chapter > * { position: relative; }
+.chapter__open {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 18px;
+  min-height: 78svh;
+  width: var(--col);
+  margin-inline: auto;
+  padding-top: var(--s-8);
+  border-top: 1px solid var(--hair);
+}
+.chapter__num { margin-right: 14px; color: var(--amber); }
+.chapter__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(56px, min(7vw, 12vh), 112px);
+  line-height: var(--lh-display);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.chapter__tag .honest { font-size: 15px; padding: 4px 14px; }
+
+/* A beat: one idea on its own screen-ish stretch of space. */
+.beat { width: var(--col); margin-inline: auto; padding-block: clamp(64px, 13vh, 150px); }
+.beat__big {
+  margin-top: 22px;
+  font-family: var(--font-display);
+  font-size: clamp(30px, min(2.9vw, 5.2vh), 46px);
+  line-height: 1.22;
+  color: var(--cream);
+  text-wrap: pretty;
+}
+.beat__text { margin-top: 22px; font-size: clamp(18px, 1.35vw, 21px); line-height: 1.65; color: var(--lavender-light); text-wrap: pretty; }
+.beat__text strong, .built-list strong { font-weight: 600; color: var(--cream); }
+
+/* What I built: the words in the column, then the recording(s), wider and centred. */
+.beat--wide { width: auto; }
+.beat--wide .beat__words { width: var(--col); margin-inline: auto; }
+.beat__words--after { margin-top: var(--s-8); }
+.built-list { display: grid; gap: 14px; margin: 26px 0 0; padding: 0; list-style: none; }
+.built-list li { position: relative; padding-left: 26px; font-size: clamp(17px, 1.25vw, 19px); line-height: 1.6; color: var(--lavender-light); }
+.built-list li::before { content: ""; position: absolute; left: 2px; top: 0.7em; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
+
+/* ---------- The recordings, in a refined browser frame ---------- */
+.recording { width: var(--wide); margin: var(--s-7) auto 0; }
+.browser {
+  overflow: hidden;
+  border: 1px solid var(--hair-strong);
+  border-radius: 14px;
+  background: var(--dusk);
+  box-shadow: 0 40px 90px -40px color-mix(in srgb, var(--deep) 90%, transparent), 0 0 0 6px color-mix(in srgb, var(--dusk) 55%, transparent);
+}
+.browser__bar { display: grid; grid-template-columns: 60px 1fr 60px; align-items: center; height: 38px; padding: 0 16px; border-bottom: 1px solid var(--hair); }
+.browser__dots { display: flex; gap: 7px; }
+.browser__dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--hair-strong); }
+.browser__url { justify-self: center; max-width: 100%; overflow: hidden; padding: 4px 16px; border-radius: 999px; background: color-mix(in srgb, var(--night) 70%, transparent); font-family: var(--font-altitude); font-size: 11px; letter-spacing: 0.04em; color: var(--lavender-quiet); white-space: nowrap; text-overflow: ellipsis; }
+.browser__screen { position: relative; aspect-ratio: 16 / 10; background: var(--night); }
+.recording__video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+/* Under "reduce motion" the recordings don't play on their own: the still, with a play button. */
+.recording__toggle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  translate: -50% -50%;
+  border: 1px solid var(--hair-strong);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--night) 72%, transparent);
+  color: var(--cream);
+  cursor: pointer;
+  transition: border-color var(--t-fast) var(--ease-arrive), background var(--t-fast) var(--ease-arrive);
+}
+.recording__toggle .i { width: 26px; height: 26px; }
+.recording__toggle:hover, .recording__toggle:focus-visible { border-color: var(--amber); }
+.recording__toggle:focus-visible { outline: var(--focus-ring); outline-offset: 3px; }
+.recording.is-playing .recording__toggle { opacity: 0; }
+.recording.is-playing .recording__toggle:focus-visible, .recording.is-playing:hover .recording__toggle { opacity: 1; }
+.recording figcaption { margin-top: 16px; text-align: center; font-size: 14px; line-height: 1.5; color: var(--lavender-quiet); }
+
+/* ---------- Key decisions: three side by side, numbered ---------- */
+.decisions { counter-reset: decision; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 3vw, 48px); margin: 30px 0 0; padding: 30px 0 0; border-top: 1px solid var(--hair-strong); list-style: none; }
+.beat:has(.decisions) { width: min(1120px, 100% - 2 * var(--page-gutter)); }
+.decisions li { counter-increment: decision; }
+.decisions li::before { content: "0" counter(decision); display: block; margin-bottom: 12px; font-family: var(--font-altitude); font-size: 11px; letter-spacing: 0.12em; color: var(--lavender-quiet); }
+.decisions h3 { font-family: var(--font-display); font-weight: 400; font-size: clamp(24px, 2vw, 30px); line-height: 1.15; color: var(--cream); text-wrap: balance; }
+.decisions p { margin-top: 12px; font-size: 16px; line-height: 1.65; color: var(--lavender); text-wrap: pretty; }
+
+/* ---------- The client's words (Plant nursery) ---------- */
+.chapter-quote { display: grid; justify-items: center; width: var(--col); margin: 0 auto; padding-block: clamp(40px, 9vh, 110px); text-align: center; }
+
+/* ---------- The end of a chapter: the honest label, and the live link ---------- */
+.chapter__end { display: grid; justify-items: start; gap: 22px; width: var(--col); margin-inline: auto; padding: 30px 0 var(--s-7); border-top: 1px solid var(--hair); }
+.chapter__honest { max-width: 44em; font-size: 17px; line-height: 1.65; color: var(--lavender); }
+.chapter__honest .honest { margin-right: 10px; }
+.chapter__links { display: flex; flex-wrap: wrap; gap: 12px; }
+.chapter__end .btn--line, .chapter__links .btn--line { min-height: 50px; border-color: var(--hair-strong); background: transparent; }
+
+/* ---------- Closing ---------- */
+.cases-close { padding: var(--s-8) 0 var(--s-9); background: radial-gradient(60% 70% at 50% 85%, color-mix(in srgb, var(--plum) 60%, transparent), transparent 75%); }
+.cases-close__words { width: var(--col); margin-inline: auto; }
+.cases-close__call { display: grid; justify-items: center; gap: 30px; width: var(--col); margin: var(--s-9) auto 0; text-align: center; }
+.cases-close__title { font-family: var(--font-display); font-weight: 400; font-size: clamp(44px, min(5vw, 9vh), 80px); line-height: var(--lh-display); text-wrap: balance; }
+.cases-close .btn--primary { min-height: 56px; padding-inline: 30px; font-weight: 600; }
+
+/* ---------- Gentle fade-ins (js/cases.js). Only when the visitor hasn't asked for less motion:
+   the class on <html> is set in the page's <head> before it draws, so nothing flashes. ---------- */
+.cases-fade [data-fade] { opacity: 0; translate: 0 22px; transition: opacity 1.1s var(--ease-arrive), translate 1.4s var(--ease-arrive); }
+.cases-fade [data-fade].is-in { opacity: 1; translate: 0 0; }
+
+/* ---------- Narrow screens: one column, the recordings full width ---------- */
+@media (max-width: 860px) {
+  .cases { --wide: calc(100% - 2 * var(--page-gutter)); }
+  .cases-index a { grid-template-columns: 34px minmax(0, 1fr) auto; row-gap: 6px; }
+  .cases-index__kind { grid-column: 2; grid-row: 2; font-size: 14px; }
+  .cases-index .honest { grid-column: 3; grid-row: 1 / span 2; }
+  .cases-index .i { display: none; }
+  .decisions { grid-template-columns: 1fr; }
+  .chapter__open { min-height: 60svh; }
+  .browser { border-radius: 10px; }
+  .browser__bar { height: 30px; }
+}
