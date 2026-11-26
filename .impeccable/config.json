@@ -152,6 +152,24 @@
         ],
         "createdAt": "2026-11-25T07:15:43.214Z",
         "reason": "Pratul's brief: Instrument Serif is the site's chosen display face (CLAUDE.md, references/round4 designs, and the round-4 brief names it for the loader percentage and the wordmark); already ignored for index.html and the style guide"
+      },
+      {
+        "rule": "tight-leading",
+        "value": "*",
+        "files": [
+          "case-studies/index.html"
+        ],
+        "createdAt": "2026-11-26T09:57:55.084Z",
+        "reason": "Claude: display serif headings (chapter titles, index names, decision titles) use the site's --lh-display 1.05 / 1.15 token, same as the home page; all body text on the page is 1.6-1.65"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "case-studies/index.html"
+        ],
+        "createdAt": "2026-11-26T09:57:55.268Z",
+        "reason": "Claude: the .honest label pills (shared home.css component, 2px/10px with 1.45 line-height) and the browser-bar address pill are the site's existing pill design, inset by their line height"
       }
     ]
   }
