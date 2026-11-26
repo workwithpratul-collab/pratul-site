@@ -24,6 +24,14 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] The nursery and agency case studies now show only "YEAR · Concept" above the heading (the category moved into the name). Replace YEAR as before; Olive & Ember shows 2026 (from its Git history).
 - [ ] Laptops no longer show the YEAR placeholder on the DERMAÉ, nursery and agency case studies; phones still do (phones were left as they are). Add each real year, or say to hide it on phones too.
 
+- [x] (Round 5) SITE_URL: every page now uses https://workwithpratul-collab.github.io/pratul-site/. To move to pratul.dev later: `node tools/set-site-url.mjs https://pratul.dev/` (the address lives in site-url.txt).
+- [ ] (Round 5) Hero: look at "move" behind the far range on your own screens. The real ridge slopes up to the left, so the left leg of the "m" sinks deeper than the "e" (about a fifth of the letters on average). One number moves it up or down: --move-base in css/home.css (45.5cqh on 16:10 screens, 45cqh on 16:9).
+- [ ] (Round 5) Read the new case study page (case-studies/) and check every chapter sounds like you: the people, what each site had to do, and the "Key decisions".
+- [ ] (Round 5) Plant nursery: check with Akash that showing the recording (with the nursery's crest and name) and his quote is fine before his site launches; add the live link to case-studies/index.html when it does.
+- [ ] (Round 5) Olive & Ember: add its live link to case-studies/index.html when it is deployed.
+- [ ] (Round 5) After pushing: paste the home page and case-studies/ links into WhatsApp and LinkedIn to see the new preview (LinkedIn's Post Inspector refreshes an old cached one).
+- [ ] (Round 5) The YEAR placeholders went away with the old case-study pages (they now forward to the new page, which shows no years). Say if you want the years back.
+
 ## CLAUDE CODE: the world
 - [x] Summit climb looks plain: smooth lilac snow, rock only as soft bands, big bland dome in the final shot.
 - [x] Big pale, smooth hillside with sparse trees behind THE KING'S GARDEN and between camps.
@@ -147,6 +155,13 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] 404 page: its body line sits over the lighter mist band at about 4:1 contrast (AA asks 4.5:1). Unchanged so the phone 404 stays the same; Pratul to decide.
 - [ ] 404 page: Chrome still requests its styles once from the wrong folder for a deep missing address before the root is found (harmless 404s).
 - [ ] Footer: the "SAY HELLO" label is faint over the bright sky of the footer picture.
+
+- [ ] (Round 5) Hero "move": on 16:9 screens the far-left peak hides more of the "m" than on 16:10 screens (the camera keeps its height, so the far range shifts sideways with the screen's shape).
+- [ ] (Round 5) Hero "move": if the 3D scene isn't running (the summit's picture shows instead), the HTML twin shows in amber with its foot faded into the haze, not behind real peaks.
+- [ ] (Round 5) Case study recordings are 1280 x 800 (to stay under 2.5 MB): a little soft on 2x screens.
+- [ ] (Round 5) Case study page, first visit: 3-4 stalls of 150-270 ms while scrolling, as the graphics driver prepares the rounded video frames and shadows (0 on a second visit). A warm-up at a quiet moment, like Services', could move them.
+- [ ] (Round 5) The film's own landmark links still go to the old case-study addresses (they forward to the chapters); the film was left untouched. The case page has no "Back to the trail" link: the browser's Back returns to the home page.
+- [ ] (Round 5) Case study page on phones: only the basic one-column layout (laptop first). Check it on a real phone.
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.

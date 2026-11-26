@@ -310,3 +310,45 @@ against `d6a27ed` (the start of the second session), which showed the same sprea
   laptops, but redrew some letter edges on phones at 2x, so the original file was kept.
 - **Fast scrolling (item 9):** the film keeps 3 s of scroll history (a few hundred numbers) and checks it once per
   frame; the climb's frame times are unchanged.
+
+## Round 5 (Nov 26): the "move" hero, signature, favicon, share image, work, testimonial, case studies
+
+**How it was measured.** As in the laptop round: the local gzip server (scratchpad tool), libraries from the real
+jsDelivr CDN, Chrome 158 headless with the real graphics card (RTX 3050 laptop, ANGLE on Direct3D 11), 1440 x 900,
+shader cache off (a first visit). "Before" is commit `1aa1911` (the end of the laptop round), served side by side
+and run alternately.
+
+| What | Before (`1aa1911`) | After |
+|---|---|---|
+| Page open -> live film (5 alternating runs) | 2.77-2.85 s, median **2.82 s** | 2.79-2.91 s, median **2.82 s** |
+| Main-thread blocking before live | 0.95-1.39 s | 0.87-1.36 s (run-to-run noise) |
+| Longest single block before live | 0.22-0.51 s | 0.21-0.49 s |
+| Download before the film is live | 2,057 KB | 2,070 KB (+13 KB: Gloock cut to m, o, v, e is 3 KB; heroword.js; the bigger page) |
+| 2 s right after live: p95 / worst / frames over 33 ms | 33.5-38.1 ms / 177-207 ms / 9-10 | 29.4-36.2 ms / 151-180 ms / 8-11 |
+| Resting on the summit hero (4 s, where the 3D "move" draws): median / p95 / worst | 6.9 / 7.7-7.9 / 8.7-9.0 ms | 6.9-7.0 / 7.8-7.9 / 8.7-9.4 ms (144 fps, screen-limited) |
+| The hero arriving (3 s after it shows): frames over 20 ms | 2-3 (one ~1.1 s: Services' known warm-up) | 3 (the same ones) |
+| About: the signature writing itself (2 s) | (a text signature) | median 6.9 ms, p95 7.0 ms, worst 21 ms |
+| The film itself (stills at 0, 0.4, 0.7 of the climb) | | identical except where things move (stars, grass, the hut's video, the trekker's breathing) |
+| Phone hero | | pixel-identical (390 x 844, motion reduced so the snow is still) |
+
+**Found and fixed before committing** (speed check fixes commit):
+1. **The hero's arrival had two new slow frames** (63-69 ms and ~28 ms). The headline's soft shadow was a CSS
+   `filter` on the whole heading, which had to be redrawn on every frame of the reveal, around the huge invisible
+   "move" too: now a `text-shadow` on the words (it looks the same). The 3D word's picture is also painted and
+   sent to the graphics card at a quiet moment while the film loads, not as the hero arrives. After: the same 3
+   slow frames as before, none new.
+2. **The signature picture (16 KB) downloaded with the page**: an SVG `<image>` doesn't wait like an `<img
+   loading="lazy">`. It is now fetched when About is a screen away. (That was +29 KB before live; now +13 KB.)
+3. **The case-study WebM recordings failed on this PC's graphics card** ("video decode error" in Chrome's
+   hardware VP9 decoder): the first encodes were full-range colour, from the JPEG frames. Re-encoded in standard
+   TV-range BT.709 colour: all ten files play with the hardware decoder. A video that ever fails as WebM now
+   carries on with its MP4 copy.
+
+**The new case study page** (case-studies/):
+
+| What | Measured |
+|---|---|
+| First load, cache off | 147 KB in 13 files (fonts and CSS shared with the home page), no long tasks; first paint 0.64-0.70 s (the old DERMAÉ page: 0.66-0.68 s) |
+| Recordings | 5 loops of 14-20 s, 2.2-2.4 MB each per format (WebM VP9 / MP4 H.264, 1280 x 800, 30 fps); posters 26-137 KB. Nothing downloads until a recording is about a screen away; only the one in view plays |
+| Scrolling the whole page with the wheel, first visit | 14 frames over 33 ms (worst 150-270 ms): no script, style or layout in them (long-animation-frame reports): the graphics driver preparing the rounded video frames and soft shadows for the first time. The old DERMAÉ page did the same once (160 ms) |
+| The same, second visit in the same browser | **0** frames over 33 ms (median 6.9 ms). Chrome keeps that driver work on disk, like Services' |
