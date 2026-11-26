@@ -25,3 +25,7 @@ references/mockups/
 
 # The design checker's private cache (rebuilt on its own).
 .impeccable/hook.cache.json
+
+# Pratul's original signature photo: private, never on GitHub. The site uses the cleaned
+# cut-out in assets/brand/ (signature-cream.png) instead.
+references/signature-photo.jpg

@@ -1139,17 +1139,9 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
 .about__value { font-family: var(--font-display); font-weight: 400; font-size: clamp(22px, min(1.8vw, 3.2vh), 26px); line-height: 1.15; color: var(--cream); }
 .about__value em { font-style: italic; color: var(--amber); }
 .about__values p { margin-top: 8px; font-size: 14px; line-height: 1.5; color: var(--lavender); text-wrap: pretty; }
-/* Laptops: a signed note. A small label, the two-line promise of the heading, who and why, three
-   numbered promises side by side, a quiet closing line, and the name signed in the display italic.
+/* Laptops: a signed note. The two-line promise of the heading, who and why, three numbered promises
+   side by side, and my real signature writing itself at the end.
    Sizes follow the window's height too (vh), so the whole note fits one screen at 1366 x 768. */
-.about__label {
-  margin-bottom: clamp(10px, 1.8vh, 18px);
-  font-family: var(--font-altitude);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--lavender-quiet);
-}
 [data-mode="film"] .about__text .heading { font-size: clamp(40px, min(4.6vw, 7.2vh), 76px); line-height: 1.05; }
 .about__text .heading em { font-style: italic; color: var(--amber); }
 .about .about__promises {   /* (.about: so the list reset in style.css doesn't zero its padding) */
@@ -1166,18 +1158,23 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
 .about__promise { font-family: var(--font-display); font-weight: 400; font-size: clamp(20px, min(1.6vw, 2.9vh), 24px); line-height: 1.15; color: var(--cream); text-wrap: balance; }
 .about__promises .nowrap { white-space: nowrap; }   /* ("hand-offs" never splits at its hyphen) */
 .about__promises p { margin-top: 6px; font-size: 14px; line-height: 1.5; color: var(--lavender); text-wrap: pretty; }
-.about__close { margin-top: clamp(18px, 3.4vh, 36px); font-size: 13px; line-height: 1.5; color: var(--lavender-quiet); }
-/* (signed by hand: the display italic, a touch larger, the faintest tilt) */
-.about__sign {
-  margin-top: clamp(4px, 1vh, 10px);
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: clamp(32px, min(2.6vw, 4.6vh), 42px);
-  line-height: 1.1;
-  color: var(--cream);
-  rotate: -2deg;   /* (its own property, so the arrival's slide-up transform doesn't override it) */
-  transform-origin: left center;
+/* My signature (index.html): cream ink on nothing, about as wide as a real signature on a letter. */
+.about__signature {
+  display: block;
+  width: clamp(170px, min(15vw, 23vh), 240px);
+  height: auto;
+  margin-top: clamp(22px, 4vh, 44px);
+  margin-left: -6px;   /* (the ink starts a little inside its picture: this lines it up with the words) */
+  overflow: visible;
 }
+/* Writing itself (js/pages/pages.js adds the classes). Each mask path is a dash as long as the path
+   (pathLength 1): pushed fully out of view to start (1.05, so not even the round pen tip shows), then
+   drawn in with its own timing. When it has finished, the mask is taken off, so the whole signature is
+   there exactly as written, every last speck of ink. */
+.about__signature path { stroke-dasharray: 1 2; stroke-dashoffset: 0; }
+.about__signature.is-ready path { stroke-dashoffset: 1.05; }
+.about__signature.is-writing path { stroke-dashoffset: 0; transition: stroke-dashoffset var(--d) var(--e) var(--t); }
+.about__signature.is-signed image { mask: none; }
 /* ---------- Testimonial (hidden until a real quote exists) ---------- */
 .quote { padding-block: var(--s-8); }
 .quote__text { font-family: var(--font-display); font-size: var(--t-line); line-height: 1.2; max-width: 30ch; }

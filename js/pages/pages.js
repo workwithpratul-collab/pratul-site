@@ -220,6 +220,25 @@ function initWork({ core }) {
 // ---------- About: the portrait's mask opens as the section arrives ----------
 function initAbout() {
   markIn(document.getElementById('about'), { margin: '0px 0px -25% 0px' });
+  initSignature();
+}
+
+// ---------- About: my signature writes itself, once ----------
+// The pen strokes are in index.html and css/home.css. Here we only say when: once most of the signature
+// is on screen, it writes itself (about 2 s), then the mask comes off so the finished signature is
+// exactly the real one. It plays once per visit. Under "reduce motion" it is simply there, already written.
+function initSignature() {
+  const sig = document.querySelector('.about__signature');
+  if (!sig || reduceMotion || !sig.getClientRects().length) return;   // (hidden on phones)
+  sig.classList.add('is-ready');   // out of sight, waiting for its moment
+  const io = new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting) return;
+    io.disconnect();
+    sig.classList.add('is-writing');
+    // (the last stroke ends at 2.0 s; a moment later the mask is lifted)
+    setTimeout(() => sig.classList.add('is-signed'), 2300);
+  }, { threshold: 0.75 });
+  io.observe(sig);
 }
 
 // ---------- The footer: its picture settles softly into place as it arrives ----------
@@ -422,7 +441,7 @@ function initReveal({ core }) {
   }
   // (Desktop: the contact section's words and button don't slide up into place: they sit still where they
   // are, so nothing in that section moves while scrolling towards the footer.)
-  const items = document.querySelectorAll((core ? '.page section:not(.contact) .lead' : '.page section .lead, .contact__actions') + ', .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__values, .about__label, .about__promises, .about__close, .about__sign, .footer__call, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
+  const items = document.querySelectorAll((core ? '.page section:not(.contact) .lead' : '.page section .lead, .contact__actions') + ', .scards__list li, .wcard, .about__short, .about__photo, .about__standfirst, .about__story, .about__values, .about__promises, .footer__call, .footer__col' + (core ? '' : ', .page .heading, .ridge__controls, .work .lead'));
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (!e.isIntersecting) continue;

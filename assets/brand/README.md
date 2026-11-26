@@ -10,6 +10,8 @@ Saved for later: not placed on the site yet (where they go is still to be decide
 | `p-mark-180.png` | The P mark, square, the size phones use for a home-screen icon (`apple-touch-icon`). | 180 x 180 |
 | `logo-full-1254.webp` | The full logo with PRATUL.DEV and "Web developer", full size. | 1254 x 1254 |
 | `logo-full-600.webp` | The full logo, smaller (social profiles, documents). | 600 x 600 |
+| `signature-cream.png`, `signature-dark.png` | Pratul's real signature, cleaned: cream ink (for dark backgrounds) and dark ink, on transparent. The sources. | 925 x 557 |
+| `signature-cream-560.webp` | The cream signature, smaller, used at the end of About (it writes itself: index.html, css/home.css). | 560 x 337 |
 
 Both are paintings on their own night-purple background (no see-through areas), so they read
 best on the site's darkest colours (`--night`).

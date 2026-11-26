@@ -840,7 +840,6 @@
       </figure>
       <div class="about__text">
         <!-- Laptops: a signed note from the person who builds the site (none of it repeats the film's words). -->
-        <p class="about__label f-only">About</p>
         <h2 class="heading f-only" id="about-title">Designed by me.<br> <em>Built by me.</em></h2>
         <p class="about__short m-only">I fell in love with code because of what it can show. A few lines can become a view that stops you, like reaching the top of a trail and seeing the whole valley open up below.</p>
         <p class="about__standfirst f-only">I'm Pratul. I design and build websites end to end, so the person you talk to on the first call is the same person who writes every line of code.</p>
@@ -865,8 +864,34 @@
             <p>Clean code, fast pages, and a site that can grow with you without starting over.</p>
           </li>
         </ol>
-        <p class="about__close f-only">Currently learning React and Next.js, one real project at a time.</p>
-        <p class="about__sign f-only">Pratul</p>
+        <!-- My real signature (assets/brand/signature-cream.png), writing itself once About comes into view
+             (js/pages/pages.js). Each path below is the centre-line of one part of a pen stroke, in the order
+             I write it: the cross stroke and the big loop on the left, the "uuu" waves, the tall stroke down
+             into the hook, and the long underline last. They are drawn into a mask, and the real signature
+             shows through the mask, so what appears is my own handwriting. --t: when the piece starts,
+             --d: how long it takes (quicker on straight lines, slower on curves), --e: its easing (the pen
+             speeds up at the start of a stroke and slows at its end). Under "reduce motion" it is simply there. -->
+        <svg class="about__signature f-only" viewBox="0 0 925 557" role="img" aria-label="Signed, Pratul">
+          <defs>
+            <mask id="signature-pen" maskUnits="userSpaceOnUse" x="0" y="0" width="925" height="557">
+              <g fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+            <path pathLength="1" style="--t: 0s; --d: 0.057s; --e: cubic-bezier(0.45, 0, 1, 1)" d="M35 156C39.2 154.7 52 151.2 60 148C68 144.8 63.8 145.7 83 137C102.2 128.3 155.3 105.7 175 96C194.7 86.3 195.2 82.3 201 79C206.8 75.7 208.5 76.5 210 76"/><!-- cross -->
+            <path pathLength="1" style="--t: 0.057s; --d: 0.066s; --e: linear" d="M210 76C210 76 209.3 77.7 210 76C210.7 74.3 213.2 68 214 66C214.8 64 214.7 67 215 64C215.3 61 214.7 53.8 216 48C217.3 42.2 221 32.3 223 29C225 25.7 226.7 27.8 228 28C229.3 28.2 230.3 27.3 231 30C231.7 32.7 233 39.3 232 44C231 48.7 227.5 54.8 225 58C222.5 61.2 219.5 60 217 63C214.5 66 211.2 73.8 210 76"/><!-- top-loop -->
+            <path pathLength="1" style="--t: 0.123s; --d: 0.116s; --e: linear" d="M210 76C210.2 77.5 211.7 78 211 85C210.3 92 207.2 104.5 206 118C204.8 131.5 205.3 150.3 204 166C202.7 181.7 199.7 203.8 198 212C196.3 220.2 194.7 214.2 194 215C193.3 215.8 193.7 210.8 194 217C194.3 223.2 195.8 245.8 196 252C196.2 258.2 195.5 253.7 195 254C194.5 254.3 193.7 252.8 193 254C192.3 255.2 192.2 254.2 191 261C189.8 267.8 185.7 289.8 186 295C186.3 300.2 190.3 294.5 193 292C195.7 289.5 199.8 282.2 202 280C204.2 277.8 209.8 276 206 279C202.2 282 183.5 291.7 179 298C174.5 304.3 182.5 303.2 179 317C175.5 330.8 161.8 367.8 158 381C154.2 394.2 157.3 392.3 156 396C154.7 399.7 151 401.8 150 403"/><!-- stem -->
+            <path pathLength="1" style="--t: 0.239s; --d: 0.174s; --e: cubic-bezier(0, 0, 0.35, 1)" d="M150 403C148.7 403.2 148.2 401.7 142 404C135.8 406.3 124.8 410.5 113 417C101.2 423.5 80.3 436 71 443C61.7 450 60 453.3 57 459C54 464.7 53.3 472.2 53 477C52.7 481.8 52.3 484 55 488C57.7 492 64.8 498.5 69 501C73.2 503.5 75.7 503.5 80 503C84.3 502.5 91 500.3 95 498C99 495.7 97.8 497.5 104 489C110.2 480.5 125.3 457.8 132 447C138.7 436.2 141 431 144 424C147 417 149 408.2 150 405"/><!-- big-loop -->
+            <path pathLength="1" style="--t: 0.513s; --d: 0.109s; --e: cubic-bezier(0.45, 0, 0.35, 1)" d="M194 215C193.3 214.7 191.7 216.8 190 213C188.3 209.2 186.2 196.2 184 192C181.8 187.8 178.5 191.7 177 188C175.5 184.3 175 170 175 170C175 170 177.3 184.5 177 188C176.7 191.5 174 176.5 173 191C172 205.5 170.7 257.7 171 275C171.3 292.3 173.7 291.2 175 295C176.3 298.8 178.3 297.5 179 298"/><!-- narrow-loop -->
+            <path pathLength="1" style="--t: 0.702s; --d: 0.077s; --e: cubic-bezier(0.45, 0, 1, 1)" d="M249 149C248.2 153.5 247.8 162.8 244 176C240.2 189.2 231.3 214.3 226 228C220.7 241.7 215.3 252.5 212 258C208.7 263.5 208.7 262 206 261C203.3 260 196 252 196 252C196 252 204.3 256.5 206 261C207.7 265.5 205.5 275.5 206 279C206.5 282.5 204.8 266.8 209 282C213.2 297.2 227.3 355.3 231 370"/><!-- diagonal -->
+            <path pathLength="1" style="--t: 0.779s; --d: 0.14s; --e: cubic-bezier(0, 0, 0.35, 1)" d="M233 370C234.5 376.7 238.7 398.5 242 410C245.3 421.5 249 430.7 253 439C257 447.3 262 455.2 266 460C270 464.8 271.5 466.8 277 468C282.5 469.2 291.3 469 299 467C306.7 465 314.2 462.2 323 456C331.8 449.8 342.8 439.5 352 430C361.2 420.5 373.7 404.2 378 399"/><!-- swoosh -->
+            <path pathLength="1" style="--t: 1.039s; --d: 0.315s; --e: cubic-bezier(0.45, 0, 1, 1)" d="M345 253C347.8 252.8 355.8 254 362 252C368.2 250 378 245.8 382 241C386 236.2 386 223 386 223C386 223 381.5 237.2 382 241C382.5 244.8 385.5 245.3 389 246C392.5 246.7 397.3 247.2 403 245C408.7 242.8 419.2 237.2 423 233C426.8 228.8 426 220 426 220C426 220 422.2 229.7 423 233C423.8 236.3 427.2 238.8 431 240C434.8 241.2 439.8 242.5 446 240C452.2 237.5 464 230.2 468 225C472 219.8 470 209 470 209C470 209 466.3 220.2 468 225C469.7 229.8 475.2 235.8 480 238C484.8 240.2 492.5 239.5 497 238C501.5 236.5 504.2 232.5 507 229C509.8 225.5 512.2 219.2 514 217C515.8 214.8 517.2 218.3 518 216C518.8 213.7 519 203 519 203C519 203 516.3 212.2 518 216C519.7 219.8 524.5 224.2 529 226C533.5 227.8 540.2 227.8 545 227C549.8 226.2 554.5 223.2 558 221C561.5 218.8 564 216.5 566 214C568 211.5 568.5 207.5 570 206C571.5 204.5 573.8 208.3 575 205C576.2 201.7 577 186 577 186C577 186 574.3 200.3 575 205C575.7 209.7 578.8 212 581 214C583.2 216 582.8 217 588 217C593.2 217 604.3 216.7 612 214C619.7 211.3 627.3 206.2 634 201C640.7 195.8 647.8 186.3 652 183C656.2 179.7 657.8 181.3 659 181"/><!-- waves -->
+            <path pathLength="1" style="--t: 1.355s; --d: 0.09s; --e: linear" d="M659 181C660 177.2 662.8 162.2 665 158C667.2 153.8 668.3 161.7 672 156C675.7 150.3 683.3 133.2 687 124C690.7 114.8 692.7 108.5 694 101C695.3 93.5 695.2 83 695 79C694.8 75 694.7 76.7 693 77C691.3 77.3 688.2 75.8 685 81C681.8 86.2 675.8 103.5 674 108"/><!-- tall-loop -->
+            <path pathLength="1" style="--t: 1.445s; --d: 0.091s; --e: linear" d="M674 108C672.7 113.3 667.5 131.7 666 140C664.5 148.3 666.2 151.2 665 158C663.8 164.8 660 163.2 659 181C658 198.8 657.5 226.2 659 265C660.5 303.8 666.5 389.2 668 414"/><!-- tall-down -->
+            <path pathLength="1" style="--t: 1.536s; --d: 0.119s; --e: cubic-bezier(0, 0, 0.35, 1)" d="M668 414C667.7 421.3 668 444.7 666 458C664 471.3 659.2 485.3 656 494C652.8 502.7 650.2 505.7 647 510C643.8 514.3 640.7 517.2 637 520C633.3 522.8 629.2 525.2 625 527C620.8 528.8 618.3 530.2 612 531C605.7 531.8 593.2 532.2 587 532C580.8 531.8 580.3 532.2 575 530C569.7 527.8 558.3 520.8 555 519"/><!-- hook -->
+            <path pathLength="1" style="--t: 1.774s; --d: 0.226s; --e: cubic-bezier(0.45, 0, 0.35, 1)" d="M156 396C157.3 396 157.7 398.2 164 396C170.3 393.8 183 387 194 383C205 379 223.5 374.2 230 372C236.5 369.8 212.5 376.7 233 370C253.5 363.3 313.8 343.2 353 332C392.2 320.8 433 311.3 468 303C503 294.7 531.3 288.3 563 282C594.7 275.7 617.7 272.5 658 265C698.3 257.5 764.5 243.8 805 237C845.5 230.2 885 226.2 901 224"/><!-- underline -->
+              </g>
+            </mask>
+          </defs>
+          <image href="assets/brand/signature-cream-560.webp" width="925" height="557" mask="url(#signature-pen)"/>
+        </svg>
         <!-- Phones: what working with me means, in three short lines (no numbers: nothing to inflate). -->
         <ul class="about__values m-only" role="list">
           <li>
