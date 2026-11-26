@@ -31,6 +31,15 @@
   font-style: normal;
   font-display: swap;
 }
+/* Gloock: only for the summit hero's huge "move" (references/round5/). Cut down to the four letters
+   m, o, v, e (3 KB). Upright, never italic. */
+@font-face {
+  font-family: "Gloock";
+  src: url("../assets/fonts/gloock-move.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 @font-face {
   font-family: "JetBrains Mono";
   src: url("../assets/fonts/jetbrains-mono.woff2") format("woff2");
@@ -69,6 +78,7 @@
      Mono:    JetBrains Mono, only for altitude numbers. */
   --font-display: "Instrument Serif", "Instrument Serif fallback", Georgia, serif;
   --font-body: "Manrope", "Manrope fallback", Arial, sans-serif;
+  --font-move: "Gloock", "Instrument Serif", Georgia, serif;   /* the hero's "move" only */
   /* Small spaced capitals (labels, counts, the showreel time) are set in Manrope now; the mono
      face is kept for one job only: altitude numbers (the meter, the summit, base camp). */
   --font-mono: var(--font-body);
@@ -275,6 +285,7 @@
   --dusk: #241d3a;           /* Indigo: surfaces (frames, cards, fields) */
   --deep: #15132a;           /* the darkest value anywhere (never black) */
   --cream: #f3ece2;          /* primary text: 14.4:1 on --night */
+  --cream-sky: #fff6ea;      /* the summit hero's headline lines, a touch warmer over the sunrise sky */
   --lavender: #c9bedd;       /* Lavender: body text */
   --lavender-quiet: #9d93c2; /* labels and measurements only: 5.9:1 */
   --lavender-light: #ddd5ee; /* secondary text over the live sky (hero): 11:1 on --night */

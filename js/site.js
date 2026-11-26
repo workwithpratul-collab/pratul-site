@@ -142,7 +142,19 @@ let heroTl = null;
 let heroIn = false;
 function buildHeroReveal() {
   const tl = gsap.timeline({ paused: true });
-  tl.add(lineReveal(heroEl.querySelector('.hero__title'), { stagger: 0.12 }).play(), 0);
+  // The headline (references/round5/): "I build websites that" fades down into place in the sky, then
+  // "move" rises slowly from behind the far peaks (its 3D twin, heroword.js, follows this word's box
+  // and opacity, so the real mountains hide its foot as it comes up), then "business forward." settles
+  // in front of them. Under "reduce motion", only gentle fades.
+  const title = heroEl.querySelector('.hero__title');
+  const still = reduceMotion ? 0 : 1;
+  tl.set(title, { opacity: 1 }, 0);
+  tl.fromTo(title.querySelectorAll('.hero__l1, .hero__that'), { opacity: 0, y: -12 * still },
+    { opacity: 1, y: 0, duration: TIME.slow, ease: EASE.arrive }, 0);
+  tl.fromTo(title.querySelector('.hero__move'), { opacity: 0, yPercent: 16 * still },
+    { opacity: 1, yPercent: 0, duration: 2.2, ease: EASE.arrive }, reduceMotion ? 0 : 0.15);
+  tl.fromTo(title.querySelector('.hero__l3'), { opacity: 0, y: 12 * still },
+    { opacity: 1, y: 0, duration: TIME.slow, ease: EASE.arrive }, reduceMotion ? 0 : 0.4);
   tl.fromTo(heroEl.querySelectorAll('.hero__sub, .hero__actions, .hero__place, .hero__replay, .hero__scroll'),
     { opacity: 0, y: reduceMotion ? 0 : 14 },
     { opacity: 1, y: 0, duration: TIME.slow, ease: EASE.arrive, stagger: 0.12 }, reduceMotion ? 0 : 0.55);

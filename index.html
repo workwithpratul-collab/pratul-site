@@ -341,14 +341,22 @@
         <div class="hero__snow m-only" aria-hidden="true"></div>
         <div class="hero__shade" aria-hidden="true"></div>
         <div class="hero__inner">
-          <h1 class="hero__title"><span class="line">I build websites</span> <span class="line">that <em>move</em></span> <span class="line">business forward.</span></h1>
-          <p class="hero__sub">Thoughtful design, careful engineering, and memorable digital experiences<span class="f-only"> for ambitious businesses</span>.</p>
-          <div class="hero__actions">
-            <a class="btn btn--primary" href="#work">Explore my work<svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
-            <button class="btn-link hero__reel" type="button" data-showreel>
-              <span class="hero__play" aria-hidden="true"><svg class="i"><use href="#i-play"/></svg></span>
-              Watch showreel <span class="measure" data-reel-length>0:26</span>
-            </button>
+          <!-- One real heading with the whole sentence (screen readers, Google). On the film (references/round5/)
+               "I build websites that" sits in the sky, "move" is a huge amber word standing far off BEHIND
+               the snow range (drawn inside the 3D scene by js/world/heroword.js: this "move" is its twin,
+               see-through while the live scene shows), and "business forward." stands in front of the
+               peaks, on the line where the letters disappear. Phones keep their own three lines. -->
+          <h1 class="hero__title"><span class="line hero__l1">I build websites</span> <span class="line"><span class="hero__that">that</span> <em class="hero__move">move</em></span> <span class="line hero__l3">business forward.</span></h1>
+          <!-- (a box for the film's layout; on phones it adds nothing: display: contents) -->
+          <div class="hero__cta">
+            <p class="hero__sub">Thoughtful design, careful engineering, and memorable digital experiences<span class="f-only"> for ambitious businesses</span>.</p>
+            <div class="hero__actions">
+              <a class="btn btn--primary" href="#work">Explore my work<svg class="i" aria-hidden="true"><use href="#i-ne"/></svg></a>
+              <button class="btn-link hero__reel" type="button" data-showreel>
+                <span class="hero__play" aria-hidden="true"><svg class="i"><use href="#i-play"/></svg></span>
+                Watch showreel <span class="measure" data-reel-length>0:26</span>
+              </button>
+            </div>
           </div>
         </div>
         <div class="hero__base">

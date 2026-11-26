@@ -29,6 +29,7 @@ import { WIND } from './world/glsl.js';
 import { createGear } from './world/gear.js';
 import { createStory } from './ui/story.js';
 import { createShade } from './world/shade.js';
+import { createHeroWord } from './world/heroword.js';
 import { createCampUI } from './ui/camp-ui.js';
 import { createGearUI } from './ui/gear-ui.js';
 import { veil, mistColour } from './ui/veil.js';
@@ -636,6 +637,9 @@ function summitBeatFor(dt, atTop) {
 // The words' soft shade: the scene darkens a little right behind whatever text is showing.
 const shade = createShade();
 const story = createStory({ reduceMotion, shade });
+// The summit hero's big "move", standing far off behind the snow range (world/heroword.js). Its HTML
+// twin in the hero decides where it sits and when it shows.
+const heroWord = createHeroWord({ el: document.querySelector('.hero__move'), inner: document.querySelector('.hero__inner') });
 const openingEl = document.getElementById('opening');
 const gearTitle = document.querySelector('.gear-ui__title');
 const campUI = createCampUI({ camps, defs: CAMPS, camera, cameraPath, reduceMotion, getProgress: () => scroll.progress });
@@ -804,6 +808,9 @@ function frame(dt, time, rect) {
   shade.set('opening', openingEl, openingEl.style.visibility === 'hidden' ? 0 : Number(openingEl.style.opacity || 1));
   shade.set('gear', gearTitle, settled > 0.92 ? 1 : 0);
   shade.render(renderer, rect);
+  // The hero's "move" and the sky's shade behind it, tested against this frame's mountains (only while
+  // the hero shows: otherwise it does nothing).
+  heroWord.render(renderer, camera, rect);
   // The hand-over asked for a picture of this frame: copy it now, while it's still in the canvas.
   if (snapshotTo) { takeSnapshot(snapshotTo); snapshotTo = null; }
   countFps(performance.now());
@@ -887,6 +894,7 @@ window.__ascent = {
 await within(12000, openingReady, 'preparing the opening');
 // (and the soft shade behind the opening words, drawn from the very first frame)
 await within(3000, shade.compile(renderer), 'the text shade');
+await within(3000, heroWord.compile(renderer), "the hero's word");
 reportProgress('final', 0.3);
 // Opening somewhere further up (back from a project page, a poster still, a page that was already
 // scrolled, or "Skip the film" pressed while loading): that part of the mountain must be ready too.
