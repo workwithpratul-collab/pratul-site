@@ -918,14 +918,17 @@
       </div>
     </section>
 
-    <!-- ========== TESTIMONIAL (hidden for now) ========== -->
-    <!-- TODO(Pratul): write a real client's words in the blockquote and their name/business in the
-         figcaption. The section stays hidden while the quote is empty, and shows itself as soon as
-         it's filled in (js/pages/pages.js). Never put an invented quote here. -->
-    <section class="quote" id="testimonial" aria-label="What a client said" hidden>
+    <!-- ========== TESTIMONIAL ========== -->
+    <!-- A real client's words, exactly as he said them (Hindi, written in English letters), with a small
+         English line under them. Small and calm: one quote, no carousel. The same quote is in the Plant
+         nursery chapter of case-studies/index.html. (js/pages/pages.js still hides this section if the
+         quote is ever emptied: never put an invented quote here.) -->
+    <section class="quote" id="testimonial" aria-label="What a client said">
       <figure class="quote__fig wrap">
-        <blockquote class="quote__text" data-quote></blockquote>
-        <figcaption class="quote__name" data-quote-name></figcaption>
+        <span class="quote__mark" aria-hidden="true">&ldquo;</span>
+        <blockquote class="quote__text" data-quote lang="hi-Latn"><p>Ye bohot behetareen hai.</p></blockquote>
+        <p class="quote__english" lang="en">&ldquo;This is excellent.&rdquo;</p>
+        <figcaption class="quote__name" data-quote-name>Akash, owner of a plant nursery <span class="quote__note">(client project)</span></figcaption>
       </figure>
     </section>
 
