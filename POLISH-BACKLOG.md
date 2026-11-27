@@ -31,6 +31,9 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] (Round 5) Olive & Ember: add its live link to case-studies/index.html when it is deployed.
 - [ ] (Round 5) After pushing: paste the home page and case-studies/ links into WhatsApp and LinkedIn to see the new preview (LinkedIn's Post Inspector refreshes an old cached one).
 - [ ] (Round 5) The YEAR placeholders went away with the old case-study pages (they now forward to the new page, which shows no years). Say if you want the years back.
+- [ ] (Small round) Hero: look at the new snow peaks along "move" on your own screens. Their tips cover about the bottom fifth of the letters. Each peak's height is one number ("tip", in degrees) in WORD_RANGE in js/world/summit.js; --move-base in css/home.css still moves the whole word.
+- [ ] (Small round) Favicon: check the P logo in a browser tab, and on a phone's home screen ("Add to Home screen"). A browser that cached the old icon may need a hard refresh (Ctrl+F5).
+- [ ] (Small round) After pushing: paste the home page link into WhatsApp/LinkedIn to see the re-made preview (LinkedIn's Post Inspector refreshes a cached one).
 
 ## CLAUDE CODE: the world
 - [x] Summit climb looks plain: smooth lilac snow, rock only as soft bands, big bland dome in the final shot.
@@ -156,12 +159,17 @@ Never delete items, never rewrite the file, never restore an older copy. Commit 
 - [ ] 404 page: Chrome still requests its styles once from the wrong folder for a deep missing address before the root is found (harmless 404s).
 - [ ] Footer: the "SAY HELLO" label is faint over the bright sky of the footer picture.
 
-- [ ] (Round 5) Hero "move": on 16:9 screens the far-left peak hides more of the "m" than on 16:10 screens (the camera keeps its height, so the far range shifts sideways with the screen's shape).
+- [x] (Round 5) Hero "move": on 16:9 screens the far-left peak hides more of the "m" than on 16:10 screens (the camera keeps its height, so the far range shifts sideways with the screen's shape).
 - [ ] (Round 5) Hero "move": if the 3D scene isn't running (the summit's picture shows instead), the HTML twin shows in amber with its foot faded into the haze, not behind real peaks.
 - [ ] (Round 5) Case study recordings are 1280 x 800 (to stay under 2.5 MB): a little soft on 2x screens.
 - [ ] (Round 5) Case study page, first visit: 3-4 stalls of 150-270 ms while scrolling, as the graphics driver prepares the rounded video frames and shadows (0 on a second visit). A warm-up at a quiet moment, like Services', could move them.
 - [ ] (Round 5) The film's own landmark links still go to the old case-study addresses (they forward to the chapters); the film was left untouched. The case page has no "Back to the trail" link: the browser's Back returns to the home page.
 - [ ] (Round 5) Case study page on phones: only the basic one-column layout (laptop first). Check it on a real phone.
+- [x] (Small round) Hero: the low slope in front of "move" is replaced by real snow peaks (two rows, different heights, the film's own peak material); the far ring sinks behind them at the summit.
+- [x] (Small round) Hero: "business forward." no longer overlaps "move"; the gap below "move" matches the gap above it. Subtext and buttons moved down to suit; fits at 1366 x 768.
+- [x] (Small round) Favicon: the P logo (.ico, 16/32 px, 180 px apple-touch-icon, 192/512 px in site.webmanifest) on every page; the old simplified P SVG removed.
+- [x] (Small round) Link preview: assets/share-summit.jpg re-made from the corrected hero (72 KB).
+- [ ] (Small round) The peaks along "move" are placed for the hero camera's view; during the last seconds of the climb they are seen from lower down, rising out of the clouds with the other far peaks. Only checked on the summit hero so far: worth a look on the full climb.
 
 ## MOBILE (Phase 7)
 - [x] Lighter, simpler version of the film for phones and tablets.
