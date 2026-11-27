@@ -59,9 +59,7 @@ export function createMountains(scene) {
   // As we climb above them (0 = from the valley, 1 = from the summit), the nearer ranges
   // sink below the sea of clouds and the farthest one becomes a low line on the horizon,
   // like in the summit style frame. Nothing pops: they slide down slowly with the climb.
-  // The farthest also sinks a little (260 m), so at the summit its long slope drops behind the
-  // sharper peaks the hero's "move" stands behind (summit.js, WORD_RANGE).
-  const SINK = [130, 210, 330, 260];
+  const SINK = [130, 210, 330, 0];
   group.userData.setRise = (t) => {
     layers.forEach((mesh, i) => {
       mesh.position.y = -SINK[i] * t;
