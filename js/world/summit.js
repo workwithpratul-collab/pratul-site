@@ -164,6 +164,13 @@ export async function createSummitZone(scene, { sunDir, cloudTop = 20, pause = n
     const x = sx + m.x * cos + m.z * sin, z = sz - m.x * sin + m.z * cos;
     peaks.add(...buildMassif({ ...m, x, z }, peakMat, rand, cloudTop));
   }
+  // ---------- 2b. The range the hero's "move" stands behind ----------
+  // The summit hero (heroword.js) draws "move" as if it stood 4.2 km away, so whatever peaks
+  // stand in front of it hide the foot of its letters. In the approved design (references/round5/)
+  // that's a row of sharp snow peaks of different heights, rising and falling along the word. These
+  // are those peaks: the same cones and the same painted material as the big peaks above, set out
+  // along the hero camera's view so each tip lands just above the bottom of the word.
+  for (const p of WORD_RANGE) peaks.add(buildPeak(wordPeakSpot(p, sx, sz, topY, sunFlat, cloudTop), peakMat, rand, cloudTop));
   scene.add(peaks);
   if (pause) await pause();
 
@@ -768,6 +775,47 @@ function makePeakMaterial(sunDir, cloud) {
       }
     `,
   });
+}
+
+// ---------- The peaks along "move" (see createSummitZone, 2b) ----------
+// Each peak, as seen from the hero camera:
+//   x: across the screen (-1 left edge, 0 middle, 1 right edge, on a 16:9 screen)
+//   tip: how high its tip stands, in degrees above the camera's level. The foot of "move" sits at
+//        about 0.25 deg; its letters are about 5.5 deg tall, so 0.25 + 1.1 = the bottom fifth.
+//   d: how far away it stands (metres; under 4,200 so it is in front of the word)
+//   r: how wide its foot is (metres): the wider, the gentler its slopes
+// Different heights and gaps, so the skyline rises and falls like a real range.
+// Two rows: the front peaks set the skyline; the farther, paler ones fill the gaps between them,
+// so the range reads as layers and the valleys never open down to the clouds.
+const WORD_RANGE = [
+  // front row
+  { x: -1.10, tip: 0.95, d: 3000, r: 420 },
+  { x: -0.86, tip: 1.35, d: 3150, r: 380 },
+  { x: -0.62, tip: 0.80, d: 2950, r: 330 },
+  { x: -0.47, tip: 1.20, d: 3200, r: 400 },
+  { x: -0.24, tip: 0.95, d: 3050, r: 360 },
+  { x: -0.05, tip: 1.30, d: 3250, r: 420 },
+  { x: 0.13, tip: 0.75, d: 3000, r: 380 },
+  // back row (farther, so paler; their tips peep between the front peaks)
+  { x: -0.98, tip: 1.10, d: 3800, r: 520 },
+  { x: -0.74, tip: 1.05, d: 3900, r: 480 },
+  { x: -0.35, tip: 1.00, d: 3850, r: 520 },
+  { x: -0.15, tip: 0.90, d: 3750, r: 460 },
+  { x: 0.05, tip: 1.00, d: 3900, r: 500 },
+];
+// The hero camera (cameraPath.js, summitShot): it stands at the top, faces 28 deg left of the
+// sun and looks down by about 2.3 deg; its view is 40 deg tall.
+const HERO_TURN = THREE.MathUtils.degToRad(28);
+const HERO_EYE = 2.2;
+const HALF_WIDE = Math.tan(THREE.MathUtils.degToRad(20)) * (16 / 9);   // half the view's width (tan)
+
+function wordPeakSpot({ x, tip, d, r }, sx, sz, topY, sunFlat, cloudTop) {
+  // The direction the camera faces, then turned to this peak's place across the screen.
+  const across = -Math.atan(x * HALF_WIDE);   // (turning right is a negative turn about "up")
+  const dir = sunFlat.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), HERO_TURN + across);
+  const dist = d / Math.cos(across);           // so it stays d metres in front of the camera
+  const tipY = topY + HERO_EYE + dist * Math.tan(THREE.MathUtils.degToRad(tip));
+  return { x: sx + dir.x * dist, z: sz + dir.z * dist, h: tipY - cloudTop, r };
 }
 
 // A massif: a main peak with two lower shoulders, so it reads as a mountain, not a cone.
