@@ -70,12 +70,13 @@
   <link rel="preload" href="assets/fonts/instrument-serif-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/manrope-variable.woff2" as="font" type="font/woff2" crossorigin>
 
-  <!-- The tab icon: the P mark as a sharp SVG, with small PNGs for browsers that can't use SVG icons;
-       the full P painting on a phone's home screen. -->
-  <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
-  <link rel="icon" href="assets/favicon-16.png" sizes="16x16" type="image/png">
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="assets/brand/p-mark-180.png">
+  <!-- The tab icon and home-screen icons: Pratul's P logo (assets/brand/favicon-p-*). The .ico holds
+       16, 32 and 48 px for older browsers; the manifest gives Android its 192 and 512 px icons. -->
+  <link rel="icon" href="assets/brand/favicon-p.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" href="assets/brand/favicon-p-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="assets/brand/favicon-p-16.png" sizes="16x16" type="image/png">
+  <link rel="apple-touch-icon" href="assets/brand/favicon-p-180.png">
+  <link rel="manifest" href="site.webmanifest">
 
   <link rel="stylesheet" href="css/tokens.css">
   <!-- The film's text layer (desktop). -->
