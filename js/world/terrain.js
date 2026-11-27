@@ -41,14 +41,56 @@ const MOUNTAIN_LAYERS = [
 // The centre the mountain rings are drawn around (about the middle of the walk).
 const RING_CENTRE = new THREE.Vector3(0, 0, -80);
 
-// The summit hero's "m": the farthest ring is the mountain in front of the foot of "move" (heroword.js).
-// Under the m's middle and right legs it dips low, so this stretch of its ridge is lifted a little
-// (about 12 px on screen), only in the hero's view at the very top. The ridge keeps its own shape: it is
-// raised as it is, fully under those legs, fading to nothing towards the edges, before the "o".
-// at: where round the ring (0..1; worked out from the hero camera's view); flat: half-width of the
-// full lift; fade: half-width where it reaches nothing; metres: how much (before the ring is squashed
-// to 0.42 of its height at the summit, so 88 m shows as about 37 m).
-const HERO_M_LIFT = { at: 0.9828, flat: 0.0040, fade: 0.0057, metres: 88 };
+// The summit hero's ridge under "move": the farthest ring is the mountain in front of the left part of
+// the word (heroword.js). Pratul marked the skyline he wants there (references/hero-ridge-request.png,
+// the points in references/ridge-points.csv). Each point below is one of his, turned into this ring's
+// terms from the hero camera's view: [where round the ring (0..1), the ridge's height there (metres,
+// before the ring is squashed to 0.42 of its height at the summit)]. Between the points the ridge runs
+// straight; past the last one it blends back into the ring's own ridge, and past the first one it
+// stays at that height off the left edge of the screen. Only the top edge moves: the ridge is painted
+// exactly as before. It shows only in the last moments of the climb.
+// (the comments: the point on a 1512 x 731 view of the hero, in screen pixels)
+const HERO_RIDGE = [
+  [0.93834, 860],   // x 5, y 248
+  [0.94032, 865],   // x 25, y 248
+  [0.94227, 722],   // x 45, y 268
+  [0.94425, 539],   // x 65, y 293
+  [0.94632, 481],   // x 85, y 301
+  [0.94952, 490],   // x 115, y 300
+  [0.95170, 500],   // x 135, y 299
+  [0.95394, 587],   // x 155, y 288
+  [0.95623, 690],   // x 175, y 275
+  [0.95855, 811],   // x 195, y 260
+  [0.96090, 894],   // x 215, y 250
+  [0.96323, 779],   // x 235, y 265
+  [0.96559, 670],   // x 255, y 279
+  [0.96801, 648],   // x 275, y 282
+  [0.97047, 618],   // x 295, y 286
+  [0.97295, 538],   // x 315, y 296
+  [0.97548, 506],   // x 335, y 300
+  [0.97804, 458],   // x 355, y 306
+  [0.98065, 475],   // x 375, y 304
+  [0.98198, 518],   // x 385, y 299
+  [0.98329, 476],   // x 395, y 304
+  [0.98459, 359],   // x 405, y 318
+  [0.98727, 308],   // x 425, y 324
+  [0.98862, 300],   // x 435, y 325
+];
+const HERO_RIDGE_FADE = [0.006, 0.002];   // how far the blend reaches: left, right (0..1 round the ring)
+// The ridge height Pratul marked at place f (the first/last point's height beyond the ends).
+function heroRidgeAt(f) {
+  const r = HERO_RIDGE;
+  if (f <= r[0][0]) return r[0][1];
+  for (let k = 1; k < r.length; k++) {
+    if (f <= r[k][0]) return r[k - 1][1] + (r[k][1] - r[k - 1][1]) * (f - r[k - 1][0]) / (r[k][0] - r[k - 1][0]);
+  }
+  return r[r.length - 1][1];
+}
+// How much of the marked ridge applies at place f: all of it between the points, blending to none.
+function heroRidgeWeight(f) {
+  const first = HERO_RIDGE[0][0], last = HERO_RIDGE[HERO_RIDGE.length - 1][0];
+  return smoothstep(first - HERO_RIDGE_FADE[0], first, f) * (1 - smoothstep(last, last + HERO_RIDGE_FADE[1], f));
+}
 
 export function createMountains(scene) {
   const group = new THREE.Group();
@@ -75,7 +117,7 @@ export function createMountains(scene) {
       mesh.visible = !(i < 3 && t > 0.999);   // fully sunk: don't draw them at all
     });
     const far = layers[3];
-    // The lift under the hero's "m" shows only in the last moments of the climb (HERO_M_LIFT).
+    // The marked ridge under "move" shows only in the last moments of the climb (HERO_RIDGE).
     far.userData.material.uniforms.uLift.value = smoothstep(0.85, 1, t);
     const s = 1 + 0.6 * t;
     far.scale.set(s, 1 - 0.58 * t, s);
@@ -119,7 +161,7 @@ function buildMountainLayer(layer, index) {
 
   // 2. Build a ribbon: two vertices per slice (top on the outline, bottom far below).
   const positions = [];
-  const lift = [];    // (farthest ring only) how much this column rises in the summit hero
+  const lift = [];    // (farthest ring only) how far this column's top moves in the summit hero
   const crest = [];   // outline height, so the shader knows how far below the top a pixel is
   const slope = [];   // which way the outline leans: lit side or shadow side
   const indices = [];
@@ -134,8 +176,8 @@ function buildMountainLayer(layer, index) {
     const next = broad[Math.min(i + k, columns)];
     const s = (next - prev) / (layer.amp * 0.18);
     positions.push(x, heights[i], z, x, bottom, z);
-    const off = Math.abs(i / columns - HERO_M_LIFT.at);
-    const up = index === 3 ? HERO_M_LIFT.metres * (1 - smoothstep(HERO_M_LIFT.flat, HERO_M_LIFT.fade, off)) : 0;
+    // (farthest ring only) how far this column's top moves to reach the marked ridge (HERO_RIDGE)
+    const up = index === 3 ? (heroRidgeAt(i / columns) - heights[i]) * heroRidgeWeight(i / columns) : 0;
     lift.push(up, up);
     crest.push(heights[i], heights[i]);
     slope.push(s, s);
@@ -168,7 +210,7 @@ function buildMountainLayer(layer, index) {
       uSnowLine: { value: layer.base + layer.amp * 0.2 },
       uLayer: { value: index },
       uLitSide: { value: 1 },     // 1 = light from the left (the moon); -1 = from the right
-      uLift: { value: 0 },        // 0..1: how much of HERO_M_LIFT shows (only at the summit)
+      uLift: { value: 0 },        // 0..1: how much of HERO_RIDGE shows (only at the summit)
     },
     vertexShader: /* glsl */ `
       attribute float aCrest;
@@ -178,8 +220,8 @@ function buildMountainLayer(layer, index) {
       varying float vY, vCrest, vSlope;
       varying vec2 vXZ;
       void main() {
-        // The hero's lift raises the ridge (the top vertex) and its painting (the crest) together,
-        // so the lifted stretch is painted exactly like the rest of the ridge.
+        // The hero's ridge (HERO_RIDGE) moves the top edge (the top vertex) and its painting (the crest)
+        // together, so the reshaped stretch is painted exactly like the rest of the ridge.
         vec3 p = position;
         float up = aLift * uLift;
         p.y += position.y > -259.0 ? up : 0.0;
