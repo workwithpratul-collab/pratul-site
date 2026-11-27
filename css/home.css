@@ -353,11 +353,12 @@ html:not(.climb-done) .hero__replay { visibility: hidden; }
 /* (without the live scene there are no peaks in front of it: the foot of the letters fades into the haze
    instead, so "business forward." never sits on top of them. Gloock's baseline is 0.875 em down the box.) */
 [data-mode="film"]:not(.is-live) .hero__move { -webkit-mask-image: linear-gradient(180deg, #000 0.72em, transparent 0.84em); mask-image: linear-gradient(180deg, #000 0.72em, transparent 0.84em); }
-/* "business forward.": 35 u, in front of the peaks, on "move"'s baseline (4 u lower), from x 468. */
+/* "business forward.": 35 u, in front of the peaks, from x 468, 33 u below "move"'s baseline: measured on a
+   1440 x 900 screenshot, the gap under "move" (to the top of these letters) matches the gap above it (9 px). */
 [data-mode="film"] .hero__l3 {
   position: absolute;
   left: calc((468 - 134) * var(--u));
-  top: calc(151 * var(--u) + 0.84 * 33 * var(--u) - 0.84 * 35 * var(--u));
+  top: calc(180 * var(--u) + 0.84 * 33 * var(--u) - 0.84 * 35 * var(--u));
   font-size: calc(35 * var(--u));
   text-shadow: 0 1px 10px rgba(40, 25, 60, 0.55);
 }

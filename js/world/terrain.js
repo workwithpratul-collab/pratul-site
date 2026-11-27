@@ -41,6 +41,15 @@ const MOUNTAIN_LAYERS = [
 // The centre the mountain rings are drawn around (about the middle of the walk).
 const RING_CENTRE = new THREE.Vector3(0, 0, -80);
 
+// The summit hero's "m": the farthest ring is the mountain in front of the foot of "move" (heroword.js).
+// Under the m's middle and right legs it dips low, so this stretch of its ridge is lifted a little
+// (about 12 px on screen), only in the hero's view at the very top. The ridge keeps its own shape: it is
+// raised as it is, fully under those legs, fading to nothing towards the edges, before the "o".
+// at: where round the ring (0..1; worked out from the hero camera's view); flat: half-width of the
+// full lift; fade: half-width where it reaches nothing; metres: how much (before the ring is squashed
+// to 0.42 of its height at the summit, so 88 m shows as about 37 m).
+const HERO_M_LIFT = { at: 0.9828, flat: 0.0040, fade: 0.0057, metres: 88 };
+
 export function createMountains(scene) {
   const group = new THREE.Group();
   group.name = 'mountains';
@@ -66,6 +75,8 @@ export function createMountains(scene) {
       mesh.visible = !(i < 3 && t > 0.999);   // fully sunk: don't draw them at all
     });
     const far = layers[3];
+    // The lift under the hero's "m" shows only in the last moments of the climb (HERO_M_LIFT).
+    far.userData.material.uniforms.uLift.value = smoothstep(0.85, 1, t);
     const s = 1 + 0.6 * t;
     far.scale.set(s, 1 - 0.58 * t, s);
     // Scale around the ring centre, not the world's origin.
@@ -108,6 +119,7 @@ function buildMountainLayer(layer, index) {
 
   // 2. Build a ribbon: two vertices per slice (top on the outline, bottom far below).
   const positions = [];
+  const lift = [];    // (farthest ring only) how much this column rises in the summit hero
   const crest = [];   // outline height, so the shader knows how far below the top a pixel is
   const slope = [];   // which way the outline leans: lit side or shadow side
   const indices = [];
@@ -122,6 +134,9 @@ function buildMountainLayer(layer, index) {
     const next = broad[Math.min(i + k, columns)];
     const s = (next - prev) / (layer.amp * 0.18);
     positions.push(x, heights[i], z, x, bottom, z);
+    const off = Math.abs(i / columns - HERO_M_LIFT.at);
+    const up = index === 3 ? HERO_M_LIFT.metres * (1 - smoothstep(HERO_M_LIFT.flat, HERO_M_LIFT.fade, off)) : 0;
+    lift.push(up, up);
     crest.push(heights[i], heights[i]);
     slope.push(s, s);
     if (i < columns) {
@@ -132,6 +147,7 @@ function buildMountainLayer(layer, index) {
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   geo.setAttribute('aCrest', new THREE.Float32BufferAttribute(crest, 1));
+  geo.setAttribute('aLift', new THREE.Float32BufferAttribute(lift, 1));
   geo.setAttribute('aSlope', new THREE.Float32BufferAttribute(slope, 1));
   geo.setIndex(indices);
 
@@ -152,18 +168,26 @@ function buildMountainLayer(layer, index) {
       uSnowLine: { value: layer.base + layer.amp * 0.2 },
       uLayer: { value: index },
       uLitSide: { value: 1 },     // 1 = light from the left (the moon); -1 = from the right
+      uLift: { value: 0 },        // 0..1: how much of HERO_M_LIFT shows (only at the summit)
     },
     vertexShader: /* glsl */ `
       attribute float aCrest;
       attribute float aSlope;
+      attribute float aLift;
+      uniform float uLift;
       varying float vY, vCrest, vSlope;
       varying vec2 vXZ;
       void main() {
-        vY = position.y;
-        vCrest = aCrest;
+        // The hero's lift raises the ridge (the top vertex) and its painting (the crest) together,
+        // so the lifted stretch is painted exactly like the rest of the ridge.
+        vec3 p = position;
+        float up = aLift * uLift;
+        p.y += position.y > -259.0 ? up : 0.0;
+        vY = p.y;
+        vCrest = aCrest + up;
         vSlope = aSlope;
-        vXZ = position.xz;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        vXZ = p.xz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
       }
     `,
     fragmentShader: /* glsl */ `
